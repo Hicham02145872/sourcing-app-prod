@@ -225,16 +225,7 @@
             </div>
         </div>
     </div>
-    <script>
-  const beamsClient = new PusherPushNotifications.Client({
-    instanceId: 'f9d38beb-6f30-40aa-b442-1a3044edd66e',
-  });
-
-  beamsClient.start()
-    .then(() => beamsClient.addDeviceInterest('hello'))
-    .then(() => console.log('Successfully registered and subscribed!'))
-    .catch(console.error);
- </script>
+    <script src="//code.tidio.co/pz38nwvmrzgi6zgfh8p6kwlp7nordcgs.js" async></script>
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
