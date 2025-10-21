@@ -9,11 +9,22 @@ class SourcingOrder extends Model
 {
     use HasFactory;
 
+    public const STATUSES = [
+        'pending_payment',
+        'paid',
+        'shipped',
+        'delivered',
+        'completed',
+        'cancelled',
+        'on_hold',
+    ];
+
     protected $fillable = [
         'user_id',
         'quotation_id',
         'total_amount',
         'status',
+        'proof_of_payment_path',
         'tracking_number',
         'tracking_carrier',
     ];

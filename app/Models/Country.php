@@ -11,6 +11,11 @@ class Country extends Model
 
     protected $fillable = ['name', 'code'];
 
+    public function getFlagUrlAttribute()
+    {
+        return asset('images/flags/' . strtolower($this->code) . '.svg');
+    }
+
     public function sourcingRequestDestinations()
     {
         return $this->hasMany(SourcingRequestDestination::class);

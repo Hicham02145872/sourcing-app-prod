@@ -9,6 +9,16 @@ class SourcingRequest extends Model
 {
     use HasFactory;
 
+    public const STATUSES = [
+        'pending',
+        'in_review',
+        'quoted',
+        'accepted',
+        'completed',
+        'rejected',
+        'cancelled',
+    ];
+
     protected $fillable = [
         'user_id',
         'product_name',
@@ -18,6 +28,10 @@ class SourcingRequest extends Model
         'note',
         'shipping_method',
         'status',
+        'phone_number',
+        'address',
+        'latitude',
+        'longitude',
     ];
 
     public function user()

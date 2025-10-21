@@ -146,6 +146,12 @@
                                         {{ __('Client') }}
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        {{ __('Phone Number') }}
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        {{ __('Address') }}
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('Category') }}
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -162,7 +168,7 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 @foreach ($sourcingRequests as $request)
                                     <tr class="hover:bg-gray-50 transition-colors duration-150 request-row" data-status="{{ $request->status }}">
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -206,6 +212,12 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $request->phone_number ?? 'N/A' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $request->address ?? 'N/A' }}
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                                                 {{ $request->category->name }}
@@ -215,10 +227,7 @@
                                             <div class="space-y-1">
                                                 @foreach ($request->destinations->take(2) as $destination)
                                                     <div class="flex items-center gap-2 text-xs">
-                                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                        </svg>
+                                                        <img src="{{ $destination->country->flag_url }}" alt="{{ $destination->country->name }} Flag" class="w-4 h-auto inline-block"/>
                                                         <span class="text-gray-700">{{ $destination->country->name }}</span>
                                                         <span class="text-gray-500">({{ $destination->quantity }})</span>
                                                     </div>

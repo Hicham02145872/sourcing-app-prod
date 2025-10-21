@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-bold text-2xl text-gray-900 tracking-tight">
+            <h2 class="font-bold text-2xl text-gray-900 dark:text-white tracking-tight">
                 {{ __('Create Service') }}
             </h2>
             <a href="{{ route('admin.services.index') }}" 
-               class="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold rounded-lg shadow-sm transition-all duration-200">
+               class="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-lg shadow-sm transition-all duration-200">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
@@ -14,16 +14,16 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-gray-50">
+    <div class="py-8 bg-gray-50 dark:bg-gray-900">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
                 <form method="POST" action="{{ route('admin.services.store') }}">
                     @csrf
 
                     <div class="space-y-6">
                         <div>
                             <x-input-label for="name" :value="__('Service Name')" />
-                            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+                            <x-text-input id="name" class="block mt-1 w-full dark:bg-gray-700 dark:text-white" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
                             <x-input-error :messages="$errors->get('name')" class="mt-2" />
                         </div>
                     </div>
