@@ -64,6 +64,7 @@
                                                   :value="old('product_name')" 
                                                   required 
                                                   autofocus 
+                                                  autocomplete="off"
                                                   placeholder="{{ __('e.g., Wireless Bluetooth Headphones') }}" />
                                     <x-input-error :messages="$errors->get('product_name')" class="mt-2" />
                                 </div>
@@ -87,6 +88,7 @@
                                                       type="url" 
                                                       name="product_url" 
                                                       :value="old('product_url')" 
+                                                      autocomplete="off"
                                                       placeholder="{{ __('https://example.com/product') }}" />
                                     </div>
                                     <p class="mt-2 text-xs text-gray-500 flex items-center gap-1">
@@ -217,9 +219,10 @@
                                     </x-input-label>
                                     <x-text-input id="phone_number" 
                                                   class="block mt-2 w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm" 
-                                                  type="text" 
+                                                  type="tel" 
                                                   name="phone_number" 
                                                   :value="old('phone_number')" 
+                                                  autocomplete="tel"
                                                   placeholder="{{ __('e.g., +1234567890') }}" />
                                     <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
                                 </div>
@@ -235,11 +238,11 @@
                                     </x-input-label>
                                     <div class="flex items-center gap-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
                                         <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="address_option" value="manual" class="form-radio h-4 w-4 text-violet-600 focus:ring-violet-500" checked>
+                                            <input type="radio" id="address_manual" name="address_option" value="manual" class="form-radio h-4 w-4 text-violet-600 focus:ring-violet-500" checked>
                                             <span class="ml-2.5 text-sm font-medium text-gray-700">{{ __('Enter manually') }}</span>
                                         </label>
                                         <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="address_option" value="geolocation" class="form-radio h-4 w-4 text-violet-600 focus:ring-violet-500">
+                                            <input type="radio" id="address_geolocation" name="address_option" value="geolocation" class="form-radio h-4 w-4 text-violet-600 focus:ring-violet-500">
                                             <span class="ml-2.5 text-sm font-medium text-gray-700">{{ __('Use my location') }}</span>
                                         </label>
                                     </div>
@@ -254,6 +257,7 @@
                                               rows="3" 
                                               class="block mt-2 w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 resize-none shadow-sm" 
                                               name="address" 
+                                              autocomplete="street-address"
                                               placeholder="{{ __('Enter your full address') }}">{{ old('address') }}</textarea>
                                     <x-input-error :messages="$errors->get('address')" class="mt-2" />
                                 </div>
@@ -299,8 +303,9 @@
                                         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                                             <!-- Quantity -->
                                             <div class="md:col-span-3">
-                                                <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">{{ __('Quantity') }}</label>
+                                                <label for="destinations_0_quantity" class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">{{ __('Quantity') }}</label>
                                                 <x-text-input type="number" 
+                                                              id="destinations_0_quantity"
                                                               name="destinations[0][quantity]" 
                                                               value="{{ old('destinations.0.quantity') }}" 
                                                               required 
@@ -311,8 +316,9 @@
 
                                             <!-- Country -->
                                             <div class="md:col-span-4">
-                                                <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">{{ __('Country') }}</label>
-                                                <select name="destinations[0][country_id]" 
+                                                <label for="destinations_0_country_id" class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">{{ __('Country') }}</label>
+                                                <select id="destinations_0_country_id"
+                                                        name="destinations[0][country_id]" 
                                                         required 
                                                         class="block w-full rounded-xl border-gray-300 focus:border-violet-500 focus:ring-violet-500 text-sm tom-select-country shadow-sm">
                                                     <option value="">{{ __('Select Country') }}</option>
@@ -328,8 +334,9 @@
 
                                             <!-- Service -->
                                             <div class="md:col-span-4">
-                                                <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">{{ __('Service') }}</label>
-                                                <select name="destinations[0][service_id]" 
+                                                <label for="destinations_0_service_id" class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">{{ __('Service') }}</label>
+                                                <select id="destinations_0_service_id"
+                                                        name="destinations[0][service_id]" 
                                                         required 
                                                         class="block w-full rounded-xl border-gray-300 focus:border-violet-500 focus:ring-violet-500 text-sm shadow-sm">
                                                     <option value="">{{ __('Select Service') }}</option>
@@ -356,6 +363,7 @@
                                 </div>
 
                                 <button type="button" 
+                                        @click="addDestination"
                                         id="add-destination" 
                                         class="mt-5 inline-flex items-center gap-2 px-5 py-3 bg-white hover:bg-violet-50 text-gray-700 hover:text-violet-700 border-2 border-gray-300 hover:border-violet-400 rounded-xl text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 shadow-sm hover:shadow-md">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -456,10 +464,8 @@
 
     @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOMContentLoaded fired.');
-
-
+        document.addEventListener('alpine:init', () => {
+            console.log('alpine:init fired.');
 
             // Address options toggle
             const addressOptions = document.querySelectorAll('input[name="address_option"]');
@@ -549,30 +555,76 @@
 
                 addDestination() {
                     const container = document.getElementById('destination-fields-container');
-                    const blockTemplate = container.querySelector('.destination-block');
-                    const newBlock = blockTemplate.cloneNode(true);
+                    this.totalDestinations++;
+                    const newIndex = this.totalDestinations - 1;
 
-                    newBlock.querySelectorAll('input, select').forEach(el => {
-                        const name = el.getAttribute('name').replace(/destinations\[\d+\]/, `destinations[${this.totalDestinations}]`);
-                        el.setAttribute('name', name);
-                        if (el.tagName === 'INPUT') el.value = '';
-                        if (el.tagName === 'SELECT') {
-                            el.selectedIndex = 0;
-                        }
-                    });
+                    const newBlock = document.createElement('div');
+                    newBlock.classList.add('destination-block', 'p-5', 'bg-gradient-to-br', 'from-gray-50', 'to-gray-100/50', 'rounded-xl', 'border-2', 'border-gray-200', 'hover:border-violet-300', 'transition-colors');
+                    newBlock.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <!-- Quantity -->
+                            <div class="md:col-span-3">
+                                <label for="destinations_${newIndex}_quantity" class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">{{ __('Quantity') }}</label>
+                                <input type="number" 
+                                       id="destinations_${newIndex}_quantity"
+                                       name="destinations[${newIndex}][quantity]" 
+                                       required 
+                                       min="1" 
+                                       class="w-full rounded-xl text-sm shadow-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" 
+                                       placeholder="{{ __('e.g., 100') }}" />
+                            </div>
 
-                    // Re-initialize TomSelect for the new block
-                    const oldSelect = newBlock.querySelector('.tom-select-country');
-                    const newSelect = oldSelect.cloneNode(true);
-                    oldSelect.parentNode.replaceChild(newSelect, oldSelect);
+                            <!-- Country -->
+                            <div class="md:col-span-4">
+                                <label for="destinations_${newIndex}_country_id" class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">{{ __('Country') }}</label>
+                                <select id="destinations_${newIndex}_country_id"
+                                        name="destinations[${newIndex}][country_id]" 
+                                        required 
+                                        class="block w-full rounded-xl border-gray-300 focus:border-violet-500 focus:ring-violet-500 text-sm tom-select-country shadow-sm">
+                                    <option value="">{{ __('Select Country') }}</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country->id }}" 
+                                                data-flag="{{ strtolower($country->code) }}">
+                                            {{ $country->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
+                            <!-- Service -->
+                            <div class="md:col-span-4">
+                                <label for="destinations_${newIndex}_service_id" class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">{{ __('Service') }}</label>
+                                <select id="destinations_${newIndex}_service_id"
+                                        name="destinations[${newIndex}][service_id]" 
+                                        required 
+                                        class="block w-full rounded-xl border-gray-300 focus:border-violet-500 focus:ring-violet-500 text-sm shadow-sm">
+                                    <option value="">{{ __('Select Service') }}</option>
+                                    @foreach($services as $service)
+                                        <option value="{{ $service->id }}">
+                                            {{ $service->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Remove Button -->
+                            <div class="md:col-span-1 flex items-end">
+                                <button type="button" 
+                                        @click="removeDestination($event)"
+                                        class="remove-destination w-full p-2.5 text-red-600 hover:text-white hover:bg-red-600 border-2 border-red-300 hover:border-red-600 rounded-xl transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow-md">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
                     container.appendChild(newBlock);
                     this.initializeTomSelect(newBlock.querySelector('.tom-select-country'));
-                    this.totalDestinations++;
                     this.currentPage = Math.ceil(this.totalDestinations / this.itemsPerPage); // Go to the last page
                     this.updateDestinationVisibility();
-                    this.bindRemoveButtons();
                 },
+
 
                 removeDestination(event) {
                     const block = event.target.closest('.destination-block');
@@ -588,6 +640,10 @@
                             b.querySelectorAll('input, select').forEach(el => {
                                 const name = el.getAttribute('name').replace(/destinations\[\d+\]/, `destinations[${idx}]`);
                                 el.setAttribute('name', name);
+                                if (el.id) {
+                                    const id = el.getAttribute('id').replace(/destinations_\d+_/, `destinations_${idx}_`);
+                                    el.setAttribute('id', id);
+                                }
                             });
                         });
                         // Adjust current page if necessary
@@ -654,8 +710,8 @@
                             
                             if (data.errors) {
                                 for (const field in data.errors) {
-                                    const sanitizedField = field.replace(/\./g, '[').replace(/\[(\d+)]/, '[$1]');
-                                    const input = document.querySelector(`[name="${sanitizedField}"]`);
+                                    const sanitizedField = field.replace(/\./g, '_');
+                                    const input = document.querySelector(`[id="${sanitizedField}"]`);
                                     if (input) {
                                         let errorContainer = input.closest('.destination-block') || input.parentNode;
                                         let errorEl = errorContainer.querySelector(`.js-error-${field.replace(/\./g, '-')}`);
