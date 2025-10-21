@@ -42,7 +42,7 @@ class AdminSourcingRequestController extends Controller
    public function updateStatus(Request $request, SourcingRequest $sourcingRequest): RedirectResponse
 {
     $validated = $request->validate([
-        'status' => 'required|in:pending,handling,completed,cancelled',
+        'status' => 'required|in:' . implode(',', \App\Models\SourcingRequest::STATUSES),
     ]);
 
     // Mise à jour du statut de la demande

@@ -88,117 +88,97 @@ class NotificationController extends Controller
      */
     public function index(Request $request)
     {
-        try {
-            $user = Auth::user();
+        $user = Auth::user();
 
-            if (!$user) {
+        if (!$user) {
+            if ($request->expectsJson()) {
                 return response()->json(['message' => 'Utilisateur non authentifié.'], 401);
             }
-
-            // Paramètres de pagination optionnels
-            $limit = $request->input('limit', 50);
-            $limit = min($limit, 100); // Maximum 100 notifications
-
-            // Cache des notifications (5 minutes)
-            $cacheKey = "user_notifications_{$user->id}";
-            $notifications = Cache::remember($cacheKey, 300, function () use ($user, $limit) {
-                return $user->notifications()
-                    ->orderBy('created_at', 'desc')
-                    ->limit($limit)
-                    ->get()
-                    ->map(function ($notification) {
-                        // Décodage sécurisé des données
-                        $data = is_string($notification->data)
-                            ? json_decode($notification->data, true) ?? []
-                            : ($notification->data ?? []);
-
-                        // Gestion de différents formats de données (Firebase, Laravel, custom)
-                        // Titre dynamique basé sur le statut si disponible
-                        $status = $data['status'] ?? null;
-                        $productName = $data['product_name'] ?? null;
-                        
-                        $defaultTitle = 'Mise à jour de demande';
-                        if ($status && $productName) {
-                            $statusLabels = [
-                                'pending' => 'En attente',
-                                'processing' => 'En traitement',
-                                'completed' => 'Terminée',
-                                'cancelled' => 'Annulée',
-                            ];
-                            $statusLabel = $statusLabels[$status] ?? ucfirst($status);
-                            $defaultTitle = "Demande $statusLabel";
-                        }
-                        
-                        $title = $data['title'] 
-                            ?? $data['notification']['title'] 
-                            ?? $notification->data['title'] 
-                            ?? $defaultTitle;
-                        
-                        $body = $data['message']  // VOTRE FORMAT (message)
-                            ?? $data['body']      // Format standard
-                            ?? $data['notification']['body']  // Format Firebase
-                            ?? $notification->data['body'] 
-                            ?? $notification->data['message']
-                            ?? 'Nouvelle notification';
-                        
-                        $clickAction = $data['click_action'] 
-                            ?? $data['notification']['click_action'] 
-                            ?? null;
-                        
-                        $icon = $data['icon'] 
-                            ?? $data['notification']['icon'] 
-                            ?? null;
-
-                        // Log pour debug (à retirer en production)
-                        Log::debug("Notification Mapping", [
-                            'notification_id' => $notification->id,
-                            'raw_data' => $data,
-                            'mapped_title' => $title,
-                            'mapped_body' => $body,
-                            'body_length' => strlen($body)
-                        ]);
-
-                        return [
-                            'id' => $notification->id,
-                            'title' => $title,
-                            'body' => $body,
-                            'click_action' => $clickAction,
-                            'icon' => $icon,
-                            'read_at' => $notification->read_at?->toIso8601String(),
-                            'created_at' => $notification->created_at->toIso8601String(),
-                            'is_read' => !is_null($notification->read_at),
-                            'type' => $notification->type ?? null,
-                        ];
-                    });
-            });
-
-            $unreadCount = $notifications->where('is_read', false)->count();
-
-            Log::info("Notifications récupérées", [
-                'user_id' => $user->id,
-                'total' => $notifications->count(),
-                'unread' => $unreadCount
-            ]);
-
-            return response()->json([
-                'notifications' => $notifications->values(), // Réindexer le tableau
-                'unread_count' => $unreadCount,
-                'total_count' => $notifications->count()
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Notifications Index: Exception', [
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([
-                'message' => 'Erreur lors de la récupération des notifications.',
-                'notifications' => [],
-                'unread_count' => 0,
-                'total_count' => 0
-            ], 500);
+            return redirect()->route('login');
         }
+
+        $notificationsQuery = $user->notifications()->orderBy('created_at', 'desc');
+
+        // Implement role-based filtering if needed
+        // Example: if notifications have a 'for_role' field in their data
+        // if ($user->role === 'admin') {
+        //     $notificationsQuery->whereJsonContains('data->for_role', 'admin');
+        // } else {
+        //     $notificationsQuery->whereJsonContains('data->for_role', 'client');
+        // }
+
+        $notifications = $notificationsQuery->get();
+
+        Log::debug("Fetched notifications for user {$user->id}", ['count' => $notifications->count(), 'notifications' => $notifications->toArray()]);
+
+        $mappedNotifications = $notifications->map(function ($notification) {
+            $data = is_string($notification->data)
+                ? json_decode($notification->data, true) ?? []
+                : ($notification->data ?? []);
+
+            $status = $data['status'] ?? null;
+            $productName = $data['product_name'] ?? null;
+
+            $defaultTitle = 'Mise à jour de demande';
+            if ($status && $productName) {
+                $statusLabels = [
+                    'pending' => 'En attente',
+                    'processing' => 'En traitement',
+                    'completed' => 'Terminée',
+                    'cancelled' => 'Annulée',
+                ];
+                $statusLabel = $statusLabels[$status] ?? ucfirst($status);
+                $defaultTitle = "Demande $statusLabel";
+            }
+
+            $title = $data['title']
+                ?? $data['notification']['title']
+                ?? $notification->data['title']
+                ?? $defaultTitle;
+
+            $body = $data['message']
+                ?? $data['body']
+                ?? $data['notification']['body']
+                ?? $notification->data['body']
+                ?? $notification->data['message']
+                ?? 'Nouvelle notification';
+
+            $clickAction = $data['click_action']
+                ?? $data['notification']['click_action']
+                ?? null;
+
+            $icon = $data['icon']
+                ?? $data['notification']['icon']
+                ?? null;
+
+            return [
+                'id' => $notification->id,
+                'title' => $title,
+                'body' => $body,
+                'click_action' => $clickAction,
+                'icon' => $icon,
+                'read_at' => $notification->read_at?->toIso8601String(),
+                'created_at' => $notification->created_at->toIso8601String(),
+                'is_read' => !is_null($notification->read_at),
+                'type' => $notification->type ?? null,
+                'category' => $data['category'] ?? null,
+            ];
+        });
+
+        $unreadCount = $mappedNotifications->where('is_read', false)->count();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'notifications' => $mappedNotifications->values(),
+                'unread_count' => $unreadCount,
+                'total_count' => $mappedNotifications->count()
+            ]);
+        }
+
+        return view('notifications.index', [
+            'notifications' => $mappedNotifications,
+            'unreadCount' => $unreadCount,
+        ]);
     }
 
     /**

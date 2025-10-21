@@ -13,9 +13,17 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
 </head>
 
-<body class="font-sans text-gray-900 antialiased bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+<body class="font-sans text-gray-900 dark:text-gray-100 antialiased bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
     <div class="min-h-screen flex flex-col items-center justify-center px-4">
         
         <!-- Logo -->
@@ -31,16 +39,16 @@
             <h1 class="mt-4 text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 SmartSource
             </h1>
-            <p class="text-gray-500 text-sm">Bienvenue sur notre plateforme</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Bienvenue sur notre plateforme</p>
         </div>
 
         <!-- Card (slot for pages like login/register) -->
-        <div class="w-full sm:max-w-md bg-white/80 backdrop-blur-xl border border-blue-100 rounded-2xl shadow-2xl p-8">
+        <div class="w-full sm:max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-blue-100 dark:border-gray-700 rounded-2xl shadow-2xl p-8">
             {{ $slot }}
         </div>
 
         <!-- Footer -->
-        <div class="mt-8 text-center text-sm text-gray-500">
+        <div class="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
             © {{ date('Y') }} SmartSource — Tous droits réservés.
         </div>
     </div>

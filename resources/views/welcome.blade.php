@@ -6,7 +6,15 @@
     <title>SmartSource - Votre Solution de Sourcing Intelligent</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -50,9 +58,9 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-white to-cyan-50 min-h-screen">
+<body class="bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen">
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-blue-100 shadow-sm">
+    <nav class="fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-50 border-b border-blue-100 dark:border-gray-700 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
@@ -69,14 +77,14 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#features" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">Fonctionnalités</a>
-                    <a href="#how-it-works" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">Comment ça marche</a>
-                    <a href="#pricing" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">Tarifs</a>
+                    <a href="#features" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Fonctionnalités</a>
+                    <a href="#how-it-works" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Comment ça marche</a>
+                    <a href="#pricing" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Tarifs</a>
                 </div>
 
                 <!-- Auth Buttons -->
                 <div class="flex items-center space-x-4">
-                    <a href="/login" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                    <a href="/login" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
                         Connexion
                     </a>
                     <a href="/register" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all font-medium">
@@ -93,21 +101,21 @@
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <!-- Left Content -->
                 <div class="fade-in-up">
-                    <div class="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-6">
+                    <div class="inline-flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-full mb-6">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
                         <span class="text-sm font-semibold">Solution de Sourcing N°1</span>
                     </div>
 
-                    <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                    <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
                         Simplifiez votre
                         <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                             Sourcing
                         </span>
                     </h1>
 
-                    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                    <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
                         Gérez vos demandes d'approvisionnement et commandes en toute simplicité. Une plateforme intuitive pour connecter acheteurs et fournisseurs.
                     </p>
 
@@ -118,7 +126,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                             </svg>
                         </a>
-                        <a href="#demo" class="px-8 py-4 bg-white text-gray-700 rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all font-semibold text-center">
+                        <a href="#demo" class="px-8 py-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all font-semibold text-center">
                             Voir la démo
                         </a>
                     </div>
@@ -126,133 +134,72 @@
                     <!-- Stats -->
                     <div class="grid grid-cols-3 gap-6">
                         <div>
-                            <div class="text-3xl font-bold text-blue-600">5K+</div>
-                            <div class="text-sm text-gray-600">Utilisateurs</div>
+                            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">5K+</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Utilisateurs</div>
                         </div>
                         <div>
-                            <div class="text-3xl font-bold text-cyan-600">98%</div>
-                            <div class="text-sm text-gray-600">Satisfaction</div>
+                            <div class="text-3xl font-bold text-cyan-600 dark:text-cyan-400">98%</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Satisfaction</div>
                         </div>
                         <div>
-                            <div class="text-3xl font-bold text-blue-600">50K+</div>
-                            <div class="text-sm text-gray-600">Commandes</div>
+                            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">50K+</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Commandes</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Right Image -->
                 <div class="relative">
-                    <!-- Main Image Container -->
-                    <div class="relative z-10 float-animation">
-                        <div class="bg-white rounded-2xl shadow-2xl p-6 border border-gray-100">
-                            <!-- Mock Dashboard -->
-                            <div class="space-y-4">
-                                <!-- Header -->
-                                <div class="flex items-center justify-between pb-4 border-b">
-                                    <h3 class="font-semibold text-gray-900">Tableau de bord</h3>
-                                    <div class="flex space-x-2">
-                                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
-                                        <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Stats Cards -->
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-xl">
-                                        <div class="text-sm text-gray-600 mb-1">Demandes actives</div>
-                                        <div class="text-2xl font-bold text-blue-600">24</div>
-                                    </div>
-                                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl">
-                                        <div class="text-sm text-gray-600 mb-1">Commandes</div>
-                                        <div class="text-2xl font-bold text-green-600">156</div>
-                                    </div>
-                                </div>
-
-                                <!-- Recent Orders -->
-                                <div class="space-y-2">
-                                    <div class="text-sm font-semibold text-gray-700 mb-2">Commandes récentes</div>
-                                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="text-sm font-medium text-gray-900">Matières premières</div>
-                                            <div class="text-xs text-gray-500">Il y a 2 heures</div>
-                                        </div>
-                                        <div class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">Validé</div>
-                                    </div>
-                                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                        <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-                                            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                            </svg>
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="text-sm font-medium text-gray-900">Équipements</div>
-                                            <div class="text-xs text-gray-500">Il y a 5 heures</div>
-                                        </div>
-                                        <div class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded">En cours</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Decorative Elements -->
-                    <div class="absolute -top-6 -right-6 w-32 h-32 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full opacity-20 blur-2xl"></div>
-                    <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full opacity-20 blur-2xl"></div>
+                    <img src="https://illustrations.popsy.co/violet/app-launch.svg" alt="App Launch Illustration" class="w-full h-auto">
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+    <section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Fonctionnalités puissantes
                 </h2>
-                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                     Tout ce dont vous avez besoin pour gérer efficacement vos opérations de sourcing
                 </p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
-                <div class="group p-8 bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                <div class="group p-8 bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-2xl border border-blue-100 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300">
                     <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Gestion des demandes</h3>
-                    <p class="text-gray-600">Créez et suivez facilement toutes vos demandes d'approvisionnement en temps réel.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Gestion des demandes</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Créez et suivez facilement toutes vos demandes d'approvisionnement en temps réel.</p>
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="group p-8 bg-gradient-to-br from-cyan-50 to-white rounded-2xl border border-cyan-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                <div class="group p-8 bg-gradient-to-br from-cyan-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-2xl border border-cyan-100 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300">
                     <div class="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Réseau de fournisseurs</h3>
-                    <p class="text-gray-600">Connectez-vous avec des fournisseurs vérifiés et élargissez votre réseau professionnel.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Réseau de fournisseurs</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Connectez-vous avec des fournisseurs vérifiés et élargissez votre réseau professionnel.</p>
                 </div>
 
                 <!-- Feature 3 -->
-                <div class="group p-8 bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                <div class="group p-8 bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-2xl border border-blue-100 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300">
                     <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Analyses & Rapports</h3>
-                    <p class="text-gray-600">Obtenez des insights détaillés sur vos opérations avec des rapports analytiques avancés.</p>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Analyses & Rapports</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Obtenez des insights détaillés sur vos opérations avec des rapports analytiques avancés.</p>
                 </div>
             </div>
         </div>

@@ -66,4 +66,12 @@ class User extends Authenticatable
     {
         return $this->role === 'client';
     }
+
+    /**
+     * Route notifications for the Firebase Cloud Messaging channel.
+     */
+    public function routeNotificationForFcm(): string|array
+    {
+        return $this->fcm_token;
+    }
 }

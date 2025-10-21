@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Country;
+use App\Models\PaymentMethod;
 use App\Models\Service;
 use App\Models\SourcingRequest;
 use Illuminate\Http\Request;
@@ -22,6 +23,18 @@ class SourcingRequestController extends Controller
         return view('client.sourcing-requests.index', compact('sourcingRequests'));
     }
 
+    public function handling(): View
+    {
+        $sourcingRequests = auth()->user()->sourcingRequests()
+            ->where('status', 'in_review')
+            ->with('category', 'destinations.country', 'destinations.service', 'quotation')
+            ->get();
+
+        $paymentMethods = PaymentMethod::where('is_active', true)->get();
+
+        return view('client.sourcing-requests.handling', compact('sourcingRequests', 'paymentMethods'));
+    }
+
     /**
      * Display the specified resource.
      */
@@ -32,9 +45,10 @@ class SourcingRequestController extends Controller
             abort(403);
         }
 
-        $sourcingRequest->load('category', 'destinations.country', 'destinations.service');
+        $sourcingRequest->load('category', 'destinations.country', 'destinations.service', 'quotation.order');
+        $paymentMethods = PaymentMethod::where('is_active', true)->get();
 
-        return view('client.sourcing-requests.show', compact('sourcingRequest'));
+        return view('client.sourcing-requests.show', compact('sourcingRequest', 'paymentMethods'));
     }
 
     /**
@@ -53,7 +67,7 @@ class SourcingRequestController extends Controller
     /**
      * Store a newly created sourcing request in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'product_name' => 'required|string|max:255',
@@ -61,6 +75,10 @@ class SourcingRequestController extends Controller
             'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'category_id' => 'required|exists:categories,id',
             'note' => 'nullable|string',
+            'phone_number' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'shipping_method' => 'nullable|in:air,sea',
             'destinations' => 'required|array|min:1',
             'destinations.*.country_id' => 'required|exists:countries,id',
@@ -78,11 +96,22 @@ class SourcingRequestController extends Controller
             'product_image' => $validated['product_image'] ?? null,
             'category_id' => $validated['category_id'],
             'note' => $validated['note'] ?? null,
+            'phone_number' => $validated['phone_number'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'shipping_method' => $validated['shipping_method'] ?? null,
         ]);
 
         foreach ($validated['destinations'] as $destinationData) {
             $sourcingRequest->destinations()->create($destinationData);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Sourcing request created successfully!',
+                'redirect_url' => route('client.dashboard')
+            ]);
         }
 
         return redirect()->route('client.dashboard')->with('status', 'Sourcing request created successfully!');
@@ -122,6 +151,10 @@ class SourcingRequestController extends Controller
             'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'category_id' => 'required|exists:categories,id',
             'note' => 'nullable|string',
+            'phone_number' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'shipping_method' => 'nullable|in:air,sea',
             'destinations' => 'required|array|min:1',
             'destinations.*.country_id' => 'required|exists:countries,id',
@@ -143,6 +176,10 @@ class SourcingRequestController extends Controller
             'product_image' => $validated['product_image'] ?? $sourcingRequest->product_image,
             'category_id' => $validated['category_id'],
             'note' => $validated['note'] ?? null,
+            'phone_number' => $validated['phone_number'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'shipping_method' => $validated['shipping_method'] ?? null,
         ]);
 
@@ -174,4 +211,88 @@ class SourcingRequestController extends Controller
 
         return redirect()->route('client.dashboard')->with('status', 'Sourcing request deleted successfully!');
     }
+
+    public function history()
+    {
+        $user = auth()->user();
+        $timeline = [];
+
+        $requests = $user->sourcingRequests()
+                         ->with(['quotation.order'])
+                         ->get();
+
+        foreach ($requests as $request) {
+            // Event: Sourcing Request created
+            $timeline[] = [
+                'date' => $request->created_at,
+                'type' => 'request_created',
+                'title' => __('Sourcing request created'),
+                'description' => __('You created a request for :product.', ['product' => $request->product_name]),
+                'link' => route('client.sourcing-requests.show', $request),
+                'icon' => 'plus-circle'
+            ];
+
+            if ($request->quotation) {
+                $quotation = $request->quotation;
+                // Event: Quotation received
+                $timeline[] = [
+                    'date' => $quotation->created_at,
+                    'type' => 'quotation_received',
+                    'title' => __('Quotation received'),
+                    'description' => __('A quotation of :amount :currency was received for :product.', [
+                        'amount' => $quotation->amount,
+                        'currency' => $quotation->currency,
+                        'product' => $request->product_name,
+                    ]),
+                    'link' => route('client.sourcing-requests.show', $request),
+                    'icon' => 'cash'
+                ];
+
+                if ($quotation->status === 'accepted') {
+                    $timeline[] = [
+                        'date' => $quotation->updated_at, // Use updated_at for status changes
+                        'type' => 'quotation_accepted',
+                        'title' => __('Quotation accepted'),
+                        'description' => __('You accepted the quotation for :product.', ['product' => $request->product_name]),
+                        'link' => route('client.sourcing-requests.show', $request),
+                        'icon' => 'check-circle'
+                    ];
+                }
+
+                if ($quotation->order) {
+                    $order = $quotation->order;
+                    // Event: Order created (payment pending)
+                    $timeline[] = [
+                        'date' => $order->created_at,
+                        'type' => 'order_created',
+                        'title' => __('Order created'),
+                        'description' => __('Your order for :product has been created and is pending payment.', ['product' => $request->product_name]),
+                        'link' => route('client.sourcing-orders.show', $order),
+                        'icon' => 'shopping-cart'
+                    ];
+
+                    // Track status changes by looking at the updated_at timestamp
+                    if ($order->status !== 'pending_payment' && $order->updated_at->gt($order->created_at)) {
+                        $timeline[] = [
+                           'date' => $order->updated_at,
+                           'type' => 'order_updated',
+                           'title' => __('Order status updated'),
+                           'description' => __('The status of your order for :product is now: :status', [
+                               'product' => $request->product_name,
+                               'status' => __(ucfirst(str_replace('_', ' ', $order->status)))
+                           ]),
+                           'link' => route('client.sourcing-orders.show', $order),
+                           'icon' => 'truck'
+                       ];
+                    }
+                }
+            }
+        }
+
+        // Sort the timeline by date, descending
+        $sortedTimeline = collect($timeline)->sortByDesc('date');
+
+        return view('client.history.index', ['timeline' => $sortedTimeline]);
+    }
+
 }

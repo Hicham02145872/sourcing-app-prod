@@ -14,6 +14,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminUserSeeder::class,
+            PaymentMethodSeeder::class,
+            IsoCountrySeeder::class,
+            CategorySeeder::class,
+            ServiceSeeder::class,
         ]);
     }
 }

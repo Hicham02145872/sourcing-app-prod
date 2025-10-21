@@ -159,6 +159,43 @@
                         </div>
                     </div>
 
+                    {{-- Contact Information Card --}}
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
+                        <div class="px-6 py-5 border-b border-gray-200">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900">{{ __('Contact Information') }}</h3>
+                            </div>
+                        </div>
+
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">{{ __('Phone Number') }}</p>
+                                <p class="text-sm text-gray-900">{{ $sourcingRequest->phone_number ?? 'N/A' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">{{ __('Address') }}</p>
+                                <p class="text-sm text-gray-900">{{ $sourcingRequest->address ?? 'N/A' }}</p>
+                            </div>
+                            @if ($sourcingRequest->latitude && $sourcingRequest->longitude)
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">{{ __('Location') }}</p>
+                                    <a href="https://www.google.com/maps/search/?api=1&query={{ $sourcingRequest->latitude }},{{ $sourcingRequest->longitude }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-200">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        {{ __('View on Google Maps') }}
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
                     {{-- Destinations Card --}}
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
                         <div class="px-6 py-5 border-b border-gray-200">
@@ -185,6 +222,7 @@
                                                 </svg>
                                             </div>
                                             <div>
+                                                <span class="fi fi-{{ strtolower($destination->country->code) }} mr-2"></span>
                                                 <p class="font-semibold text-gray-900">{{ $destination->country->name }}</p>
                                                 <p class="text-xs text-gray-600">{{ $destination->service->name }}</p>
                                             </div>
@@ -300,10 +338,9 @@
                             <div>
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-2">{{ __('New Status') }}</label>
                                 <select name="status" id="status" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm">
-                                    <option value="pending" {{ $sourcingRequest->status == 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
-                                    <option value="handling" {{ $sourcingRequest->status == 'handling' ? 'selected' : '' }}>{{ __('Handling') }}</option>
-                                    <option value="completed" {{ $sourcingRequest->status == 'completed' ? 'selected' : '' }}>{{ __('Completed') }}</option>
-                                    <option value="cancelled" {{ $sourcingRequest->status == 'cancelled' ? 'selected' : '' }}>{{ __('Cancelled') }}</option>
+                                    @foreach (\App\Models\SourcingRequest::STATUSES as $status)
+                                        <option value="{{ $status }}" {{ $sourcingRequest->status == $status ? 'selected' : '' }}>{{ __($status) }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -319,4 +356,25 @@
             </div>
         </div>
     </div>
+    @push('scripts')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (document.getElementById('map')) {
+                const lat = {{ $sourcingRequest->latitude }};
+                const lng = {{ $sourcingRequest->longitude }};
+                const map = L.map('map').setView([lat, lng], 13);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                L.marker([lat, lng]).addTo(map)
+                    .bindPopup('Client Location')
+                    .openPopup();
+            }
+        });
+    </script>
+    @endpush
 </x-app-layout>
