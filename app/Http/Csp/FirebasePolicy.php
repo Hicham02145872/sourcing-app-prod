@@ -10,7 +10,7 @@ class FirebasePolicy extends Basic
     {
         parent::configure();
 
-        $this->addDirective('script-src', ['self', 'https://www.gstatic.com', 'https://www.googleapis.com', 'https://cdn.jsdelivr.net']);
+        $this->addDirective('script-src', ['self', 'unsafe-eval', 'https://www.gstatic.com', 'https://www.googleapis.com', 'https://cdn.jsdelivr.net']);
         $this->addDirective('connect-src', ['self', 'https://www.gstatic.com', 'https://*.firebaseio.com', 'https://*.googleapis.com', 'https://*.firebaseapp.com']);
         $this->addDirective('img-src', ['self', 'data:', 'https://www.gstatic.com']);
         $this->addDirective('style-src', ['self', 'unsafe-inline', 'https://fonts.googleapis.com']);
