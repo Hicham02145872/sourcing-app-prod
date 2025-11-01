@@ -84,12 +84,12 @@
                                     <div class="pt-4 space-y-3">
                                         <div>
                                             <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ __('Additional Notes') }}</p>
-                                            <p class="text-sm text-gray-700">{{ $sourcingOrder->quotation->sourcingRequest->note ?? __('{{ __('No notes provided') }}') }}</p>
+                                            <p class="text-sm text-gray-700">{{ $sourcingOrder->quotation->sourcingRequest->note ?? __('No notes provided') }}</p>
                                         </div>
 
                                         <div>
                                             <p class="text-xs font-medium text-gray-500 uppercase mb-1">{{ __('Shipping Method') }}</p>
-                                            <p class="text-sm text-gray-900">{{ ucfirst($sourcingOrder->quotation->sourcingRequest->shipping_method ?? __('{{ __('Not specified') }}')) }}</p>
+                                            <p class="text-sm text-gray-900">{{ ucfirst($sourcingOrder->quotation->sourcingRequest->shipping_method ?? __('Not specified')) }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -134,6 +134,22 @@
                     </div>
 
                     {{-- Payment --}}
+                    @if ($sourcingOrder->rejection_reason)
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-bold text-red-700">{{ __('Payment Proof Rejected') }}</p>
+                                    <p class="text-sm text-red-600 mt-1">{{ $sourcingOrder->rejection_reason }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="bg-white border border-gray-200 rounded-lg">
                         <div class="px-6 py-4 border-b border-gray-200">
                             <h3 class="text-base font-semibold text-gray-900">{{ __('Payment') }}</h3>
@@ -159,6 +175,10 @@
                                     <a href="{{ asset('storage/' . $sourcingOrder->proof_of_payment_path) }}" target="_blank" 
                                        class="text-sm font-medium text-violet-600 hover:text-violet-700">
                                         {{ __('View Document') }}
+                                    </a>
+                                    <a href="{{ route('client.sourcing-orders.receipt', $sourcingOrder) }}" target="_blank"
+                                       class="ml-4 text-sm font-medium text-green-600 hover:text-green-700">
+                                        {{ __('Print Receipt') }}
                                     </a>
                                 </div>
                             @endif

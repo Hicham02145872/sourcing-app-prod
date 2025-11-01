@@ -107,11 +107,11 @@ class NotificationController extends Controller
         //     $notificationsQuery->whereJsonContains('data->for_role', 'client');
         // }
 
-        $notifications = $notificationsQuery->get();
+        $notifications = $notificationsQuery->paginate(15);
 
         Log::debug("Fetched notifications for user {$user->id}", ['count' => $notifications->count(), 'notifications' => $notifications->toArray()]);
 
-        $mappedNotifications = $notifications->map(function ($notification) {
+        $mappedNotifications = $notifications->getCollection()->map(function ($notification) {
             $data = is_string($notification->data)
                 ? json_decode($notification->data, true) ?? []
                 : ($notification->data ?? []);
@@ -165,13 +165,19 @@ class NotificationController extends Controller
             ];
         });
 
-        $unreadCount = $mappedNotifications->where('is_read', false)->count();
+        $unreadCount = $notifications->where('read_at', null)->count();
 
         if ($request->expectsJson()) {
             return response()->json([
                 'notifications' => $mappedNotifications->values(),
                 'unread_count' => $unreadCount,
-                'total_count' => $mappedNotifications->count()
+                'total_count' => $notifications->total(),
+                'per_page' => $notifications->perPage(),
+                'current_page' => $notifications->currentPage(),
+                'last_page' => $notifications->lastPage(),
+                'from' => $notifications->firstItem(),
+                'to' => $notifications->lastItem(),
+                'links' => $notifications->linkCollection(),
             ]);
         }
 

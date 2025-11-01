@@ -2,10 +2,10 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-4xl font-extrabold text-gray-900 tracking-tight">
+                <h2 class="text-2xl font-extrabold text-black-900 tracking-tight">
                     {{ __('Your Sourcing Orders') }}
                 </h2>
-                <p class="mt-2 text-sm text-gray-600">{{ __('Track the progress of your accepted quotations') }}</p>
+                <p class="mt-0 text-sm text-blackk-600">{{ __('Track the progress of your accepted quotations') }}</p>
             </div>
             <a href="{{ route('client.dashboard') }}" 
                class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm">
@@ -17,8 +17,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-gradient-to-br from-gray-50 to-gray-100/50 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-4 bg-gradient-to-br from-gray-50 to-gray-100/50 min-h-screen">
+        <div class="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-200">
                 @if ($sourcingOrders->isEmpty())
                     <div class="text-center py-20 px-6">

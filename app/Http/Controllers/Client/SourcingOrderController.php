@@ -17,31 +17,28 @@ class SourcingOrderController extends Controller
 {
     public function index(): View
     {
+        $this->authorize('viewAny', SourcingOrder::class);
         $sourcingOrders = Auth::user()->sourcingOrders()->with('quotation.sourcingRequest')->get();
         return view('client.sourcing-orders.index', compact('sourcingOrders'));
     }
 
     public function show(SourcingOrder $sourcingOrder): View
     {
-        // Ensure the authenticated user owns this sourcing order
-        if (Auth::user()->id !== $sourcingOrder->user_id) {
-            abort(403);
-        }
-
-        $sourcingOrder->load('quotation.sourcingRequest.category', 'quotation.sourcingRequest.destinations.country', 'quotation.sourcingRequest.destinations.service');
+        $this->authorize('view', $sourcingOrder);
 
         return view('client.sourcing-orders.show', compact('sourcingOrder'));
     }
 
     public function uploadProofOfPayment(Request $request, SourcingOrder $sourcingOrder): RedirectResponse
     {
+        $this->authorize('update', $sourcingOrder);
         Log::debug('uploadProofOfPayment method called', ['method' => $request->method(), 'request' => $request->all()]);
 
         if ($request->hasFile('proof_of_payment')) {
             Log::debug('Request has file');
             if ($request->file('proof_of_payment')->isValid()) {
                 Log::debug('File is valid');
-                $path = $request->file('proof_of_payment')->store('proofs_of_payment', 'public');
+                $path = $request->file('proof_of_payment')->store('proofs_of_payment', 'local');
                 Log::debug('File stored', ['path' => $path]);
                 $sourcingOrder->update([
                     'proof_of_payment_path' => $path,
@@ -61,5 +58,12 @@ class SourcingOrderController extends Controller
         }
 
         return redirect()->route('client.sourcing-orders.show', $sourcingOrder)->with('status', 'Proof of payment uploaded successfully. It will be reviewed by an admin.');
+    }
+
+    public function showReceipt(SourcingOrder $sourcingOrder): View
+    {
+        $this->authorize('view', $sourcingOrder);
+
+        return view('client.sourcing-orders.receipt', compact('sourcingOrder'));
     }
 }

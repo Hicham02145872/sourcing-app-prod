@@ -8,7 +8,7 @@
     
     <div class="flex flex-col h-full">
         {{-- Logo Section --}}
-        <div class="flex items-center justify-between h-20 px-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between py-3 px-6 border-b border-gray-200 dark:border-gray-700">
             <a href="{{ $role === 'admin' ? route('admin.dashboard') : route('client.dashboard') }}" class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,8 +156,8 @@
                         <span>{{ __('All Sourcing Requests') }}</span>
                     </a>
 
-                    <a href="{{ route('admin.quotations.create') }}" 
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.quotations.create') ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    <a href="{{ route('admin.quotations.select-request') }}" 
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.quotations.select-request') ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m-3 10v-5m-5 5h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>

@@ -15,20 +15,70 @@ use Kreait\Firebase\Contract\Messaging;
 
 class QuotationController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $quotations = Quotation::with('sourcingRequest.user')->get();
-        return view('admin.quotations.index', compact('quotations'));
+        $this->authorize('viewAny', Quotation::class);
+
+        $baseQuery = Quotation::query();
+
+        $totalQuotations = $baseQuery->count();
+        $pendingQuotations = (clone $baseQuery)->where('status', 'pending')->count();
+        $approvedQuotations = (clone $baseQuery)->where('status', 'approved')->count();
+        $rejectedQuotations = (clone $baseQuery)->where('status', 'rejected')->count();
+
+        $query = Quotation::with('sourcingRequest.user');
+
+        // Search
+        if ($request->has('search') && $request->search) {
+            $query->whereHas('sourcingRequest', function ($q) use ($request) {
+                $q->where('product_name', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('user', function ($userQuery) use ($request) {
+                        $userQuery->where('name', 'like', '%' . $request->search . '%');
+                    });
+            });
+        }
+
+        // Filter by status
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $query->orderBy($sortBy, $sortDirection);
+
+        $quotations = $query->paginate(10);
+
+        return view('admin.quotations.index', compact(
+            'quotations', 
+            'request',
+            'totalQuotations',
+            'pendingQuotations',
+            'approvedQuotations',
+            'rejectedQuotations'
+        ));
     }
 
-    public function create(): View
+    public function selectRequest(): View
     {
+        $this->authorize('create', Quotation::class);
         $sourcingRequests = SourcingRequest::where('status', 'in_review')->get();
-        return view('admin.quotations.create', compact('sourcingRequests'));
+        $sourcingRequestsInReview = $sourcingRequests->count();
+        $pendingQuotations = $sourcingRequests->whereNull('quoted_at')->count();
+        $sourcingRequestsThisMonth = SourcingRequest::where('status', 'in_review')->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count();
+        return view('admin.quotations.select_request', compact('sourcingRequests', 'sourcingRequestsInReview', 'pendingQuotations', 'sourcingRequestsThisMonth'));
+    }
+
+    public function create(SourcingRequest $sourcingRequest): View
+    {
+        $this->authorize('create', Quotation::class);
+        return view('admin.quotations.create', compact('sourcingRequest'));
     }
 
     public function store(Request $request, Messaging $messaging): RedirectResponse
     {
+        $this->authorize('create', Quotation::class);
         $validated = $request->validate([
             'sourcing_request_id' => 'required|exists:sourcing_requests,id',
             'unit_price' => 'required|numeric',
@@ -51,27 +101,7 @@ class QuotationController extends Controller
             'status' => 'pending', // Default status
         ]);
 
-        $sourcingRequest = SourcingRequest::find($validated['sourcing_request_id']);
-        $notification = new QuotationCreated($quotation);
-
-        // Notify the user via mail and database
-        $sourcingRequest->user->notify($notification);
-
-        // Manually send the FCM notification
-        if ($sourcingRequest->user->fcm_token) {
-            try {
-                $fcmMessage = $notification->toFcm($sourcingRequest->user);
-                if ($fcmMessage) {
-                    $messaging->send($fcmMessage);
-                }
-            } catch (\Exception $e) {
-                // Log the error but don't block the user
-                Log::error('FCM notification failed to send: '.$e->getMessage());
-            }
-        }
-
-        // Invalidate the cache for the user's notifications
-        Cache::forget("user_notifications_{$sourcingRequest->user->id}");
+        event(new \App\Events\QuotationCreated($quotation));
 
         return redirect()->route('admin.dashboard')->with('status', 'Quotation created successfully!');
     }

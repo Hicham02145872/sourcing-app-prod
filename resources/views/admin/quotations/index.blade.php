@@ -6,7 +6,7 @@
                     <h2 class="font-semibold text-3xl text-gray-900 dark:text-white tracking-tight">
                         {{ __('Quotations') }}
                     </h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5">Manage and track all quotations</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5">{{ __('Manage and track all quotations') }}</p>
                 </div>
                 <div class="flex items-center space-x-3">
                     <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
@@ -14,12 +14,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                         Export
-                    </button>
-                    <a href="{{ route('admin.quotations.create') }}" class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 border border-transparent rounded-lg font-medium text-sm text-white shadow-sm transition-colors">
+<a href="{{ route('admin.quotations.select-request') }}" class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 border border-transparent rounded-lg font-medium text-sm text-white shadow-sm transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        New Quotation
+                        {{ __('New Quotation') }}
                     </a>
                 </div>
             </div>
@@ -33,8 +32,8 @@
                 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Quotations</p>
-                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $quotations->count() }}</p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Total Quotations') }}</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $totalQuotations }}</p>
                         </div>
                         <div class="w-10 h-10 bg-violet-100 dark:bg-violet-900/50 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +47,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
-                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $quotations->where('status', 'pending')->count() }}</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $pendingQuotations }}</p>
                         </div>
                         <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +61,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Approved</p>
-                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $quotations->where('status', 'approved')->count() }}</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $approvedQuotations }}</p>
                         </div>
                         <div class="w-10 h-10 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +75,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Rejected</p>
-                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $quotations->where('status', 'rejected')->count() }}</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $rejectedQuotations }}</p>
                         </div>
                         <div class="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +87,7 @@
             </div>
 
             <!-- Search and Filter Bar -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
+            <form action="{{ route('admin.quotations.index') }}" method="GET" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
                     <div class="flex-1 max-w-lg">
                         <div class="relative">
@@ -97,17 +96,17 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                             </div>
-                            <input type="text" placeholder="Search quotations..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-sm dark:bg-gray-700 dark:text-white">
+                            <input type="text" name="search" placeholder="{{ __('Search quotations...') }}" value="{{ $request->search ?? '' }}" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-sm dark:bg-gray-700 dark:text-white">
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <select class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-sm bg-white dark:bg-gray-700 dark:text-white">
-                            <option>All Status</option>
-                            <option>Pending</option>
-                            <option>Approved</option>
-                            <option>Rejected</option>
+                        <select name="status" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-sm bg-white dark:bg-gray-700 dark:text-white">
+                            <option value="">All Status</option>
+                            <option value="pending" {{ ($request->status ?? '') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="approved" {{ ($request->status ?? '') == 'approved' ? 'selected' : '' }}>Approved</option>
+                            <option value="rejected" {{ ($request->status ?? '') == 'rejected' ? 'selected' : '' }}>Rejected</option>
                         </select>
-                        <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                             </svg>
@@ -115,7 +114,7 @@
                         </button>
                     </div>
                 </div>
-            </div>
+            </form>
 
             <!-- Table Card -->
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -124,30 +123,43 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                    <div class="flex items-center">
+                                    <a href="{{ route('admin.quotations.index', array_merge($request->query(), ['sort_by' => 'id', 'sort_direction' => $request->sort_by == 'id' && $request->sort_direction == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center">
                                         ID
-                                        <svg class="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                        </svg>
-                                    </div>
+                                        @if($request->sort_by == 'id')
+                                            <svg class="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $request->sort_direction == 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/>
+                                            </svg>
+                                        @endif
+                                    </a>
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                    Product Name
+                                    {{ __('Product Name') }}
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                    Client
+                                    {{ __('Client') }}
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                    Amount
+                                    <a href="{{ route('admin.quotations.index', array_merge($request->query(), ['sort_by' => 'amount', 'sort_direction' => $request->sort_by == 'amount' && $request->sort_direction == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center">
+                                        {{ __('Amount') }}
+                                        @if($request->sort_by == 'amount')
+                                            <svg class="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $request->sort_direction == 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/>
+                                            </svg>
+                                        @endif
+                                    </a>
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                     Status
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                    Date
-                                </th>
-                                <th scope="col" class="px-6 py-3.5 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                    Actions
+                                    <a href="{{ route('admin.quotations.index', array_merge($request->query(), ['sort_by' => 'created_at', 'sort_direction' => $request->sort_by == 'created_at' && $request->sort_direction == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center">
+                                        {{ __('Date') }}
+                                        @if($request->sort_by == 'created_at')
+                                            <svg class="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $request->sort_direction == 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/>
+                                            </svg>
+                                        @endif
+                                    </a>
                                 </th>
                             </tr>
                         </thead>
@@ -200,26 +212,6 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                         {{ $quotation->created_at->format('M d, Y') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div class="flex items-center justify-end space-x-2">
-                                            <button type="button" class="inline-flex items-center p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors" title="View">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                </svg>
-                                            </button>
-                                            <button type="button" class="inline-flex items-center p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors" title="Edit">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                </svg>
-                                            </button>
-                                            <button type="button" class="inline-flex items-center p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="Delete">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -234,37 +226,26 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </div>
-                    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">No quotations found</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Get started by creating a new quotation.</p>
-                    <a href="{{ route('admin.quotations.create') }}" class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 border border-transparent rounded-lg font-medium text-sm text-white shadow-sm transition-colors">
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">{{ __('No quotations found') }}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('Get started by creating a new quotation.') }}</p>
+                    <a href="{{ route('admin.quotations.select-request') }}" class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 border border-transparent rounded-lg font-medium text-sm text-white shadow-sm transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Create Quotation
+                        {{ __('Create Quotation') }}
                     </a>
                 </div>
                 @endif
 
                 <!-- Pagination -->
-                @if($quotations->isNotEmpty())
+                @if($quotations->hasPages())
                 <div class="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="text-sm text-gray-700 dark:text-gray-400">
-                            Showing <span class="font-medium">1</span> to <span class="font-medium">{{ $quotations->count() }}</span> of <span class="font-medium">{{ $quotations->count() }}</span> results
+                            Showing <span class="font-medium">{{ $quotations->firstItem() }}</span> to <span class="font-medium">{{ $quotations->lastItem() }}</span> of <span class="font-medium">{{ $quotations->total() }}</span> results
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                Previous
-                            </button>
-                            <button type="button" class="inline-flex items-center px-3 py-1.5 bg-violet-600 border border-transparent rounded-lg text-sm font-medium text-white">
-                                1
-                            </button>
-                            <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                2
-                            </button>
-                            <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                Next
-                            </button>
+                        <div>
+                            {{ $quotations->appends($request->query())->links() }}
                         </div>
                     </div>
                 </div>

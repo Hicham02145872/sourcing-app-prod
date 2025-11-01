@@ -115,6 +115,11 @@
                                 </div>
                             @endif
 
+                                <div class="flex items-center justify-between py-2">
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Sourcing Location') }}:</span>
+                                    <span class="text-sm font-semibold text-gray-900 dark:text-white capitalize">{{ $sourcingRequest->sourcing_location }}</span>
+                                </div>
+
                             @if ($sourcingRequest->note)
                                 <div class="flex items-start gap-4">
                                     <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -339,7 +344,9 @@
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-2">{{ __('New Status') }}</label>
                                 <select name="status" id="status" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm">
                                     @foreach (\App\Models\SourcingRequest::STATUSES as $status)
-                                        <option value="{{ $status }}" {{ $sourcingRequest->status == $status ? 'selected' : '' }}>{{ __($status) }}</option>
+                                        @if ($sourcingRequest->canTransitionTo($status, auth()->user()))
+                                            <option value="{{ $status }}" {{ $sourcingRequest->status == $status ? 'selected' : '' }}>{{ __($status) }}</option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>
