@@ -1,7 +1,7 @@
 <x-app-layout :breadcrumb="[
-    ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
-    ['label' => 'Payment Methods', 'url' => route('admin.payment-methods.index')],
-    ['label' => 'Create']
+    ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
+    ['label' => __('Payment Methods'), 'url' => route('admin.payment-methods.index')],
+    ['label' => __('Create')]
 ]">
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -63,7 +63,7 @@
                                                value="{{ old('name') }}" 
                                                required 
                                                autofocus
-                                               placeholder="e.g., CIH Bank, Wise Transfer"
+                                               placeholder="{{ __('e.g., CIH Bank, Wise Transfer') }}"
                                                class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                         @error('name')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -90,7 +90,7 @@
                                                        accept="image/*"
                                                        onchange="previewLogo(event)"
                                                        class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/50 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900 cursor-pointer">
-                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG or SVG (Max. 2MB)</p>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('PNG, JPG or SVG (Max. 2MB)') }}</p>
                                             </div>
                                         </div>
                                         @error('logo')
@@ -123,7 +123,7 @@
                                                type="text" 
                                                name="account_type" 
                                                value="{{ old('account_type') }}"
-                                               placeholder="e.g., Checking, Business"
+                                               placeholder="{{ __('e.g., Checking, Business') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 
@@ -136,7 +136,7 @@
                                                type="text" 
                                                name="account_holder" 
                                                value="{{ old('account_holder') }}"
-                                               placeholder="Full name"
+                                               placeholder="{{ __('Full name') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 
@@ -149,7 +149,7 @@
                                                type="text" 
                                                name="account_number" 
                                                value="{{ old('account_number') }}"
-                                               placeholder="Enter account number"
+                                               placeholder="{{ __('Enter account number') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 
@@ -162,7 +162,7 @@
                                                type="text" 
                                                name="routing_number" 
                                                value="{{ old('routing_number') }}"
-                                               placeholder="Enter routing number"
+                                               placeholder="{{ __('Enter routing number') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 
@@ -175,7 +175,7 @@
                                                type="text" 
                                                name="bank_name" 
                                                value="{{ old('bank_name') }}"
-                                               placeholder="e.g., CIH Bank"
+                                               placeholder="{{ __('e.g., CIH Bank') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 
@@ -188,7 +188,7 @@
                                                type="text" 
                                                name="swift_code" 
                                                value="{{ old('swift_code') }}"
-                                               placeholder="e.g., CIHBMAMA"
+                                               placeholder="{{ __('e.g., CIHBMAMA') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 
@@ -201,7 +201,7 @@
                                                type="text" 
                                                name="iban" 
                                                value="{{ old('iban') }}"
-                                               placeholder="e.g., MA64..."
+                                               placeholder="{{ __('e.g., MA64...') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 
@@ -214,7 +214,7 @@
                                                type="text" 
                                                name="country" 
                                                value="{{ old('country') }}"
-                                               placeholder="e.g., Morocco"
+                                               placeholder="{{ __('e.g., Morocco') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 
@@ -227,7 +227,7 @@
                                                type="email" 
                                                name="email" 
                                                value="{{ old('email') }}"
-                                               placeholder="account@example.com"
+                                               placeholder="{{ __('account@example.com') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 
@@ -240,7 +240,7 @@
                                                type="text" 
                                                name="address" 
                                                value="{{ old('address') }}"
-                                               placeholder="Full address"
+                                               placeholder="{{ __('Full address') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
                                 </div>

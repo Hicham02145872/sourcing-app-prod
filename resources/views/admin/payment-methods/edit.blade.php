@@ -1,7 +1,7 @@
 <x-app-layout :breadcrumb="[
-    ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
-    ['label' => 'Payment Methods', 'url' => route('admin.payment-methods.index')],
-    ['label' => 'Edit']
+    ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
+    ['label' => __('Payment Methods'), 'url' => route('admin.payment-methods.index')],
+    ['label' => __('Edit')]
 ]">
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -64,7 +64,7 @@
                                                value="{{ old('name', $paymentMethod->name) }}" 
                                                required 
                                                autofocus
-                                               placeholder="e.g., CIH Bank, Wise Transfer"
+                                               placeholder="{{ __('e.g., CIH Bank, Wise Transfer') }}"
                                                class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                         @error('name')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -95,7 +95,7 @@
                                                        accept="image/*"
                                                        onchange="previewLogo(event)"
                                                        class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-50 dark:file:bg-amber-900/50 file:text-amber-700 dark:file:text-amber-300 hover:file:bg-amber-100 dark:hover:file:bg-amber-900 cursor-pointer">
-                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG or SVG (Max. 2MB) - Leave empty to keep current logo</p>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('PNG, JPG or SVG (Max. 2MB) - Leave empty to keep current logo') }}</p>
                                             </div>
                                         </div>
                                         @error('logo')
@@ -128,7 +128,7 @@
                                                type="text" 
                                                name="account_type" 
                                                value="{{ old('account_type', $paymentMethod->details['Account Type'] ?? '') }}"
-                                               placeholder="e.g., Checking, Business"
+                                               placeholder="{{ __('e.g., Checking, Business') }}"
                                                class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 dark:bg-gray-700 dark:text-white">
                                     </div>
 

@@ -9,7 +9,7 @@
                     <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5">{{ __('Organize and manage product categories') }}</p>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl font-medium text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -24,7 +24,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Stats Card -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Total Categories') }}</p>
@@ -38,7 +38,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Active Categories') }}</p>
@@ -52,7 +52,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Products') }}</p>
@@ -69,7 +69,7 @@
 
             <!-- Success Message -->
             @if (session('success'))
-                <div class="bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 rounded-lg p-4 mb-6">
+                <div class="bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 rounded-xl p-4 mb-6">
                     <div class="flex items-start">
                         <div class="flex-shrink-0">
                             <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,32 +90,30 @@
                 </div>
             @endif
 
-            <!-- Search Bar -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
-                    <div class="flex-1 max-w-lg">
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                </svg>
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
+                <form action="{{ route('admin.categories.index') }}" method="GET">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
+                        <div class="flex-1 max-w-lg">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                                <input type="text" name="search" placeholder="{{ __('Search categories...') }}" value="{{ request('search') }}" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-sm dark:bg-gray-700 dark:text-white">
                             </div>
-                            <input type="text" placeholder="{{ __('Search categories...') }}" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-sm dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-indigo-700 transition-colors duration-200">
+                                {{ __('Search') }}
+                            </button>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                            </svg>
-                            {{ __('Filters') }}
-                        </button>
-                    </div>
-                </div>
+                </form>
             </div>
 
             <!-- Table Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
@@ -153,7 +151,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <div class="w-8 h-8 bg-violet-100 dark:bg-violet-900/50 rounded-lg flex items-center justify-center mr-3">
+                                            <div class="w-8 h-8 bg-violet-100 dark:bg-violet-900/50 rounded-xl flex items-center justify-center mr-3">
                                                 <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                                                 </svg>
@@ -178,7 +176,7 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $category->created_at ? $category->created_at->format('M d, Y') : 'N/A' }}
+                                        {{ $category->created_at ? $category->created_at->translatedFormat('d M Y') : 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end space-x-2">
@@ -214,34 +212,19 @@
                     </div>
                     <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">{{ __('No categories found') }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('Get started by creating your first category.') }}</p>
-                    <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 border border-transparent rounded-lg font-medium text-sm text-white shadow-sm transition-colors">
+                    <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 border border-transparent rounded-xl font-medium text-sm text-white shadow-sm transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Add Category
+{{ __('Add Category') }}
                     </a>
                 </div>
                 @endif
 
                 <!-- Pagination -->
-                @if($categories->isNotEmpty())
+                @if($categories->hasPages())
                 <div class="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-700 dark:text-gray-400">
-                            {{ __('Showing') }} <span class="font-medium">1</span> {{ __('to') }} <span class="font-medium">{{ $categories->count() }}</span> {{ __('of') }} <span class="font-medium">{{ $categories->count() }}</span> {{ __('results') }}
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                {{ __('Previous') }}
-                            </button>
-                            <button type="button" class="inline-flex items-center px-3 py-1.5 bg-violet-600 border border-transparent rounded-lg text-sm font-medium text-white">
-                                1
-                            </button>
-                            <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                {{ __('Next') }}
-                            </button>
-                        </div>
-                    </div>
+                    {{ $categories->links() }}
                 </div>
                 @endif
             </div>

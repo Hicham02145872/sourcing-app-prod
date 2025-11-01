@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class SourcingRequest extends Model
 {
@@ -32,6 +33,7 @@ class SourcingRequest extends Model
         'address',
         'latitude',
         'longitude',
+        'sourcing_location',
     ];
 
     public function user()
@@ -64,5 +66,62 @@ class SourcingRequest extends Model
     public function order()
     {
         return $this->hasOneThrough(SourcingOrder::class, Quotation::class);
+    }
+
+    public function canTransitionTo(string $newStatus, User $user = null): bool
+    {
+        $user = $user ?? auth()->user(); // Use provided user or authenticated user
+
+        $allowedTransitions = [
+            'pending' => [
+                'client' => ['rejected'], // Client can cancel their own pending request
+                'admin' => ['in_review', 'rejected'], // Admin can review or reject
+            ],
+            'in_review' => [
+                'client' => ['rejected'], // Client can cancel their own request in review
+                'admin' => ['quoted', 'rejected'], // Admin can quote or reject
+            ],
+            'quoted' => [
+                'client' => ['accepted', 'rejected'], // Client can accept or reject a quotation
+                'admin' => ['accepted', 'rejected'], // Admin can also mark as accepted/rejected (e.g., if client communicates offline)
+            ],
+            'accepted' => [
+                'admin' => ['completed', 'cancelled'], // Admin can complete or cancel an accepted request
+            ],
+            'rejected' => [], // No transitions from rejected
+            'completed' => [], // No transitions from completed
+            'cancelled' => [], // No transitions from cancelled
+        ];
+
+        // Check if the current status has defined transitions
+        if (!isset($allowedTransitions[$this->status])) {
+            return false;
+        }
+
+        // Check if the new status is allowed for the current status
+        if (!in_array($newStatus, $allowedTransitions[$this->status][$user->role] ?? [])) {
+            return false;
+        }
+
+        // Additional checks (e.g., ownership)
+        if ($user->isClient() && $this->user_id !== $user->id) {
+            return false; // Client can only transition their own requests
+        }
+
+        return true;
+    }
+
+    public function transitionTo(string $newStatus, User $user = null): bool
+    {
+        if (!$this->canTransitionTo($newStatus, $user)) {
+            throw new \Exception("Invalid status transition from '{$this->status}' to '{$newStatus}' for user role '{$user->role}'.");
+        }
+
+        $this->status = $newStatus;
+        $this->save();
+
+        event(new \App\Events\SourcingRequestStatusChanged($this, $user ?? auth()->user()));
+
+        return true;
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Client\ClientDashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\ServiceController;
@@ -23,7 +24,7 @@ Route::get('/dashboard', function () {
     }
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('categories', CategoryController::class);
@@ -33,23 +34,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('sourcing-orders', [App\Http\Controllers\Admin\SourcingOrderController::class, 'index'])->name('sourcing-orders.index');
     Route::get('sourcing-orders/{sourcingOrder}', [App\Http\Controllers\Admin\SourcingOrderController::class, 'show'])->name('sourcing-orders.show');
     Route::get('sourcing-orders/{sourcingOrder}/download-proof-of-payment', [App\Http\Controllers\Admin\SourcingOrderController::class, 'downloadProofOfPayment'])->name('sourcing-orders.download-proof-of-payment');
+    Route::get('sourcing-orders/{sourcingOrder}/download-proof', [App\Http\Controllers\Admin\SourcingOrderController::class, 'downloadProofOfPayment'])->name('sourcing-orders.download-proof');
+    Route::post('sourcing-orders/{sourcingOrder}/reject-proof', [App\Http\Controllers\Admin\SourcingOrderController::class, 'rejectProof'])->name('sourcing-orders.reject-proof');
     Route::get('/sourcing-requests', [App\Http\Controllers\Admin\AdminSourcingRequestController::class, 'index'])->name('sourcing-requests.index');
     Route::get('/sourcing-requests/{sourcingRequest}', [App\Http\Controllers\Admin\AdminSourcingRequestController::class, 'show'])->name('sourcing-requests.show');
     Route::patch('/sourcing-requests/{sourcingRequest}/update-status', [App\Http\Controllers\Admin\AdminSourcingRequestController::class, 'updateStatus'])->name('sourcing-requests.update-status');
-    Route::get('quotations/create', [App\Http\Controllers\Admin\QuotationController::class, 'create'])->name('quotations.create');
+    Route::get('quotations/select-request', [App\Http\Controllers\Admin\QuotationController::class, 'selectRequest'])->name('quotations.select-request');
+    Route::get('quotations/create/{sourcingRequest}', [App\Http\Controllers\Admin\QuotationController::class, 'create'])->name('quotations.create');
     Route::post('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'store'])->name('quotations.store');
     Route::get('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'index'])->name('quotations.index');
     Route::patch('sourcing-orders/{sourcingOrder}/update-status', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateStatus'])->name('sourcing-orders.update-status');
 
-    Route::resource('users', App\Http\Controllers\Admin\UserController::class)->only(['index', 'edit', 'update', 'destroy']);
+    Route::resource('users', App\Http\Controllers\Admin\UserController::class);
 });
 
 
-Route::middleware(['auth', 'role:client'])->prefix('client')->name('client.')->group(function () {
-    Route::get('/dashboard', function () {
-        $sourcingRequests = auth()->user()->sourcingRequests()->with('category', 'destinations.country', 'destinations.service')->get();
-        return view('client.dashboard', compact('sourcingRequests'));
-    })->name('dashboard');
+Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('client.')->group(function () {
+    Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/sourcing-requests/create', [SourcingRequestController::class, 'create'])->name('sourcing-requests.create');
     Route::post('/sourcing-requests', [SourcingRequestController::class, 'store'])->name('sourcing-requests.store');
@@ -59,12 +60,15 @@ Route::middleware(['auth', 'role:client'])->prefix('client')->name('client.')->g
     Route::get('/sourcing-requests/{sourcingRequest}/edit', [SourcingRequestController::class, 'edit'])->name('sourcing-requests.edit');
     Route::put('/sourcing-requests/{sourcingRequest}', [SourcingRequestController::class, 'update'])->name('sourcing-requests.update');
     Route::delete('/sourcing-requests/{sourcingRequest}', [SourcingRequestController::class, 'destroy'])->name('sourcing-requests.destroy');
+    Route::post('/sourcing-requests/{sourcingRequest}/duplicate', [SourcingRequestController::class, 'duplicate'])->name('sourcing-requests.duplicate');
     Route::match(['get', 'post'], '/sourcing-orders/{sourcingOrder}/upload-proof-of-payment', [App\Http\Controllers\Client\SourcingOrderController::class, 'uploadProofOfPayment'])->name('sourcing-orders.upload-proof-of-payment');
     Route::post('/quotations/{quotation}/accept', [App\Http\Controllers\Client\QuotationController::class, 'accept'])->name('quotations.accept');
+    Route::post('/quotations/{quotation}/reject', [App\Http\Controllers\Client\QuotationController::class, 'reject'])->name('quotations.reject');
     Route::get('/quotations', [App\Http\Controllers\Client\QuotationController::class, 'index'])->name('quotations.index');
 
     Route::get('/sourcing-orders', [App\Http\Controllers\Client\SourcingOrderController::class, 'index'])->name('sourcing-orders.index');
     Route::get('/sourcing-orders/{sourcingOrder}', [App\Http\Controllers\Client\SourcingOrderController::class, 'show'])->name('sourcing-orders.show');
+    Route::get('/sourcing-orders/{sourcingOrder}/receipt', [App\Http\Controllers\Client\SourcingOrderController::class, 'showReceipt'])->name('sourcing-orders.receipt');
     Route::get('/history', [SourcingRequestController::class, 'history'])->name('history');
 });
 

@@ -6,7 +6,7 @@
                     <h2 class="font-semibold text-3xl text-gray-900 dark:text-white tracking-tight">
                         {{ __('Create Quotation') }}
                     </h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5">Generate a new quotation for sourcing request</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5">{{ __('Generate a new quotation for sourcing request') }}</p>
                 </div>
                 <div class="hidden md:flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,13 +32,13 @@
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Quotation Details</h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Complete all required fields to proceed</p>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Quotation Details') }}</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Complete all required fields to proceed') }}</p>
                                 </div>
                             </div>
                             <div class="hidden md:block">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">
-                                    Draft
+                                    {{ __('Draft') }}
                                 </span>
                             </div>
                         </div>
@@ -49,24 +49,16 @@
 
                         <!-- Section 1: Basic Information -->
                         <div>
-                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Basic Information</h4>
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">{{ __('Basic Information') }}</h4>
                             <div class="grid grid-cols-1 gap-6">
-                                <!-- Sourcing Request -->
-                                <div>
-                                    <label for="sourcing_request_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        {{ __('Sourcing Request') }}
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <select id="sourcing_request_id" name="sourcing_request_id" 
-                                        class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        required>
-                                        <option value="">Select a sourcing request</option>
-                                        @foreach ($sourcingRequests as $request)
-                                            <option value="{{ $request->id }}">{{ $request->product_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Link this quotation to an existing sourcing request</p>
-                                </div>
+                        <!-- Sourcing Request -->
+                        <input type="hidden" name="sourcing_request_id" value="{{ $sourcingRequest->id }}">
+                        <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-2">{{ __('Selected Sourcing Request') }}</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400"><strong>{{ __('Product Name:') }}</strong> {{ $sourcingRequest->product_name }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400"><strong>{{ __('Category:') }}</strong> {{ $sourcingRequest->category->name }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400"><strong>{{ __('User:') }}</strong> {{ $sourcingRequest->user->name }}</p>
+                        </div>
 
                                 <!-- Currency -->
                                 <div>
@@ -78,24 +70,24 @@
                                         name="currency" 
                                         class="block w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                         required>
-                                        <option value="">Select currency</option>
-                                        <option value="USD">USD - US Dollar</option>
-                                        <option value="EUR">EUR - Euro</option>
-                                        <option value="GBP">GBP - British Pound</option>
-                                        <option value="MAD">MAD - Moroccan Dirham</option>
-                                        <option value="JPY">JPY - Japanese Yen</option>
-                                        <option value="CNY">CNY - Chinese Yuan</option>
-                                        <option value="CAD">CAD - Canadian Dollar</option>
-                                        <option value="AUD">AUD - Australian Dollar</option>
+                                        <option value="">{{ __('Select currency') }}</option>
+                                        <option value="USD">{{ __('USD - US Dollar') }}</option>
+                                        <option value="EUR">{{ __('EUR - Euro') }}</option>
+                                        <option value="GBP">{{ __('GBP - British Pound') }}</option>
+                                        <option value="MAD">{{ __('MAD - Moroccan Dirham') }}</option>
+                                        <option value="JPY">{{ __('JPY - Japanese Yen') }}</option>
+                                        <option value="CNY">{{ __('CNY - Chinese Yuan') }}</option>
+                                        <option value="CAD">{{ __('CAD - Canadian Dollar') }}</option>
+                                        <option value="AUD">{{ __('AUD - Australian Dollar') }}</option>
                                     </select>
-                                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">All monetary values will be in this currency</p>
+                                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ __('All monetary values will be in this currency') }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Section 2: Pricing Details -->
                         <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Pricing Details</h4>
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">{{ __('Pricing Details') }}</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Unit Price -->
                                 <div>

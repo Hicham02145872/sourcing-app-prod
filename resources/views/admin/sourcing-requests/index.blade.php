@@ -8,10 +8,10 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-3xl font-bold text-gray-900 tracking-tight">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                         {{ __('All Sourcing Requests') }}
                     </h2>
-                    <p class="text-sm text-gray-600 mt-0.5">{{ __('Manage and review all client requests') }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{{ __('Manage and review all client requests') }}</p>
                 </div>
             </div>
 
@@ -91,36 +91,38 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
                 {{-- Filters Bar --}}
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div class="flex items-center gap-3">
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
+                    <form action="{{ route('admin.sourcing-requests.index') }}" method="GET">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" 
+                                           name="search"
+                                           id="searchInput"
+                                           placeholder="{{ __('Search requests...') }}" 
+                                           value="{{ request('search') }}"
+                                           class="pl-10 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64">
                                 </div>
-                                <input type="text" 
-                                       id="searchInput"
-                                       placeholder="{{ __('Search requests...') }}" 
-                                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64">
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <select name="status" id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">{{ __('All Status') }}</option>
+                                    @foreach (\App\Models\SourcingRequest::STATUSES as $status)
+                                        <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>{{ __(ucfirst($status)) }}</option>
+                                    @endforeach
+                                </select>
+
+                                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 transition-colors duration-200">
+                                    {{ __('Filter') }}
+                                </button>
                             </div>
                         </div>
-
-                        <div class="flex items-center gap-3">
-                            <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="all">{{ __('All Status') }}</option>
-                                <option value="pending">{{ __('Pending') }}</option>
-                                <option value="active">{{ __('Active') }}</option>
-                                <option value="completed">{{ __('Completed') }}</option>
-                            </select>
-
-                            <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option>{{ __('Sort by: Newest') }}</option>
-                                <option>{{ __('Sort by: Oldest') }}</option>
-                                <option>{{ __('Sort by: Client') }}</option>
-                            </select>
-                        </div>
-                    </div>
+                    </form>
                 </div>
 
                 {{-- Table Content --}}
@@ -277,53 +279,14 @@
                 </div>
 
                 {{-- Pagination (if needed) --}}
-                @if(!$sourcingRequests->isEmpty())
+                @if($sourcingRequests->hasPages())
                     <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                        <div class="flex items-center justify-between">
-                            <div class="text-sm text-gray-700">
-                                {{ __('Showing') }} <span class="font-semibold">{{ $sourcingRequests->count() }}</span> {{ __('results') }}
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    {{ __('Previous') }}
-                                </button>
-                                <button class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                    {{ __('Next') }}
-                                </button>
-                            </div>
-                        </div>
+                        {{ $sourcingRequests->links() }}
                     </div>
                 @endif
             </div>
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Search functionality
-            const searchInput = document.getElementById('searchInput');
-            const statusFilter = document.getElementById('statusFilter');
-            const rows = document.querySelectorAll('.request-row');
 
-            function filterTable() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const selectedStatus = statusFilter.value;
-
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    const status = row.dataset.status;
-                    
-                    const matchesSearch = text.includes(searchTerm);
-                    const matchesStatus = selectedStatus === 'all' || status === selectedStatus;
-
-                    row.style.display = matchesSearch && matchesStatus ? '' : 'none';
-                });
-            }
-
-            searchInput.addEventListener('input', filterTable);
-            statusFilter.addEventListener('change', filterTable);
-        });
-    </script>
-    @endpush
 </x-app-layout>

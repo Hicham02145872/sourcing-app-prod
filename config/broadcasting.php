@@ -59,6 +59,10 @@ return [
             'driver' => 'null',
         ],
 
+        'fcm' => [
+            'driver' => 'fcm',
+        ],
+
     ],
 
 ];

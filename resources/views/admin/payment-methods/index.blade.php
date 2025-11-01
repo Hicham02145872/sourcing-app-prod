@@ -20,6 +20,28 @@
     <div class="py-8 bg-gray-50 dark:bg-gray-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
+                <form action="{{ route('admin.payment-methods.index') }}" method="GET">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
+                        <div class="flex-1 max-w-lg">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                                <input type="text" name="search" placeholder="{{ __('Search payment methods...') }}" value="{{ request('search') }}" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-sm dark:bg-gray-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 transition-colors duration-200">
+                                {{ __('Search') }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
             @if($paymentMethods->isEmpty())
                 {{-- Empty State --}}
                 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12">
@@ -165,6 +187,8 @@
                             </div>
                         </div>
                     @endforeach
+                <div class="mt-6">
+                    {{ $paymentMethods->links() }}
                 </div>
             @endif
         </div>

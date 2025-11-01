@@ -21,9 +21,22 @@ class AdminSourcingRequestController extends Controller
     /**
      * Display a listing of all sourcing requests.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $sourcingRequests = SourcingRequest::with('category', 'user', 'destinations.country', 'destinations.service')->get();
+        $query = SourcingRequest::with('category', 'user', 'destinations.country', 'destinations.service');
+
+        // Filter by status
+        if ($request->has('status') && $request->status != 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by search term
+        if ($request->has('search')) {
+            $query->where('product_name', 'like', '%' . $request->search . '%');
+        }
+
+        $sourcingRequests = $query->paginate(10);
+
         return view('admin.sourcing-requests.index', compact('sourcingRequests'));
     }
 
@@ -45,53 +58,10 @@ class AdminSourcingRequestController extends Controller
         'status' => 'required|in:' . implode(',', \App\Models\SourcingRequest::STATUSES),
     ]);
 
-    // Mise à jour du statut de la demande
-    $sourcingRequest->update([
-        'status' => $validated['status'],
-    ]);
-
-    // Envoyer la notification de base de données Laravel
-    $sourcingRequest->user->notify(new SourcingRequestStatusUpdated($sourcingRequest));
-
-    // Invalider le cache des notifications de l'utilisateur
-    Cache::forget("user_notifications_{$sourcingRequest->user->id}");
-
-    // Envoi de notification FCM si le token existe
-    $fcmToken = $sourcingRequest->user?->fcm_token;
-
-    if ($fcmToken) {
-        try {
-            $factory = (new Factory)->withServiceAccount(env('GOOGLE_APPLICATION_CREDENTIALS'));
-            $messaging = $factory->createMessaging();
-
-            $notification = Notification::create(
-                'Mise à jour de votre demande de sourcing',
-                'Votre demande #' . $sourcingRequest->id . ' a été mise à jour au statut : ' . $validated['status']
-            );
-
-            $data = [
-                'sourcing_request_id' => (string) $sourcingRequest->id,
-                'status' => (string) $validated['status'],
-                'click_action' => route('client.sourcing-requests.show', $sourcingRequest),
-            ];
-
-            $message = CloudMessage::withTarget('token', $fcmToken)
-                ->withNotification($notification)
-                ->withData($data);
-
-            $messaging->send($message);
-
-            Log::info('Firebase Notification sent successfully', [
-                'token' => $fcmToken,
-                'payload' => $message->jsonSerialize(),
-            ]);
-        } catch (\Kreait\Firebase\Exception\Messaging\InvalidMessage $e) {
-            Log::error('Firebase Notification Error: Invalid message', ['exception' => $e->getMessage()]);
-        } catch (\Kreait\Firebase\Exception\Messaging\NotFound $e) {
-            Log::error('Firebase Notification Error: Token not found', ['token' => $fcmToken, 'exception' => $e->getMessage()]);
-        } catch (\Exception $e) {
-            Log::error('Firebase Notification Exception: ' . $e->getMessage());
-        }
+    try {
+        $sourcingRequest->transitionTo($validated['status']);
+    } catch (\Exception $e) {
+        return redirect()->back()->withErrors(['generic' => $e->getMessage()]);
     }
 
     return redirect()

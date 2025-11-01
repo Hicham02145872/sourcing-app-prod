@@ -8,11 +8,15 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class QuotationCreated extends Notification
+class QuotationCreated extends Notification implements ShouldQueue  // Added ShouldQueue
 {
     use Queueable;
 
     protected $quotation;
+    
+    // Add retry logic
+    public $tries = 3;
+    public $backoff = [60, 300, 900]; // 1min, 5min, 15min
 
     /**
      * Create a new notification instance.
@@ -29,7 +33,13 @@ class QuotationCreated extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['mail', 'database'];
+
+        if (!empty($notifiable->fcm_token)) {
+            $channels[] = 'fcm';
+        }
+
+        return $channels;
     }
 
     /**
@@ -62,11 +72,13 @@ class QuotationCreated extends Notification
             'click_action' => route('client.sourcing-requests.show', $this->quotation->sourcingRequest->id),
         ];
     }
+    
     /**
      * Get the FCM representation of the notification.
      *
      * @return \Kreait\Firebase\Messaging\Message
-     */    public function toFcm(object $notifiable)
+     */    
+    public function toFcm(object $notifiable)
     {
         $url = route('client.sourcing-requests.show', $this->quotation->sourcingRequest->id);
         $notification = \Kreait\Firebase\Messaging\Notification::create(
@@ -80,5 +92,13 @@ class QuotationCreated extends Notification
         return \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification($notification)
             ->withData($data);
+    }
+    
+    /**
+     * Determine the time at which the job should timeout.
+     */
+    public function retryUntil(): \DateTime
+    {
+        return now()->addHours(24);
     }
 }

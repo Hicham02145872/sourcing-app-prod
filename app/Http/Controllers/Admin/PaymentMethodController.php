@@ -11,9 +11,16 @@ use Illuminate\Support\Facades\Storage;
 
 class PaymentMethodController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $paymentMethods = PaymentMethod::all();
+        $query = PaymentMethod::query();
+
+        if ($search = $request->query('search')) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        $paymentMethods = $query->paginate(10);
+
         return view('admin.payment-methods.index', compact('paymentMethods'));
     }
 

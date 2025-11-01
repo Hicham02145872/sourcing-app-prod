@@ -22,6 +22,7 @@ class PasswordUpdateTest extends TestCase
                 'current_password' => 'password',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
+                '_token' => csrf_token(),
             ]);
 
         $response
@@ -42,10 +43,13 @@ class PasswordUpdateTest extends TestCase
                 'current_password' => 'wrong-password',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
+                '_token' => csrf_token(),
             ]);
 
         $response
             ->assertSessionHasErrorsIn('updatePassword', 'current_password')
             ->assertRedirect('/profile');
+
+        $this->assertNotNull($user->fresh());
     }
 }

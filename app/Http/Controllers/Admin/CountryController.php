@@ -13,9 +13,16 @@ class CountryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $countries = Country::all();
+        $query = Country::query();
+
+        if ($search = $request->query('search')) {
+            $query->where('name', 'like', '%' . $search . '%')->orWhere('code', 'like', '%' . $search . '%');
+        }
+
+        $countries = $query->paginate(10);
+
         return view('admin.countries.index', compact('countries'));
     }
 

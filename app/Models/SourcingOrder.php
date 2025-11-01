@@ -24,6 +24,7 @@ class SourcingOrder extends Model
         'quotation_id',
         'total_amount',
         'status',
+        'rejection_reason',
         'proof_of_payment_path',
         'tracking_number',
         'tracking_carrier',
@@ -41,5 +42,20 @@ class SourcingOrder extends Model
     public function quotation()
     {
         return $this->belongsTo(Quotation::class);
+    }
+
+    public function canTransitionTo(string $newStatus): bool
+    {
+        $allowedTransitions = [
+            'pending_payment' => ['paid', 'cancelled'],
+            'paid' => ['shipped', 'on_hold', 'cancelled'],
+            'shipped' => ['delivered'],
+            'delivered' => ['completed'],
+            'on_hold' => ['paid', 'cancelled'],
+            'cancelled' => [],
+            'completed' => [],
+        ];
+
+        return in_array($newStatus, $allowedTransitions[$this->status] ?? []);
     }
 }

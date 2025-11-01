@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class QuotationAccepted extends Notification
+class QuotationAccepted extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -29,7 +29,19 @@ class QuotationAccepted extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $url = url(route('admin.sourcing-orders.show', $this->quotation->order->id));
+
+        return (new MailMessage)
+            ->subject('Quotation Accepted for Sourcing Request #' . $this->quotation->sourcingRequest->id)
+            ->greeting('Hello Admin,')
+            ->line('A quotation for Sourcing Request #' . $this->quotation->sourcingRequest->id . ' has been accepted by the client.')
+            ->action('View Sourcing Order', $url)
+            ->line('Please review the accepted quotation and proceed with the order.');
     }
 
     /**

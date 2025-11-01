@@ -11,6 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\StoreSourcingRequestRequest;
+use App\Http\Requests\UpdateSourcingRequestRequest;
+use App\Services\TimelineService;
 
 class SourcingRequestController extends Controller
 {
@@ -19,12 +23,14 @@ class SourcingRequestController extends Controller
      */
     public function index(): View
     {
+        $this->authorize('viewAny', SourcingRequest::class);
         $sourcingRequests = auth()->user()->sourcingRequests()->with('category', 'destinations.country', 'destinations.service')->get();
         return view('client.sourcing-requests.index', compact('sourcingRequests'));
     }
 
     public function handling(): View
     {
+        $this->authorize('viewAny', SourcingRequest::class);
         $sourcingRequests = auth()->user()->sourcingRequests()
             ->where('status', 'in_review')
             ->with('category', 'destinations.country', 'destinations.service', 'quotation')
@@ -40,10 +46,7 @@ class SourcingRequestController extends Controller
      */
     public function show(SourcingRequest $sourcingRequest): View
     {
-        // Ensure the authenticated user owns this sourcing request
-        if (auth()->user()->id !== $sourcingRequest->user_id) {
-            abort(403);
-        }
+        $this->authorize('view', $sourcingRequest);
 
         $sourcingRequest->load('category', 'destinations.country', 'destinations.service', 'quotation.order');
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
@@ -56,10 +59,11 @@ class SourcingRequestController extends Controller
      */
     public function create(): View
     {
+        $this->authorize('create', SourcingRequest::class);
         // Retrieve all categories, countries, and services for the form
-        $categories = Category::all();
-        $countries = Country::all();
-        $services = Service::all();
+        $categories = \App\Models\Category::all();
+        $countries = \App\Models\Country::all();
+        $services = \App\Models\Service::all();
         // Pass the data to the view
         return view('client.sourcing-requests.create', compact('categories', 'countries', 'services'));
     }
@@ -67,45 +71,34 @@ class SourcingRequestController extends Controller
     /**
      * Store a newly created sourcing request in storage.
      */
-    public function store(Request $request)
+    public function store(StoreSourcingRequestRequest $request)
     {
-        $validated = $request->validate([
-            'product_name' => 'required|string|max:255',
-            'product_url' => 'nullable|url|max:255',
-            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'category_id' => 'required|exists:categories,id',
-            'note' => 'nullable|string',
-            'phone_number' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'shipping_method' => 'nullable|in:air,sea',
-            'destinations' => 'required|array|min:1',
-            'destinations.*.country_id' => 'required|exists:countries,id',
-            'destinations.*.service_id' => 'required|exists:services,id',
-            'destinations.*.quantity' => 'required|integer|min:1',
-        ]);
+        $this->authorize('create', SourcingRequest::class);
+        $validated = $request->validated();
 
-        if ($request->hasFile('product_image')) {
-            $validated['product_image'] = $request->file('product_image')->store('product_images', 'public');
-        }
+        DB::transaction(function () use ($request, $validated) {
+            if ($request->hasFile('product_image')) {
+                $validated['product_image'] = $request->file('product_image')->store('product_images', 'public');
+            }
 
-        $sourcingRequest = $request->user()->sourcingRequests()->create([
-            'product_name' => $validated['product_name'],
-            'product_url' => $validated['product_url'] ?? null,
-            'product_image' => $validated['product_image'] ?? null,
-            'category_id' => $validated['category_id'],
-            'note' => $validated['note'] ?? null,
-            'phone_number' => $validated['phone_number'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'latitude' => $validated['latitude'] ?? null,
-            'longitude' => $validated['longitude'] ?? null,
-            'shipping_method' => $validated['shipping_method'] ?? null,
-        ]);
+            $sourcingRequest = $request->user()->sourcingRequests()->create([
+                'product_name' => $validated['product_name'],
+                'product_url' => $validated['product_url'] ?? null,
+                'product_image' => $validated['product_image'] ?? null,
+                'category_id' => $validated['category_id'],
+                'note' => $validated['note'] ?? null,
+                'phone_number' => $validated['phone_number'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'shipping_method' => $validated['shipping_method'] ?? null,
+                'sourcing_location' => $validated['sourcing_location'],
+            ]);
 
-        foreach ($validated['destinations'] as $destinationData) {
-            $sourcingRequest->destinations()->create($destinationData);
-        }
+            foreach ($validated['destinations'] as $destinationData) {
+                $sourcingRequest->destinations()->create($destinationData);
+            }
+        });
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -122,10 +115,7 @@ class SourcingRequestController extends Controller
      */
     public function edit(SourcingRequest $sourcingRequest): View
     {
-        // Ensure the authenticated user owns this sourcing request
-        if (auth()->user()->id !== $sourcingRequest->user_id) {
-            abort(403);
-        }
+        $this->authorize('update', $sourcingRequest);
 
         $sourcingRequest->load('category', 'destinations.country', 'destinations.service');
         $categories = Category::all();
@@ -138,56 +128,41 @@ class SourcingRequestController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SourcingRequest $sourcingRequest): RedirectResponse
+    public function update(UpdateSourcingRequestRequest $request, SourcingRequest $sourcingRequest): RedirectResponse
     {
-        // Ensure the authenticated user owns this sourcing request
-        if (auth()->user()->id !== $sourcingRequest->user_id) {
-            abort(403);
-        }
+        $this->authorize('update', $sourcingRequest);
 
-        $validated = $request->validate([
-            'product_name' => 'required|string|max:255',
-            'product_url' => 'nullable|url|max:255',
-            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'category_id' => 'required|exists:categories,id',
-            'note' => 'nullable|string',
-            'phone_number' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'shipping_method' => 'nullable|in:air,sea',
-            'destinations' => 'required|array|min:1',
-            'destinations.*.country_id' => 'required|exists:countries,id',
-            'destinations.*.service_id' => 'required|exists:services,id',
-            'destinations.*.quantity' => 'required|integer|min:1',
-        ]);
+        $validated = $request->validated();
 
-        if ($request->hasFile('product_image')) {
-            // Delete old image if exists
-            if ($sourcingRequest->product_image) {
-                Storage::disk('public')->delete($sourcingRequest->product_image);
+        DB::transaction(function () use ($request, $sourcingRequest, $validated) {
+            if ($request->hasFile('product_image')) {
+                // Delete old image if exists
+                if ($sourcingRequest->product_image) {
+                    Storage::disk('public')->delete($sourcingRequest->product_image);
+                }
+                $validated['product_image'] = $request->file('product_image')->store('product_images', 'public');
             }
-            $validated['product_image'] = $request->file('product_image')->store('product_images', 'public');
-        }
 
-        $sourcingRequest->update([
-            'product_name' => $validated['product_name'],
-            'product_url' => $validated['product_url'] ?? null,
-            'product_image' => $validated['product_image'] ?? $sourcingRequest->product_image,
-            'category_id' => $validated['category_id'],
-            'note' => $validated['note'] ?? null,
-            'phone_number' => $validated['phone_number'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'latitude' => $validated['latitude'] ?? null,
-            'longitude' => $validated['longitude'] ?? null,
-            'shipping_method' => $validated['shipping_method'] ?? null,
-        ]);
+            $sourcingRequest->update([
+                'product_name' => $validated['product_name'],
+                'product_url' => $validated['product_url'] ?? null,
+                'product_image' => $validated['product_image'] ?? $sourcingRequest->product_image,
+                'category_id' => $validated['category_id'],
+                'note' => $validated['note'] ?? null,
+                'phone_number' => $validated['phone_number'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'shipping_method' => $validated['shipping_method'] ?? null,
+                'sourcing_location' => $validated['sourcing_location'],
+            ]);
 
-        // Update destinations
-        $sourcingRequest->destinations()->delete(); // Delete existing destinations
-        foreach ($validated['destinations'] as $destinationData) {
-            $sourcingRequest->destinations()->create($destinationData);
-        }
+            // Update destinations
+            $sourcingRequest->destinations()->delete(); // Delete existing destinations
+            foreach ($validated['destinations'] as $destinationData) {
+                $sourcingRequest->destinations()->create($destinationData);
+            }
+        });
 
         return redirect()->route('client.sourcing-requests.show', $sourcingRequest)->with('status', 'Sourcing request updated successfully!');
     }
@@ -197,10 +172,7 @@ class SourcingRequestController extends Controller
      */
     public function destroy(SourcingRequest $sourcingRequest): RedirectResponse
     {
-        // Ensure the authenticated user owns this sourcing request
-        if (auth()->user()->id !== $sourcingRequest->user_id) {
-            abort(403);
-        }
+        $this->authorize('delete', $sourcingRequest);
 
         // Delete associated image if exists
         if ($sourcingRequest->product_image) {
@@ -212,87 +184,33 @@ class SourcingRequestController extends Controller
         return redirect()->route('client.dashboard')->with('status', 'Sourcing request deleted successfully!');
     }
 
-    public function history()
+    public function history(TimelineService $timelineService)
     {
         $user = auth()->user();
-        $timeline = [];
-
-        $requests = $user->sourcingRequests()
-                         ->with(['quotation.order'])
-                         ->get();
-
-        foreach ($requests as $request) {
-            // Event: Sourcing Request created
-            $timeline[] = [
-                'date' => $request->created_at,
-                'type' => 'request_created',
-                'title' => __('Sourcing request created'),
-                'description' => __('You created a request for :product.', ['product' => $request->product_name]),
-                'link' => route('client.sourcing-requests.show', $request),
-                'icon' => 'plus-circle'
-            ];
-
-            if ($request->quotation) {
-                $quotation = $request->quotation;
-                // Event: Quotation received
-                $timeline[] = [
-                    'date' => $quotation->created_at,
-                    'type' => 'quotation_received',
-                    'title' => __('Quotation received'),
-                    'description' => __('A quotation of :amount :currency was received for :product.', [
-                        'amount' => $quotation->amount,
-                        'currency' => $quotation->currency,
-                        'product' => $request->product_name,
-                    ]),
-                    'link' => route('client.sourcing-requests.show', $request),
-                    'icon' => 'cash'
-                ];
-
-                if ($quotation->status === 'accepted') {
-                    $timeline[] = [
-                        'date' => $quotation->updated_at, // Use updated_at for status changes
-                        'type' => 'quotation_accepted',
-                        'title' => __('Quotation accepted'),
-                        'description' => __('You accepted the quotation for :product.', ['product' => $request->product_name]),
-                        'link' => route('client.sourcing-requests.show', $request),
-                        'icon' => 'check-circle'
-                    ];
-                }
-
-                if ($quotation->order) {
-                    $order = $quotation->order;
-                    // Event: Order created (payment pending)
-                    $timeline[] = [
-                        'date' => $order->created_at,
-                        'type' => 'order_created',
-                        'title' => __('Order created'),
-                        'description' => __('Your order for :product has been created and is pending payment.', ['product' => $request->product_name]),
-                        'link' => route('client.sourcing-orders.show', $order),
-                        'icon' => 'shopping-cart'
-                    ];
-
-                    // Track status changes by looking at the updated_at timestamp
-                    if ($order->status !== 'pending_payment' && $order->updated_at->gt($order->created_at)) {
-                        $timeline[] = [
-                           'date' => $order->updated_at,
-                           'type' => 'order_updated',
-                           'title' => __('Order status updated'),
-                           'description' => __('The status of your order for :product is now: :status', [
-                               'product' => $request->product_name,
-                               'status' => __(ucfirst(str_replace('_', ' ', $order->status)))
-                           ]),
-                           'link' => route('client.sourcing-orders.show', $order),
-                           'icon' => 'truck'
-                       ];
-                    }
-                }
-            }
-        }
-
-        // Sort the timeline by date, descending
-        $sortedTimeline = collect($timeline)->sortByDesc('date');
+        $sortedTimeline = $timelineService->generateTimeline($user);
 
         return view('client.history.index', ['timeline' => $sortedTimeline]);
     }
 
+    /**
+     * Duplicate the specified resource.
+     */
+    public function duplicate(SourcingRequest $sourcingRequest): RedirectResponse
+    {
+        $this->authorize('create', $sourcingRequest);
+
+        DB::transaction(function () use ($sourcingRequest) {
+            $newSourcingRequest = $sourcingRequest->replicate();
+            $newSourcingRequest->status = 'pending';
+            $newSourcingRequest->created_at = now();
+            $newSourcingRequest->updated_at = now();
+            $newSourcingRequest->save();
+
+            foreach ($sourcingRequest->destinations as $destination) {
+                $newSourcingRequest->destinations()->create($destination->toArray());
+            }
+        });
+
+        return redirect()->route('client.dashboard')->with('status', 'Sourcing request duplicated successfully!');
+    }
 }
