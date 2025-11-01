@@ -22,3 +22,8 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+cloudflared.exe
+test-results/
+playwright-tests/
+notify()
+'Sourcing
