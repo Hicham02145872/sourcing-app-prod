@@ -1,0 +1,12 @@
+.git
+.gitignore
+.env
+.env.example
+vendor
+node_modules
+storage/*.key
+storage/pail
+public/hot
+public/build
+docker-compose.yml
+Dockerfile
