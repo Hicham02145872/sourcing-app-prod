@@ -8,8 +8,18 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
-    volumes:
-      - .:/var/www/html
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+  queue:
+    image: laravel-app:latest # Use the same image as the app service
+    restart: unless-stopped
+    command: php artisan queue:work --tries=3 # Command to run the queue worker
     depends_on:
       - db
     environment:
