@@ -50,7 +50,11 @@ return [
              *
              */
 
-            'credentials' => env('FIREBASE_CREDENTIALS', env('GOOGLE_APPLICATION_CREDENTIALS')),
+            'credentials' => [
+                'project_id' => env('FIREBASE_PROJECT_ID'),
+                'private_key' => env('FIREBASE_PRIVATE_KEY') ? str_replace('\\n', "\n", env('FIREBASE_PRIVATE_KEY')) : null,
+                'client_email' => env('FIREBASE_CLIENT_EMAIL'),
+            ],
 
             /*
              * ------------------------------------------------------------------------
