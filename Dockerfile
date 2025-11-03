@@ -13,7 +13,7 @@ COPY --from=frontend /app .
 RUN composer install --no-dev --optimize-autoloader
 
 # Stage 3: Final Production Image
-FROM php:8.2-apache
+FROM php:8.2-fpm
 WORKDIR /var/www/html
 
 # Install system dependencies and PHP extensions
@@ -32,10 +32,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-enable opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Configure Apache
-COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
-RUN a2enmod rewrite
-
 # Copy application code and compiled assets
 COPY --from=backend /app .
 
@@ -43,8 +39,5 @@ COPY --from=backend /app .
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-
-
-# Expose port 80 and start Apache
-EXPOSE 80
-CMD ["apache2-foreground"]
+# Start php-fpm
+CMD ["php-fpm"]
