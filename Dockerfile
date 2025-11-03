@@ -43,12 +43,7 @@ COPY --from=backend /app .
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Create storage link and run optimizations
-RUN php artisan storage:link \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache \
-    && php artisan event:cache
+
 
 # Expose port 80 and start Apache
 EXPOSE 80
