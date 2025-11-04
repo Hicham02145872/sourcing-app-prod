@@ -11,6 +11,8 @@ use App\Listeners\UpdateSourcingRequestStatusOnQuotationRejected;
 use App\Listeners\SendQuotationRejectedNotification;
 use App\Events\SourcingRequestStatusChanged;
 use App\Listeners\SendSourcingRequestStatusChangeNotification;
+use App\Events\SourcingOrderStatusChanged;
+use App\Listeners\SendSourcingOrderStatusUpdatedNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -35,6 +37,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         SourcingRequestStatusChanged::class => [
             SendSourcingRequestStatusChangeNotification::class,
+        ],
+        SourcingOrderStatusChanged::class => [
+            SendSourcingOrderStatusUpdatedNotification::class,
         ],
     ];
 

@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
 use App\Notifications\SourcingOrderStatusUpdated;
 use App\Notifications\ProofOfPaymentRejected;
+use App\Events\SourcingOrderStatusChanged;
 use Illuminate\Support\Facades\Log;
 
 class SourcingOrderController extends Controller
@@ -85,10 +86,9 @@ class SourcingOrderController extends Controller
         // Eager-load relationships required by the notification
         $sourcingOrder->load('quotation.sourcingRequest', 'user');
 
-        Log::debug("Dispatching SourcingOrderStatusUpdated for SourcingOrder #{$sourcingOrder->id} to user {$sourcingOrder->user->id}", ['new_status' => $sourcingOrder->status]);
-        $sourcingOrder->user->notify(new SourcingOrderStatusUpdated($sourcingOrder));
+        event(new SourcingOrderStatusChanged($sourcingOrder));
 
-        return back()->with('status', 'Sourcing order status updated successfully!');
+        return redirect()->route('admin.sourcing-orders.show', $sourcingOrder)->with('status', 'Sourcing order status updated successfully!');
     }
 
     public function rejectProof(Request $request, SourcingOrder $sourcingOrder): RedirectResponse

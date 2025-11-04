@@ -54,8 +54,10 @@ class QuotationRejected extends Notification implements ShouldQueue
         return [
             'quotation_id' => $this->quotation->id,
             'sourcing_request_id' => $this->quotation->sourcing_request_id,
-            'message' => 'The quotation for sourcing request #' . $this->quotation->sourcing_request_id . ' has been rejected by the client.',
-            'url' => route('admin.sourcing-requests.show', $this->quotation->sourcing_request_id),
+            'title' => 'Quotation Rejected',
+            'body' => 'The quotation for sourcing request #' . $this->quotation->sourcing_request_id . ' has been rejected by the client.',
+            'click_action' => route('admin.sourcing-requests.show', $this->quotation->sourcing_request_id),
+            'type' => 'warning',
         ];
     }
 }

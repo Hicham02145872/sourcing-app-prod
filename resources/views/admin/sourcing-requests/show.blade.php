@@ -325,7 +325,7 @@
                         </div>
                     </div>
 
-                    {{-- Update Status Form --}}
+                    {{-- Update Status --}}
                     <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl shadow-sm border border-indigo-200 p-6">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -336,28 +336,22 @@
                             <h3 class="text-lg font-semibold text-gray-900">{{ __('Update Status') }}</h3>
                         </div>
 
-                        <form action="{{ route('admin.sourcing-requests.update-status', $sourcingRequest) }}" method="POST" class="space-y-4">
-                            @csrf
-                            @method('PATCH')
-                            
-                            <div>
-                                <label for="status" class="block text-sm font-medium text-gray-700 mb-2">{{ __('New Status') }}</label>
-                                <select name="status" id="status" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm">
-                                    @foreach (\App\Models\SourcingRequest::STATUSES as $status)
-                                        @if ($sourcingRequest->canTransitionTo($status, auth()->user()))
-                                            <option value="{{ $status }}" {{ $sourcingRequest->status == $status ? 'selected' : '' }}>{{ __($status) }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm transition-colors duration-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                {{ __('Update Status') }}
-                            </button>
-                        </form>
+                        <div class="space-y-2">
+                            @foreach (\App\Models\SourcingRequest::STATUSES as $status)
+                                @if ($sourcingRequest->canTransitionTo($status, auth()->user()))
+                                    <a href="#" 
+                                       onclick="event.preventDefault(); if(confirm('Are you sure you want to update the status to {{ __($status) }}?')) { document.getElementById('update-status-form-{{ $status }}').submit(); }"
+                                       class="block w-full text-left px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm transition-colors duration-200">
+                                        {{ __('Mark as') }} {{ __($status) }}
+                                    </a>
+                                    <form id="update-status-form-{{ $status }}" action="{{ route('admin.sourcing-requests.update-status', $sourcingRequest) }}" method="POST" style="display: none;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="{{ $status }}">
+                                    </form>
+                                @endif
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>

@@ -7,8 +7,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Kreait\Firebase\Messaging\CloudMessage;
-use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
 class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
 {
@@ -31,44 +29,7 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        $channels = ['database', 'mail'];
-
-        if (!empty($notifiable->fcm_token)) {
-            $channels[] = 'fcm';
-        }
-
-        return $channels;
-    }
-
-    /**
-     * Get the FCM representation of the notification.
-     */
-    public function toFcm(object $notifiable): CloudMessage
-    {
-        $statusLabels = [
-            'pending_payment' => 'Pending Payment',
-            'paid' => 'Paid',
-            'shipped' => 'Shipped',
-            'delivered' => 'Delivered',
-            'completed' => 'Completed',
-            'cancelled' => 'Cancelled',
-            'on_hold' => 'On Hold',
-        ];
-
-        $status = $statusLabels[$this->sourcingOrder->status] ?? ucfirst(str_replace('_', ' ', $this->sourcingOrder->status));
-
-        return CloudMessage::withTarget('token', $notifiable->fcm_token)
-            ->withNotification(FirebaseNotification::create(
-                'Order Status Update: ' . $status,
-                'Your order #' . $this->sourcingOrder->id . ' for "' . $this->sourcingOrder->quotation->sourcingRequest->product_name . '" is now ' . $status . '.'
-            ))
-            ->withData([
-                'sourcing_order_id' => (string) $this->sourcingOrder->id,
-                'product_name' => $this->sourcingOrder->quotation->sourcingRequest->product_name,
-                'status' => $this->sourcingOrder->status,
-                'click_action' => route('client.sourcing-orders.show', $this->sourcingOrder, false),
-                'type' => 'info',
-            ]);
+        return ['mail', 'database'];
     }
 
     /**
@@ -111,8 +72,6 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
             'body' => 'Your order #' . $this->sourcingOrder->id . ' is now ' . $status . '.',
             'type' => 'info',
         ];
-
-        Log::debug("SourcingOrderStatusUpdated toArray data for user {$notifiable->id}", $notificationData);
 
         return $notificationData;
     }

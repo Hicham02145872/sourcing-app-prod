@@ -10,7 +10,7 @@ use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Route;
 use Monolog\Handler\AmqpHandler;
 
-Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
+use Illuminate\Http\Request;\n\nRoute::get(\'language/{locale}\', [LanguageController::class, \'switch\'])->name(\'language.switch\');
 
 Route::get('/', function () {
     return view('welcome');
@@ -43,7 +43,6 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::get('quotations/create/{sourcingRequest}', [App\Http\Controllers\Admin\QuotationController::class, 'create'])->name('quotations.create');
     Route::post('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'store'])->name('quotations.store');
     Route::get('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'index'])->name('quotations.index');
-    Route::patch('sourcing-orders/{sourcingOrder}/update-status', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateStatus'])->name('sourcing-orders.update-status');
 
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
 });
@@ -77,7 +76,14 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::post('/fcm-token', [App\Http\Controllers\NotificationController::class, 'updateToken'])->name('fcm.token.update');
+    // Route::post('/fcm-token', [App\Http\Controllers\NotificationController::class, 'updateToken'])->name('fcm.token.update');
+    Route::middleware(['auth'])->post('/fcm/token/update', function (Request $request) {
+        $request->user()->update([
+            'fcm_token' => $request->input('fcm_token'),
+        ]);
+
+        return response()->json(['success' => true]);
+    })->name('fcm.token.update');
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');

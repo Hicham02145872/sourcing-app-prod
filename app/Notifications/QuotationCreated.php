@@ -8,13 +8,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class QuotationCreated extends Notification implements ShouldQueue  // Added ShouldQueue
+class QuotationCreated extends Notification implements ShouldQueue
 {
     use Queueable;
 
     protected $quotation;
     
-    // Add retry logic
     public $tries = 3;
     public $backoff = [60, 300, 900]; // 1min, 5min, 15min
 
@@ -28,18 +27,11 @@ class QuotationCreated extends Notification implements ShouldQueue  // Added Sho
 
     /**
      * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
+     * Mail + Database uniquement (FCM géré par le listener)
      */
     public function via(object $notifiable): array
     {
-        $channels = ['mail', 'database'];
-
-        if (!empty($notifiable->fcm_token)) {
-            $channels[] = 'fcm';
-        }
-
-        return $channels;
+        return ['mail', 'database'];
     }
 
     /**
@@ -60,8 +52,6 @@ class QuotationCreated extends Notification implements ShouldQueue  // Added Sho
 
     /**
      * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
     {
@@ -72,28 +62,7 @@ class QuotationCreated extends Notification implements ShouldQueue  // Added Sho
             'click_action' => route('client.sourcing-requests.show', $this->quotation->sourcingRequest->id),
         ];
     }
-    
-    /**
-     * Get the FCM representation of the notification.
-     *
-     * @return \Kreait\Firebase\Messaging\Message
-     */    
-    public function toFcm(object $notifiable)
-    {
-        $url = route('client.sourcing-requests.show', $this->quotation->sourcingRequest->id);
-        $notification = \Kreait\Firebase\Messaging\Notification::create(
-            'Nouveau devis reçu',
-            'Un nouveau devis de ' . $this->quotation->amount . ' ' . $this->quotation->currency . ' a été créé pour votre demande de sourcing : ' . $this->quotation->sourcingRequest->product_name
-        );
-        $data = [
-            'sourcing_request_id' => (string) $this->quotation->sourcing_request_id,
-            'click_action' => $url,
-        ];
-        return \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $notifiable->fcm_token)
-            ->withNotification($notification)
-            ->withData($data);
-    }
-    
+
     /**
      * Determine the time at which the job should timeout.
      */

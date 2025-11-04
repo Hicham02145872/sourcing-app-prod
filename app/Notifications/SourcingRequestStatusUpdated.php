@@ -14,9 +14,6 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
     protected $sourcingRequest;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(SourcingRequest $sourcingRequest)
     {
         $this->sourcingRequest = $sourcingRequest;
@@ -24,8 +21,7 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
     /**
      * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
+     * FCM retiré temporairement - garde seulement Mail et Database
      */
     public function via(object $notifiable): array
     {
@@ -51,8 +47,6 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
     /**
      * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
     {

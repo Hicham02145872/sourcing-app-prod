@@ -3,8 +3,7 @@
 
 <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 lg:translate-x-0" 
        id="sidebar"
-       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-       x-data="{ sidebarOpen: false }">
+       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
     
     <div class="flex flex-col h-full">
         {{-- Logo Section --}}
@@ -263,13 +262,7 @@
     </div>
 </aside>
 
-{{-- Mobile Menu Button --}}
-<button @click="sidebarOpen = !sidebarOpen" 
-        class="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors duration-200">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-    </svg>
-</button>
+
 
 {{-- Overlay for mobile --}}
 <div x-show="sidebarOpen" 

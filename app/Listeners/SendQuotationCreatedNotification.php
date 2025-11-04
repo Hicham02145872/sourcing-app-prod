@@ -4,54 +4,75 @@ namespace App\Listeners;
 
 use App\Events\QuotationCreated;
 use App\Notifications\QuotationCreated as QuotationCreatedNotification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
-use Kreait\Firebase\Contract\Messaging;
+use Exception;
 
-class SendQuotationCreatedNotification implements ShouldQueue
+class SendQuotationCreatedNotification
 {
-    use InteractsWithQueue;
-
-    protected $messaging;
-
-    /**
-     * Create the event listener.
-     *
-     * @return void
-     */
-    public function __construct(Messaging $messaging)
-    {
-        $this->messaging = $messaging;
-    }
+    public $tries = 3;
+    public $backoff = [60, 300, 900];
 
     /**
      * Handle the event.
-     *
-     * @param  \App\Events\QuotationCreated  $event
-     * @return void
      */
-    public function handle(QuotationCreated $event)
+    public function handle(QuotationCreated $event): void
     {
         $quotation = $event->quotation;
         $user = $quotation->sourcingRequest->user;
 
-        $notification = new QuotationCreatedNotification($quotation);
+        // Envoie la notification via les canaux configurés (Mail + Database)
+        $user->notify(new QuotationCreatedNotification($quotation));
 
-        // Notify the user via mail and database
-        $user->notify($notification);
+        // Envoie le FCM manuellement
+        $this->sendFcmNotification($quotation, $user);
 
-        // Manually send the FCM notification
-        if ($user->fcm_token) {
-            try {
-                $fcmMessage = $notification->toFcm($user);
-                if ($fcmMessage) {
-                    $this->messaging->send($fcmMessage);
-                }
-            } catch (\Exception $e) {
-                // Log the error but don't block the user
-                Log::error('FCM notification failed to send: '.$e->getMessage());
-            }
-        }
+        Log::info('QuotationCreated notification sent', [
+            'quotation_id' => $quotation->id,
+            'user_id' => $user->id,
+        ]);
     }
+
+    /**
+     * Envoie une notification FCM à l'utilisateur
+     */
+/**
+ * Envoie une notification FCM à l'utilisateur
+ */
+private function sendFcmNotification($quotation, $user): void
+{
+    try {
+        $fcmToken = $user->fcm_token;
+
+        if (empty($fcmToken)) {
+            Log::debug('No FCM token found for user ' . $user->id);
+            return;
+        }
+
+        $messaging = app('firebase.messaging');
+
+        $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $fcmToken)
+            ->withNotification(
+                \Kreait\Firebase\Messaging\Notification::create(
+                    'Nouveau devis reçu',
+                    "Devis de {$quotation->amount} {$quotation->currency} pour {$quotation->sourcingRequest->product_name}"
+                )
+            )
+            ->withData([
+                'quotation_id' => (string) $quotation->id,
+                'sourcing_request_id' => (string) $quotation->sourcing_request_id,
+                'amount' => (string) $quotation->amount,
+                'currency' => $quotation->currency,
+            ]);
+
+        $messaging->send($message);
+
+        Log::info('FCM notification sent for quotation ' . $quotation->id);
+    } catch (Exception $e) {
+        Log::error('FCM notification error: ' . $e->getMessage(), [
+            'quotation_id' => $quotation->id,
+            'user_id' => $user->id,
+        ]);
+    }
+}
+
 }
