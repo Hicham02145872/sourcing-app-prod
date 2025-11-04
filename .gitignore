@@ -27,3 +27,4 @@ test-results/
 playwright-tests/
 notify()
 'Sourcing
+"storage/app/firebase_credentials.json" 
