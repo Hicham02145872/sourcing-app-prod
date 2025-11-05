@@ -120,6 +120,12 @@ class SourcingRequest extends Model
         $this->status = $newStatus;
         $this->save();
 
+        \Illuminate\Support\Facades\Log::debug('DEBUG: SourcingRequestStatusChanged event DISPATCHED from SourcingRequest model', [
+            'sourcing_request_id' => $this->id,
+            'new_status' => $newStatus,
+            'dispatched_by_user_id' => ($user ?? auth()->user())->id,
+            'timestamp' => now()->toDateTimeString(),
+        ]);
         event(new \App\Events\SourcingRequestStatusChanged($this, $user ?? auth()->user()));
 
         return true;

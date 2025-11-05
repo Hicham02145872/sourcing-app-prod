@@ -9,8 +9,9 @@ use App\Http\Controllers\SourcingRequestController;
 use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Route;
 use Monolog\Handler\AmqpHandler;
+use Illuminate\Http\Request;
 
-use Illuminate\Http\Request;\n\nRoute::get(\'language/{locale}\', [LanguageController::class, \'switch\'])->name(\'language.switch\');
+Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 Route::get('/', function () {
     return view('welcome');

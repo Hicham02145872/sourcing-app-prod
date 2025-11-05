@@ -7,6 +7,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
 class ProofOfPaymentUploaded extends Notification implements ShouldQueue
 {
@@ -29,7 +31,11 @@ class ProofOfPaymentUploaded extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['mail', 'database'];
+        if ($notifiable->fcm_token) {
+            $channels[] = 'fcm';
+        }
+        return $channels;
     }
 
     /**
@@ -59,5 +65,26 @@ class ProofOfPaymentUploaded extends Notification implements ShouldQueue
             'message' => 'Proof of payment uploaded for Sourcing Order #' . $this->sourcingOrder->id,
             'link' => route('admin.sourcing-orders.show', $this->sourcingOrder->id),
         ];
+    }
+
+    /**
+     * Get the FCM representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return \Kreait\Firebase\Messaging\CloudMessage
+     */
+    public function toFcm($notifiable)
+    {
+        $url = route('admin.sourcing-orders.show', $this->sourcingOrder->id);
+
+        return CloudMessage::withTarget('token', $notifiable->fcm_token)
+            ->withNotification(FirebaseNotification::create(
+                'Proof of Payment Uploaded',
+                'Proof of payment uploaded for Sourcing Order #' . $this->sourcingOrder->id
+            ))
+            ->withData([
+                'click_action' => $url,
+                'sourcing_order_id' => (string) $this->sourcingOrder->id,
+            ]);
     }
 }

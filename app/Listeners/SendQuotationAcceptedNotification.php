@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\QuotationAccepted as QuotationAcceptedNotification;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class SendQuotationAcceptedNotification
 {
@@ -18,52 +19,35 @@ class SendQuotationAcceptedNotification
      */
     public function handle(QuotationAccepted $event)
     {
-        $admins = User::where('role', 'admin')->get();
         $quotation = $event->quotation;
+        $lockKey = 'quotation_accepted_notification:' . $quotation->id;
 
-        foreach ($admins as $admin) {
-            $admin->notify(new QuotationAcceptedNotification($quotation));
-            $this->sendFcmNotification($quotation, $admin);
+        if (Cache::has($lockKey)) {
+            Log::debug('QuotationAccepted notification already sent recently', [
+                'quotation_id' => $quotation->id,
+                'lock_key' => $lockKey,
+            ]);
+            return;
         }
 
-        Log::info('QuotationAccepted notification sent', [
-            'quotation_id' => $quotation->id,
-            'sourcing_request_id' => $quotation->sourcing_request_id,
-        ]);
-    }
+        Cache::put($lockKey, true, now()->addSeconds(60));
 
-    /**
-     * Envoie une notification FCM à l'utilisateur
-     */
-    private function sendFcmNotification($quotation, $user): void
-    {
         try {
-            $fcmToken = $user->fcm_token;
+            $admins = User::where('role', 'admin')->get();
 
-            if (empty($fcmToken)) {
-                Log::debug('No FCM token found for user ' . $user->id);
-                return;
+            foreach ($admins as $admin) {
+                $admin->notify(new QuotationAcceptedNotification($quotation));
             }
 
-            $messaging = app('firebase.messaging');
-
-            $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $fcmToken)
-                ->withNotification(\Kreait\Firebase\Messaging\Notification::create(
-                    'Quotation Accepted',
-                    'Quotation for SR #' . $quotation->sourcingRequest->id . ' has been accepted.'
-                ))
-                ->withData([
-                    'quotation_id' => (string) $quotation->id,
-                    'sourcing_request_id' => (string) $quotation->sourcing_request_id,
-                    'click_action' => route('admin.sourcing-orders.show', $quotation->order->id),
-                ]);
-
-            $messaging->send($message);
-            Log::info('FCM notification sent for quotation ' . $quotation->id);
-        } catch (Exception $e) {
-            Log::error('FCM notification error: ' . $e->getMessage(), [
+            Log::info('QuotationAccepted notification sent to all admins', [
                 'quotation_id' => $quotation->id,
-                'user_id' => $user->id,
+                'sourcing_request_id' => $quotation->sourcing_request_id,
+            ]);
+        } catch (Exception $e) {
+            Cache::forget($lockKey);
+            Log::error('Failed to send QuotationAccepted notification', [
+                'quotation_id' => $quotation->id,
+                'error' => $e->getMessage(),
             ]);
         }
     }

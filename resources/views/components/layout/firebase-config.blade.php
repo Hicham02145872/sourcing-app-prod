@@ -14,6 +14,31 @@
     const app = initializeApp(firebaseConfig);
     const messaging = getMessaging(app);
 
+    let existingNotificationSourcingRequestIds = new Set();
+
+    async function fetchExistingNotifications() {
+        try {
+            const response = await fetch('{{ route("notifications.index") }}', {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                data.forEach(notification => {
+                    if (notification.data && notification.data.sourcing_request_id) {
+                        const srId = String(notification.data.sourcing_request_id); // Ensure string type
+                        existingNotificationSourcingRequestIds.add(srId);
+                        console.log(`DEBUG: Added SR ID ${srId} (type: ${typeof srId}) from DB to Set.`);
+                    }
+                });
+                console.log("✅ Existing notification IDs fetched:", existingNotificationSourcingRequestIds);
+            }
+        } catch (error) {
+            console.error("❌ Error fetching existing notifications:", error);
+        }
+    }
+
     async function requestPermissionAndGetToken() {
         try {
             if (!('Notification' in window)) {
@@ -67,6 +92,16 @@
     onMessage(messaging, (payload) => {
         console.log("🔔 Notification reçue:", payload);
         
+        const sourcingRequestId = String(payload.data?.sourcing_request_id); // Ensure string type for comparison
+        console.log(`DEBUG: FCM Payload SR ID: ${sourcingRequestId} (type: ${typeof sourcingRequestId})`);
+        console.log(`DEBUG: existingNotificationSourcingRequestIds contains ${sourcingRequestId}? ${existingNotificationSourcingRequestIds.has(sourcingRequestId)}`);
+
+        // Only display if it's not already in the database notifications
+        if (sourcingRequestId && existingNotificationSourcingRequestIds.has(sourcingRequestId)) {
+            console.log(`ℹ️ Notification for SR ID ${sourcingRequestId} already exists in DB, skipping display.`);
+            return;
+        }
+
         if (payload.notification) {
             new Notification(payload.notification.title, {
                 body: payload.notification.body,
@@ -84,6 +119,7 @@
             .then((registration) => {
                 console.log("✅ Service Worker enregistré");
                 @auth
+                    fetchExistingNotifications(); // Fetch existing notifications on auth
                     requestPermissionAndGetToken();
                 @endauth
             })

@@ -13,6 +13,8 @@ use App\Events\SourcingRequestStatusChanged;
 use App\Listeners\SendSourcingRequestStatusChangeNotification;
 use App\Events\SourcingOrderStatusChanged;
 use App\Listeners\SendSourcingOrderStatusUpdatedNotification;
+use Illuminate\Auth\Events\Registered;
+use App\Listeners\SendQueuedVerificationEmail;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -23,6 +25,9 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+        Registered::class => [
+            SendQueuedVerificationEmail::class,
+        ],
         QuotationCreated::class => [
             UpdateSourcingRequestStatusOnQuotationCreated::class,
             \App\Listeners\SendQuotationCreatedNotification::class,

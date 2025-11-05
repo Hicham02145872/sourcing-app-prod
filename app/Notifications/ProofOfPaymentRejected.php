@@ -7,6 +7,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\SourcingOrder;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
 class ProofOfPaymentRejected extends Notification implements ShouldQueue
 {
@@ -29,7 +31,11 @@ class ProofOfPaymentRejected extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        $channels = ['database'];
+        if ($notifiable->fcm_token) {
+            $channels[] = 'fcm';
+        }
+        return $channels;
     }
 
     /**
@@ -45,5 +51,26 @@ class ProofOfPaymentRejected extends Notification implements ShouldQueue
             'reason' => $this->sourcingOrder->rejection_reason,
             'url' => route('client.sourcing-orders.show', $this->sourcingOrder->id),
         ];
+    }
+
+    /**
+     * Get the FCM representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return \Kreait\Firebase\Messaging\CloudMessage
+     */
+    public function toFcm($notifiable)
+    {
+        $url = route('client.sourcing-orders.show', $this->sourcingOrder->id);
+
+        return CloudMessage::withTarget('token', $notifiable->fcm_token)
+            ->withNotification(FirebaseNotification::create(
+                'Proof of Payment Rejected',
+                'Your proof of payment for order #' . $this->sourcingOrder->id . ' was rejected.'
+            ))
+            ->withData([
+                'click_action' => $url,
+                'sourcing_order_id' => (string) $this->sourcingOrder->id,
+            ]);
     }
 }

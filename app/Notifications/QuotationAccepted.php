@@ -7,6 +7,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
 class QuotationAccepted extends Notification implements ShouldQueue
 {
@@ -14,22 +16,18 @@ class QuotationAccepted extends Notification implements ShouldQueue
 
     protected $quotation;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(Quotation $quotation)
     {
         $this->quotation = $quotation;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['mail', 'database'];
+        if ($notifiable->fcm_token) {
+            $channels[] = 'fcm';
+        }
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -44,19 +42,30 @@ class QuotationAccepted extends Notification implements ShouldQueue
             ->line('Please review the accepted quotation and proceed with the order.');
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(object $notifiable): array
     {
         return [
             'title' => 'Quotation Accepted',
             'body' => 'Quotation #' . $this->quotation->id . ' for ' . $this->quotation->sourcingRequest->product_name . ' has been accepted by ' . $this->quotation->sourcingRequest->user->name . '.',
             'quotation_id' => $this->quotation->id,
-            'sourcing_order_id' => $this->quotation->order->id, // Assuming order is already created
+            'sourcing_order_id' => $this->quotation->order->id,
             'click_action' => route('admin.sourcing-orders.index'),
         ];
+    }
+
+    public function toFcm(object $notifiable): CloudMessage
+    {
+        $url = route('admin.sourcing-orders.show', $this->quotation->order->id);
+
+        return CloudMessage::withTarget('token', $notifiable->fcm_token)
+            ->withNotification(FirebaseNotification::create(
+                'Quotation Accepted',
+                'Quotation for SR #' . $this->quotation->sourcingRequest->id . ' has been accepted.'
+            ))
+            ->withData([
+                'click_action' => $url,
+                'quotation_id' => (string) $this->quotation->id,
+                'sourcing_request_id' => (string) $this->quotation->sourcing_request_id,
+            ]);
     }
 }

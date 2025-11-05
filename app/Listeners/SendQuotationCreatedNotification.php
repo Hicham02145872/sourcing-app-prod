@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\QuotationCreated;
 use App\Notifications\QuotationCreated as QuotationCreatedNotification;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Exception;
 
 class SendQuotationCreatedNotification
@@ -17,62 +18,90 @@ class SendQuotationCreatedNotification
      */
     public function handle(QuotationCreated $event): void
     {
-        $quotation = $event->quotation;
-        $user = $quotation->sourcingRequest->user;
+        try {
+            $quotation = $event->quotation;
+            
+            // Validate quotation and relationships
+            if (!$quotation || !$quotation->sourcingRequest) {
+                Log::warning('QuotationCreated: Invalid quotation or missing sourcing request', [
+                    'quotation_id' => $quotation->id ?? null,
+                ]);
+                return;
+            }
 
-        // Envoie la notification via les canaux configurés (Mail + Database)
-        $user->notify(new QuotationCreatedNotification($quotation));
+            $user = $quotation->sourcingRequest->user;
 
-        // Envoie le FCM manuellement
-        $this->sendFcmNotification($quotation, $user);
+            if (!$user) {
+                Log::warning('QuotationCreated: User not found for quotation', [
+                    'quotation_id' => $quotation->id,
+                ]);
+                return;
+            }
 
-        Log::info('QuotationCreated notification sent', [
-            'quotation_id' => $quotation->id,
-            'user_id' => $user->id,
-        ]);
+            // Check for duplicate notifications using atomic lock
+            $lockKey = 'quotation_notification:' . $quotation->id;
+            
+            if (Cache::has($lockKey)) {
+                Log::debug('QuotationCreated notification already sent recently', [
+                    'quotation_id' => $quotation->id,
+                    'lock_key' => $lockKey,
+                ]);
+                return;
+            }
+
+            // Set lock for 60 seconds to prevent duplicates
+            Cache::put($lockKey, true, now()->addSeconds(60));
+
+            // Check if user has FCM token
+            if (!$user->fcm_token) {
+                Log::warning('QuotationCreated: User has no FCM token', [
+                    'quotation_id' => $quotation->id,
+                    'user_id' => $user->id,
+                ]);
+                // Still send via other channels (Mail, Database)
+                $this->sendNotification($quotation, $user);
+                return;
+            }
+
+            // Send notification via all channels
+            $this->sendNotification($quotation, $user);
+
+            Log::info('QuotationCreated notification sent successfully', [
+                'quotation_id' => $quotation->id,
+                'user_id' => $user->id,
+                'has_fcm_token' => !empty($user->fcm_token),
+            ]);
+
+        } catch (Exception $e) {
+            Log::error('Failed to send QuotationCreated notification', [
+                'quotation_id' => $quotation->id ?? null,
+                'user_id' => $user->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Release lock on error
+            if (isset($lockKey)) {
+                Cache::forget($lockKey);
+            }
+
+            throw $e;
+        }
     }
 
     /**
-     * Envoie une notification FCM à l'utilisateur
+     * Send notification through configured channels
      */
-/**
- * Envoie une notification FCM à l'utilisateur
- */
-private function sendFcmNotification($quotation, $user): void
-{
-    try {
-        $fcmToken = $user->fcm_token;
-
-        if (empty($fcmToken)) {
-            Log::debug('No FCM token found for user ' . $user->id);
-            return;
-        }
-
-        $messaging = app('firebase.messaging');
-
-        $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $fcmToken)
-            ->withNotification(
-                \Kreait\Firebase\Messaging\Notification::create(
-                    'Nouveau devis reçu',
-                    "Devis de {$quotation->amount} {$quotation->currency} pour {$quotation->sourcingRequest->product_name}"
-                )
-            )
-            ->withData([
-                'quotation_id' => (string) $quotation->id,
-                'sourcing_request_id' => (string) $quotation->sourcing_request_id,
-                'amount' => (string) $quotation->amount,
-                'currency' => $quotation->currency,
+    private function sendNotification($quotation, $user): void
+    {
+        try {
+            $user->notify(new QuotationCreatedNotification($quotation));
+        } catch (Exception $e) {
+            Log::error('Error sending notification to user', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
             ]);
-
-        $messaging->send($message);
-
-        Log::info('FCM notification sent for quotation ' . $quotation->id);
-    } catch (Exception $e) {
-        Log::error('FCM notification error: ' . $e->getMessage(), [
-            'quotation_id' => $quotation->id,
-            'user_id' => $user->id,
-        ]);
+            throw $e;
+        }
     }
-}
-
 }

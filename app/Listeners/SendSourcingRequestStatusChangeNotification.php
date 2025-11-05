@@ -6,6 +6,7 @@ use App\Events\SourcingRequestStatusChanged;
 use App\Notifications\SourcingRequestStatusUpdated as SourcingRequestStatusUpdatedNotification;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class SendSourcingRequestStatusChangeNotification
 {
@@ -14,72 +15,53 @@ class SendSourcingRequestStatusChangeNotification
      */
     public function handle(SourcingRequestStatusChanged $event): void
     {
-        $sourcingRequest = $event->sourcingRequest;
-        $user = $sourcingRequest->user;
-
-        // Envoie la notification via les canaux configurés (Mail + Database)
-        $user->notify(new SourcingRequestStatusUpdatedNotification($sourcingRequest));
-
-        // FCM commenté temporairement - à réactiver une fois Firebase configuré
-        $this->sendFcmNotification($sourcingRequest, $user);
-
-        Log::info('SourcingRequestStatusUpdated notification sent', [
-            'sourcing_request_id' => $sourcingRequest->id,
-            'user_id' => $user->id,
-            'status' => $sourcingRequest->status,
+        \Illuminate\Support\Facades\Log::debug('DEBUG: SendSourcingRequestStatusChangeNotification listener TRIGGERED', [
+            'sourcing_request_id' => $event->sourcingRequest->id,
+            'status' => $event->sourcingRequest->status,
+            'event_user_id' => $event->user->id,
+            'timestamp' => now()->toDateTimeString(),
         ]);
-    }
 
-    /**
-     * Envoie une notification FCM à l'utilisateur
-     * À RÉACTIVER UNE FOIS FIREBASE CONFIGURÉ
-     */
-    private function sendFcmNotification($sourcingRequest, $user): void
-    {
+        $sourcingRequest = $event->sourcingRequest;
+        $clientUser = $sourcingRequest->user;
+        $adminUser = $event->user;
+
+        // Empêcher les doublons avec un verrou
+        $lockKey = 'sourcing_notification:' . $sourcingRequest->id . ':' . $sourcingRequest->status;
+        
+        if (Cache::has($lockKey)) {
+            Log::debug('Notification already sent recently', ['sourcing_request_id' => $sourcingRequest->id, 'lock_key' => $lockKey]);
+            return;
+        }
+
+        Cache::put($lockKey, true, 60); // Verrou pour 60 secondes
+
         try {
-            $fcmToken = $user->fcm_token;
+            // Notifier le client
+            $clientUser->notify(new SourcingRequestStatusUpdatedNotification($sourcingRequest));
 
-            if (empty($fcmToken)) {
-                Log::debug('No FCM token found for user ' . $user->id);
-                return;
+            Log::info('SourcingRequestStatusUpdated notification sent to client for Sourcing Request', [
+                'sourcing_request_id' => $sourcingRequest->id,
+                'user_id' => $clientUser->id,
+                'status' => $sourcingRequest->status,
+            ]);
+
+            // Notifier l'admin si différent du client
+            if ($clientUser->id !== $adminUser->id) {
+                $adminUser->notify(new SourcingRequestStatusUpdatedNotification($sourcingRequest));
+                Log::info('SourcingRequestStatusUpdated notification sent to admin for Sourcing Request', [
+                    'sourcing_request_id' => $sourcingRequest->id,
+                    'user_id' => $adminUser->id,
+                    'status' => $sourcingRequest->status,
+                ]);
             }
 
-            $statusLabel = $this->getStatusLabel($sourcingRequest->status);
-
-            $messaging = app('firebase.messaging');
-
-            $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $fcmToken)
-                ->withNotification(\Kreait\Firebase\Messaging\Notification::create(
-                    'Mise à jour de votre demande de sourcing',
-                    "Demande #{$sourcingRequest->product_name} : {$statusLabel}"
-                ))
-                ->withData([
-                    'sourcing_request_id' => (string) $sourcingRequest->id,
-                    'status' => $sourcingRequest->status,
-                    'product_name' => $sourcingRequest->product_name,
-                    'click_action' => route('client.sourcing-requests.show', $sourcingRequest->id),
-                ]);
-
-            $messaging->send($message);
-            Log::info('FCM notification sent for sourcing request ' . $sourcingRequest->id);
         } catch (Exception $e) {
-            Log::error('FCM notification error: ' . $e->getMessage(), [
+            Cache::forget($lockKey); // Libérer le verrou en cas d'erreur
+            Log::error('Failed to send SourcingRequestStatusUpdated notification.', [
                 'sourcing_request_id' => $sourcingRequest->id,
-                'user_id' => $user->id,
+                'error' => $e->getMessage(),
             ]);
         }
-    }
-
-    private function getStatusLabel(string $status): string
-    {
-        $statusLabels = [
-            'pending' => 'En attente',
-            'in_review' => 'En cours de révision',
-            'quoted' => 'Devis envoyé',
-            'rejected' => 'Rejetée',
-            'accepted' => 'Acceptée',
-            'cancelled' => 'Annulée',
-        ];
-        return $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
     }
 }

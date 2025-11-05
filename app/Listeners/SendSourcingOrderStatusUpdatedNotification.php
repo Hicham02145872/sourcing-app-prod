@@ -6,6 +6,7 @@ use App\Events\SourcingOrderStatusChanged;
 use App\Notifications\SourcingOrderStatusUpdated as SourcingOrderStatusUpdatedNotification;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class SendSourcingOrderStatusUpdatedNotification
 {
@@ -17,66 +18,33 @@ class SendSourcingOrderStatusUpdatedNotification
         $sourcingOrder = $event->sourcingOrder;
         $user = $sourcingOrder->quotation->sourcingRequest->user;
 
-        $user->notify(new SourcingOrderStatusUpdatedNotification($sourcingOrder));
+        $lockKey = 'sourcing_order_notification:' . $sourcingOrder->id . ':' . $sourcingOrder->status;
 
-        $this->sendFcmNotification($sourcingOrder, $user);
+        if (Cache::has($lockKey)) {
+            Log::debug('SourcingOrderStatusUpdated notification already sent recently', [
+                'sourcing_order_id' => $sourcingOrder->id,
+                'lock_key' => $lockKey,
+            ]);
+            return;
+        }
 
-        Log::info('SourcingOrderStatusUpdated notification sent', [
-            'sourcing_order_id' => $sourcingOrder->id,
-            'user_id' => $user->id,
-            'status' => $sourcingOrder->status,
-        ]);
-    }
+        Cache::put($lockKey, true, now()->addSeconds(60));
 
-    /**
-     * Envoie une notification FCM à l'utilisateur
-     */
-    private function sendFcmNotification($sourcingOrder, $user): void
-    {
         try {
-            $fcmToken = $user->fcm_token;
+            $user->notify(new SourcingOrderStatusUpdatedNotification($sourcingOrder));
 
-            if (empty($fcmToken)) {
-                Log::debug('No FCM token found for user ' . $user->id);
-                return;
-            }
-
-            $statusLabel = $this->getStatusLabel($sourcingOrder->status);
-
-            $messaging = app('firebase.messaging');
-
-            $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $fcmToken)
-                ->withNotification(\Kreait\Firebase\Messaging\Notification::create(
-                    'Mise à jour du statut de votre commande',
-                    "Commande #{$sourcingOrder->id} : {$statusLabel}"
-                ))
-                ->withData([
-                    'sourcing_order_id' => (string) $sourcingOrder->id,
-                    'status' => $sourcingOrder->status,
-                    'click_action' => route('client.sourcing-orders.show', $sourcingOrder->id),
-                ]);
-
-            $messaging->send($message);
-            Log::info('FCM notification sent for sourcing order ' . $sourcingOrder->id);
-        } catch (Exception $e) {
-            Log::error('FCM notification error: ' . $e->getMessage(), [
+            Log::info('SourcingOrderStatusUpdated notification sent for Sourcing Order', [
                 'sourcing_order_id' => $sourcingOrder->id,
                 'user_id' => $user->id,
+                'status' => $sourcingOrder->status,
+            ]);
+        } catch (Exception $e) {
+            Cache::forget($lockKey);
+            Log::error('Failed to send SourcingOrderStatusUpdated notification.', [
+                'sourcing_order_id' => $sourcingOrder->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
             ]);
         }
-    }
-
-    private function getStatusLabel(string $status): string
-    {
-        $statusLabels = [
-            'pending_payment' => 'En attente de paiement',
-            'paid' => 'Payée',
-            'shipped' => 'Expédiée',
-            'delivered' => 'Livrée',
-            'completed' => 'Terminée',
-            'cancelled' => 'Annulée',
-            'on_hold' => 'En attente',
-        ];
-        return $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
     }
 }
