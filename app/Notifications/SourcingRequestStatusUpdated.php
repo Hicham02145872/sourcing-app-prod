@@ -98,7 +98,7 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
             ->greeting('Bonjour,')
 
-            ->line("Le statut de votre demande de sourcing #{$this->sourcingRequest->id} ({$this->sourcingRequest->product_name}) a été mis à jour.")
+            ->line("Le statut de votre demande de sourcing {$this->sourcingRequest->product_name} a été mis à jour.")
 
             ->line("Nouveau statut : **{$statusLabel}**")
 
@@ -134,7 +134,7 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
             'title' => "Mise à jour de votre demande de sourcing",
 
-            'body' => "Votre demande #{$this->sourcingRequest->id} ({$this->sourcingRequest->product_name}) a été mise à jour au statut : {$statusLabel}.",
+            'body' => "Votre demande {$this->sourcingRequest->product_name} a été mise à jour au statut : {$statusLabel}.",
 
             'click_action' => route('client.sourcing-requests.show', $this->sourcingRequest->id),
 
@@ -176,7 +176,7 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
                 'Mise à jour de votre demande de sourcing',
 
-                "Votre demande #{$this->sourcingRequest->id} a été mise à jour au statut : {$statusLabel}."
+                "Votre demande {$this->sourcingRequest->product_name} a été mise à jour au statut : {$statusLabel}."
 
             ))
 

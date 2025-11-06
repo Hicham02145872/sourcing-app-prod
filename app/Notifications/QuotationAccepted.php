@@ -35,9 +35,9 @@ class QuotationAccepted extends Notification implements ShouldQueue
         $url = url(route('admin.sourcing-orders.show', $this->quotation->order->id));
 
         return (new MailMessage)
-            ->subject('Quotation Accepted for Sourcing Request #' . $this->quotation->sourcingRequest->id)
+            ->subject('Quotation Accepted for Sourcing Request: ' . $this->quotation->sourcingRequest->product_name)
             ->greeting('Hello Admin,')
-            ->line('A quotation for Sourcing Request #' . $this->quotation->sourcingRequest->id . ' has been accepted by the client.')
+            ->line('A quotation for Sourcing Request ' . $this->quotation->sourcingRequest->product_name . ' has been accepted by the client.')
             ->action('View Sourcing Order', $url)
             ->line('Please review the accepted quotation and proceed with the order.');
     }
@@ -60,7 +60,7 @@ class QuotationAccepted extends Notification implements ShouldQueue
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification(FirebaseNotification::create(
                 'Quotation Accepted',
-                'Quotation for SR #' . $this->quotation->sourcingRequest->id . ' has been accepted.'
+                'Quotation for ' . $this->quotation->sourcingRequest->product_name . ' has been accepted.'
             ))
             ->withData([
                 'click_action' => $url,

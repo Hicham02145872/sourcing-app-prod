@@ -66,13 +66,19 @@ class QuotationRejected extends Notification implements ShouldQueue
 
 
 
-        return (new MailMessage)
+                return (new MailMessage)
 
-            ->subject('Quotation Rejected for Sourcing Request #' . $this->quotation->sourcingRequest->id)
 
-            ->greeting('Hello Admin,')
 
-            ->line('A quotation for Sourcing Request #' . $this->quotation->sourcingRequest->id . ' has been rejected by the client.')
+                    ->subject('Quotation Rejected for Sourcing Request: ' . $this->quotation->sourcingRequest->product_name)
+
+
+
+                    ->greeting('Hello Admin,')
+
+
+
+                    ->line('A quotation for Sourcing Request ' . $this->quotation->sourcingRequest->product_name . ' has been rejected by the client.')
 
             ->action('View Sourcing Request', $url)
 
@@ -94,7 +100,7 @@ class QuotationRejected extends Notification implements ShouldQueue
 
             'title' => 'Quotation Rejected',
 
-            'body' => 'The quotation for sourcing request #' . $this->quotation->sourcing_request_id . ' has been rejected by the client.',
+            'body' => 'The quotation for sourcing request ' . $this->quotation->sourcingRequest->product_name . ' has been rejected by the client.',
 
             'click_action' => route('admin.sourcing-requests.show', $this->quotation->sourcing_request_id),
 
@@ -120,7 +126,7 @@ class QuotationRejected extends Notification implements ShouldQueue
 
                 'Quotation Rejected',
 
-                'Quotation for SR #' . $this->quotation->sourcingRequest->id . ' has been rejected.'
+                'Quotation for ' . $this->quotation->sourcingRequest->product_name . ' has been rejected.'
 
             ))
 
