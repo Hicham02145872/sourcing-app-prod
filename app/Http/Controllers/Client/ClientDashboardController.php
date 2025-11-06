@@ -40,7 +40,7 @@ class ClientDashboardController extends Controller
             $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
         }
 
-        $sourcingRequests = $query->paginate(3)->withQueryString();
+        $sourcingRequests = $query->latest()->paginate(3)->withQueryString();
         
         $categories = Category::all();
 

@@ -35,7 +35,7 @@ class AdminSourcingRequestController extends Controller
             $query->where('product_name', 'like', '%' . $request->search . '%');
         }
 
-        $sourcingRequests = $query->paginate(10);
+        $sourcingRequests = $query->latest()->paginate(10);
 
         return view('admin.sourcing-requests.index', compact('sourcingRequests'));
     }

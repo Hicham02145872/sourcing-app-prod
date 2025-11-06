@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -m-6 p-6 mb-0">
+        
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="font-semibold text-3xl text-gray-900 dark:text-white tracking-tight">
@@ -8,22 +8,9 @@
                     </h2>
                     <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5">{{ __('Welcome back, here\'s what\'s happening today') }}</p>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <select class="px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors">
-                        <option>{{ __('Last 7 days') }}</option>
-                        <option>{{ __('Last 30 days') }}</option>
-                        <option>{{ __('Last 90 days') }}</option>
-                        <option>{{ __('This year') }}</option>
-                    </select>
-                    <button type="button" class="inline-flex items-center px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        {{ __('Export') }}
-                    </button>
-                </div>
+           
             </div>
-        </div>
+        
     </x-slot>
 
     <div class="py-8 bg-gray-50 dark:bg-gray-900 min-h-screen">

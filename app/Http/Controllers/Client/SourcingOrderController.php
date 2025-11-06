@@ -18,7 +18,7 @@ class SourcingOrderController extends Controller
     public function index(): View
     {
         $this->authorize('viewAny', SourcingOrder::class);
-        $sourcingOrders = Auth::user()->sourcingOrders()->with('quotation.sourcingRequest')->get();
+        $sourcingOrders = Auth::user()->sourcingOrders()->with('quotation.sourcingRequest')->paginate(10);
         return view('client.sourcing-orders.index', compact('sourcingOrders'));
     }
 

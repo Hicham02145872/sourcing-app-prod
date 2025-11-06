@@ -34,7 +34,7 @@ class SourcingRequestController extends Controller
         $sourcingRequests = auth()->user()->sourcingRequests()
             ->where('status', 'in_review')
             ->with('category', 'destinations.country', 'destinations.service', 'quotation')
-            ->get();
+            ->paginate(10);
 
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
 

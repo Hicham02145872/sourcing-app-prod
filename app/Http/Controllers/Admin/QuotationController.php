@@ -63,10 +63,11 @@ class QuotationController extends Controller
     public function selectRequest(): View
     {
         $this->authorize('create', Quotation::class);
-        $sourcingRequests = SourcingRequest::where('status', 'in_review')->get();
-        $sourcingRequestsInReview = $sourcingRequests->count();
-        $pendingQuotations = $sourcingRequests->whereNull('quoted_at')->count();
-        $sourcingRequestsThisMonth = SourcingRequest::where('status', 'in_review')->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count();
+        $sourcingRequestsQuery = SourcingRequest::where('status', 'in_review');
+        $sourcingRequestsInReview = $sourcingRequestsQuery->count();
+        $pendingQuotations = (clone $sourcingRequestsQuery)->whereDoesntHave('quotation')->count();
+        $sourcingRequestsThisMonth = (clone $sourcingRequestsQuery)->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count();
+        $sourcingRequests = $sourcingRequestsQuery->paginate(10);
         return view('admin.quotations.select_request', compact('sourcingRequests', 'sourcingRequestsInReview', 'pendingQuotations', 'sourcingRequestsThisMonth'));
     }
 

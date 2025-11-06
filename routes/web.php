@@ -51,8 +51,8 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
 Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('client.')->group(function () {
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
 
-    Route::resource('sourcing-requests', SourcingRequestController::class);
     Route::get('/sourcing-requests/handling', [SourcingRequestController::class, 'handling'])->name('sourcing-requests.handling');
+    Route::resource('sourcing-requests', SourcingRequestController::class);
     Route::post('/sourcing-requests/{sourcingRequest}/duplicate', [SourcingRequestController::class, 'duplicate'])->name('sourcing-requests.duplicate');
     Route::match(['get', 'post'], '/sourcing-orders/{sourcingOrder}/upload-proof-of-payment', [App\Http\Controllers\Client\SourcingOrderController::class, 'uploadProofOfPayment'])->name('sourcing-orders.upload-proof-of-payment');
     Route::post('/quotations/{quotation}/accept', [App\Http\Controllers\Client\QuotationController::class, 'accept'])->name('quotations.accept');

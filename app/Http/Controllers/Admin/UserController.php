@@ -20,6 +20,15 @@ class UserController extends Controller
             });
         }
 
+        $inactiveUsers = User::where('role', 'client')
+                                ->whereNull('email_verified_at')
+                                ->count();
+        $newUsersThisMonth = User::where('role', 'client')
+                                ->whereYear('created_at', now()->year)
+                                ->whereMonth('created_at', now()->month)
+                                ->count();
+        $activeUsers = $query->count();
+        $totalUsers = $query->count();
         $users = $query->paginate(10); // Paginate with 10 users per page
 
         if ($request->ajax()) {
@@ -29,6 +38,6 @@ class UserController extends Controller
             ]);
         }
 
-        return view('admin.users.index', compact('users'));
+        return view('admin.users.index', compact('users', 'totalUsers', 'activeUsers', 'newUsersThisMonth', 'inactiveUsers'));
     }
 }
