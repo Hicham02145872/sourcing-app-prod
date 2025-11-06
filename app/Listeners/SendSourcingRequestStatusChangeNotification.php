@@ -46,15 +46,7 @@ class SendSourcingRequestStatusChangeNotification
                 'status' => $sourcingRequest->status,
             ]);
 
-            // Notifier l'admin si différent du client
-            if ($clientUser->id !== $adminUser->id) {
-                $adminUser->notify(new SourcingRequestStatusUpdatedNotification($sourcingRequest));
-                Log::info('SourcingRequestStatusUpdated notification sent to admin for Sourcing Request', [
-                    'sourcing_request_id' => $sourcingRequest->id,
-                    'user_id' => $adminUser->id,
-                    'status' => $sourcingRequest->status,
-                ]);
-            }
+
 
         } catch (Exception $e) {
             Cache::forget($lockKey); // Libérer le verrou en cas d'erreur
