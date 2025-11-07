@@ -45,9 +45,13 @@ class ProofOfPaymentRejected extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
+        $this->sourcingOrder->load('quotation.sourcingRequest');
+        $productName = $this->sourcingOrder->quotation->sourcingRequest->product_name;
+
         return [
             'sourcing_order_id' => $this->sourcingOrder->id,
-            'message' => 'Your proof of payment for order #' . $this->sourcingOrder->id . ' was rejected.',
+            'title' => 'Payment Rejected',
+            'body' => "Your payment for the order related to '{$productName}' was rejected.",
             'reason' => $this->sourcingOrder->rejection_reason,
             'url' => route('client.sourcing-orders.show', $this->sourcingOrder->id),
         ];

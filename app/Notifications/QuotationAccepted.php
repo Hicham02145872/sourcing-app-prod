@@ -46,7 +46,7 @@ class QuotationAccepted extends Notification implements ShouldQueue
     {
         return [
             'title' => 'Quotation Accepted',
-            'body' => 'Quotation #' . $this->quotation->id . ' for ' . $this->quotation->sourcingRequest->product_name . ' has been accepted by ' . $this->quotation->sourcingRequest->user->name . '.',
+            'body' => "The quote for '{$this->quotation->sourcingRequest->product_name}' was accepted by {$this->quotation->sourcingRequest->user->name}.",
             'quotation_id' => $this->quotation->id,
             'sourcing_order_id' => $this->quotation->order->id,
             'click_action' => route('admin.sourcing-orders.index'),

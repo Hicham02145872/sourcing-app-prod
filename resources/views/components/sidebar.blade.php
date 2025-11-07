@@ -7,7 +7,7 @@
     
     <div class="flex flex-col h-full">
         {{-- Logo Section --}}
-        <div class="flex items-center justify-between py-4  px-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between py-4 px-6 border-b border-gray-200 dark:border-gray-700">
             <a href="{{ $role === 'admin' ? route('admin.dashboard') : route('client.dashboard') }}" class="flex items-center gap-3">
                 <span class="text-xl font-bold text-gray-900 dark:text-white">fastsourcingbrothers</span>
             </a>
@@ -19,8 +19,6 @@
                 </svg>
             </button>
         </div>
-
-
 
         {{-- Navigation --}}
         <nav class="flex-1 overflow-y-auto px-4 py-6">
@@ -51,14 +49,6 @@
                         <span>{{ __('Quotations') }}</span>
                     </a>
 
-                    {{-- <a href="{{ route('client.sourcing-requests.index') }}" 
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 {{ request()->routeIs('client.sourcing-requests.*') ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span>{{ __('My Requests') }}</span>
-                    </a> --}}
-
                     <a href="{{ route('client.sourcing-requests.create') }}" 
                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 {{ request()->routeIs('client.sourcing-requests.create') ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,8 +65,6 @@
                         <span>{{ __('My Orders') }}</span>
                     </a>
 
-
-
                     <a href="{{ route('client.history') }}" 
                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 {{ request()->routeIs('client.history') ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,8 +73,6 @@
                         <span>{{ __('History') }}</span>
                     </a>
                 </div>
-
-
 
             @else
                 {{-- Admin Navigation --}}
@@ -146,13 +132,7 @@
                         </svg>
                         <span>{{ __('Manage Clients') }}</span>
                     </a>
-
-
-
-
                 </div>
-
-
             @endif
         </nav>
 
@@ -170,8 +150,6 @@
         </div>
     </div>
 </aside>
-
-
 
 {{-- Overlay for mobile --}}
 <div x-show="sidebarOpen" 

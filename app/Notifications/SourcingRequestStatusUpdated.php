@@ -94,17 +94,17 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
         return (new MailMessage)
 
-            ->subject('Mise à jour du statut de votre demande de sourcing #' . $this->sourcingRequest->id)
+                        ->subject('Your Sourcing Request #' . $this->sourcingRequest->id . ' Status Update')
 
-            ->greeting('Bonjour,')
+                        ->greeting('Hello,')
 
-            ->line("Le statut de votre demande de sourcing {$this->sourcingRequest->product_name} a été mis à jour.")
+                        ->line("Good news! The status of your sourcing request for **{$this->sourcingRequest->product_name}** has been updated.")
 
-            ->line("Nouveau statut : **{$statusLabel}**")
+                        ->line("New Status: **{$statusLabel}**")
 
-            ->action('Voir votre demande', $url)
+                        ->action('View Your Request', $url)
 
-            ->line('Merci d\'utiliser notre service !');
+                        ->line('Thank you for choosing our service!');
 
     }
 
@@ -122,29 +122,29 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
      */
 
-    public function toArray($notifiable)
+        public function toArray($notifiable)
 
-    {
+        {
 
-        $statusLabel = $this->getStatusLabel($this->sourcingRequest->status);
+            $statusLabel = $this->getStatusLabel($this->sourcingRequest->status);
 
+    
 
+            return [
 
-        return [
+                'title' => "Sourcing Request Updated",
 
-            'title' => "Mise à jour de votre demande de sourcing",
+                'body' => "Your request for '{$this->sourcingRequest->product_name}' is now '{$statusLabel}'.",
 
-            'body' => "Votre demande {$this->sourcingRequest->product_name} a été mise à jour au statut : {$statusLabel}.",
+                'click_action' => route('client.sourcing-requests.show', $this->sourcingRequest->id),
 
-            'click_action' => route('client.sourcing-requests.show', $this->sourcingRequest->id),
+                'sourcing_request_id' => $this->sourcingRequest->id,
 
-            'sourcing_request_id' => $this->sourcingRequest->id,
+                'status' => $this->sourcingRequest->status,
 
-            'status' => $this->sourcingRequest->status,
+            ];
 
-        ];
-
-    }
+        }
 
 
 

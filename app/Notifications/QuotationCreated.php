@@ -72,41 +72,69 @@ class QuotationCreated extends Notification implements ShouldQueue
 
 
 
-        return (new MailMessage)
-
-            ->subject('Nouveau devis reçu pour votre demande de sourcing')
-
-            ->greeting('Bonjour,')
-
-            ->line("Un nouveau devis de **{$this->quotation->amount} {$this->quotation->currency}** a été créé pour votre demande de sourcing : **{$this->quotation->sourcingRequest->product_name}**.")
-
-            ->action('Voir le devis', $url)
-
-            ->line('Veuillez consulter les détails et accepter ou rejeter le devis.')
-
-            ->line('Merci d\'utiliser notre service !');
-
-    }
+                return (new MailMessage)
 
 
 
-    public function toArray(object $notifiable): array
+                    ->subject('New Quotation Received for Your Sourcing Request')
 
-    {
 
-        return [
 
-            'title' => 'Nouveau devis reçu',
+                    ->greeting('Hello,')
 
-            'body' => 'Un nouveau devis de ' . $this->quotation->amount . ' ' . $this->quotation->currency . ' a été créé pour votre demande de sourcing : ' . $this->quotation->sourcingRequest->product_name,
 
-            'sourcing_request_id' => $this->quotation->sourcing_request_id,
 
-            'click_action' => route('client.sourcing-requests.show', $this->quotation->sourcingRequest->id),
+                    ->line("A new quotation of **{$this->quotation->amount} {$this->quotation->currency}** has been created for your sourcing request: **{$this->quotation->sourcingRequest->product_name}**.")
 
-        ];
+
+
+                    ->action('View Quotation', $url)
+
+
+
+                    ->line('Please review the details and accept or reject the quotation.')
+
+
+
+                    ->line('Thank you for using our service!');
 
     }
+
+
+
+        public function toArray(object $notifiable): array
+
+
+
+        {
+
+
+
+            return [
+
+
+
+                'title' => 'New Quotation Received',
+
+
+
+                'body' => "You\'ve received a new quote of {$this->quotation->amount} {$this->quotation->currency} for your request: '{$this->quotation->sourcingRequest->product_name}'.",
+
+
+
+                'sourcing_request_id' => $this->quotation->sourcing_request_id,
+
+
+
+                'click_action' => route('client.sourcing-requests.show', $this->quotation->sourcingRequest->id),
+
+
+
+            ];
+
+
+
+        }
 
 
 

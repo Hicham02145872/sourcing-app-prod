@@ -184,6 +184,11 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- Pagination Links --}}
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        {{ $timeline->links() }}
+                    </div>
                 </div>
             @endif
 

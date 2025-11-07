@@ -60,9 +60,14 @@ class ProofOfPaymentUploaded extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
+        $this->sourcingOrder->load('quotation.sourcingRequest', 'user');
+        $productName = $this->sourcingOrder->quotation->sourcingRequest->product_name;
+        $clientName = $this->sourcingOrder->user->name;
+
         return [
             'sourcing_order_id' => $this->sourcingOrder->id,
-            'message' => 'Proof of payment uploaded for Sourcing Order #' . $this->sourcingOrder->id,
+            'title' => 'Payment Uploaded',
+            'body' => "{$clientName} uploaded proof of payment for the order related to '{$productName}'.",
             'link' => route('admin.sourcing-orders.show', $this->sourcingOrder->id),
         ];
     }

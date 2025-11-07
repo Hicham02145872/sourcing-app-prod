@@ -1,5 +1,5 @@
-<header class="sticky top-0 z-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-700/80 shadow-sm">
-    <div class="px-4 sm:px-6 lg:px-8">
+<header class="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-700/80 shadow-sm">
+    <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <button @click="sidebarOpen = !sidebarOpen" 
                     class="lg:hidden p-2 -ml-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all">

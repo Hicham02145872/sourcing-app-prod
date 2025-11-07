@@ -1,7 +1,7 @@
 {{-- Liste des Notifications --}}
 <div class="max-h-[480px] overflow-y-auto scrollbar-thin" 
      x-show="!loading && filteredNotifications.length > 0">
-    <template x-for="(n, index) in filteredNotifications" :key="n.id || index">
+    <template x-for="(n, index) in filteredNotifications.slice(0, 5)" :key="n.id || index">
         <div class="notification-item relative group border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gradient-to-r hover:from-gray-50 hover:to-indigo-50/30 dark:hover:from-gray-700 dark:hover:to-gray-700/50"
              :class="{ 'bg-indigo-50/40 dark:bg-indigo-500/10': !n.read_at }">
             <a :href="n.click_action || '#'" 

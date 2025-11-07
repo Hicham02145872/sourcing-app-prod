@@ -184,12 +184,24 @@ class SourcingRequestController extends Controller
         return redirect()->route('client.dashboard')->with('status', 'Sourcing request deleted successfully!');
     }
 
-    public function history(TimelineService $timelineService)
+    public function history(TimelineService $timelineService): View
     {
         $user = auth()->user();
-        $sortedTimeline = $timelineService->generateTimeline($user);
+        $fullTimeline = $timelineService->generateTimeline($user);
 
-        return view('client.history.index', ['timeline' => $sortedTimeline]);
+        // Manually paginate the collection
+        $perPage = 10;
+        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage();
+        $currentItems = $fullTimeline->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        $paginatedTimeline = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentItems,
+            $fullTimeline->count(),
+            $perPage,
+            $currentPage,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+        );
+
+        return view('client.history.index', ['timeline' => $paginatedTimeline]);
     }
 
     /**

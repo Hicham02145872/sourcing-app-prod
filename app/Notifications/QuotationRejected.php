@@ -88,27 +88,47 @@ class QuotationRejected extends Notification implements ShouldQueue
 
 
 
-    public function toArray(object $notifiable): array
+        public function toArray(object $notifiable): array
 
-    {
 
-        return [
 
-            'quotation_id' => $this->quotation->id,
+        {
 
-            'sourcing_request_id' => $this->quotation->sourcing_request_id,
 
-            'title' => 'Quotation Rejected',
 
-            'body' => 'The quotation for sourcing request ' . $this->quotation->sourcingRequest->product_name . ' has been rejected by the client.',
+            return [
 
-            'click_action' => route('admin.sourcing-requests.show', $this->quotation->sourcing_request_id),
 
-            'type' => 'warning',
 
-        ];
+                'quotation_id' => $this->quotation->id,
 
-    }
+
+
+                'sourcing_request_id' => $this->quotation->sourcing_request_id,
+
+
+
+                'title' => 'Quotation Rejected',
+
+
+
+                'body' => "The quote for '{$this->quotation->sourcingRequest->product_name}' was rejected by the client.",
+
+
+
+                'click_action' => route('admin.sourcing-requests.show', $this->quotation->sourcing_request_id),
+
+
+
+                'type' => 'warning',
+
+
+
+            ];
+
+
+
+        }
 
 
 
