@@ -1,15 +1,24 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                        {{ __('Create New Request') }}
-                    </h2>
-                    <p class="mt-1 text-sm sm:text-base text-gray-600 dark:text-gray-400">{{ __('Fill in the details below to submit a new sourcing request') }}</p>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-600 dark:bg-blue-700 rounded-lg flex items-center justify-center shadow-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                {{ __('Create New Request') }}
+                            </h2>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Fill in the details below to submit a new sourcing request') }}</p>
+                        </div>
+                    </div>
                 </div>
                 <a href="{{ route('client.dashboard') }}" 
-                   class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm w-full sm:w-auto justify-center">
+                   class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
@@ -19,8 +28,8 @@
         </div>
     </x-slot>
 
-    <div class="py-3 sm:py-5 bg-gray-50 dark:bg-gray-900 min-h-screen">
-        <div class="max-w-8xl mx-auto px-3 sm:px-4 lg:px-8">
+    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <form method="POST" action="{{ route('client.sourcing-requests.store') }}" enctype="multipart/form-data"
                   x-data="sourcingRequestForm" @submit.prevent="submitForm"
                   data-translation-destination-required="{{ __('At least one destination is required!') }}"
@@ -32,78 +41,78 @@
                 @csrf
 
                 <!-- Progress Steps -->
-                <div class="mb-6 sm:mb-8">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+                <div class="mb-8">
+                    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                         <div class="flex items-center justify-between max-w-3xl mx-auto">
                             <!-- Step 1 -->
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">
+                                <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-sm">
                                     1
                                 </div>
                                 <div class="hidden sm:block">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ __('Product Details') }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Basic information') }}</p>
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('Product Details') }}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('Basic information') }}</p>
                                 </div>
                             </div>
                             
                             <!-- Connector -->
-                            <div class="flex-1 h-0.5 bg-gray-200 dark:bg-gray-700 mx-4"></div>
+                            <div class="flex-1 h-0.5 bg-slate-200 dark:bg-slate-700 mx-4"></div>
                             
                             <!-- Step 2 -->
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 flex items-center justify-center text-sm font-bold">
+                                <div class="w-10 h-10 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center text-sm font-bold shadow-sm">
                                     2
                                 </div>
                                 <div class="hidden sm:block">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Destinations') }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Shipping details') }}</p>
+                                    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ __('Destinations') }}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('Shipping details') }}</p>
                                 </div>
                             </div>
                             
                             <!-- Connector -->
-                            <div class="flex-1 h-0.5 bg-gray-200 dark:bg-gray-700 mx-4"></div>
+                            <div class="flex-1 h-0.5 bg-slate-200 dark:bg-slate-700 mx-4"></div>
                             
                             <!-- Step 3 -->
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 flex items-center justify-center text-sm font-bold">
+                                <div class="w-10 h-10 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center text-sm font-bold shadow-sm">
                                     3
                                 </div>
                                 <div class="hidden sm:block">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Review') }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Final check') }}</p>
+                                    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ __('Review') }}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('Final check') }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Left Column - Product & Contact Information -->
-                    <div class="lg:col-span-2 space-y-4 sm:space-y-6">
+                    <div class="lg:col-span-2 space-y-6">
                         <!-- Product Details Section -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <div class="px-4 sm:px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8-4m8 4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Product & Core Details') }}</h3>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Enter the basic information about your product') }}</p>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Product & Core Details') }}</h3>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Enter the basic information about your product') }}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="p-4 sm:p-6 space-y-5">
+                            <div class="p-6 space-y-5">
                                 <!-- Product Name -->
                                 <div>
-                                    <x-input-label for="product_name" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                    <x-input-label for="product_name" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                                         {{ __('Product Name') }} <span class="text-red-500">*</span>
                                     </x-input-label>
                                     <x-text-input id="product_name" 
-                                                  class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 shadow-sm dark:bg-gray-700 dark:text-white text-sm" 
+                                                  class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
                                                   type="text" 
                                                   name="product_name" 
                                                   :value="old('product_name')" 
@@ -116,17 +125,17 @@
 
                                 <!-- Product URL -->
                                 <div>
-                                    <x-input-label for="product_url" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                    <x-input-label for="product_url" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                                         {{ __('Product URL (Optional)') }}
                                     </x-input-label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
                                             </svg>
                                         </div>
                                         <x-text-input id="product_url" 
-                                                      class="block w-full pl-10 rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 shadow-sm dark:bg-gray-700 dark:text-white text-sm" 
+                                                      class="block w-full pl-10 rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
                                                       type="url" 
                                                       name="product_url" 
                                                       :value="old('product_url')" 
@@ -140,12 +149,12 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <!-- Category -->
                                     <div>
-                                        <x-input-label for="category_id" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                        <x-input-label for="category_id" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                                             {{ __('Category') }} <span class="text-red-500">*</span>
                                         </x-input-label>
                                         <select id="category_id" 
                                                 name="category_id" 
-                                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 text-gray-900 dark:text-white shadow-sm dark:bg-gray-700 text-sm" 
+                                                class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white shadow-sm dark:bg-slate-700 text-sm" 
                                                 required>
                                             <option value="">{{ __('Select a Category') }}</option>
                                             @foreach($categories as $category)
@@ -157,12 +166,12 @@
 
                                     <!-- Sourcing Location -->
                                     <div>
-                                        <x-input-label for="sourcing_location" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                        <x-input-label for="sourcing_location" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                                             {{ __('Sourcing Location') }} <span class="text-red-500">*</span>
                                         </x-input-label>
                                         <select id="sourcing_location" 
                                                 name="sourcing_location" 
-                                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 text-gray-900 dark:text-white shadow-sm dark:bg-gray-700 text-sm" 
+                                                class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 text-slate-900 dark:text-white shadow-sm dark:bg-slate-700 text-sm" 
                                                 required>
                                             <option value="china" {{ old('sourcing_location') == 'china' ? 'selected' : '' }}>{{ __('China') }}</option>
                                             <option value="dubai" {{ old('sourcing_location') == 'dubai' ? 'selected' : '' }}>{{ __('Dubai') }}</option>
@@ -173,12 +182,12 @@
 
                                 <!-- Note -->
                                 <div>
-                                    <x-input-label for="note" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                    <x-input-label for="note" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                                         {{ __('Additional Notes / Specific Requirements') }}
                                     </x-input-label>
                                     <textarea id="note" 
                                               rows="3" 
-                                              class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 resize-none shadow-sm dark:bg-gray-700 dark:text-white text-sm" 
+                                              class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 resize-none shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
                                               name="note" 
                                               placeholder="{{ __('Specify colors, sizes, materials, or any other requirements...') }}">{{ old('note') }}</textarea>
                                     <x-input-error :messages="$errors->get('note')" class="mt-2" />
@@ -186,11 +195,11 @@
 
                                 <!-- Shipping Method -->
                                 <div>
-                                    <x-input-label class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                    <x-input-label class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                                         {{ __('Shipping Method') }}
                                     </x-input-label>
                                     <div class="grid grid-cols-1 gap-3">
-                                        <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600 has-[:checked]:border-blue-500 dark:has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20 has-[:checked]:shadow-sm group">
+                                        <label class="relative flex items-center p-4 border-2 border-slate-200 dark:border-slate-600 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-600 has-[:checked]:border-blue-500 dark:has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20 has-[:checked]:shadow-sm group">
                                             <input type="radio" id="shipping_method_air" name="shipping_method" value="air" class="peer sr-only" {{ old('shipping_method') == 'air' ? 'checked' : '' }}>
                                             <div class="flex items-center gap-4 w-full">
                                                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -199,8 +208,8 @@
                                                     </svg>
                                                 </div>
                                                 <div class="flex-1 min-w-0">
-                                                    <p class="font-bold text-gray-900 dark:text-white text-sm mb-1">{{ __('Air Freight') }}</p>
-                                                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('Faster delivery, suitable for small volumes') }}</p>
+                                                    <p class="font-bold text-slate-900 dark:text-white text-sm mb-1">{{ __('Air Freight') }}</p>
+                                                    <p class="text-xs text-slate-600 dark:text-slate-400">{{ __('Faster delivery, suitable for small volumes') }}</p>
                                                 </div>
                                                 <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 opacity-0 peer-checked:opacity-100 transition-opacity flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -208,7 +217,7 @@
                                             </div>
                                         </label>
 
-                                        <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600 has-[:checked]:border-blue-500 dark:has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20 has-[:checked]:shadow-sm group">
+                                        <label class="relative flex items-center p-4 border-2 border-slate-200 dark:border-slate-600 rounded-lg cursor-pointer transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-600 has-[:checked]:border-blue-500 dark:has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20 has-[:checked]:shadow-sm group">
                                             <input type="radio" id="shipping_method_sea" name="shipping_method" value="sea" class="peer sr-only" {{ old('shipping_method') == 'sea' ? 'checked' : '' }}>
                                             <div class="flex items-center gap-4 w-full">
                                                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -217,8 +226,8 @@
                                                     </svg>
                                                 </div>
                                                 <div class="flex-1 min-w-0">
-                                                    <p class="font-bold text-gray-900 dark:text-white text-sm mb-1">{{ __('Sea Freight') }}</p>
-                                                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('Cost-effective, suitable for large volumes') }}</p>
+                                                    <p class="font-bold text-slate-900 dark:text-white text-sm mb-1">{{ __('Sea Freight') }}</p>
+                                                    <p class="text-xs text-slate-600 dark:text-slate-400">{{ __('Cost-effective, suitable for large volumes') }}</p>
                                                 </div>
                                                 <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 opacity-0 peer-checked:opacity-100 transition-opacity flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -232,8 +241,8 @@
                         </div>
 
                         <!-- Contact Information Section -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <div class="px-4 sm:px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,20 +250,20 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Contact Information') }}</h3>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('How we can reach you for updates') }}</p>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Contact Information') }}</h3>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('How we can reach you for updates') }}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="p-4 sm:p-6 space-y-5">
+                            <div class="p-6 space-y-5">
                                 <!-- Phone Number -->
                                 <div>
-                                    <x-input-label for="phone_number" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                    <x-input-label for="phone_number" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                                         {{ __('Phone Number') }}
                                     </x-input-label>
                                     <x-text-input id="phone_number" 
-                                                  class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 shadow-sm dark:bg-gray-700 dark:text-white text-sm" 
+                                                  class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
                                                   type="tel" 
                                                   name="phone_number" 
                                                   :value="old('phone_number')" 
@@ -265,29 +274,29 @@
 
                                 <!-- Address Options -->
                                 <div>
-                                    <x-input-label class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                    <x-input-label class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
                                         {{ __('Address / Location') }}
                                     </x-input-label>
-                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
                                         <label class="flex items-center cursor-pointer">
                                             <input type="radio" id="address_manual" name="address_option" value="manual" class="form-radio h-4 w-4 text-blue-600 focus:ring-blue-500" checked>
-                                            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Enter manually') }}</span>
+                                            <span class="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('Enter manually') }}</span>
                                         </label>
                                         <label class="flex items-center cursor-pointer">
                                             <input type="radio" id="address_geolocation" name="address_option" value="geolocation" class="form-radio h-4 w-4 text-blue-600 focus:ring-blue-500">
-                                            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Use my location (GPS)') }}</span>
+                                            <span class="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('Use my location (GPS)') }}</span>
                                         </label>
                                     </div>
                                 </div>
 
                                 <!-- Manual Address -->
                                 <div id="manual-address-container">
-                                    <x-input-label for="address" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                    <x-input-label for="address" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                         {{ __('Full Address') }}
                                     </x-input-label>
                                     <textarea id="address" 
                                               rows="3" 
-                                              class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 resize-none shadow-sm dark:bg-gray-700 dark:text-white text-sm" 
+                                              class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 resize-none shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
                                               name="address" 
                                               autocomplete="street-address"
                                               placeholder="{{ __('Enter your full address') }}">{{ old('address') }}</textarea>
@@ -299,7 +308,7 @@
                                     <button type="button" 
                                             @click="getGeolocation"
                                             id="get-location-btn" 
-                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-800 hover:bg-gray-900 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md w-full sm:w-auto">
+                                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-lg text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -315,10 +324,10 @@
                     </div>
 
                     <!-- Right Column - Product Image & Destinations -->
-                    <div class="space-y-4 sm:space-y-6">
+                    <div class="space-y-6">
                         <!-- Product Image Section -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <div class="px-4 sm:px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -326,23 +335,23 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Product Image') }}</h3>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Optional but recommended') }}</p>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Product Image') }}</h3>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Optional but recommended') }}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="p-4 sm:p-6">
+                            <div class="p-6">
                                 <div class="space-y-4">
                                     <!-- Image Preview -->
-                                    <div class="relative aspect-square bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600 group hover:border-blue-500 transition-all duration-200 shadow-inner">
+                                    <div class="relative aspect-square bg-slate-50 dark:bg-slate-700 rounded-lg overflow-hidden border-2 border-dashed border-slate-300 dark:border-slate-600 group hover:border-blue-500 transition-all duration-200 shadow-inner">
                                         <img id="product_image_preview" 
                                              class="w-full h-full object-cover opacity-0 transition-opacity duration-300" 
                                              src="" 
                                              alt="Product preview" />
                                         <div id="placeholder" 
-                                             class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-blue-500 transition-colors duration-200">
-                                            <div class="w-16 h-16 bg-white dark:bg-gray-800 rounded-lg shadow-sm flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                                             class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors duration-200">
+                                            <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-lg shadow-sm flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                 </svg>
@@ -367,8 +376,8 @@
                                                accept="image/*" />
                                     </label>
 
-                                    <div class="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                                        <p class="text-xs text-gray-600 dark:text-gray-400 font-medium flex items-start gap-2">
+                                    <div class="p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 font-medium flex items-start gap-2">
                                             <svg class="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
@@ -380,8 +389,8 @@
                         </div>
 
                         <!-- Destination Details Section -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <div class="px-4 sm:px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -390,39 +399,39 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Destinations') }}</h3>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Where to ship your products') }}</p>
+                                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Destinations') }}</h3>
+                                            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Where to ship your products') }}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="p-4 sm:p-6">
+                            <div class="p-6">
                                 <div id="destination-fields-container" class="space-y-4">
                                     {{-- Initial Destination Block --}}
-                                    <div class="destination-block p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+                                    <div class="destination-block p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
                                         <div class="space-y-4">
                                             <!-- Quantity -->
                                             <div>
-                                                <label for="destinations_0_quantity" class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">{{ __('Quantity') }}</label>
+                                                <label for="destinations_0_quantity" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">{{ __('Quantity') }}</label>
                                                 <x-text-input type="number" 
                                                               id="destinations_0_quantity"
                                                               name="destinations[0][quantity]" 
                                                               value="{{ old('destinations.0.quantity') }}" 
                                                               required 
                                                               min="1" 
-                                                              class="w-full rounded-lg text-sm shadow-sm dark:bg-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500" 
+                                                              class="w-full rounded-lg text-sm shadow-sm dark:bg-slate-800 dark:text-white border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500" 
                                                               placeholder="{{ __('e.g., 100') }}" />
                                                 <x-input-error :messages="$errors->get('destinations.0.quantity')" class="mt-2 js-error-message js-error-destinations-0-quantity" />
                                             </div>
 
                                             <!-- Country -->
                                             <div>
-                                                <label for="destinations_0_country_id" class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">{{ __('Country') }}</label>
+                                                <label for="destinations_0_country_id" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">{{ __('Country') }}</label>
                                                 <select id="destinations_0_country_id"
                                                         name="destinations[0][country_id]" 
                                                         required 
-                                                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 text-sm tom-select-country shadow-sm dark:bg-gray-800 dark:text-white">
+                                                        class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 text-sm tom-select-country shadow-sm dark:bg-slate-800 dark:text-white">
                                                     <option value="">{{ __('Select Country') }}</option>
                                                     @foreach($countries as $country)
                                                         <option value="{{ $country->id }}" 
@@ -437,11 +446,11 @@
 
                                             <!-- Service -->
                                             <div>
-                                                <label for="destinations_0_service_id" class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">{{ __('Service') }}</label>
+                                                <label for="destinations_0_service_id" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">{{ __('Service') }}</label>
                                                 <select id="destinations_0_service_id"
                                                         name="destinations[0][service_id]" 
                                                         required 
-                                                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm dark:bg-gray-800 dark:text-white">
+                                                        class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm dark:bg-slate-800 dark:text-white">
                                                     <option value="">{{ __('Select Service') }}</option>
                                                     @foreach($services as $service)
                                                         <option value="{{ $service->id }}" {{ old('destinations.0.service_id') == $service->id ? 'selected' : '' }}>
@@ -470,7 +479,7 @@
                                 <button type="button" 
                                         @click="addDestination"
                                         id="add-destination" 
-                                        class="mt-5 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400 border border-gray-300 dark:border-gray-600 hover:border-blue-400 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm w-full">
+                                        class="mt-5 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 border border-slate-300 dark:border-slate-600 hover:border-blue-400 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm w-full">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
@@ -482,9 +491,9 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 sm:py-5">
+                <div class="mt-8 flex flex-col sm:flex-row items-center justify-end gap-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 px-6 py-5">
                     <a href="{{ route('client.dashboard') }}" 
-                       class="w-full sm:w-auto text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 flex items-center justify-center gap-2 py-2.5 sm:py-0">
+                       class="w-full sm:w-auto text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 flex items-center justify-center gap-2 py-2.5 sm:py-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -547,7 +556,6 @@
 
             // --- TomSelect Initialization for Country Flags ---
             const initializeTomSelect = (element) => {
-                // Check if TomSelect is already initialized
                 if (element.tomselect) {
                     element.tomselect.destroy();
                 }
@@ -592,29 +600,29 @@
                 
                 getDestinationTemplate(newIndex) {
                     const template = document.createElement('div');
-                    template.classList.add('destination-block', 'p-4', 'bg-gray-50', 'dark:bg-gray-700', 'rounded-lg', 'border', 'border-gray-200', 'dark:border-gray-600', 'hover:border-blue-400', 'dark:hover:border-blue-600', 'transition-colors');
+                    template.classList.add('destination-block', 'p-4', 'bg-slate-50', 'dark:bg-slate-700', 'rounded-lg', 'border', 'border-slate-200', 'dark:border-slate-600', 'hover:border-blue-400', 'dark:hover:border-blue-600', 'transition-colors');
                     template.innerHTML = `
                         <div class="space-y-4">
                             <!-- Quantity -->
                             <div>
-                                <label for="destinations_${newIndex}_quantity" class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">{{ __('Quantity') }}</label>
+                                <label for="destinations_${newIndex}_quantity" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">{{ __('Quantity') }}</label>
                                 <input type="number" 
                                        id="destinations_${newIndex}_quantity"
                                        name="destinations[${newIndex}][quantity]" 
                                        required 
                                        min="1" 
-                                       class="w-full rounded-lg text-sm shadow-sm dark:bg-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500" 
+                                       class="w-full rounded-lg text-sm shadow-sm dark:bg-slate-800 dark:text-white border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500" 
                                        placeholder="{{ __('e.g., 100') }}" />
                                 <x-input-error messages="" class="mt-2 js-error-message js-error-destinations-${newIndex}-quantity" />
                             </div>
 
                             <!-- Country -->
                             <div>
-                                <label for="destinations_${newIndex}_country_id" class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">{{ __('Country') }}</label>
+                                <label for="destinations_${newIndex}_country_id" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">{{ __('Country') }}</label>
                                 <select id="destinations_${newIndex}_country_id"
                                         name="destinations[${newIndex}][country_id]" 
                                         required 
-                                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 text-sm tom-select-country shadow-sm dark:bg-gray-800 dark:text-white">
+                                        class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 text-sm tom-select-country shadow-sm dark:bg-slate-800 dark:text-white">
                                     <option value="">{{ __('Select Country') }}</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country->id }}" 
@@ -628,11 +636,11 @@
 
                             <!-- Service -->
                             <div>
-                                <label for="destinations_${newIndex}_service_id" class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">{{ __('Service') }}</label>
+                                <label for="destinations_${newIndex}_service_id" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">{{ __('Service') }}</label>
                                 <select id="destinations_${newIndex}_service_id"
                                         name="destinations[${newIndex}][service_id]" 
                                         required 
-                                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm dark:bg-gray-800 dark:text-white">
+                                        class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm dark:bg-slate-800 dark:text-white">
                                     <option value="">{{ __('Select Service') }}</option>
                                     @foreach($services as $service)
                                         <option value="{{ $service->id }}">
@@ -807,4 +815,59 @@
         });
     </script>
     @endpush
+
+    <style>
+        /* Enterprise form styling */
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="url"],
+        input[type="number"],
+        textarea,
+        select {
+            border-collapse: separate;
+        }
+
+        /* Custom scrollbar for textareas */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .dark textarea::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+
+        .dark textarea::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+
+        /* Progress steps styling */
+        .destination-block {
+            transition: all 0.3s ease;
+        }
+
+        .destination-block:hover {
+            box-shadow: 0 1px 3px 0 rgba(59, 130, 246, 0.1);
+        }
+    </style>
 </x-app-layout>

@@ -457,7 +457,8 @@
 <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900" x-data="{ sidebarOpen: false }" x-cloak>
     <x-sidebar :role="auth()->user()->role ?? 'client'" />
 
-    <header class="sticky top-0 z-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-700/80 shadow-sm lg:pl-64">
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-700/80 shadow-sm">
+        <x-layout.header />
         <div class="px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <button @click="sidebarOpen = !sidebarOpen" 
@@ -468,9 +469,7 @@
                 </button>
 
                 <div class="flex-1">
-                    @if (isset($header))
-                        <div class="py-2">{{ $header }}</div>
-                    @endif
+                    
                 </div>
 
                 <!-- Dark Mode Toggle -->

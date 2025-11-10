@@ -5,17 +5,24 @@
 ]">
     <x-slot name="header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                 <div class="flex-1 min-w-0">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                        {{ __('Sourcing Order Details') }}
-                    </h2>
-                    <p class="mt-1 text-base text-gray-600 dark:text-gray-400">
-                        {{ __('Order') }} #{{ $sourcingOrder->id }}
-                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-600 dark:bg-blue-700 rounded-lg flex items-center justify-center shadow-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                {{ __('Order Details') }}
+                            </h2>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Order') }} #{{ $sourcingOrder->id }}</p>
+                        </div>
+                    </div>
                 </div>
                 <a href="{{ route('client.sourcing-orders.index') }}" 
-                   class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm w-full sm:w-auto justify-center">
+                   class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
@@ -25,7 +32,7 @@
         </div>
     </x-slot>
 
-    <div class="py-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- Status Banner --}}
@@ -35,28 +42,30 @@
                     'payment_pending_verification' => ['color' => 'blue', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15', 'title' => __('Verification in Progress')],
                     'processing' => ['color' => 'purple', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15', 'title' => __('Processing Order')],
                     'shipped' => ['color' => 'blue', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4', 'title' => __('Shipped')],
-                    'delivered' => ['color' => 'green', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => __('Delivered')],
+                    'delivered' => ['color' => 'emerald', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => __('Delivered')],
                 ];
                 $statusData = $statusConfig[$sourcingOrder->status] ?? $statusConfig['pending_payment'];
             @endphp
             
-            <div class="mb-8 p-6 rounded-xl shadow-sm border {{ "bg-{$statusData['color']}-50 dark:bg-{$statusData['color']}-900/20 border-{$statusData['color']}-200 dark:border-{$statusData['color']}-700" }}">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full flex items-center justify-center {{ "bg-{$statusData['color']}-100 dark:bg-{$statusData['color']}-900 border border-{$statusData['color']}-300 dark:border-{$statusData['color']}-500" }}">
-                            <svg class="w-6 h-6 {{ "text-{$statusData['color']}-600 dark:text-{$statusData['color']}-400" }}" 
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
-                            </svg>
+            <div class="mb-8 bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div class="p-6 bg-{{ $statusData['color'] }}-50 dark:bg-{{ $statusData['color'] }}-900/20 border-b-4 border-{{ $statusData['color'] }}-400 dark:border-{{ $statusData['color'] }}-600">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-lg flex items-center justify-center bg-{{ $statusData['color'] }}-100 dark:bg-{{ $statusData['color'] }}-900/50 border-2 border-{{ $statusData['color'] }}-300 dark:border-{{ $statusData['color'] }}-600 shadow-sm">
+                                <svg class="w-7 h-7 text-{{ $statusData['color'] }}-600 dark:text-{{ $statusData['color'] }}-400" 
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-{{ $statusData['color'] }}-700 dark:text-{{ $statusData['color'] }}-300 uppercase tracking-wider mb-1">{{ $statusData['title'] ?? __('Current Status') }}</p>
+                                <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ __(ucfirst(str_replace('_', ' ', $sourcingOrder->status))) }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-sm font-medium {{ "text-{$statusData['color']}-700 dark:text-{$statusData['color']}-300" }} uppercase tracking-wider mb-1">{{ $statusData['title'] ?? __('Current Status') }}</p>
-                            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ __(ucfirst(str_replace('_', ' ', $sourcingOrder->status))) }}</p>
+                        <div class="text-center sm:text-right bg-white dark:bg-slate-800 rounded-lg px-4 py-3 border border-slate-200 dark:border-slate-700">
+                            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Last updated') }}</p>
+                            <p class="text-sm font-bold text-slate-900 dark:text-white mt-1">{{ $sourcingOrder->updated_at->diffForHumans() }}</p>
                         </div>
-                    </div>
-                    <div class="text-center sm:text-right">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Last updated') }}</p>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $sourcingOrder->updated_at->diffForHumans() }}</p>
                     </div>
                 </div>
             </div>
@@ -67,8 +76,8 @@
                 <div class="lg:col-span-2 space-y-8">
                     
                     {{-- Product Information --}}
-                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -77,11 +86,11 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Product Information') }}</h3>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Complete product details and specifications') }}</p>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Product Information') }}</h3>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Complete product details and specifications') }}</p>
                                     </div>
                                 </div>
-                                <span class="px-3 py-1 text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
                                     {{ $sourcingOrder->quotation->sourcingRequest->category->name }}
                                 </span>
                             </div>
@@ -91,14 +100,14 @@
                                 {{-- Product Image --}}
                                 <div class="space-y-6">
                                     <div class="relative group">
-                                        <div class="w-full aspect-square bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl overflow-hidden">
+                                        <div class="w-full aspect-square bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden shadow-sm">
                                             @if ($sourcingOrder->quotation->sourcingRequest->product_image)
                                                 <img src="{{ asset('storage/' . $sourcingOrder->quotation->sourcingRequest->product_image) }}" 
                                                      alt="{{ $sourcingOrder->quotation->sourcingRequest->product_name }}" 
                                                      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center">
-                                                    <svg class="w-20 h-20 text-gray-300 dark:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <svg class="w-20 h-20 text-slate-300 dark:text-slate-600" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
                                                     </svg>
                                                 </div>
@@ -106,10 +115,10 @@
                                         </div>
                                     </div>
                                     <div class="space-y-3">
-                                        <h4 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">{{ $sourcingOrder->quotation->sourcingRequest->product_name }}</h4>
+                                        <h4 class="text-xl font-bold text-slate-900 dark:text-white leading-tight">{{ $sourcingOrder->quotation->sourcingRequest->product_name }}</h4>
                                         @if ($sourcingOrder->quotation->sourcingRequest->product_url)
                                             <a href="{{ $sourcingOrder->quotation->sourcingRequest->product_url }}" target="_blank" 
-                                               class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors">
+                                               class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                                 </svg>
@@ -120,9 +129,9 @@
                                 </div>
                                 
                                 {{-- Product Details --}}
-                                <div class="space-y-6">
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ __('Shipping Method') }}</p>
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">{{ __('Shipping Method') }}</p>
                                         <div class="flex items-center gap-3">
                                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                                                 <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,8 +139,8 @@
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p class="text-base font-semibold text-gray-900 dark:text-white capitalize">{{ $sourcingOrder->quotation->sourcingRequest->shipping_method ?? __('Not specified') }}</p>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                <p class="text-base font-bold text-slate-900 dark:text-white capitalize">{{ $sourcingOrder->quotation->sourcingRequest->shipping_method ?? __('Not specified') }}</p>
+                                                <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
                                                     @if($sourcingOrder->quotation->sourcingRequest->shipping_method === 'air')
                                                         {{ __('Faster delivery, suitable for small volumes') }}
                                                     @else
@@ -142,15 +151,15 @@
                                         </div>
                                     </div>
 
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ __('Additional Notes') }}</p>
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">{{ __('Additional Notes') }}</p>
                                         <div class="flex items-start gap-3">
                                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                                 <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
                                             </div>
-                                            <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed flex-1">
+                                            <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed flex-1">
                                                 {{ $sourcingOrder->quotation->sourcingRequest->note ?? __('No additional notes provided.') }}
                                             </p>
                                         </div>
@@ -161,8 +170,8 @@
                     </div>
 
                     {{-- Quotation Details --}}
-                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,36 +179,36 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Quotation Details') }}</h3>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Detailed pricing and cost breakdown') }}</p>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Quotation Details') }}</h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Detailed pricing and cost breakdown') }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="p-6">
                             <div class="space-y-6">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{{ __('Unit Price') }}</p>
-                                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($sourcingOrder->quotation->unit_price, 2) }} <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $sourcingOrder->quotation->currency }}</span></p>
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Price') }}</p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->unit_price, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingOrder->quotation->currency }}</span></p>
                                     </div>
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{{ __('Commission') }}</p>
-                                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($sourcingOrder->quotation->commission_service, 2) }} <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $sourcingOrder->quotation->currency }}</span></p>
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Commission') }}</p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->commission_service, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingOrder->quotation->currency }}</span></p>
                                     </div>
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{{ __('Unit Weight') }}</p>
-                                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($sourcingOrder->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-gray-500 dark:text-gray-400">g</span></p>
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Weight') }}</p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">g</span></p>
                                     </div>
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{{ __('Local Delivery') }}</p>
-                                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($sourcingOrder->quotation->delivery_cost_china, 2) }} <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $sourcingOrder->quotation->currency }}</span></p>
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Local Delivery') }}</p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->delivery_cost_china, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingOrder->quotation->currency }}</span></p>
                                     </div>
                                 </div>
                                 
-                                <div class="p-6 bg-gradient-to-r from-blue-500/10 to-blue-600/10 border-2 border-blue-400 dark:border-blue-600 rounded-xl">
+                                <div class="p-6 bg-gradient-to-r from-blue-500/10 to-blue-600/10 border-2 border-blue-400 dark:border-blue-600 rounded-lg">
                                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                         <div>
-                                            <p class="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider mb-1">{{ __('Grand Total') }}</p>
+                                            <p class="text-sm font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wider mb-1">{{ __('Grand Total') }}</p>
                                             <p class="text-3xl sm:text-4xl font-extrabold text-blue-800 dark:text-blue-400">{{ number_format($sourcingOrder->quotation->amount, 2) }} <span class="text-xl font-bold">{{ $sourcingOrder->quotation->currency }}</span></p>
                                         </div>
                                         <svg class="w-14 h-14 text-blue-500 dark:text-blue-700 opacity-50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,8 +221,8 @@
                     </div>
 
                     {{-- Payment Section --}}
-                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,8 +230,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Payment Status') }}</h3>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Upload and manage payment proof') }}</p>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Payment Status') }}</h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Upload and manage payment proof') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -244,28 +253,28 @@
                             @endif
 
                             @if($sourcingOrder->status === 'pending_payment')
-                                <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+                                <div class="pt-6 border-t border-slate-200 dark:border-slate-700">
                                     <form action="{{ route('client.sourcing-orders.upload-proof-of-payment', $sourcingOrder) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                                         @csrf
                                         <div>
-                                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Upload Proof of Payment') }}</label>
+                                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('Upload Proof of Payment') }}</label>
                                             <input type="file" 
                                                    name="proof_of_payment" 
-                                                   class="block w-full text-sm text-gray-600 dark:text-gray-400
+                                                   class="block w-full text-sm text-slate-600 dark:text-slate-400
                                                           file:mr-4 file:py-2.5 file:px-4
                                                           file:rounded-lg file:border-0
                                                           file:text-sm file:font-semibold
                                                           file:bg-blue-100 dark:file:bg-blue-900/50 file:text-blue-700 dark:file:text-blue-300
                                                           hover:file:bg-blue-200 dark:hover:file:bg-blue-900/70
                                                           file:cursor-pointer file:transition-colors
-                                                          border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl
+                                                          border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg
                                                           hover:border-blue-400 dark:hover:border-blue-500 transition-colors
                                                           cursor-pointer p-2"
                                                    required/>
-                                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Accepted formats: PDF, JPG, PNG (Max: 5MB)') }}</p>
+                                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ __('Accepted formats: PDF, JPG, PNG (Max: 5MB)') }}</p>
                                         </div>
                                         <button type="submit" 
-                                                class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
+                                                class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm font-bold rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
@@ -274,19 +283,19 @@
                                     </form>
                                 </div>
                             @elseif($sourcingOrder->proof_of_payment_path)
-                                <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
-                                    <div class="text-center p-6 bg-green-50 dark:bg-green-900/20 rounded-xl border-2 border-green-300 dark:border-green-700">
-                                        <div class="w-14 h-14 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <svg class="w-7 h-7 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="pt-6 border-t border-slate-200 dark:border-slate-700">
+                                    <div class="text-center p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border-2 border-emerald-300 dark:border-emerald-700">
+                                        <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                         </div>
-                                        <p class="text-base font-bold text-gray-900 dark:text-white mb-2">{{ __('Payment Proof Submitted') }}</p>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ __('Your payment proof is under review. We will proceed with the order once verified.') }}</p>
+                                        <p class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ __('Payment Proof Submitted') }}</p>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ __('Your payment proof is under review. We will proceed with the order once verified.') }}</p>
                                         <div class="flex flex-col sm:flex-row gap-3 justify-center">
                                             <a href="{{ asset('storage/' . $sourcingOrder->proof_of_payment_path) }}" 
                                                target="_blank" 
-                                               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 dark:text-green-300 bg-white dark:bg-gray-700 border-2 border-green-300 dark:border-green-700 rounded-lg hover:bg-green-50 dark:hover:bg-gray-600 transition-colors shadow-sm">
+                                               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-700 border-2 border-emerald-300 dark:border-emerald-700 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -294,7 +303,7 @@
                                                 {{ __('View Document') }}
                                             </a>
                                             <a href="{{ route('client.sourcing-orders.receipt', $sourcingOrder) }}" target="_blank"
-                                               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-300 bg-white dark:bg-gray-700 border-2 border-blue-300 dark:border-blue-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors shadow-sm">
+                                               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-blue-700 dark:text-blue-300 bg-white dark:bg-slate-700 border-2 border-blue-300 dark:border-blue-700 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                                 </svg>
@@ -311,8 +320,8 @@
 
                 {{-- Sidebar --}}
                 <div class="lg:col-span-1">
-                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden sticky top-6">
-                        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden sticky top-6">
+                        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,8 +329,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Order Summary') }}</h3>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Key information at a glance') }}</p>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Order Summary') }}</h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Key information at a glance') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -329,59 +338,61 @@
                             
                             {{-- Key Details --}}
                             <div class="space-y-3">
-                                <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                                    <svg class="w-4 h-4 mr-3 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="flex items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                                    <svg class="w-4 h-4 mr-3 text-blue-500 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                     </svg>
-                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400 flex-1">{{ __('Order ID') }}</span>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-white">#{{ $sourcingOrder->id }}</span>
+                                    <span class="text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1">{{ __('Order ID') }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">#{{ $sourcingOrder->id }}</span>
                                 </div>
 
-                                <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                                    <svg class="w-4 h-4 mr-3 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h.01M3 7h.01M3 3h.01M17 7h.01M17 3h.01M21 7h.01M21 3h.01M7 17h.01M7 21h.01M3 17h.01M3 21h.01M17 17h.01M17 21h.01M21 17h.01M21 21h.01"/>
+                                <div class="flex items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                                    <svg class="w-4 h-4 mr-3 text-blue-500 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                                     </svg>
-                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400 flex-1">{{ __('Category') }}</span>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $sourcingOrder->quotation->sourcingRequest->category->name }}</span>
+                                    <span class="text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1">{{ __('Category') }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->quotation->sourcingRequest->category->name }}</span>
                                 </div>
 
-                                <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                                    <svg class="w-4 h-4 mr-3 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                <div class="flex items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                                    <svg class="w-4 h-4 mr-3 text-blue-500 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                     </svg>
-                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400 flex-1">{{ __('Total Quantity') }}</span>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-white">{{ number_format($sourcingOrder->quotation->sourcingRequest->destinations->sum('quantity')) }}</span>
+                                    <span class="text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1">{{ __('Total Quantity') }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->sourcingRequest->destinations->sum('quantity')) }}</span>
                                 </div>
                             </div>
                             
                             {{-- Status --}}
-                            <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Status') }}</span>
-                                <span class="px-2.5 py-1 text-xs font-bold rounded-full
-                                    {{ $statusData['color'] === 'amber' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' : 
-                                       ($statusData['color'] === 'blue' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 
-                                       ($statusData['color'] === 'purple' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' : 
-                                       ($statusData['color'] === 'red' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 
-                                       'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'))) }}">
+                            <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                                <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">{{ __('Status') }}</span>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold
+                                    {{ $statusData['color'] === 'amber' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 
+                                       ($statusData['color'] === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 
+                                       ($statusData['color'] === 'purple' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' : 
+                                       'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400')) }}">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
+                                    </svg>
                                     {{ __(ucfirst(str_replace('_', ' ', $sourcingOrder->status))) }}
                                 </span>
                             </div>
 
                             {{-- Grand Total --}}
-                            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <div class="p-5 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl border border-blue-700 shadow-sm">
+                            <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+                                <div class="p-5 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg shadow-sm">
                                     <div class="text-center">
                                         <p class="text-sm font-bold text-blue-200 uppercase tracking-wide mb-1">{{ __('Total Amount') }}</p>
                                         <p class="text-3xl font-extrabold text-white mb-1">{{ number_format($sourcingOrder->quotation->amount, 2) }}</p>
-                                        <p class="text-base font-semibold text-blue-300">{{ $sourcingOrder->quotation->currency }}</p>
+                                        <p class="text-base font-bold text-blue-300">{{ $sourcingOrder->quotation->currency }}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <div class="text-center text-xs text-gray-500 dark:text-gray-400">
-                                    <p class="mb-1">{{ __('Order Created') }}: {{ $sourcingOrder->created_at->format('M d, Y') }}</p>
-                                    <p>{{ __('Last Update') }}: {{ $sourcingOrder->updated_at->diffForHumans() }}</p>
+                            <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+                                <div class="text-center text-xs text-slate-500 dark:text-slate-400 space-y-1">
+                                    <p><span class="font-semibold">{{ __('Order Created') }}:</span> {{ $sourcingOrder->created_at->format('M d, Y') }}</p>
+                                    <p><span class="font-semibold">{{ __('Last Update') }}:</span> {{ $sourcingOrder->updated_at->diffForHumans() }}</p>
                                 </div>
                             </div>
                         </div>
@@ -391,4 +402,39 @@
             </div>
         </div>
     </div>
+
+    <style>
+        /* Custom scrollbar styling */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .dark .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+
+        .dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+    </style>
 </x-app-layout>

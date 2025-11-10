@@ -106,4 +106,10 @@ class QuotationController extends Controller
 
         return redirect()->route('admin.dashboard')->with('status', 'Quotation created successfully!');
     }
+
+    public function show(Quotation $quotation): View
+    {
+        $this->authorize('view', $quotation);
+        return view('admin.quotations.show', compact('quotation'));
+    }
 }
