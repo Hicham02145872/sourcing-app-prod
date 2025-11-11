@@ -39,12 +39,12 @@ class SendQueuedVerificationEmail implements ShouldQueue
             }
 
             if (is_null($user->verification_email_sent_at)) {
-                // Send the notification
-                $user->sendEmailVerificationNotification();
-
                 // Mark that we've sent it
                 $user->verification_email_sent_at = now();
                 $user->save();
+
+                // Send the notification
+                $user->sendEmailVerificationNotification();
 
                 Log::info('Email verification notification sent to user.', ['user_id' => $user->id]);
             } else {
