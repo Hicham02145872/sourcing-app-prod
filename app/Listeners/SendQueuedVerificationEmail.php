@@ -30,7 +30,7 @@ class SendQueuedVerificationEmail implements ShouldQueue
         $lock = Cache::lock('verification_email_sent:' . $user->id, 120);
 
         try {
-            if ($lock->get()) {
+            if ($lock->block(5)) {  // Wait up to 5 seconds for the lock
                 $user->sendEmailVerificationNotification();
                 Log::info('Email verification notification sent to user.', ['user_id' => $user->id]);
             }
@@ -43,7 +43,7 @@ class SendQueuedVerificationEmail implements ShouldQueue
             ]);
 
         } finally {
-            optional($lock)->release();
+            $lock->forceRelease();
         }
     }
 }
