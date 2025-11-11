@@ -26,7 +26,13 @@ class SendQueuedVerificationEmail implements ShouldQueue
     public function handle(Registered $event): void
     {
         $user = $event->user;
-        $lock = Cache::lock('verification_email_sent:' . $user->id, 60); // Lock for 60 seconds
+
+        if ($user->hasVerifiedEmail()) {
+            Log::info('Email already verified for user, skipping verification email.', ['user_id' => $user->id]);
+            return;
+        }
+
+        $lock = Cache::lock('verification_email_sent:' . $user->id, 120); // Lock for 120 seconds
 
         try {
             if ($lock->get()) {
