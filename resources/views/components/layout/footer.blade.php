@@ -1,4 +1,4 @@
-<footer class="mt-auto border-t bg-white dark:bg-gray-800 border-blue-200/50 dark:border-blue-800/50">
+<footer class="fixed bottom-0 right-0 z-30 lg:left-72 border-t bg-white dark:bg-gray-800 border-blue-200/50 dark:border-blue-800/50 w-full">
     <div class="px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
             {{-- Copyright Section --}}

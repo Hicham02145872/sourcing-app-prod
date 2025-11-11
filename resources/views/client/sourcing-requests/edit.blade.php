@@ -28,8 +28,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-25 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             <form method="POST" action="{{ route('client.sourcing-requests.update', $sourcingRequest) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
@@ -41,7 +41,7 @@
                             <!-- Step 1 -->
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-sm">
-                                    1
+                                    {{ __('1') }}
                                 </div>
                                 <div class="hidden sm:block">
                                     <p class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Product Details') }}</p>
@@ -55,7 +55,7 @@
                             <!-- Step 2 -->
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-sm">
-                                    2
+                                    {{ __('2') }}
                                 </div>
                                 <div class="hidden sm:block">
                                     <p class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Image & Details') }}</p>
@@ -69,7 +69,7 @@
                             <!-- Step 3 -->
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-lg bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center text-sm font-bold">
-                                    3
+                                    {{ __('3') }}
                                 </div>
                                 <div class="hidden sm:block">
                                     <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ __('Destinations') }}</p>
@@ -89,7 +89,7 @@
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8-4m8 4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                         </svg>
                                     </div>
                                     <div>
@@ -250,8 +250,8 @@
                                     <div class="relative aspect-square bg-slate-50 dark:bg-slate-700 rounded-lg overflow-hidden border-2 border-dashed border-slate-300 dark:border-slate-600 group hover:border-blue-500 transition-all duration-200 shadow-inner">
                                         <img id="product_image_preview" 
                                              class="w-full h-full object-cover" 
-                                             src="{{ $sourcingRequest->product_image ? asset('storage/' . $sourcingRequest->product_image) : 'https://via.placeholder.com/400x400?text=No+Image' }}" 
-                                             alt="Product preview" />
+                                             src="{{ $sourcingRequest->product_image ? asset('storage/' . $sourcingRequest->product_image) : 'https://via.placeholder.com/400x400?text=' . __('No Image') }}" 
+                                             alt="{{ __('Product preview') }}" />
                                     </div>
 
                                     <!-- Upload Button -->

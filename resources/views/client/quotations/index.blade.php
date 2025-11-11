@@ -28,8 +28,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-25 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
             @if ($sourcingRequests->isEmpty())
                 {{-- Empty State --}}
@@ -62,7 +62,7 @@
                                     <div>
                                         <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ __('Active Quotations') }}</h3>
                                         <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                                            <span class="font-semibold text-blue-600 dark:text-blue-400">{{ $sourcingRequests->count() }}</span> {{ Str::plural('quotation', $sourcingRequests->count()) }}
+                                            <span class="font-semibold text-blue-600 dark:text-blue-400">{{ $sourcingRequests->count() }}</span> {{ Str::plural(__('quotation'), $sourcingRequests->count()) }}
                                         </p>
                                     </div>
                                 </div>

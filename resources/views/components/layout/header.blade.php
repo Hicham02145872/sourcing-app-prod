@@ -9,9 +9,11 @@
                 </svg>
             </button>
 
-
             {{-- Header Content --}}
             <div class="flex-1 px-4">
+                @if(auth()->check() && auth()->user()->role === 'client')
+                    <p class="text-base text-gray-600 dark:text-gray-400 font-bold text-center">Estimated delivery-time between 15 - 20 working days</p>
+                @endif
                 @if (isset($header))
                     <div class="py-2">{{ $header }}</div>
                 @endif

@@ -29,8 +29,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-25 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {{-- Left Column - Main Content --}}
                 <div class="lg:col-span-2 space-y-6">

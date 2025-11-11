@@ -6,14 +6,7 @@
     <title>SmartSource - Votre Solution de Sourcing Intelligent</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -88,16 +81,8 @@
             border-radius: 4px;
         }
 
-        .dark ::-webkit-scrollbar-thumb {
-            background: #475569;
-        }
-
         ::-webkit-scrollbar-thumb:hover {
             background: #3b82f6;
-        }
-
-        .dark ::-webkit-scrollbar-thumb:hover {
-            background: #2563eb;
         }
 
         /* Smooth transitions */
@@ -108,9 +93,9 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen">
+<body class="bg-gradient-to-br from-blue-50 via-white to-cyan-50 min-h-screen">
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md z-50 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+    <nav class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-slate-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
@@ -134,14 +119,14 @@
 
                 <!-- Desktop Navigation -->
                 <div class="hidden lg:flex items-center space-x-8">
-                    <a href="#features" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-semibold">Fonctionnalités</a>
-                    <a href="#how-it-works" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-semibold">Comment ça marche</a>
-                    <a href="#pricing" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-semibold">Tarifs</a>
+                    <a href="#features" class="text-slate-600 hover:text-blue-600 transition-colors font-semibold">Fonctionnalités</a>
+                    <a href="#how-it-works" class="text-slate-600 hover:text-blue-600 transition-colors font-semibold">Comment ça marche</a>
+                    <a href="#pricing" class="text-slate-600 hover:text-blue-600 transition-colors font-semibold">Tarifs</a>
                 </div>
 
                 <!-- Auth Buttons Desktop -->
                 <div class="hidden lg:flex items-center space-x-4">
-                    <a href="/login" class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-semibold transition-colors">
+                    <a href="/login" class="text-slate-700 hover:text-blue-600 font-semibold transition-colors">
                         Connexion
                     </a>
                     <a href="/register" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all font-semibold">
@@ -152,13 +137,13 @@
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobileMenu" class="hidden lg:hidden bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+        <div id="mobileMenu" class="hidden lg:hidden bg-white border-t border-slate-200">
             <div class="px-4 py-4 space-y-3 max-w-7xl mx-auto">
-                <a href="#features" class="block px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors font-semibold">Fonctionnalités</a>
-                <a href="#how-it-works" class="block px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors font-semibold">Comment ça marche</a>
-                <a href="#pricing" class="block px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors font-semibold">Tarifs</a>
-                <hr class="dark:border-slate-700 my-3">
-                <a href="/login" class="block px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors font-semibold">
+                <a href="#features" class="block px-4 py-3 text-slate-700 hover:bg-blue-50 rounded-lg transition-colors font-semibold">Fonctionnalités</a>
+                <a href="#how-it-works" class="block px-4 py-3 text-slate-700 hover:bg-blue-50 rounded-lg transition-colors font-semibold">Comment ça marche</a>
+                <a href="#pricing" class="block px-4 py-3 text-slate-700 hover:bg-blue-50 rounded-lg transition-colors font-semibold">Tarifs</a>
+                <hr class="my-3">
+                <a href="/login" class="block px-4 py-3 text-slate-700 hover:bg-blue-50 rounded-lg transition-colors font-semibold">
                     Connexion
                 </a>
                 <a href="/register" class="block px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold text-center">
@@ -175,7 +160,7 @@
                 <!-- Left Content -->
                 <div class="fade-in-up space-y-6 sm:space-y-8">
                     <!-- Badge -->
-                    <div class="inline-flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 sm:px-4 py-2 rounded-full border border-blue-200 dark:border-blue-800">
+                    <div class="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-3 sm:px-4 py-2 rounded-full border border-blue-200">
                         <svg class="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
@@ -183,7 +168,7 @@
                     </div>
 
                     <!-- Heading -->
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white leading-tight">
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight">
                         Simplifiez votre
                         <span class="block bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                             Sourcing
@@ -191,7 +176,7 @@
                     </h1>
 
                     <!-- Description -->
-                    <p class="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <p class="text-base sm:text-lg lg:text-xl text-slate-600 leading-relaxed">
                         Gérez vos demandes d'approvisionnement et commandes en toute simplicité. Une plateforme intuitive pour connecter acheteurs et fournisseurs.
                     </p>
 
@@ -203,24 +188,24 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                             </svg>
                         </a>
-                        <a href="#demo" class="px-6 sm:px-8 py-3 sm:py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg sm:rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all font-semibold text-center active:scale-95 touch-button sm:touch-button">
+                        <a href="#demo" class="px-6 sm:px-8 py-3 sm:py-4 bg-white text-slate-700 rounded-lg sm:rounded-xl border-2 border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all font-semibold text-center active:scale-95 touch-button sm:touch-button">
                             Voir la démo
                         </a>
                     </div>
 
                     <!-- Stats -->
                     <div class="grid grid-cols-3 gap-3 sm:gap-6 pt-6 sm:pt-8">
-                        <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-lg sm:rounded-xl border border-slate-200 dark:border-slate-700 text-center hover:shadow-lg transition-all duration-300">
-                            <div class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">5K+</div>
-                            <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 sm:mt-2 font-semibold">Utilisateurs</div>
+                        <div class="bg-white p-3 sm:p-6 rounded-lg sm:rounded-xl border border-slate-200 text-center hover:shadow-lg transition-all duration-300">
+                            <div class="text-2xl sm:text-3xl font-bold text-blue-600">5K+</div>
+                            <div class="text-xs sm:text-sm text-slate-600 mt-1 sm:mt-2 font-semibold">Utilisateurs</div>
                         </div>
-                        <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-lg sm:rounded-xl border border-slate-200 dark:border-slate-700 text-center hover:shadow-lg transition-all duration-300">
-                            <div class="text-2xl sm:text-3xl font-bold text-cyan-600 dark:text-cyan-400">98%</div>
-                            <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 sm:mt-2 font-semibold">Satisfaction</div>
+                        <div class="bg-white p-3 sm:p-6 rounded-lg sm:rounded-xl border border-slate-200 text-center hover:shadow-lg transition-all duration-300">
+                            <div class="text-2xl sm:text-3xl font-bold text-cyan-600">98%</div>
+                            <div class="text-xs sm:text-sm text-slate-600 mt-1 sm:mt-2 font-semibold">Satisfaction</div>
                         </div>
-                        <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-lg sm:rounded-xl border border-slate-200 dark:border-slate-700 text-center hover:shadow-lg transition-all duration-300">
-                            <div class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">50K+</div>
-                            <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 sm:mt-2 font-semibold">Commandes</div>
+                        <div class="bg-white p-3 sm:p-6 rounded-lg sm:rounded-xl border border-slate-200 text-center hover:shadow-lg transition-all duration-300">
+                            <div class="text-2xl sm:text-3xl font-bold text-blue-600">50K+</div>
+                            <div class="text-xs sm:text-sm text-slate-600 mt-1 sm:mt-2 font-semibold">Commandes</div>
                         </div>
                     </div>
                 </div>
@@ -234,55 +219,55 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800">
+    <section id="features" class="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-8 sm:mb-16">
-                <div class="inline-flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-full mb-4 border border-blue-200 dark:border-blue-800">
+                <div class="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-4 border border-blue-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                     <span class="text-sm font-bold">Fonctionnalités</span>
                 </div>
-                <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-4">
+                <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-2 sm:mb-4">
                     Fonctionnalités puissantes
                 </h2>
-                <p class="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto px-2 sm:px-0">
+                <p class="text-base sm:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto px-2 sm:px-0">
                     Tout ce dont vous avez besoin pour gérer efficacement vos opérations de sourcing
                 </p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-4 sm:gap-8">
                 <!-- Feature 1 -->
-                <div class="group p-4 sm:p-8 bg-gradient-to-br from-blue-50 to-white dark:from-slate-900 dark:to-slate-800 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 hover:shadow-xl hover:scale-105 transition-all duration-300 active:scale-95">
+                <div class="group p-4 sm:p-8 bg-gradient-to-br from-blue-50 to-white rounded-xl sm:rounded-2xl border border-slate-200 hover:shadow-xl hover:scale-105 transition-all duration-300 active:scale-95">
                     <div class="w-12 sm:w-14 h-12 sm:h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform flex-shrink-0 shadow-lg shadow-blue-500/30">
                         <svg class="w-6 sm:w-7 h-6 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-3">Gestion des demandes</h3>
-                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300">Créez et suivez facilement toutes vos demandes d'approvisionnement en temps réel.</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 sm:mb-3">Gestion des demandes</h3>
+                    <p class="text-sm sm:text-base text-slate-600">Créez et suivez facilement toutes vos demandes d'approvisionnement en temps réel.</p>
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="group p-4 sm:p-8 bg-gradient-to-br from-cyan-50 to-white dark:from-slate-900 dark:to-slate-800 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 hover:shadow-xl hover:scale-105 transition-all duration-300 active:scale-95">
+                <div class="group p-4 sm:p-8 bg-gradient-to-br from-cyan-50 to-white rounded-xl sm:rounded-2xl border border-slate-200 hover:shadow-xl hover:scale-105 transition-all duration-300 active:scale-95">
                     <div class="w-12 sm:w-14 h-12 sm:h-14 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform flex-shrink-0 shadow-lg shadow-cyan-500/30">
                         <svg class="w-6 sm:w-7 h-6 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-3">Réseau de fournisseurs</h3>
-                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300">Connectez-vous avec des fournisseurs vérifiés et élargissez votre réseau professionnel.</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 sm:mb-3">Réseau de fournisseurs</h3>
+                    <p class="text-sm sm:text-base text-slate-600">Connectez-vous avec des fournisseurs vérifiés et élargissez votre réseau professionnel.</p>
                 </div>
 
                 <!-- Feature 3 -->
-                <div class="group p-4 sm:p-8 bg-gradient-to-br from-blue-50 to-white dark:from-slate-900 dark:to-slate-800 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 hover:shadow-xl hover:scale-105 transition-all duration-300 active:scale-95">
+                <div class="group p-4 sm:p-8 bg-gradient-to-br from-blue-50 to-white rounded-xl sm:rounded-2xl border border-slate-200 hover:shadow-xl hover:scale-105 transition-all duration-300 active:scale-95">
                     <div class="w-12 sm:w-14 h-12 sm:h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform flex-shrink-0 shadow-lg shadow-blue-500/30">
                         <svg class="w-6 sm:w-7 h-6 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-3">Analyses & Rapports</h3>
-                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300">Obtenez des insights détaillés sur vos opérations avec des rapports analytiques avancés.</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 sm:mb-3">Analyses & Rapports</h3>
+                    <p class="text-sm sm:text-base text-slate-600">Obtenez des insights détaillés sur vos opérations avec des rapports analytiques avancés.</p>
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 <x-app-layout :breadcrumb="[
-    ['label' => 'Dashboard', 'url' => route('client.dashboard')],
-    ['label' => 'Sourcing Requests', 'url' => route('client.sourcing-requests.index')],
-    ['label' => 'Details']
+    ['label' => __('Dashboard'), 'url' => route('client.dashboard')],
+    ['label' => __('Sourcing Requests'), 'url' => route('client.sourcing-requests.index')],
+    ['label' => __('Details')]
 ]">
     <x-slot name="header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,8 +35,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-25 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
             {{-- Status Banner --}}
             @php
@@ -84,7 +84,7 @@
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8-4m8 4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                         </svg>
                                     </div>
                                     <div>
@@ -230,7 +230,7 @@
                                                 {{ __('Quantity') }}
                                             </div>
                                             <span class="px-3 py-1 text-base font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 rounded-full whitespace-nowrap">
-                                                {{ number_format($destination->quantity) }} units
+                                                {{ number_format($destination->quantity) }} {{ __('units') }}
                                             </span>
                                         </div>
                                     </div>
@@ -240,7 +240,7 @@
                     </div>
 
                     {{-- Quotation & Actions --}}
-                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden" x-data="{ selectedMethod: null }">
                         <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                 <div class="flex items-center gap-3">
@@ -279,7 +279,7 @@
                                         </div>
                                         <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
                                             <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Weight') }}</p>
-                                            <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">g</span></p>
+                                            <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('g') }}</span></p>
                                         </div>
                                         <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
                                             <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Local Delivery') }}</p>
@@ -482,7 +482,7 @@
                                         __('Request ID') => ['value' => "#{$sourcingRequest->id}", 'icon' => 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z'],
                                         __('Category') => ['value' => $sourcingRequest->category->name, 'icon' => 'M7 7h.01M7 3h.01M3 7h.01M3 3h.01M17 7h.01M17 3h.01M21 7h.01M21 3h.01M7 17h.01M7 21h.01M3 17h.01M3 21h.01M17 17h.01M17 21h.01M21 17h.01M21 21h.01'],
                                         __('Destinations') => ['value' => $sourcingRequest->destinations->count(), 'icon' => 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945'],
-                                        __('Total Quantity') => ['value' => number_format($sourcingRequest->destinations->sum('quantity')) . ' units', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
+                                        __('Total Quantity') => ['value' => number_format($sourcingRequest->destinations->sum('quantity')) . ' ' . __('units'), 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
                                     ];
                                 @endphp
                                 @foreach($summaryDetails as $label => $data)
@@ -509,7 +509,7 @@
                                 <div class="p-5 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl border border-blue-700 shadow-sm">
                                     <div class="text-center">
                                         <p class="text-sm font-bold text-blue-200 uppercase tracking-wide mb-1">{{ __('Order Grand Total') }}</p>
-                                        <p class="text-3xl font-extrabold text-white mb-1">{{ number_format($sourcingRequest->quotation->amount, 2) }}</p>
+                                        <p class="text-3xl sm:text-4xl font-extrabold text-blue-800 dark:text-blue-400">{{ number_format($sourcingRequest->quotation->amount, 2) }}</p>
                                         <p class="text-base font-semibold text-blue-300">{{ $sourcingRequest->quotation->currency }}</p>
                                     </div>
                                 </div>

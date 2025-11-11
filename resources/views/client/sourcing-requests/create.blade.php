@@ -28,8 +28,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-25 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             <form method="POST" action="{{ route('client.sourcing-requests.store') }}" enctype="multipart/form-data"
                   x-data="sourcingRequestForm" @submit.prevent="submitForm"
                   data-translation-destination-required="{{ __('At least one destination is required!') }}"
@@ -47,7 +47,7 @@
                             <!-- Step 1 -->
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-sm">
-                                    1
+                                    {{ __('1') }}
                                 </div>
                                 <div class="hidden sm:block">
                                     <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('Product Details') }}</p>
@@ -61,7 +61,7 @@
                             <!-- Step 2 -->
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center text-sm font-bold shadow-sm">
-                                    2
+                                    {{ __('2') }}
                                 </div>
                                 <div class="hidden sm:block">
                                     <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ __('Destinations') }}</p>
@@ -75,7 +75,7 @@
                             <!-- Step 3 -->
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center text-sm font-bold shadow-sm">
-                                    3
+                                    {{ __('3') }}
                                 </div>
                                 <div class="hidden sm:block">
                                     <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ __('Review') }}</p>
@@ -348,7 +348,7 @@
                                         <img id="product_image_preview" 
                                              class="w-full h-full object-cover opacity-0 transition-opacity duration-300" 
                                              src="" 
-                                             alt="Product preview" />
+                                             alt="{{ __('Product preview') }}" />
                                         <div id="placeholder" 
                                              class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors duration-200">
                                             <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-lg shadow-sm flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
@@ -435,8 +435,7 @@
                                                     <option value="">{{ __('Select Country') }}</option>
                                                     @foreach($countries as $country)
                                                         <option value="{{ $country->id }}" 
-                                                                data-flag="{{ strtolower($country->code) }}" 
-                                                                {{ old('destinations.0.country_id') == $country->id ? 'selected' : '' }}>
+                                                                data-flag="{{ strtolower($country->code) }}">
                                                             {{ $country->name }}
                                                         </option>
                                                     @endforeach
@@ -453,7 +452,7 @@
                                                         class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm dark:bg-slate-800 dark:text-white">
                                                     <option value="">{{ __('Select Service') }}</option>
                                                     @foreach($services as $service)
-                                                        <option value="{{ $service->id }}" {{ old('destinations.0.service_id') == $service->id ? 'selected' : '' }}>
+                                                        <option value="{{ $service->id }}">
                                                             {{ $service->name }}
                                                         </option>
                                                     @endforeach
@@ -565,7 +564,7 @@
                     searchField: ['text'],
                     plugins: {
                         'dropdown_header': {
-                            title: 'Select Country'
+                            title: '{{ __("Select Country") }}'
                         }
                     },
                     render: {
@@ -722,7 +721,7 @@
                 
                 async submitForm(event) {
                     event.preventDefault();
-                    window.dispatchEvent(new CustomEvent('loading-start', { detail: { message: 'Creating your sourcing request...' } }));
+                    window.dispatchEvent(new CustomEvent('loading-start', { detail: { message: '{{ __("Creating your sourcing request...") }}' } }));
 
                     document.querySelectorAll('.js-error-message').forEach(el => el.textContent = '');
                     document.querySelectorAll('.js-error-message').forEach(el => el.style.display = 'none');
@@ -744,12 +743,12 @@
                         const data = await response.json();
 
                         if (response.ok) {
-                            window.dispatchEvent(new CustomEvent('show-success-toast', { detail: data.message || 'Request submitted successfully!' }));
+                            window.dispatchEvent(new CustomEvent('show-success-toast', { detail: data.message || '{{ __("Request submitted successfully!") }}' }));
                             setTimeout(() => {
                                 window.location.href = data.redirect_url || '{{ route("client.dashboard") }}';
                             }, 1500);
                         } else if (response.status === 422) {
-                            window.dispatchEvent(new CustomEvent('show-error-toast', { detail: data.message || 'Please check the form for errors.' }));
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { detail: data.message || '{{ __("Please check the form for errors.") }}' }));
                             
                             if (data.errors) {
                                 for (const field in data.errors) {
@@ -767,11 +766,11 @@
                                 }
                             }
                         } else {
-                            window.dispatchEvent(new CustomEvent('show-error-toast', { detail: data.message || 'An unexpected error occurred. Please try again.' }));
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { detail: data.message || '{{ __("An unexpected error occurred. Please try again.") }}' }));
                         }
 
                     } catch (error) {
-                        window.dispatchEvent(new CustomEvent('show-error-toast', { detail: 'A network error occurred. Please check your connection.' }));
+                        window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __("A network error occurred. Please check your connection.") }}' }));
                     } finally {
                         window.dispatchEvent(new CustomEvent('loading-stop'));
                     }

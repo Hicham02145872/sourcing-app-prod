@@ -1,23 +1,12 @@
 {{-- resources/views/components/sidebar-enterprise-blue.blade.php --}}
 @props(['role' => 'client'])
 
-<aside class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-xl transform transition-transform duration-300 lg:translate-x-0 flex flex-col" 
+<aside class="fixed top-[4rem] bottom-0 left-0 z-50 w-72 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-xl transform transition-transform duration-300 lg:translate-x-0 flex flex-col" 
        id="sidebar"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
     
     {{-- Logo Section --}}
-    <div class="flex items-center justify-between py-0 px-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <a href="{{ $role === 'admin' ? route('admin.dashboard') : route('client.dashboard') }}" class="flex items-center gap-2 group">
-            <img src="{{ asset('images/logos/logi1.jpg') }}" alt="Logo" class="h-20 w-auto">
-        </a>
-        
-        {{-- Mobile Close Button --}}
-        <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-        </button>
-    </div>
+    
 
     {{-- Main Content Wrapper --}}
     <div class="flex-1 overflow-y-auto">

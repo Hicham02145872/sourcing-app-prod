@@ -11,9 +11,9 @@
                         </div>
                         <div>
                             <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                                {{ __('Quotations') }}
+                                {{ __('Quotations Management') }}
                             </h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Manage and track all quotations') }}</p>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Enterprise quotation tracking and management system') }}</p>
                         </div>
                     </div>
                 </div>
@@ -22,7 +22,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        {{ __('Export Report') }}
+                        {{ __('Export') }}
                     </button>
                     <a href="{{ route('admin.quotations.select-request') }}" 
                        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-violet-600 hover:bg-violet-700 dark:bg-violet-700 dark:hover:bg-violet-600 text-white rounded-lg transition-all duration-200 shadow-sm hover:shadow">
@@ -36,8 +36,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-25 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
             {{-- Statistics Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -86,16 +86,16 @@
                         <div>
                             <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Approved') }}</p>
                             <p class="text-2xl font-bold text-slate-900 dark:text-white mt-2">{{ $approvedQuotations }}</p>
-                            <p class="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1 flex items-center gap-1">
+                            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1 flex items-center gap-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
                                 {{ __('Accepted by clients') }}
                             </p>
                         </div>
-                        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
                     </div>
@@ -132,7 +132,7 @@
                             <div class="flex items-center gap-3">
                                 <div class="w-2 h-2 bg-violet-600 rounded-full animate-pulse"></div>
                                 <div>
-                                    <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ __('Quotations') }}</h3>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ __('Active Quotations') }}</h3>
                                     <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                                         <span class="font-semibold text-violet-600 dark:text-violet-400">{{ $quotations->total() }}</span> {{ Str::plural('quotation', $quotations->total()) }}
                                     </p>
@@ -163,7 +163,7 @@
                             {{-- Status Filter --}}
                             <div class="w-full sm:w-48">
                                 <select name="status" class="block w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white shadow-sm font-medium">
-                                    <option value="">{{ __('All Status') }}</option>
+                                    <option value="">{{ __('All Statuses') }}</option>
                                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
                                     <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>{{ __('Approved') }}</option>
                                     <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
@@ -194,10 +194,10 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{{ __('No Quotations') }}</h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-sm mx-auto">{{ __('There are no quotations available at the moment. Create a new quotation to get started.') }}</p>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{{ __('No Quotations Found') }}</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-sm mx-auto">{{ __('There are no quotations matching your criteria. Create a new quotation to get started.') }}</p>
                         <a href="{{ route('admin.quotations.select-request') }}" 
-                           class="inline-flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
+                           class="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 dark:bg-violet-700 dark:hover:bg-violet-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
@@ -211,16 +211,19 @@
                             <thead class="bg-slate-50 dark:bg-slate-900/50">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                        {{ __('Product Details') }}
+                                        {{ __('Quotation') }}
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                        {{ __('Product') }}
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                                         {{ __('Client') }}
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                        {{ __('Amount') }}
+                                        {{ __('Status') }}
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                        {{ __('Status') }}
+                                        {{ __('Amount') }}
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                                         {{ __('Date') }}
@@ -233,34 +236,39 @@
                             <tbody class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                                 @foreach ($quotations as $quotation)
                                     <tr class="hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-colors duration-150">
-                                        {{-- Product Details --}}
+                                        {{-- Quotation ID --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                                <div class="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden flex-shrink-0">
                                                     @if ($quotation->sourcingRequest->product_image)
-                                                        <img class="w-full h-full object-cover" 
-                                                             src="{{ asset('storage/' . $quotation->sourcingRequest->product_image) }}" 
-                                                             alt="{{ $quotation->sourcingRequest->product_name }}">
+                                                        <img src="{{ asset('storage/' . $quotation->sourcingRequest->product_image) }}"
+                                                             alt="{{ $quotation->sourcingRequest->product_name }}"
+                                                             class="w-full h-full object-cover">
                                                     @else
-                                                        <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                                        </svg>
+                                                        <div class="w-full h-full flex items-center justify-center bg-violet-100 dark:bg-violet-900/30">
+                                                            <span class="text-sm font-bold text-violet-600 dark:text-violet-400">
+                                                                {{ mb_substr($quotation->sourcingRequest->product_name, 0, 1) }}
+                                                            </span>
+                                                        </div>
                                                     @endif
                                                 </div>
-                                                <div class="min-w-0">
-                                                    <div class="text-sm font-semibold text-slate-900 dark:text-white max-w-xs truncate">
-                                                        {{ $quotation->sourcingRequest->product_name }}
-                                                    </div>
-                                                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                                        #{{ str_pad($quotation->id, 5, '0', STR_PAD_LEFT) }}
-                                                    </div>
+                                                <div>
+                                                    <div class="text-sm font-bold text-slate-900 dark:text-white">#{{ str_pad($quotation->id, 5, '0', STR_PAD_LEFT) }}</div>
+                                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ $quotation->sourcingRequest->category->name ?? 'N/A' }}</div>
                                                 </div>
+                                            </div>
+                                        </td>
+
+                                        {{-- Product --}}
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-semibold text-slate-900 dark:text-white max-w-xs truncate">
+                                                {{ $quotation->sourcingRequest->product_name }}
                                             </div>
                                         </td>
 
                                         {{-- Client --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-2">
                                                 <div class="w-8 h-8 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
                                                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300">
                                                         {{ substr($quotation->sourcingRequest->user->name, 0, 1) }}
@@ -273,6 +281,24 @@
                                             </div>
                                         </td>
 
+                                        {{-- Status --}}
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @php
+                                                $statusConfig = [
+                                                    'pending' => ['color' => 'amber', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                    'approved' => ['color' => 'emerald', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                    'rejected' => ['color' => 'red', 'icon' => 'M6 18L18 6M6 6l12 12'],
+                                                ];
+                                                $statusData = $statusConfig[$quotation->status] ?? $statusConfig['pending'];
+                                            @endphp
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold {{ "bg-{$statusData['color']}-100 dark:bg-{$statusData['color']}-900/30 text-{$statusData['color']}-700 dark:text-{$statusData['color']}-400" }}">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
+                                                </svg>
+                                                {{ __(ucfirst($quotation->status)) }}
+                                            </span>
+                                        </td>
+
                                         {{-- Amount --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-bold text-slate-900 dark:text-white">
@@ -281,41 +307,10 @@
                                             <div class="text-xs text-slate-500 dark:text-slate-400">{{ $quotation->currency }}</div>
                                         </td>
 
-                                        {{-- Status --}}
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @php
-                                                $statusColors = [
-                                                    'pending' => 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700',
-                                                    'approved' => 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700',
-                                                    'rejected' => 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700',
-                                                ];
-                                            @endphp
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border rounded-lg {{ $statusColors[$quotation->status] ?? 'bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600' }}">
-                                                @if($quotation->status === 'pending')
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                    </svg>
-                                                @elseif($quotation->status === 'approved')
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                                    </svg>
-                                                @elseif($quotation->status === 'rejected')
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                    </svg>
-                                                @endif
-                                                {{ ucfirst($quotation->status) }}
-                                            </span>
-                                        </td>
-
                                         {{-- Date --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-slate-900 dark:text-white">
-                                                {{ $quotation->created_at->format('M j, Y') }}
-                                            </div>
-                                            <div class="text-xs text-slate-500 dark:text-slate-400">
-                                                {{ $quotation->created_at->format('g:i A') }}
-                                            </div>
+                                            <div class="text-sm text-slate-900 dark:text-white">{{ $quotation->created_at->format('M d, Y') }}</div>
+                                            <div class="text-xs text-slate-500 dark:text-slate-400">{{ $quotation->created_at->diffForHumans() }}</div>
                                         </td>
 
                                         {{-- Actions --}}
@@ -328,13 +323,6 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                                     </svg>
                                                 </a>
-                                                <button type="button" onclick="window.print()" 
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg transition-colors duration-200 shadow-sm">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                                                    </svg>
-                                                    {{ __('Print') }}
-                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -372,14 +360,6 @@
         table {
             border-collapse: separate;
             border-spacing: 0;
-        }
-
-        /* Line clamp utilities */
-        .line-clamp-1 {
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
         }
 
         /* Custom scrollbar for table */

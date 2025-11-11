@@ -20,8 +20,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-25 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-4">
             <!-- Stats Card -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">

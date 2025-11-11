@@ -1,7 +1,7 @@
 <x-app-layout :breadcrumb="[
-    ['label' => 'Dashboard', 'url' => route('client.dashboard')],
-    ['label' => 'Sourcing Orders', 'url' => route('client.sourcing-orders.index')],
-    ['label' => 'Details']
+    ['label' => __('Dashboard'), 'url' => route('client.dashboard')],
+    ['label' => __('Sourcing Orders'), 'url' => route('client.sourcing-orders.index')],
+    ['label' => __('Details')]
 ]">
     <x-slot name="header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,8 +32,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-25 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
             {{-- Status Banner --}}
             @php
@@ -41,13 +41,13 @@
                     'pending_payment' => ['color' => 'amber', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => __('Payment Required')],
                     'payment_pending_verification' => ['color' => 'blue', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15', 'title' => __('Verification in Progress')],
                     'processing' => ['color' => 'purple', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15', 'title' => __('Processing Order')],
-                    'shipped' => ['color' => 'blue', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4', 'title' => __('Shipped')],
+                    'shipped' => ['color' => 'purple', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4', 'title' => __('Shipped')],
                     'delivered' => ['color' => 'emerald', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => __('Delivered')],
                 ];
                 $statusData = $statusConfig[$sourcingOrder->status] ?? $statusConfig['pending_payment'];
             @endphp
             
-            <div class="mb-8 bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="mb-6 bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div class="p-6 bg-{{ $statusData['color'] }}-50 dark:bg-{{ $statusData['color'] }}-900/20 border-b-4 border-{{ $statusData['color'] }}-400 dark:border-{{ $statusData['color'] }}-600">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div class="flex items-center gap-4">
@@ -70,10 +70,10 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {{-- Main Content --}}
-                <div class="lg:col-span-2 space-y-8">
+                <div class="lg:col-span-2 space-y-6">
                     
                     {{-- Product Information --}}
                     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
@@ -96,9 +96,9 @@
                             </div>
                         </div>
                         <div class="p-6">
-                            <div class="grid md:grid-cols-2 gap-8">
+                            <div class="grid md:grid-cols-2 gap-6">
                                 {{-- Product Image --}}
-                                <div class="space-y-6">
+                                <div class="space-y-4">
                                     <div class="relative group">
                                         <div class="w-full aspect-square bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden shadow-sm">
                                             @if ($sourcingOrder->quotation->sourcingRequest->product_image)
@@ -114,7 +114,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="space-y-3">
+                                    <div class="space-y-2">
                                         <h4 class="text-xl font-bold text-slate-900 dark:text-white leading-tight">{{ $sourcingOrder->quotation->sourcingRequest->product_name }}</h4>
                                         @if ($sourcingOrder->quotation->sourcingRequest->product_url)
                                             <a href="{{ $sourcingOrder->quotation->sourcingRequest->product_url }}" target="_blank" 
@@ -197,7 +197,7 @@
                                     </div>
                                     <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Weight') }}</p>
-                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">g</span></p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('g') }}</span></p>
                                     </div>
                                     <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Local Delivery') }}</p>
@@ -253,63 +253,59 @@
                             @endif
 
                             @if($sourcingOrder->status === 'pending_payment')
-                                <div class="pt-6 border-t border-slate-200 dark:border-slate-700">
-                                    <form action="{{ route('client.sourcing-orders.upload-proof-of-payment', $sourcingOrder) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                                        @csrf
-                                        <div>
-                                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('Upload Proof of Payment') }}</label>
-                                            <input type="file" 
-                                                   name="proof_of_payment" 
-                                                   class="block w-full text-sm text-slate-600 dark:text-slate-400
-                                                          file:mr-4 file:py-2.5 file:px-4
-                                                          file:rounded-lg file:border-0
-                                                          file:text-sm file:font-semibold
-                                                          file:bg-blue-100 dark:file:bg-blue-900/50 file:text-blue-700 dark:file:text-blue-300
-                                                          hover:file:bg-blue-200 dark:hover:file:bg-blue-900/70
-                                                          file:cursor-pointer file:transition-colors
-                                                          border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg
-                                                          hover:border-blue-400 dark:hover:border-blue-500 transition-colors
-                                                          cursor-pointer p-2"
-                                                   required/>
-                                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ __('Accepted formats: PDF, JPG, PNG (Max: 5MB)') }}</p>
-                                        </div>
-                                        <button type="submit" 
-                                                class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm font-bold rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                            {{ __('Submit Payment Proof') }}
-                                        </button>
-                                    </form>
-                                </div>
+                                <form action="{{ route('client.sourcing-orders.upload-proof-of-payment', $sourcingOrder) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                    @csrf
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('Upload Proof of Payment') }}</label>
+                                        <input type="file" 
+                                               name="proof_of_payment" 
+                                               class="block w-full text-sm text-slate-600 dark:text-slate-400
+                                                      file:mr-4 file:py-2.5 file:px-4
+                                                      file:rounded-lg file:border-0
+                                                      file:text-sm file:font-semibold
+                                                      file:bg-blue-100 dark:file:bg-blue-900/50 file:text-blue-700 dark:file:text-blue-300
+                                                      hover:file:bg-blue-200 dark:hover:file:bg-blue-900/70
+                                                      file:cursor-pointer file:transition-colors
+                                                      border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg
+                                                      hover:border-blue-400 dark:hover:border-blue-500 transition-colors
+                                                      cursor-pointer p-2"
+                                               required/>
+                                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ __('Accepted formats: PDF, JPG, PNG (Max: 5MB)') }}</p>
+                                    </div>
+                                    <button type="submit" 
+                                            class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm font-bold rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        {{ __('Submit Payment Proof') }}
+                                    </button>
+                                </form>
                             @elseif($sourcingOrder->proof_of_payment_path)
-                                <div class="pt-6 border-t border-slate-200 dark:border-slate-700">
-                                    <div class="text-center p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border-2 border-emerald-300 dark:border-emerald-700">
-                                        <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <div class="text-center p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border-2 border-emerald-300 dark:border-emerald-700">
+                                    <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <p class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ __('Payment Proof Submitted') }}</p>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ __('Your payment proof is under review. We will proceed with the order once verified.') }}</p>
+                                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                        <a href="{{ asset('storage/' . $sourcingOrder->proof_of_payment_path) }}" 
+                                           target="_blank" 
+                                           class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-700 border-2 border-emerald-300 dark:border-emerald-700 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                             </svg>
-                                        </div>
-                                        <p class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ __('Payment Proof Submitted') }}</p>
-                                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ __('Your payment proof is under review. We will proceed with the order once verified.') }}</p>
-                                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                                            <a href="{{ asset('storage/' . $sourcingOrder->proof_of_payment_path) }}" 
-                                               target="_blank" 
-                                               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-700 border-2 border-emerald-300 dark:border-emerald-700 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                </svg>
-                                                {{ __('View Document') }}
-                                            </a>
-                                            <a href="{{ route('client.sourcing-orders.receipt', $sourcingOrder) }}" target="_blank"
-                                               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-blue-700 dark:text-blue-300 bg-white dark:bg-slate-700 border-2 border-blue-300 dark:border-blue-700 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                                </svg>
-                                                {{ __('Print Receipt') }}
-                                            </a>
-                                        </div>
+                                            {{ __('View Document') }}
+                                        </a>
+                                        <a href="{{ route('client.sourcing-orders.receipt', $sourcingOrder) }}" target="_blank"
+                                           class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-blue-700 dark:text-blue-300 bg-white dark:bg-slate-700 border-2 border-blue-300 dark:border-blue-700 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            {{ __('Print Receipt') }}
+                                        </a>
                                     </div>
                                 </div>
                             @endif
@@ -359,7 +355,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                     </svg>
                                     <span class="text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1">{{ __('Total Quantity') }}</span>
-                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->sourcingRequest->destinations->sum('quantity')) }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->sourcingRequest->destinations->sum('quantity')) }} {{ __('units') }}</span>
                                 </div>
                             </div>
                             
