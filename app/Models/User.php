@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use App\Models\SourcingRequest;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -32,5 +33,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'verification_email_sent_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function sourcingRequests()
+    {
+        return $this->hasMany(SourcingRequest::class);
     }
 }
