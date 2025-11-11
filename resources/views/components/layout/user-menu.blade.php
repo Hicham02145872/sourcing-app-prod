@@ -4,11 +4,11 @@
                 class="flex items-center gap-2.5 p-2 pr-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 group"
                 :class="{ 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500/20': open }">
             <div class="w-9 h-9 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-white dark:ring-gray-800 group-hover:shadow-blue-500/50 transition-shadow duration-200">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                {{ strtoupper(substr(optional(auth()->user())->name, 0, 1)) }}
             </div>
             <div class="hidden sm:block text-left">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white leading-none">{{ auth()->user()->name }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ ucfirst(auth()->user()->role ?? 'Utilisateur') }}</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white leading-none">{{ optional(auth()->user())->name }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ ucfirst(optional(auth()->user())->role ?? 'Utilisateur') }}</p>
             </div>
             <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 transition-transform duration-200" 
                  :class="{ 'rotate-180': open }" 
@@ -30,13 +30,13 @@
             
             {{-- User Info Header --}}
             <div class="px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20 border-b border-blue-200/50 dark:border-blue-800/50">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ auth()->user()->name }}</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5">{{ auth()->user()->email }}</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ optional(auth()->user())->name }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5">{{ optional(auth()->user())->email }}</p>
                 <span class="inline-flex items-center mt-2 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-500/30">
                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
                     </svg>
-                    {{ ucfirst(auth()->user()->role ?? 'Utilisateur') }}
+                    {{ ucfirst(optional(auth()->user())->role ?? 'Utilisateur') }}
                 </span>
             </div>
             
