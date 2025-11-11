@@ -15,9 +15,6 @@
             }
         }
         
-        .enterprise-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
-        }
         
         .accent-line {
             height: 4px;
@@ -29,49 +26,27 @@
 
     <div class="max-w-4xl mx-auto my-12 bg-white shadow-2xl">
         <!-- Header Section -->
-        <div class="enterprise-header text-white p-10">
+        <div class="bg-gray-100 p-10">
             <div class="flex justify-between items-start">
                 <div>
-                    <div class="text-5xl font-bold mb-2">{{ __('INVOICE') }}</div>
-                    <div class="text-blue-200 text-sm font-medium tracking-wider">{{ __('COMMERCIAL INVOICE') }}</div>
+                    <div class="text-5xl font-bold mb-2 text-gray-800">{{ __('INVOICE') }}</div>
                 </div>
                 <div class="text-right">
-                    <div class="bg-white bg-opacity-20 backdrop-blur-sm px-6 py-4 rounded-lg border border-white border-opacity-30">
-                        <div class="text-xs text-blue-200 mb-1 uppercase tracking-wide">{{ __('Invoice Number') }}</div>
-                        <div class="text-2xl font-bold">#{{ $sourcingOrder->id }}</div>
-                        <div class="text-xs text-blue-200 mt-3 uppercase tracking-wide">{{ __('Date Issued') }}</div>
-                        <div class="text-sm font-medium">{{ now()->format('F d, Y') }}</div>
+                    <div class="bg-white px-6 py-4 rounded-lg border border-gray-200">
+                        <div class="text-xs text-gray-500 mb-1 uppercase tracking-wide">{{ __('Invoice Number') }}</div>
+                        <div class="text-2xl font-bold text-gray-800">#{{ $sourcingOrder->id }}</div>
+                        <div class="text-xs text-gray-500 mt-3 uppercase tracking-wide">{{ __('Date Issued') }}</div>
+                        <div class="text-sm font-medium text-gray-800">{{ now()->format('F d, Y') }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="accent-line"></div>
+
 
         <!-- Company & Client Information -->
         <div class="p-10">
-            <div class="grid grid-cols-2 gap-12 mb-12">
-                <!-- Supplier Info -->
-                <div>
-                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b-2 border-indigo-600">
-                        {{ __('Supplier Information') }}
-                    </div>
-                    <div class="space-y-1">
-                        <div class="text-xl font-bold text-gray-900">{{ __('Your Company Name') }}</div>
-                        <div class="text-sm text-gray-600">{{ __('123 Business Avenue, Suite 100') }}</div>
-                        <div class="text-sm text-gray-600">{{ __('New York, NY 10001') }}</div>
-                        <div class="text-sm text-gray-600 mt-3">
-                            <span class="font-semibold">{{ __('Email:') }}</span> contact@yourcompany.com
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <span class="font-semibold">{{ __('Phone:') }}</span> +1 (555) 123-4567
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <span class="font-semibold">{{ __('Tax ID:') }}</span> XX-XXXXXXX
-                        </div>
-                    </div>
-                </div>
-
+            <div class="grid grid-cols-1 gap-12 mb-12">
                 <!-- Client Info -->
                 <div>
                     <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b-2 border-indigo-600">
@@ -87,6 +62,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
 
             <!-- Items Table -->
@@ -140,7 +116,7 @@
             </div>
 
             <!-- Payment Terms & Notes -->
-            <div class="border-t-2 border-gray-200 pt-8 grid grid-cols-2 gap-8">
+            <div class="border-t-2 border-gray-200 pt-8 grid grid-cols-1 gap-8">
                 <div>
                     <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{{ __('Payment Terms') }}</div>
                     <div class="text-sm text-gray-600 space-y-1">
@@ -163,9 +139,6 @@
             <div class="flex justify-between items-center text-xs text-gray-500">
                 <div>
                     © {{ now()->format('Y') }} {{ __('Your Company Name') }}. {{ __('All rights reserved.') }}
-                </div>
-                <div class="text-right">
-                    {{ __('This is a computer-generated invoice and requires no signature.') }}
                 </div>
             </div>
         </div>
