@@ -12,13 +12,8 @@ class SendQueuedVerificationEmail implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    /**
-     * Create the event listener.
-     */
-    public function __construct()
-    {
-        //
-    }
+    // ✅ No retry (very important!)
+    public $tries = 1;
 
     /**
      * Handle the event.
@@ -27,12 +22,12 @@ class SendQueuedVerificationEmail implements ShouldQueue
     {
         $user = $event->user;
 
-        if ($user->hasVerifiedEmail()) {
+        if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && $user->hasVerifiedEmail()) {
             Log::info('Email already verified for user, skipping verification email.', ['user_id' => $user->id]);
             return;
         }
 
-        $lock = Cache::lock('verification_email_sent:' . $user->id, 120); // Lock for 120 seconds
+        $lock = Cache::lock('verification_email_sent:' . $user->id, 120);
 
         try {
             if ($lock->get()) {
@@ -40,12 +35,13 @@ class SendQueuedVerificationEmail implements ShouldQueue
                 Log::info('Email verification notification sent to user.', ['user_id' => $user->id]);
             }
         } catch (\Exception $e) {
-            Log::error('Failed to send email verification notification.', [
+
+            // ❌ Don't throw the exception (important!)
+            Log::error('Failed to send verification email.', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
-            // Re-throw the exception to allow the job to be retried
-            throw $e;
+
         } finally {
             optional($lock)->release();
         }

@@ -257,12 +257,11 @@
                 return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
             },
 
-            showToast(notification) {
-                window.dispatchEvent(new CustomEvent('show-success-toast', { 
-                    detail: notification.notification?.title || 'Nouvelle notification' 
-                }));
-            },
-
+                            showToast(notification) {
+                                window.dispatchEvent(new CustomEvent('show-success-toast', { 
+                                    detail: notification.title || 'Nouvelle notification' 
+                                }));
+                            },
             showSuccessToast(message) {
                 window.dispatchEvent(new CustomEvent('show-success-toast', { detail: message }));
             },
