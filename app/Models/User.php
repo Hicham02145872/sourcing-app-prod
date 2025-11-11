@@ -39,4 +39,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(SourcingRequest::class);
     }
+
+    public function isClient(): bool
+    {
+        return $this->role === 'client';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 }
