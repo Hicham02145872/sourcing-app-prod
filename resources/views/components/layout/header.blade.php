@@ -21,10 +21,13 @@
                 @if(auth()->check() && auth()->user()->role === 'client')
                     {{-- Delivery Time Text --}}
                     <div class="hidden md:flex items-center">
-                        <p class="text-sm text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap mr-4">
+                        <p class="text-sm text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap">
                             Estimated delivery-time between 15 - 20 working days
                         </p>
                     </div>
+
+                    {{-- Espace entre le texte et les icônes sociales --}}
+                    <div class="hidden md:block w-8"></div>
 
                     {{-- Social Media Icons --}}
                     <div class="flex items-center gap-1">
