@@ -8,12 +8,12 @@
             </svg>
         </div>
         <div>
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Erreur de chargement</h4>
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">{{ __('Loading Error') }}</h4>
             <p class="text-xs text-gray-600 dark:text-gray-400" x-text="error"></p>
         </div>
         <button @click="fetchNotifications" 
                 class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-            Réessayer
+            {{ __('Retry') }}
         </button>
     </div>
 </div>

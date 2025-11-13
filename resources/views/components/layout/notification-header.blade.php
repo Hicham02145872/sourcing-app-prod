@@ -9,16 +9,16 @@
                 </svg>
             </div>
             <div>
-                <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100">Notifications</h3>
+                <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100">{{ __('Notifications') }}</h3>
                 <p class="text-xs text-blue-600 dark:text-blue-400" x-show="unreadCount > 0">
-                    <span x-text="unreadCount"></span> nouvelle<span x-show="unreadCount > 1">s</span>
+                    <span x-text="unreadCount"></span> {{ __('new') }}<span x-show="unreadCount > 1">{{ __('s') }}</span>
                 </p>
             </div>
         </div>
         <button @click="markAllAsRead" 
                 x-show="unreadCount > 0"
                 class="px-3 py-1.5 text-xs font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
-            Tout marquer comme lu
+            {{ __('Mark All as Read') }}
         </button>
     </div>
 </div>

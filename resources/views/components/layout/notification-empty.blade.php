@@ -9,8 +9,8 @@
             </svg>
         </div>
         <div>
-            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Aucune notification</h4>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Vous êtes à jour ! Aucune nouvelle notification pour le moment.</p>
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">{{ __('No notifications') }}</h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('You are all caught up! No new notifications for now.') }}</p>
         </div>
     </div>
 </div>

@@ -16,6 +16,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
         'role',
         'fcm_token',
@@ -48,5 +49,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function sourcingOrders()
+    {
+        return $this->hasMany(SourcingOrder::class);
     }
 }

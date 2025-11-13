@@ -257,21 +257,11 @@
                             </div>
 
                             <div class="p-6 space-y-5">
-                                <!-- Phone Number -->
-                                <div>
-                                    <x-input-label for="phone_number" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                                        {{ __('Phone Number') }}
-                                    </x-input-label>
-                                    <x-text-input id="phone_number" 
-                                                  class="block w-full rounded-lg border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
-                                                  type="tel" 
-                                                  name="phone_number" 
-                                                  :value="old('phone_number')" 
-                                                  autocomplete="tel"
-                                                  placeholder="{{ __('e.g., +1234567890') }}" />
-                                    <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
-                                </div>
-
+                                                                <!-- Phone Number (Hidden) -->
+                                                                <input type="hidden"
+                                                                       id="phone_number"
+                                                                       name="phone_number"
+                                                                       value="{{ old('phone_number', auth()->user()->phone) }}" />
                                 <!-- Address Options -->
                                 <div>
                                     <x-input-label class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">

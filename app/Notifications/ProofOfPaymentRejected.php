@@ -50,8 +50,8 @@ class ProofOfPaymentRejected extends Notification implements ShouldQueue
 
         return [
             'sourcing_order_id' => $this->sourcingOrder->id,
-            'title' => 'Payment Rejected',
-            'body' => "Your payment for the order related to '{$productName}' was rejected.",
+            'title' => __('Payment Rejected'),
+            'body' => __('Your payment for the order related to \':productName\' was rejected.', ['productName' => $productName]),
             'reason' => $this->sourcingOrder->rejection_reason,
             'url' => route('client.sourcing-orders.show', $this->sourcingOrder->id),
         ];
@@ -69,8 +69,8 @@ class ProofOfPaymentRejected extends Notification implements ShouldQueue
 
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification(FirebaseNotification::create(
-                'Proof of Payment Rejected',
-                'Your proof of payment for order #' . $this->sourcingOrder->id . ' was rejected.'
+                __('Proof of Payment Rejected'),
+                __('Your proof of payment for order #:orderId was rejected.', ['orderId' => $this->sourcingOrder->id])
             ))
             ->withData([
                 'click_action' => $url,

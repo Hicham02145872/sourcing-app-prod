@@ -465,8 +465,8 @@
         </main>
 
         {{-- Footer Moderne --}}
-        <footer class="mt-auto border-t bg-white dark:bg-gray-800 dark:border-gray-700">
-            <div class="px-4 sm:px-6 lg:px-8 py-6">
+        <footer class="mt-auto border-t border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-slate-900">
+            <div class="px-4 sm:px-6 lg:px-8 py-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

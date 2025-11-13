@@ -1,31 +1,66 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
+    <!-- Header -->
+    <div class="mb-10">
+        <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <svg class="w-7 h-7 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+        </div>
+        <h1 class="text-3xl font-semibold text-slate-900 dark:text-white mb-2 text-center">
+            Verify your email
+        </h1>
+        <p class="text-slate-500 dark:text-slate-400 text-center">
+            Check your inbox for the verification link
+        </p>
     </div>
 
+    <!-- Info Message -->
+    <div class="mb-8 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl">
+        <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed text-center">
+            We've sent a verification link to your email address. Click the link to activate your account.
+        </p>
+    </div>
+
+    <!-- Success Status -->
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
+        <div class="mb-8 p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-xl">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-sm font-medium text-green-800 dark:text-green-300">
+                    Verification link sent successfully!
+                </p>
+            </div>
         </div>
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
+    <!-- Actions -->
+    <div class="space-y-4">
+        <!-- Resend Button -->
         <form method="POST" action="{{ route('verification.send') }}">
             @csrf
-
-            <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
-            </div>
-        </form>
-
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
+            <button type="submit"
+                    class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Resend verification email
             </button>
         </form>
+
+        <!-- Logout -->
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit"
+                    class="w-full py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">
+                Log out
+            </button>
+        </form>
+    </div>
+
+    <!-- Help Text -->
+    <div class="mt-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+        <p class="text-xs text-slate-600 dark:text-slate-400 text-center leading-relaxed">
+            <strong>Didn't receive the email?</strong><br/>
+            Check your spam folder or click resend above
+        </p>
     </div>
 </x-guest-layout>

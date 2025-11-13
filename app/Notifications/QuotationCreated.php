@@ -76,27 +76,43 @@ class QuotationCreated extends Notification implements ShouldQueue
 
 
 
-                    ->subject('New Quotation Received for Your Sourcing Request')
+                                        ->subject(__('New Quotation Received for Your Sourcing Request'))
 
 
 
-                    ->greeting('Hello,')
+                                        ->greeting(__('Hello,'))
 
 
 
-                    ->line("A new quotation of **{$this->quotation->amount} {$this->quotation->currency}** has been created for your sourcing request: **{$this->quotation->sourcingRequest->product_name}**.")
+                                        ->line(__('A new quotation of **:amount :currency** has been created for your sourcing request: **:productName**.', [
 
 
 
-                    ->action('View Quotation', $url)
+                                            'amount' => $this->quotation->amount,
 
 
 
-                    ->line('Please review the details and accept or reject the quotation.')
+                                            'currency' => $this->quotation->currency,
 
 
 
-                    ->line('Thank you for using our service!');
+                                            'productName' => $this->quotation->sourcingRequest->product_name,
+
+
+
+                                        ]))
+
+
+
+                                        ->action(__('View Quotation'), $url)
+
+
+
+                                        ->line(__('Please review the details and accept or reject the quotation.'))
+
+
+
+                                        ->line(__('Thank you for using our service!'));
 
     }
 
@@ -114,11 +130,27 @@ class QuotationCreated extends Notification implements ShouldQueue
 
 
 
-                'title' => 'New Quotation Received',
+                                'title' => __('New Quotation Received'),
 
 
 
-                'body' => "You\'ve received a new quote of {$this->quotation->amount} {$this->quotation->currency} for your request: '{$this->quotation->sourcingRequest->product_name}'.",
+                                'body' => __('You\'ve received a new quote of :amount :currency for your request: \':productName\'.', [
+
+
+
+                                    'amount' => $this->quotation->amount,
+
+
+
+                                    'currency' => $this->quotation->currency,
+
+
+
+                                    'productName' => $this->quotation->sourcingRequest->product_name,
+
+
+
+                                ]),
 
 
 
@@ -148,13 +180,21 @@ class QuotationCreated extends Notification implements ShouldQueue
 
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
 
-            ->withNotification(FirebaseNotification::create(
+                        ->withNotification(FirebaseNotification::create(
 
-                'Nouveau devis reçu',
+                            __('New Quotation Received'),
 
-                "Devis de {$this->quotation->amount} {$this->quotation->currency} pour {$this->quotation->sourcingRequest->product_name}"
+                            __('Quotation of :amount :currency for :productName', [
 
-            ))
+                                'amount' => $this->quotation->amount,
+
+                                'currency' => $this->quotation->currency,
+
+                                'productName' => $this->quotation->sourcingRequest->product_name,
+
+                            ])
+
+                        ))
 
             ->withData([
 

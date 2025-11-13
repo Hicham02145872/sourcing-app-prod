@@ -152,12 +152,12 @@
                 <div class="space-y-2" x-show="!loading && notifications.length > 0">
                     <template x-for="notification in notifications.slice(0, 3)" :key="notification.id">
                         <div class="bg-white dark:bg-slate-800 rounded-lg p-3 border border-blue-100 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-600 transition-colors cursor-pointer">
-                            <a :href="notification.data.click_action || '#'" @click.prevent="markAsRead(notification.id, notification.data.click_action)">
+                            <a :href="notification.click_action || '#'" @click.prevent="markAsRead(notification.id, notification.click_action)">
                                 <div class="flex items-start gap-2">
                                     <div x-show="!notification.read_at" class="w-2 h-2 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-900 dark:text-white" x-text="notification.data.title"></p>
-                                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5 line-clamp-1" x-text="notification.data.body"></p>
+                                        <p class="text-xs font-semibold text-slate-900 dark:text-white" x-text="notification.title"></p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5 line-clamp-1" x-text="notification.body"></p>
                                         <p class="text-xs text-slate-500 dark:text-slate-500 mt-1" x-text="formatDate(notification.created_at)"></p>
                                     </div>
                                 </div>

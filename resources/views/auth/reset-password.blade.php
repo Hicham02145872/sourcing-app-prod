@@ -1,39 +1,87 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
+    <!-- Header -->
+    <div class="mb-10">
+        <h1 class="text-3xl font-semibold text-slate-900 dark:text-white mb-2">
+            Set new password
+        </h1>
+        <p class="text-slate-500 dark:text-slate-400">
+            Create a strong password for your account
+        </p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" action="{{ route('password.store') }}" class="space-y-6">
         @csrf
 
         <!-- Password Reset Token -->
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-        <!-- Email Address -->
+        <!-- Email (Read-only) -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
+            <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Email address
+            </label>
+            <input id="email" 
+                type="email" 
+                name="email" 
+                value="{{ old('email', $request->email) }}"
+                required 
+                autofocus 
+                autocomplete="username"
+                readonly
+                class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-500 dark:text-slate-400 cursor-not-allowed" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
+        <!-- New Password -->
+        <div>
+            <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                New password
+            </label>
+            <input id="password" 
+                type="password" 
+                name="password" 
+                required 
+                autocomplete="new-password"
+                placeholder="Enter new password"
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Must be at least 8 characters long
+            </p>
         </div>
 
         <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
+        <div>
+            <label for="password_confirmation" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Confirm password
+            </label>
+            <input id="password_confirmation"
+                type="password"
+                name="password_confirmation" 
+                required 
+                autocomplete="new-password"
+                placeholder="Re-enter new password"
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
+        <!-- Submit Button -->
+        <button type="submit"
+                class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-8">
+            Reset password
+        </button>
     </form>
+
+    <!-- Divider -->
+    <div class="my-8 flex items-center">
+        <div class="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
+    </div>
+
+    <!-- Back to Login -->
+    <p class="text-center text-sm text-slate-600 dark:text-slate-400">
+        <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+            Back to sign in
+        </a>
+    </p>
 </x-guest-layout>

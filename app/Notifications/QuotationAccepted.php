@@ -35,18 +35,21 @@ class QuotationAccepted extends Notification implements ShouldQueue
         $url = url(route('admin.sourcing-orders.show', $this->quotation->order->id));
 
         return (new MailMessage)
-            ->subject('Quotation Accepted for Sourcing Request: ' . $this->quotation->sourcingRequest->product_name)
-            ->greeting('Hello Admin,')
-            ->line('A quotation for Sourcing Request ' . $this->quotation->sourcingRequest->product_name . ' has been accepted by the client.')
-            ->action('View Sourcing Order', $url)
-            ->line('Please review the accepted quotation and proceed with the order.');
+            ->subject(__('Quotation Accepted for Sourcing Request: :productName', ['productName' => $this->quotation->sourcingRequest->product_name]))
+            ->greeting(__('Hello Admin,'))
+            ->line(__('A quotation for Sourcing Request :productName has been accepted by the client.', ['productName' => $this->quotation->sourcingRequest->product_name]))
+            ->action(__('View Sourcing Order'), $url)
+            ->line(__('Please review the accepted quotation and proceed with the order.'));
     }
 
     public function toArray(object $notifiable): array
     {
         return [
-            'title' => 'Quotation Accepted',
-            'body' => "The quote for '{$this->quotation->sourcingRequest->product_name}' was accepted by {$this->quotation->sourcingRequest->user->name}.",
+            'title' => __('Quotation Accepted'),
+            'body' => __('The quote for \':productName\' was accepted by :clientName.', [
+                'productName' => $this->quotation->sourcingRequest->product_name,
+                'clientName' => $this->quotation->sourcingRequest->user->name,
+            ]),
             'quotation_id' => $this->quotation->id,
             'sourcing_order_id' => $this->quotation->order->id,
             'click_action' => route('admin.sourcing-orders.index'),
@@ -59,8 +62,8 @@ class QuotationAccepted extends Notification implements ShouldQueue
 
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification(FirebaseNotification::create(
-                'Quotation Accepted',
-                'Quotation for ' . $this->quotation->sourcingRequest->product_name . ' has been accepted.'
+                __('Quotation Accepted'),
+                __('Quotation for :productName has been accepted.', ['productName' => $this->quotation->sourcingRequest->product_name])
             ))
             ->withData([
                 'click_action' => $url,

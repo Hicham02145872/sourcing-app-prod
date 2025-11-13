@@ -2,54 +2,73 @@
 
 namespace App\Listeners;
 
-use Illuminate\Auth\Events\Registered;
+use App\Events\UserRegistered;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class SendQueuedVerificationEmail implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    // ✅ No retry (very important!)
     public $tries = 1;
+    public $afterCommit = true;
 
     /**
      * Handle the event.
      */
-    public function handle(Registered $event): void
+    public function handle(UserRegistered $event): void
     {
         $user = $event->user;
+        $listener = class_basename(static::class);
 
-        if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && $user->hasVerifiedEmail()) {
-            Log::info('Email already verified for user, skipping verification email.', ['user_id' => $user->id]);
-            return;
-        }
+        try {
+            Log::info("🔥 {$listener} STARTED", [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'job_id' => $this->job?->getJobId(),
+                'attempt' => $this->attempts(),
+            ]);
 
-        DB::transaction(function () use ($user) {
-            // Re-fetch the user and lock the row for the duration of the transaction
-            $user = \App\Models\User::where('id', $user->id)->lockForUpdate()->first();
-
-            // Double-check the email hasn't been verified and that we haven't sent the email yet
-            if ($user->hasVerifiedEmail()) {
-                Log::warning('User email already verified, skipping notification.', ['user_id' => $user->id]);
+            if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && $user->hasVerifiedEmail()) {
+                Log::info("✅ {$listener}: Email already verified, skipping", ['user_id' => $user->id]);
                 return;
             }
 
-            if (is_null($user->verification_email_sent_at)) {
-                // Mark that we've sent it
-                $user->verification_email_sent_at = now();
-                $user->save();
+            DB::transaction(function () use ($user, $listener) {
+                $user = \App\Models\User::where('id', $user->id)->lockForUpdate()->first();
 
-                // Send the notification
-                $user->sendEmailVerificationNotification();
+                if ($user->hasVerifiedEmail()) {
+                    Log::warning("⚠️ {$listener}: User email already verified (double check)", ['user_id' => $user->id]);
+                    return;
+                }
 
-                Log::info('Email verification notification sent to user.', ['user_id' => $user->id]);
-            } else {
-                Log::warning('Verification email already sent for user.', ['user_id' => $user->id]);
-            }
-        });
+                if (is_null($user->verification_email_sent_at)) {
+                    $user->verification_email_sent_at = now();
+                    $user->save();
+
+                    Log::info("📤 {$listener}: Sending email verification...", ['user_id' => $user->id]);
+                    $user->sendEmailVerificationNotification();
+                    Log::info("✅ {$listener}: Email sent successfully", ['user_id' => $user->id]);
+                } else {
+                    Log::warning("⚠️ {$listener}: Verification email already sent", ['user_id' => $user->id]);
+                }
+            });
+
+            Log::info("🏁 {$listener} COMPLETED", [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+        } catch (Throwable $e) {
+            Log::error("❌ {$listener} FAILED", [
+                'user_id' => $user->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw $e; // laisser Laravel re-essayer si nécessaire
+        }
     }
 }

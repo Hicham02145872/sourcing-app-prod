@@ -92,19 +92,31 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
 
 
-        return (new MailMessage)
+                return (new MailMessage)
 
-                        ->subject('Your Sourcing Request #' . $this->sourcingRequest->id . ' Status Update')
 
-                        ->greeting('Hello,')
 
-                        ->line("Good news! The status of your sourcing request for **{$this->sourcingRequest->product_name}** has been updated.")
+                                ->subject(__('Your Sourcing Request #:requestId Status Update', ['requestId' => $this->sourcingRequest->id]))
 
-                        ->line("New Status: **{$statusLabel}**")
 
-                        ->action('View Your Request', $url)
 
-                        ->line('Thank you for choosing our service!');
+                                ->greeting(__('Hello,'))
+
+
+
+                                ->line(__('Good news! The status of your sourcing request for **:productName** has been updated.', ['productName' => $this->sourcingRequest->product_name]))
+
+
+
+                                ->line(__('New Status: **:status**', ['status' => $statusLabel]))
+
+
+
+                                ->action(__('View Your Request'), $url)
+
+
+
+                                ->line(__('Thank you for choosing our service!'));
 
     }
 
@@ -130,11 +142,27 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
     
 
-            return [
+                        return [
 
-                'title' => "Sourcing Request Updated",
+    
 
-                'body' => "Your request for '{$this->sourcingRequest->product_name}' is now '{$statusLabel}'.",
+                            'title' => __('Sourcing Request Updated'),
+
+    
+
+                            'body' => __('Your request for \':productName\' is now \':status\'.', [
+
+    
+
+                                'productName' => $this->sourcingRequest->product_name,
+
+    
+
+                                'status' => $statusLabel,
+
+    
+
+                            ]),
 
                 'click_action' => route('client.sourcing-requests.show', $this->sourcingRequest->id),
 
@@ -170,15 +198,35 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
 
 
-        return CloudMessage::withTarget('token', $notifiable->fcm_token)
+                return CloudMessage::withTarget('token', $notifiable->fcm_token)
 
-            ->withNotification(FirebaseNotification::create(
 
-                'Mise à jour de votre demande de sourcing',
 
-                "Votre demande {$this->sourcingRequest->product_name} a été mise à jour au statut : {$statusLabel}."
+                    ->withNotification(FirebaseNotification::create(
 
-            ))
+
+
+                        __('Sourcing Request Update'),
+
+
+
+                        __('Your request :productName has been updated to status: :status.', [
+
+
+
+                            'productName' => $this->sourcingRequest->product_name,
+
+
+
+                            'status' => $statusLabel,
+
+
+
+                        ])
+
+
+
+                    ))
 
             ->withData([
 
@@ -192,28 +240,50 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
 
 
-    protected function getStatusLabel(string $status): string
+        protected function getStatusLabel(string $status): string
 
-    {
 
-        $statusLabels = [
 
-            'pending' => 'En attente',
+        {
 
-            'in_review' => 'En cours de révision',
 
-            'quoted' => 'Devis envoyé',
 
-            'rejected' => 'Rejetée',
+            $statusLabels = [
 
-            'accepted' => 'Acceptée',
 
-            'cancelled' => 'Annulée',
 
-        ];
+                'pending' => __('Pending'),
 
-        return $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
 
-    }
+
+                'in_review' => __('In review'),
+
+
+
+                'quoted' => __('Quoted'),
+
+
+
+                'rejected' => __('Rejected'),
+
+
+
+                'accepted' => __('Accepted'),
+
+
+
+                'cancelled' => __('Cancelled'),
+
+
+
+            ];
+
+
+
+            return $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
+
+
+
+        }
 
 }

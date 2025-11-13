@@ -2,37 +2,35 @@
 
 namespace App\Providers;
 
+use App\Events\QuotationAccepted;
 use App\Events\QuotationCreated;
-use App\Listeners\UpdateSourcingRequestStatusOnQuotationCreated;
 use App\Events\QuotationRejected;
-use App\Listeners\UpdateSourcingRequestStatusOnQuotationAccepted;
-use App\Listeners\SendQuotationAcceptedNotification;
-use App\Listeners\UpdateSourcingRequestStatusOnQuotationRejected;
-use App\Listeners\SendQuotationRejectedNotification;
-use App\Events\SourcingRequestStatusChanged;
-use App\Listeners\SendSourcingRequestStatusChangeNotification;
 use App\Events\SourcingOrderStatusChanged;
+use App\Events\SourcingRequestStatusChanged;
+use App\Listeners\SendQuotationAcceptedNotification;
+use App\Listeners\SendQuotationCreatedNotification;
+use App\Listeners\SendQuotationRejectedNotification;
 use App\Listeners\SendSourcingOrderStatusUpdatedNotification;
-use Illuminate\Auth\Events\Registered;
-use App\Listeners\SendQueuedVerificationEmail;
+use App\Listeners\SendSourcingRequestStatusChangeNotification;
+use App\Listeners\UpdateSourcingRequestStatusOnQuotationAccepted;
+use App\Listeners\UpdateSourcingRequestStatusOnQuotationCreated;
+use App\Listeners\UpdateSourcingRequestStatusOnQuotationRejected;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
     /**
-     * The event listener mappings for the application.
+     * The event to listener mappings for the application.
      *
-     * @var array
+     * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
-        Registered::class => [
-            SendQueuedVerificationEmail::class,
-        ],
         QuotationCreated::class => [
             UpdateSourcingRequestStatusOnQuotationCreated::class,
-            \App\Listeners\SendQuotationCreatedNotification::class,
+            SendQuotationCreatedNotification::class,
         ],
-        \App\Events\QuotationAccepted::class => [
+        QuotationAccepted::class => [
             UpdateSourcingRequestStatusOnQuotationAccepted::class,
             SendQuotationAcceptedNotification::class,
         ],
@@ -50,11 +48,17 @@ class EventServiceProvider extends ServiceProvider
 
     /**
      * Register any events for your application.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         //
+    }
+
+    /**
+     * Determine if events and listeners should be automatically discovered.
+     */
+    public function shouldDiscoverEvents(): bool
+    {
+        return true;
     }
 }

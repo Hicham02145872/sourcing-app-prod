@@ -1,4 +1,4 @@
-<div class="hidden sm:flex sm:items-center sm:gap-4" x-data="notificationCenter" @show-success-toast.window="showSuccessToast($event.detail)" @show-error-toast.window="showErrorToast($event.detail)">
+<div class="sm:flex sm:items-center sm:gap-4" x-data="notificationCenter" @show-success-toast.window="showSuccessToast($event.detail)" @show-error-toast.window="showErrorToast($event.detail)">
     <div class="relative">
         <button @click="open = !open; if(open) fetchNotifications()" 
                 class="relative p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 group"

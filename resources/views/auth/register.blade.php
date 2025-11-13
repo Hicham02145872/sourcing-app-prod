@@ -1,69 +1,128 @@
 <x-guest-layout>
-    <!-- En-tête -->
-    <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-            Créer un compte SmartSource
-        </h2>
-        <p class="text-gray-500 mt-1 text-sm">Rejoignez notre communauté 🚀</p>
+    <!-- Header -->
+    <div class="mb-10">
+        <h1 class="text-3xl font-semibold text-slate-900 dark:text-white mb-2">
+            Create your account
+        </h1>
+        <p class="text-slate-500 dark:text-slate-400">
+            Get started with SmartSource today
+        </p>
     </div>
 
-    <!-- Formulaire -->
-    <form method="POST" action="{{ route('register') }}" class="space-y-6">
+    <!-- Registration Form -->
+    <form method="POST" action="{{ route('register') }}" class="space-y-5">
         @csrf
 
-        <!-- Nom complet -->
+        <!-- Full Name -->
         <div>
-            <x-input-label for="name" :value="__('Nom complet')" class="text-gray-700 font-medium" />
-            <x-text-input id="name"
-                class="block mt-1 w-full border-gray-200 bg-white text-gray-900 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-                type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+            <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Full name
+            </label>
+            <input id="name"
+                type="text" 
+                name="name" 
+                value="{{ old('name') }}"
+                required 
+                autofocus 
+                autocomplete="name"
+                placeholder="John Doe"
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
-        <!-- Adresse e-mail -->
+        <!-- Email -->
         <div>
-            <x-input-label for="email" :value="__('Adresse e-mail')" class="text-gray-700 font-medium" />
-            <x-text-input id="email"
-                class="block mt-1 w-full border-gray-200 bg-white text-gray-900 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-                type="email" name="email" :value="old('email')" required autocomplete="username" />
+            <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Email address
+            </label>
+            <input id="email"
+                type="email" 
+                name="email" 
+                value="{{ old('email') }}"
+                required 
+                autocomplete="username"
+                placeholder="name@company.com"
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Mot de passe -->
+        <!-- Phone -->
         <div>
-            <x-input-label for="password" :value="__('Mot de passe')" class="text-gray-700 font-medium" />
-            <x-text-input id="password"
-                class="block mt-1 w-full border-gray-200 bg-white text-gray-900 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-                type="password" name="password" required autocomplete="new-password" />
+            <label for="phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Phone number
+            </label>
+            <input id="phone"
+                type="text" 
+                name="phone" 
+                value="{{ old('phone') }}"
+                required 
+                autocomplete="tel"
+                placeholder="+1 (555) 000-0000"
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+        </div>
+
+        <!-- Password -->
+        <div>
+            <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Password
+            </label>
+            <input id="password"
+                type="password" 
+                name="password" 
+                required 
+                autocomplete="new-password"
+                placeholder="Create a strong password"
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Confirmation du mot de passe -->
+        <!-- Confirm Password -->
         <div>
-            <x-input-label for="password_confirmation" :value="__('Confirmer le mot de passe')" class="text-gray-700 font-medium" />
-            <x-text-input id="password_confirmation"
-                class="block mt-1 w-full border-gray-200 bg-white text-gray-900 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-                type="password" name="password_confirmation" required autocomplete="new-password" />
+            <label for="password_confirmation" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Confirm password
+            </label>
+            <input id="password_confirmation"
+                type="password" 
+                name="password_confirmation" 
+                required 
+                autocomplete="new-password"
+                placeholder="Re-enter your password"
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <!-- Bouton d'inscription -->
-        <div>
-            <button type="submit"
-                    class="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                {{ __('Créer mon compte') }}
-            </button>
+        <!-- Terms -->
+        <div class="flex items-start pt-1">
+            <input type="checkbox" 
+                   id="terms" 
+                   name="terms" 
+                   required
+                   class="mt-1 w-4 h-4 text-blue-600 border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-0">
+            <label for="terms" class="ml-3 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                I agree to the <a href="#" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium">Terms of Service</a> and <a href="#" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium">Privacy Policy</a>
+            </label>
         </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+                class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-6">
+            Create account
+        </button>
     </form>
 
-    <!-- Séparateur -->
-    <div class="my-6 border-t border-gray-200"></div>
+    <!-- Divider -->
+    <div class="my-8 flex items-center">
+        <div class="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
+        <span class="px-4 text-xs text-slate-400 dark:text-slate-500 font-medium">OR</span>
+        <div class="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
+    </div>
 
-    <!-- Lien vers la connexion -->
-    <p class="text-center text-gray-600 text-sm">
-        Vous avez déjà un compte ?
-        <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:underline">
-            Se connecter
+    <!-- Login Link -->
+    <p class="text-center text-sm text-slate-600 dark:text-slate-400">
+        Already have an account?
+        <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+            Sign in
         </a>
     </p>
 </x-guest-layout>

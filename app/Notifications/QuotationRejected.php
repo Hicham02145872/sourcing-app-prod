@@ -70,19 +70,23 @@ class QuotationRejected extends Notification implements ShouldQueue
 
 
 
-                    ->subject('Quotation Rejected for Sourcing Request: ' . $this->quotation->sourcingRequest->product_name)
+                                        ->subject(__('Quotation Rejected for Sourcing Request: :productName', ['productName' => $this->quotation->sourcingRequest->product_name]))
 
 
 
-                    ->greeting('Hello Admin,')
+                                        ->greeting(__('Hello Admin,'))
 
 
 
-                    ->line('A quotation for Sourcing Request ' . $this->quotation->sourcingRequest->product_name . ' has been rejected by the client.')
+                                        ->line(__('A quotation for Sourcing Request :productName has been rejected by the client.', ['productName' => $this->quotation->sourcingRequest->product_name]))
 
-            ->action('View Sourcing Request', $url)
 
-            ->line('Please review the rejected quotation.');
+
+                                ->action(__('View Sourcing Request'), $url)
+
+
+
+                                ->line(__('Please review the rejected quotation.'));
 
     }
 
@@ -108,11 +112,11 @@ class QuotationRejected extends Notification implements ShouldQueue
 
 
 
-                'title' => 'Quotation Rejected',
+                                'title' => __('Quotation Rejected'),
 
 
 
-                'body' => "The quote for '{$this->quotation->sourcingRequest->product_name}' was rejected by the client.",
+                                'body' => __('The quote for \':productName\' was rejected by the client.', ['productName' => $this->quotation->sourcingRequest->product_name]),
 
 
 
@@ -142,13 +146,13 @@ class QuotationRejected extends Notification implements ShouldQueue
 
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
 
-            ->withNotification(FirebaseNotification::create(
+                        ->withNotification(FirebaseNotification::create(
 
-                'Quotation Rejected',
+                            __('Quotation Rejected'),
 
-                'Quotation for ' . $this->quotation->sourcingRequest->product_name . ' has been rejected.'
+                            __('Quotation for :productName has been rejected.', ['productName' => $this->quotation->sourcingRequest->product_name])
 
-            ))
+                        ))
 
             ->withData([
 

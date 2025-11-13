@@ -46,11 +46,11 @@ class ProofOfPaymentUploaded extends Notification implements ShouldQueue
         $url = url(route('admin.sourcing-orders.show', $this->sourcingOrder->id));
 
         return (new MailMessage)
-            ->subject('Proof of Payment Uploaded for Sourcing Order #' . $this->sourcingOrder->id)
-            ->greeting('Hello Admin,')
-            ->line('A client has uploaded proof of payment for Sourcing Order #' . $this->sourcingOrder->id . '.')
-            ->action('View Sourcing Order', $url)
-            ->line('Please review the proof of payment and update the order status accordingly.');
+            ->subject(__('Proof of Payment Uploaded for Sourcing Order #:orderId', ['orderId' => $this->sourcingOrder->id]))
+            ->greeting(__('Hello Admin,'))
+            ->line(__('A client has uploaded proof of payment for Sourcing Order #:orderId.', ['orderId' => $this->sourcingOrder->id]))
+            ->action(__('View Sourcing Order'), $url)
+            ->line(__('Please review the proof of payment and update the order status accordingly.'));
     }
 
     /**
@@ -66,8 +66,8 @@ class ProofOfPaymentUploaded extends Notification implements ShouldQueue
 
         return [
             'sourcing_order_id' => $this->sourcingOrder->id,
-            'title' => 'Payment Uploaded',
-            'body' => "{$clientName} uploaded proof of payment for the order related to '{$productName}'.",
+            'title' => __('Payment Uploaded'),
+            'body' => __(':clientName uploaded proof of payment for the order related to \':productName\'.', ['clientName' => $clientName, 'productName' => $productName]),
             'link' => route('admin.sourcing-orders.show', $this->sourcingOrder->id),
         ];
     }
@@ -84,8 +84,8 @@ class ProofOfPaymentUploaded extends Notification implements ShouldQueue
 
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification(FirebaseNotification::create(
-                'Proof of Payment Uploaded',
-                'Proof of payment uploaded for Sourcing Order #' . $this->sourcingOrder->id
+                __('Proof of Payment Uploaded'),
+                __('Proof of payment uploaded for Sourcing Order #:orderId', ['orderId' => $this->sourcingOrder->id])
             ))
             ->withData([
                 'click_action' => $url,

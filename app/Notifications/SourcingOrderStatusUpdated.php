@@ -35,11 +35,15 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
         $statusLabel = $this->getStatusLabel($this->sourcingOrder->status);
 
         return (new MailMessage)
-                    ->subject('Your Sourcing Order Status Has Been Updated')
-                    ->greeting('Hello ' . $notifiable->name . ',')
-                    ->line('The status of your sourcing order #' . $this->sourcingOrder->id . ' for "' . $this->sourcingOrder->quotation->sourcingRequest->product_name . '" has been updated to: ' . $statusLabel . '.')
-                    ->action('View Your Order', route('client.sourcing-orders.show', $this->sourcingOrder))
-                    ->line('Thank you for using our application!');
+                    ->subject(__('Your Sourcing Order Status Has Been Updated'))
+                    ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+                    ->line(__('The status of your sourcing order #:orderId for ":productName" has been updated to: :status.', [
+                        'orderId' => $this->sourcingOrder->id,
+                        'productName' => $this->sourcingOrder->quotation->sourcingRequest->product_name,
+                        'status' => $statusLabel,
+                    ]))
+                    ->action(__('View Your Order'), route('client.sourcing-orders.show', $this->sourcingOrder))
+                    ->line(__('Thank you for using our application!'));
     }
 
     public function toArray(object $notifiable): array
@@ -48,8 +52,8 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
 
         return [
             'sourcing_order_id' => $this->sourcingOrder->id,
-            'title' => 'Order Status Update: ' . $statusLabel,
-            'body' => 'Your order #' . $this->sourcingOrder->id . ' is now ' . $statusLabel . '.',
+            'title' => __('Order Status Update: :status', ['status' => $statusLabel]),
+            'body' => __('Your order #:orderId is now :status.', ['orderId' => $this->sourcingOrder->id, 'status' => $statusLabel]),
             'type' => 'info',
         ];
     }
@@ -61,8 +65,8 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
 
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification(FirebaseNotification::create(
-                'Mise à jour du statut de votre commande',
-                "Commande #{$this->sourcingOrder->id} : {$statusLabel}"
+                __('Order Status Update'),
+                __('Order #:orderId : :status', ['orderId' => $this->sourcingOrder->id, 'status' => $statusLabel])
             ))
             ->withData([
                 'click_action' => $url,
@@ -73,13 +77,13 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
     private function getStatusLabel(string $status): string
     {
         $statusLabels = [
-            'pending_payment' => 'En attente de paiement',
-            'paid' => 'Payée',
-            'shipped' => 'Expédiée',
-            'delivered' => 'Livrée',
-            'completed' => 'Terminée',
-            'cancelled' => 'Annulée',
-            'on_hold' => 'En attente',
+            'pending_payment' => __('Pending payment'),
+            'paid' => __('Paid'),
+            'shipped' => __('Shipped'),
+            'delivered' => __('Delivered'),
+            'completed' => __('Completed'),
+            'cancelled' => __('Cancelled'),
+            'on_hold' => __('On Hold'),
         ];
         return $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
     }
