@@ -25,7 +25,7 @@
             {{-- Actions --}}
              
             <div class="flex items-center gap-3">
-                 @if($role === 'client')
+                 @if(auth()->check() && auth()->user()->role === 'client')
                 {{-- Social Media Icons avec couleurs originales --}}
                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
                    class="p-2.5 text-[#1877F2] hover:bg-[#1877F2]/10 rounded-xl transition-all duration-200 group" 
