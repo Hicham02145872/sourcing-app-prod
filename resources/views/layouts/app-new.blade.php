@@ -25,5 +25,6 @@
     @if(auth()->user() && auth()->user()->role === 'client')
         <script src="//code.tidio.co/fcoeyvf3lyzubcu375ojfn87yy6zf6l1.js" async></script>
     @endif
+    <x-cookie-consent />
 </body>
 </html>
