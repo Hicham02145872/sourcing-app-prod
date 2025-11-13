@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>FastSourcingBrothers - Expert Sourcing from China</title>
-    <meta name="description" content="Professional sourcing solutions from China. Connect directly with verified manufacturers, reduce costs by 60%, and streamline your supply chain.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://public-frontend-cos.metadl.com/mgx/img/favicon.png" type="image/png">
+    <title>SourceHub - Streamline Your Procurement Process</title>
+    <meta name="description" content="Simplify your procurement process, save time, and gain transparency with our all-in-one sourcing platform. Connect with suppliers, manage quotes, and track orders with ease.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
@@ -280,7 +282,7 @@
             transform: translateY(var(--scroll-offset, 0));
         }
 
-        /* Blue theme accent - more subtle */
+        /* Blue theme accent */
         .blue-accent {
             background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
         }
@@ -309,6 +311,29 @@
                 padding-bottom: 4rem;
             }
         }
+
+        /* Process timeline */
+        .process-step {
+            position: relative;
+        }
+        .process-step::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #2563eb, transparent);
+        }
+        .process-step:last-child::after {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .process-step::after {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-white to-blue-50 min-h-screen">
@@ -329,14 +354,14 @@
                     <div class="flex items-center space-x-3">
                         <div class="w-11 h-11 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center shadow-md pulse-glow flex-shrink-0">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                             </svg>
                         </div>
                         <div class="flex flex-col">
                             <span class="text-xl font-bold text-slate-900 leading-tight tracking-tight">
-                                FastSourcingBrothers
+                                SourceHub
                             </span>
-                            <span class="text-xs text-slate-600 font-semibold tracking-wide">Sourcing Expert from China</span>
+                            <span class="text-xs text-slate-600 font-semibold tracking-wide">Procurement Made Simple</span>
                         </div>
                     </div>
 
@@ -349,11 +374,10 @@
 
                     <!-- Desktop Navigation -->
                     <div class="hidden lg:flex items-center space-x-8">
-                        <a href="#services" class="text-slate-700 hover:text-blue-700 font-semibold text-sm tracking-wide">Services</a>
-                        <a href="#process" class="text-slate-700 hover:text-blue-700 font-semibold text-sm tracking-wide">Our Process</a>
-                        <a href="#advantages" class="text-slate-700 hover:text-blue-700 font-semibold text-sm tracking-wide">Advantages</a>
+                        <a href="#features" class="text-slate-700 hover:text-blue-700 font-semibold text-sm tracking-wide">Features</a>
+                        <a href="#how-it-works" class="text-slate-700 hover:text-blue-700 font-semibold text-sm tracking-wide">How It Works</a>
+                        <a href="#benefits" class="text-slate-700 hover:text-blue-700 font-semibold text-sm tracking-wide">Benefits</a>
                         <a href="#testimonials" class="text-slate-700 hover:text-blue-700 font-semibold text-sm tracking-wide">Testimonials</a>
-                        <a href="#contact" class="text-slate-700 hover:text-blue-700 font-semibold text-sm tracking-wide">Contact</a>
                     </div>
 
                     <!-- Auth Buttons Desktop -->
@@ -362,7 +386,7 @@
                             Login
                         </a>
                         <a href="{{ route('register') }}" class="px-6 py-2.5 bg-gradient-to-r from-blue-700 to-blue-600 text-white rounded-lg hover:shadow-lg hover:scale-105 font-semibold text-sm tracking-wide">
-                            Get Started
+                            Sign Up Free
                         </a>
                     </div>
                 </div>
@@ -371,17 +395,16 @@
             <!-- Mobile Menu -->
             <div id="mobileMenu" class="hidden lg:hidden glass border-t border-slate-200">
                 <div class="px-4 py-4 space-y-3 max-w-7xl mx-auto">
-                    <a href="#services" class="block px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold">Services</a>
-                    <a href="#process" class="block px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold">Our Process</a>
-                    <a href="#advantages" class="block px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold">Advantages</a>
+                    <a href="#features" class="block px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold">Features</a>
+                    <a href="#how-it-works" class="block px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold">How It Works</a>
+                    <a href="#benefits" class="block px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold">Benefits</a>
                     <a href="#testimonials" class="block px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold">Testimonials</a>
-                    <a href="#contact" class="block px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold">Contact</a>
                     <hr class="my-3 border-slate-200">
-                    <a href="{{ route('login') }}" class="block px-4 py-3 text-slate-700 border-2 border-slate-300 rounded-lg font-semibold text-center">
+                    <a href="#" class="block px-4 py-3 text-slate-700 border-2 border-slate-300 rounded-lg font-semibold text-center">
                         Login
                     </a>
-                    <a href="{{ route('register') }}" class="block px-4 py-3 bg-gradient-to-r from-blue-700 to-blue-600 text-white rounded-lg font-semibold text-center">
-                        Get Started
+                    <a href="#cta" class="block px-4 py-3 bg-gradient-to-r from-blue-700 to-blue-600 text-white rounded-lg font-semibold text-center">
+                        Sign Up Free
                     </a>
                 </div>
             </div>
@@ -397,22 +420,22 @@
                         <!-- Badge -->
                         <div class="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-700 to-blue-600 text-white px-5 py-2.5 rounded-full enterprise-badge shadow-md">
                             <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="text-sm font-bold tracking-wide">#1 China Sourcing Partner</span>
+                            <span class="text-sm font-bold tracking-wide">Trusted by 1000+ Businesses</span>
                         </div>
 
                         <!-- Heading -->
                         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight tracking-tight">
-                            Your Trusted
+                            Simplify Your
                             <span class="block gradient-text mt-2">
-                                China Sourcing Partner
+                                Procurement Process
                             </span>
                         </h1>
 
                         <!-- Description -->
                         <p class="text-lg sm:text-xl text-slate-600 leading-relaxed font-medium">
-                            FastSourcingBrothers connects you directly with China's top manufacturers. We manage your entire supply chain: supplier research, negotiation, quality control, and international logistics.
+                            Save time and gain transparency with our all-in-one sourcing platform. Connect with suppliers, manage quotes, and track orders with ease.
                         </p>
 
                         <!-- Trust Badges -->
@@ -425,43 +448,43 @@
                             </div>
                             <div class="flex items-center space-x-2 bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm enterprise-card">
                                 <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                                 </svg>
-                                <span class="text-sm font-semibold text-slate-700">Quality Control</span>
+                                <span class="text-sm font-semibold text-slate-700">Real-time Updates</span>
                             </div>
                             <div class="flex items-center space-x-2 bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm enterprise-card">
                                 <svg class="w-5 h-5 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                                 </svg>
-                                <span class="text-sm font-semibold text-slate-700">Guaranteed Delivery</span>
+                                <span class="text-sm font-semibold text-slate-700">24/7 Support</span>
                             </div>
                         </div>
 
                         <!-- Buttons -->
                         <div class="flex flex-col sm:flex-row gap-4 pt-6">
-                            <a href="#contact" class="px-8 py-4 bg-gradient-to-r from-blue-700 to-blue-600 text-white rounded-xl hover:shadow-xl hover:scale-105 font-semibold text-center flex items-center justify-center space-x-2 active:scale-95 touch-button shadow-lg shadow-blue-600/25">
-                                <span>Request Free Quote</span>
+                            <a href="#cta" class="px-8 py-4 bg-gradient-to-r from-blue-700 to-blue-600 text-white rounded-xl hover:shadow-xl hover:scale-105 font-semibold text-center flex items-center justify-center space-x-2 active:scale-95 touch-button shadow-lg shadow-blue-600/25">
+                                <span>Start Your Sourcing Request</span>
                                 <svg class="w-5 h-5 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                                 </svg>
                             </a>
-                            <a href="#process" class="px-8 py-4 glass text-slate-700 rounded-xl border-2 border-slate-300 hover:border-blue-600 hover:shadow-lg transition-all font-semibold text-center active:scale-95 touch-button">
-                                Discover Our Process
+                            <a href="#how-it-works" class="px-8 py-4 glass text-slate-700 rounded-xl border-2 border-slate-300 hover:border-blue-600 hover:shadow-lg transition-all font-semibold text-center active:scale-95 touch-button">
+                                Get a Free Quote
                             </a>
                         </div>
 
                         <!-- Stats -->
                         <div class="grid grid-cols-3 gap-4 pt-8">
                             <div class="enterprise-card p-6 rounded-xl text-center card-hover">
-                                <div class="text-3xl sm:text-4xl font-bold gradient-text counter" data-target="500">0</div>
-                                <div class="text-sm text-slate-600 mt-2 font-semibold">Clients</div>
+                                <div class="text-3xl sm:text-4xl font-bold gradient-text counter" data-target="1000">0</div>
+                                <div class="text-sm text-slate-600 mt-2 font-semibold">Active Users</div>
                             </div>
                             <div class="enterprise-card p-6 rounded-xl text-center card-hover">
-                                <div class="text-3xl sm:text-4xl font-bold gradient-text counter" data-target="2000">0</div>
-                                <div class="text-sm text-slate-600 mt-2 font-semibold">Suppliers</div>
+                                <div class="text-3xl sm:text-4xl font-bold gradient-text counter" data-target="5000">0</div>
+                                <div class="text-sm text-slate-600 mt-2 font-semibold">Orders Processed</div>
                             </div>
                             <div class="enterprise-card p-6 rounded-xl text-center card-hover">
-                                <div class="text-3xl sm:text-4xl font-bold gradient-text counter" data-target="98">0</div>
+                                <div class="text-3xl sm:text-4xl font-bold gradient-text counter" data-target="99">0</div>
                                 <div class="text-sm text-slate-600 mt-2 font-semibold">Satisfaction</div>
                             </div>
                         </div>
@@ -474,7 +497,7 @@
                             <div class="relative z-10 w-full h-full flex items-center justify-center">
                                 <div class="w-64 h-64 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full opacity-15 blur-3xl absolute"></div>
                                 <svg class="w-96 h-96 text-blue-700 opacity-25 float-animation" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                                 </svg>
                             </div>
                         </div>
@@ -483,232 +506,237 @@
             </div>
         </section>
 
-        <!-- Services Section -->
-        <section id="services" class="section-spacing px-4 sm:px-6 lg:px-8 glass border-y border-slate-200/80">
+        <!-- Features Section -->
+        <section id="features" class="section-spacing px-4 sm:px-6 lg:px-8 glass border-y border-slate-200/80">
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-16 scroll-reveal">
                     <div class="inline-flex items-center space-x-2 bg-blue-100 text-blue-800 px-5 py-2.5 rounded-full mb-6 border border-blue-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
                         </svg>
-                        <span class="text-sm font-bold tracking-wide">Our Services</span>
+                        <span class="text-sm font-bold tracking-wide">Platform Features</span>
                     </div>
                     <h2 class="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
-                        Complete Sourcing Solution
+                        Everything You Need for Efficient Sourcing
                     </h2>
                     <p class="text-xl text-slate-600 max-w-3xl mx-auto font-medium">
-                        From supplier research to final delivery, we manage every step of your China supply chain
+                        Our comprehensive platform streamlines every aspect of your procurement process
                     </p>
                 </div>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Service 1 -->
+                    <!-- Feature 1 -->
                     <div class="group p-8 enterprise-card rounded-2xl card-hover scroll-reveal">
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-md shadow-blue-600/25">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Supplier Research</h3>
-                        <p class="text-slate-600 leading-relaxed">Identification and selection of China's best manufacturers tailored to your specific needs. Access to our network of 2000+ verified suppliers.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Effortless Sourcing Requests</h3>
+                        <p class="text-slate-600 leading-relaxed">Submit detailed sourcing requests for products or services with ease. Our intuitive interface guides you through every step.</p>
                     </div>
 
-                    <!-- Service 2 -->
+                    <!-- Feature 2 -->
                     <div class="group p-8 enterprise-card rounded-2xl card-hover scroll-reveal">
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-md shadow-blue-600/25">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Negotiation & Contracts</h3>
-                        <p class="text-slate-600 leading-relaxed">Negotiation of best prices and terms. Complete contract management and protection of your commercial interests with local expertise.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Streamlined Quotation Management</h3>
+                        <p class="text-slate-600 leading-relaxed">Receive and manage multiple quotations from suppliers with clear acceptance and rejection workflows all in one place.</p>
                     </div>
 
-                    <!-- Service 3 -->
+                    <!-- Feature 3 -->
                     <div class="group p-8 enterprise-card rounded-2xl card-hover scroll-reveal">
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-md shadow-blue-600/25">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Quality Control</h3>
-                        <p class="text-slate-600 leading-relaxed">Rigorous factory inspections before shipment. Compliance verification with international standards and your specifications.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Comprehensive Order Tracking</h3>
+                        <p class="text-slate-600 leading-relaxed">Track the status of your sourcing orders from quotation acceptance to final delivery with real-time updates.</p>
                     </div>
 
-                    <!-- Service 4 -->
+                    <!-- Feature 4 -->
                     <div class="group p-8 enterprise-card rounded-2xl card-hover scroll-reveal">
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-md shadow-blue-600/25">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">International Logistics</h3>
-                        <p class="text-slate-600 leading-relaxed">Complete management of sea, air, or rail transport. Customs clearance and delivery to your warehouse with real-time tracking.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Secure Payment Processing</h3>
+                        <p class="text-slate-600 leading-relaxed">Integration with various payment methods ensures smooth and secure transactions for all your sourcing needs.</p>
                     </div>
 
-                    <!-- Service 5 -->
+                    <!-- Feature 5 -->
                     <div class="group p-8 enterprise-card rounded-2xl card-hover scroll-reveal">
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-md shadow-blue-600/25">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Financial Management</h3>
-                        <p class="text-slate-600 leading-relaxed">Secure payments, currency management, and protection against financial risks. Guaranteed secure payment.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Real-time Notifications</h3>
+                        <p class="text-slate-600 leading-relaxed">Stay updated with push notifications via mobile/web and email alerts on request status, quotations, and order progress.</p>
                     </div>
 
-                    <!-- Service 6 -->
+                    <!-- Feature 6 -->
                     <div class="group p-8 enterprise-card rounded-2xl card-hover scroll-reveal">
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-md shadow-blue-600/25">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Continuous Support</h3>
-                        <p class="text-slate-600 leading-relaxed">Personalized support throughout your project. Bilingual team available to answer all your questions.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Dedicated Client Support</h3>
+                        <p class="text-slate-600 leading-relaxed">Direct communication channels including WhatsApp support ensure you get assistance whenever you need it.</p>
+                    </div>
+
+                    <!-- Feature 7 -->
+                    <div class="group p-8 enterprise-card rounded-2xl card-hover scroll-reveal md:col-span-2 lg:col-span-1 mx-auto md:max-w-md lg:max-w-none">
+                        <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-md shadow-blue-600/25">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-4 tracking-tight">Intuitive User Interface</h3>
+                        <p class="text-slate-600 leading-relaxed">A modern, user-friendly dashboard designed for both clients and administrators to navigate with ease.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Process Section -->
-        <section id="process" class="section-spacing px-4 sm:px-6 lg:px-8 relative">
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="section-spacing px-4 sm:px-6 lg:px-8 relative">
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-16 scroll-reveal">
                     <div class="inline-flex items-center space-x-2 bg-blue-100 text-blue-800 px-5 py-2.5 rounded-full mb-6 border border-blue-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
-                        <span class="text-sm font-bold tracking-wide">Our Process</span>
+                        <span class="text-sm font-bold tracking-wide">Simple Process</span>
                     </div>
                     <h2 class="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
-                        How We Work
+                        How It Works
                     </h2>
                     <p class="text-xl text-slate-600 max-w-3xl mx-auto font-medium">
-                        A simple and transparent 6-step process to guarantee your success
+                        Get started with our streamlined 6-step process
                     </p>
                 </div>
 
-                <div class="relative">
-                    <!-- Timeline line -->
-                    <div class="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-700 to-blue-600"></div>
-
-                    <!-- Steps -->
-                    <div class="space-y-16">
-                        <!-- Step 1 -->
-                        <div class="relative grid lg:grid-cols-2 gap-8 items-center scroll-reveal">
-                            <div class="lg:text-right">
-                                <div class="inline-block lg:block enterprise-card p-8 rounded-2xl card-hover">
-                                    <div class="flex lg:flex-row-reverse items-start gap-6">
-                                        <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                                            <span class="text-white font-bold text-2xl">1</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h3 class="text-2xl font-bold text-slate-900 mb-3 tracking-tight">Needs Analysis</h3>
-                                            <p class="text-slate-600 leading-relaxed">We study your needs, specifications, and objectives in detail to identify the best suppliers.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="hidden lg:block"></div>
-                        </div>
-
-                        <!-- Step 2 -->
-                        <div class="relative grid lg:grid-cols-2 gap-8 items-center scroll-reveal">
-                            <div class="hidden lg:block"></div>
-                            <div>
-                                <div class="enterprise-card p-8 rounded-2xl card-hover">
-                                    <div class="flex items-start gap-6">
-                                        <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                                            <span class="text-white font-bold text-2xl">2</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h3 class="text-2xl font-bold text-slate-900 mb-3 tracking-tight">Research & Selection</h3>
-                                            <p class="text-slate-600 leading-relaxed">Identification of the most suitable manufacturers in our network of 2000+ verified suppliers in China.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Step 3 -->
-                        <div class="relative grid lg:grid-cols-2 gap-8 items-center scroll-reveal">
-                            <div class="lg:text-right">
-                                <div class="inline-block lg:block enterprise-card p-8 rounded-2xl card-hover">
-                                    <div class="flex lg:flex-row-reverse items-start gap-6">
-                                        <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                                            <span class="text-white font-bold text-2xl">3</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h3 class="text-2xl font-bold text-slate-900 mb-3 tracking-tight">Negotiation & Quotes</h3>
-                                            <p class="text-slate-600 leading-relaxed">Negotiation of best prices and terms. Presentation of detailed and transparent quotes for validation.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="hidden lg:block"></div>
-                        </div>
-
-                        <!-- Step 4 -->
-                        <div class="relative grid lg:grid-cols-2 gap-8 items-center scroll-reveal">
-                            <div class="hidden lg:block"></div>
-                            <div>
-                                <div class="enterprise-card p-8 rounded-2xl card-hover">
-                                    <div class="flex items-start gap-6">
-                                        <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                                            <span class="text-white font-bold text-2xl">4</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h3 class="text-2xl font-bold text-slate-900 mb-3 tracking-tight">Production & Monitoring</h3>
-                                            <p class="text-slate-600 leading-relaxed">Production launch with regular monitoring. Inspections during manufacturing to ensure quality.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Step 5 -->
-                        <div class="relative grid lg:grid-cols-2 gap-8 items-center scroll-reveal">
-                            <div class="lg:text-right">
-                                <div class="inline-block lg:block enterprise-card p-8 rounded-2xl card-hover">
-                                    <div class="flex lg:flex-row-reverse items-start gap-6">
-                                        <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                                            <span class="text-white font-bold text-2xl">5</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h3 class="text-2xl font-bold text-slate-900 mb-3 tracking-tight">Final Quality Control</h3>
-                                            <p class="text-slate-600 leading-relaxed">Complete inspection before shipment. Compliance verification and quality tests according to your standards.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="hidden lg:block"></div>
-                        </div>
-
-                        <!-- Step 6 -->
-                        <div class="relative grid lg:grid-cols-2 gap-8 items-center scroll-reveal">
-                            <div class="hidden lg:block"></div>
-                            <div>
-                                <div class="enterprise-card p-8 rounded-2xl card-hover">
-                                    <div class="flex items-start gap-6">
-                                        <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                                            <span class="text-white font-bold text-2xl">6</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h3 class="text-2xl font-bold text-slate-900 mb-3 tracking-tight">Delivery & After-Sales</h3>
-                                            <p class="text-slate-600 leading-relaxed">Secure shipping and delivery. After-sales service and continuous support for your complete satisfaction.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Step 1 -->
+    <div class="process-step enterprise-card p-8 rounded-2xl card-hover scroll-reveal group relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="flex items-start gap-6 relative z-10">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                <span class="text-white font-bold text-2xl">1</span>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-slate-900 mb-3 tracking-tight">Submit Request</h3>
+                <p class="text-slate-600 leading-relaxed text-sm">Create a detailed sourcing request with your product specifications and requirements.</p>
+                <div class="mt-4 flex items-center gap-2 text-blue-600 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>✓</span> Simple & Fast
                 </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="process-step enterprise-card p-8 rounded-2xl card-hover scroll-reveal group relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="flex items-start gap-6 relative z-10">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                <span class="text-white font-bold text-2xl">2</span>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-slate-900 mb-3 tracking-tight">Receive Quotations</h3>
+                <p class="text-slate-600 leading-relaxed text-sm">Get multiple competitive quotes from verified suppliers matched to your needs.</p>
+                <div class="mt-4 flex items-center gap-2 text-blue-600 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>✓</span> Best Offers
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="process-step enterprise-card p-8 rounded-2xl card-hover scroll-reveal group relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="flex items-start gap-6 relative z-10">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                <span class="text-white font-bold text-2xl">3</span>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-slate-900 mb-3 tracking-tight">Accept/Reject</h3>
+                <p class="text-slate-600 leading-relaxed text-sm">Review quotations and accept the best offer with our simple approval workflow.</p>
+                <div class="mt-4 flex items-center gap-2 text-blue-600 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>✓</span> Your Choice
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="process-step enterprise-card p-8 rounded-2xl card-hover scroll-reveal group relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="flex items-start gap-6 relative z-10">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                <span class="text-white font-bold text-2xl">4</span>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-slate-900 mb-3 tracking-tight">Track Order</h3>
+                <p class="text-slate-600 leading-relaxed text-sm">Monitor your order status in real-time from production to shipment.</p>
+                <div class="mt-4 flex items-center gap-2 text-blue-600 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>✓</span> Real-time Updates
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="process-step enterprise-card p-8 rounded-2xl card-hover scroll-reveal group relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="flex items-start gap-6 relative z-10">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                <span class="text-white font-bold text-2xl">5</span>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-slate-900 mb-3 tracking-tight">Secure Payment</h3>
+                <p class="text-slate-600 leading-relaxed text-sm">Complete transactions safely with our integrated payment processing system.</p>
+                <div class="mt-4 flex items-center gap-2 text-blue-600 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>✓</span> Safe & Encrypted
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="process-step enterprise-card p-8 rounded-2xl card-hover scroll-reveal group relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="flex items-start gap-6 relative z-10">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                <span class="text-white font-bold text-2xl">6</span>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-slate-900 mb-3 tracking-tight">Delivery</h3>
+                <p class="text-slate-600 leading-relaxed text-sm">Receive your products with full tracking and support throughout delivery.</p>
+                <div class="mt-4 flex items-center gap-2 text-blue-600 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>✓</span> On Time
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+    </div>
+</div>
             </div>
         </section>
 
-        <!-- Advantages Section -->
-        <section id="advantages" class="section-spacing px-4 sm:px-6 lg:px-8 glass border-y border-slate-200/80">
+        <!-- Benefits Section -->
+        <section id="benefits" class="section-spacing px-4 sm:px-6 lg:px-8 glass border-y border-slate-200/80">
             <div class="max-w-7xl mx-auto">
                 <div class="grid lg:grid-cols-2 gap-16 items-center">
                     <div class="scroll-reveal">
@@ -716,35 +744,24 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                             </svg>
-                            <span class="text-sm font-bold tracking-wide">Our Advantages</span>
+                            <span class="text-sm font-bold tracking-wide">Key Benefits</span>
                         </div>
                         <h2 class="text-4xl sm:text-5xl font-bold text-slate-900 mb-8 tracking-tight">
-                            Why Choose FastSourcingBrothers?
+                            Why Businesses Choose SourceHub
                         </h2>
                         <p class="text-xl text-slate-600 mb-10 leading-relaxed">
-                            Our expertise in the Chinese market and our network of verified suppliers guarantee you the best conditions for your sourcing.
+                            Transform your procurement process with transparency, efficiency, and cost savings.
                         </p>
                         <div class="space-y-8">
                             <div class="flex items-start space-x-5">
                                 <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <svg class="w-7 h-7 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-900 mb-2 text-lg">Savings up to 60%</h4>
-                                    <p class="text-slate-600 leading-relaxed">Significant reduction in your sourcing costs through our direct negotiations with manufacturers</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start space-x-5">
-                                <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-7 h-7 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-slate-900 mb-2 text-lg">Considerable Time Savings</h4>
-                                    <p class="text-slate-600 leading-relaxed">We manage the entire process so you can focus on your core business</p>
+                                    <h4 class="font-bold text-slate-900 mb-2 text-lg">Save Time</h4>
+                                    <p class="text-slate-600 leading-relaxed">Reduce procurement cycle time by up to 70% with automated workflows and instant supplier connections.</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-5">
@@ -754,49 +771,60 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-slate-900 mb-2 text-lg">Guaranteed Quality</h4>
-                                    <p class="text-slate-600 leading-relaxed">Rigorous quality controls at every stage and guaranteed compliance with international standards</p>
+                                    <h4 class="font-bold text-slate-900 mb-2 text-lg">Complete Transparency</h4>
+                                    <p class="text-slate-600 leading-relaxed">Track every step of your order with real-time updates and full visibility into pricing and timelines.</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-5">
                                 <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <svg class="w-7 h-7 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-slate-900 mb-2 text-lg">Local Expertise</h4>
-                                    <p class="text-slate-600 leading-relaxed">Bilingual team based in China with in-depth knowledge of the market and local culture</p>
+                                    <h4 class="font-bold text-slate-900 mb-2 text-lg">Connect with Suppliers</h4>
+                                    <p class="text-slate-600 leading-relaxed">Access a network of verified suppliers and receive competitive quotes from multiple vendors instantly.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-5">
+                                <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-7 h-7 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 mb-2 text-lg">Boost Efficiency</h4>
+                                    <p class="text-slate-600 leading-relaxed">Streamline your entire procurement workflow from request to delivery with our intuitive platform.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="scroll-reveal">
                         <div class="enterprise-card p-10 rounded-2xl shadow-lg">
-                            <h3 class="text-3xl font-bold text-slate-900 mb-8 tracking-tight">Average Client Results</h3>
+                            <h3 class="text-3xl font-bold text-slate-900 mb-8 tracking-tight">Platform Impact</h3>
                             <div class="space-y-8">
                                 <div>
                                     <div class="flex justify-between mb-3">
-                                        <span class="text-slate-700 font-semibold text-lg">Cost Reduction</span>
-                                        <span class="text-green-700 font-bold text-lg">-60%</span>
+                                        <span class="text-slate-700 font-semibold text-lg">Time Reduction</span>
+                                        <span class="text-green-700 font-bold text-lg">70%</span>
                                     </div>
                                     <div class="w-full bg-slate-200 rounded-full h-4">
-                                        <div class="bg-gradient-to-r from-green-600 to-green-700 h-4 rounded-full" style="width: 60%"></div>
+                                        <div class="bg-gradient-to-r from-green-600 to-green-700 h-4 rounded-full" style="width: 70%"></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex justify-between mb-3">
-                                        <span class="text-slate-700 font-semibold text-lg">Time Savings</span>
-                                        <span class="text-blue-700 font-bold text-lg">+75%</span>
+                                        <span class="text-slate-700 font-semibold text-lg">Cost Savings</span>
+                                        <span class="text-blue-700 font-bold text-lg">45%</span>
                                     </div>
                                     <div class="w-full bg-slate-200 rounded-full h-4">
-                                        <div class="bg-gradient-to-r from-blue-600 to-blue-700 h-4 rounded-full" style="width: 75%"></div>
+                                        <div class="bg-gradient-to-r from-blue-600 to-blue-700 h-4 rounded-full" style="width: 45%"></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex justify-between mb-3">
-                                        <span class="text-slate-700 font-semibold text-lg">Quality Improvement</span>
-                                        <span class="text-blue-700 font-bold text-lg">+85%</span>
+                                        <span class="text-slate-700 font-semibold text-lg">Process Efficiency</span>
+                                        <span class="text-blue-700 font-bold text-lg">85%</span>
                                     </div>
                                     <div class="w-full bg-slate-200 rounded-full h-4">
                                         <div class="bg-gradient-to-r from-blue-600 to-blue-700 h-4 rounded-full" style="width: 85%"></div>
@@ -804,18 +832,18 @@
                                 </div>
                                 <div>
                                     <div class="flex justify-between mb-3">
-                                        <span class="text-slate-700 font-semibold text-lg">Client Satisfaction</span>
-                                        <span class="text-blue-700 font-bold text-lg">98%</span>
+                                        <span class="text-slate-700 font-semibold text-lg">User Satisfaction</span>
+                                        <span class="text-blue-700 font-bold text-lg">99%</span>
                                     </div>
                                     <div class="w-full bg-slate-200 rounded-full h-4">
-                                        <div class="bg-gradient-to-r from-blue-600 to-blue-700 h-4 rounded-full" style="width: 98%"></div>
+                                        <div class="bg-gradient-to-r from-blue-600 to-blue-700 h-4 rounded-full" style="width: 99%"></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-10 p-8 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                                <p class="text-sm text-slate-600 mb-2 font-semibold">Average ROI</p>
-                                <p class="text-5xl font-bold gradient-text">350%</p>
-                                <p class="text-sm text-slate-600 mt-3">In the first year</p>
+                                <p class="text-sm text-slate-600 mb-2 font-semibold">Average Order Value</p>
+                                <p class="text-5xl font-bold gradient-text">$50K+</p>
+                                <p class="text-sm text-slate-600 mt-3">Per successful procurement</p>
                             </div>
                         </div>
                     </div>
@@ -831,13 +859,13 @@
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
-                        <span class="text-sm font-bold tracking-wide">Client Testimonials</span>
+                        <span class="text-sm font-bold tracking-wide">Client Success Stories</span>
                     </div>
                     <h2 class="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
-                        What Our Clients Say
+                        Trusted by Industry Leaders
                     </h2>
                     <p class="text-xl text-slate-600 max-w-3xl mx-auto font-medium">
-                        Discover how FastSourcingBrothers has helped companies like yours succeed in China sourcing
+                        See how businesses are transforming their procurement with SourceHub
                     </p>
                 </div>
 
@@ -861,14 +889,14 @@
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <p class="text-slate-600 mb-8 italic leading-relaxed">"FastSourcingBrothers transformed our supply chain. We reduced costs by 55% while improving quality. Their team is professional and responsive."</p>
+                        <p class="text-slate-600 mb-8 italic leading-relaxed">"SourceHub transformed our procurement process completely. The transparency and ease of use are unmatched. We've reduced our sourcing time by 65% and saved significantly on costs."</p>
                         <div class="flex items-center">
                             <div class="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                                JD
+                                AS
                             </div>
                             <div>
-                                <p class="font-bold text-slate-900 text-lg">Ayman DAOUDE</p>
-                                <p class="text-sm text-slate-600">Client</p>
+                                <p class="font-bold text-slate-900 text-lg">Ayman Sami</p>
+                                <p class="text-sm text-slate-600">client</p>
                             </div>
                         </div>
                     </div>
@@ -892,14 +920,14 @@
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <p class="text-slate-600 mb-8 italic leading-relaxed">"Exceptional service from start to finish. Quality controls are rigorous and communication is excellent. Highly recommend!"</p>
+                        <p class="text-slate-600 mb-8 italic leading-relaxed">"The real-time tracking and notification system is a game-changer. We always know exactly where our orders are. The WhatsApp support is incredibly responsive and helpful."</p>
                         <div class="flex items-center">
                             <div class="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                                SM
+                                HN
                             </div>
                             <div>
-                                <p class="font-bold text-slate-900 text-lg">Amin SAMI</p>
-                                <p class="text-sm text-slate-600">Client</p>
+                                <p class="font-bold text-slate-900 text-lg">hicham nadi</p>
+                                <p class="text-sm text-slate-600">client</p>
                             </div>
                         </div>
                     </div>
@@ -923,15 +951,46 @@
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <p class="text-slate-600 mb-8 italic leading-relaxed">"Thanks to FastSourcingBrothers, we found reliable suppliers and saved tremendously. Their expertise in the Chinese market is invaluable."</p>
+                        <p class="text-slate-600 mb-8 italic leading-relaxed">"Getting multiple quotes from verified suppliers in one place has revolutionized how we source materials. The secure payment system gives us peace of mind for every transaction."</p>
                         <div class="flex items-center">
                             <div class="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                                PW
+                                AA
                             </div>
                             <div>
-                                <p class="font-bold text-slate-900 text-lg">ahmad MARWAN</p>
+                                <p class="font-bold text-slate-900 text-lg">Ahmad alami</p>
                                 <p class="text-sm text-slate-600">Client</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="mt-16 flex flex-wrap justify-center items-center gap-8 scroll-reveal">
+                    <div class="flex items-center space-x-3 bg-white px-6 py-4 rounded-xl border border-slate-200 shadow-sm enterprise-card">
+                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="font-bold text-slate-900">Secure Payment</p>
+                            <p class="text-xs text-slate-600">256-bit Encryption</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 bg-white px-6 py-4 rounded-xl border border-slate-200 shadow-sm enterprise-card">
+                        <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="font-bold text-slate-900">Quality Control</p>
+                            <p class="text-xs text-slate-600">Verified Suppliers</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 bg-white px-6 py-4 rounded-xl border border-slate-200 shadow-sm enterprise-card">
+                        <svg class="w-8 h-8 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                        </svg>
+                        <div>
+                            <p class="font-bold text-slate-900">Guaranteed Delivery</p>
+                            <p class="text-xs text-slate-600">On-Time Promise</p>
                         </div>
                     </div>
                 </div>
@@ -939,35 +998,49 @@
         </section>
 
         <!-- CTA Section -->
-        <section id="contact" class="section-spacing px-4 sm:px-6 lg:px-8 relative">
+        <section id="cta" class="section-spacing px-4 sm:px-6 lg:px-8 relative">
             <div class="max-w-5xl mx-auto">
                 <div class="relative bg-gradient-to-r from-blue-700 to-blue-600 rounded-3xl p-12 sm:p-16 text-center shadow-2xl overflow-hidden scroll-reveal">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent"></div>
                     <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wOCI+PHBhdGggZD0iTTM2IDM0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDEwYzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
                     <div class="relative z-10">
                         <h2 class="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">
-                            Ready to Optimize Your China Sourcing?
+                            Ready to Transform Your Procurement?
                         </h2>
                         <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto leading-relaxed">
-                            Join over 500 clients that have already trusted FastSourcingBrothers for their China sourcing needs.
+                            Join thousands of businesses that have streamlined their sourcing process with SourceHub. Start saving time and money today.
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                             <a href="{{ route('register') }}" class="inline-flex items-center px-10 py-5 bg-white text-blue-700 rounded-xl hover:shadow-2xl hover:scale-105 transition-all font-bold text-lg">
-                                <span>Request Free Quote</span>
+                                <span>Start Your Sourcing Request</span>
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                                 </svg>
                             </a>
-                            <a href="tel:{{ config('app.phone') }}" class="inline-flex items-center px-10 py-5 bg-transparent text-white rounded-xl border-2 border-white hover:bg-white hover:text-blue-700 transition-all font-bold text-lg">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                                </svg>
-                                <span>Call Us</span>
+                            <a href="{{ route('register') }}" class="inline-flex items-center px-10 py-5 bg-transparent text-white rounded-xl border-2 border-white hover:bg-white hover:text-blue-700 transition-all font-bold text-lg">
+                                <span>Get a Free Quote</span>
                             </a>
                         </div>
-                        <p class="text-sm text-blue-100 mt-8 font-medium">
-                            ✓ Free quote within 24h • ✓ No commitment • ✓ Personalized consultation
-                        </p>
+                        <div class="mt-8 flex flex-col sm:flex-row justify-center items-center gap-6 text-blue-100">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium">No credit card required</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium">Free consultation</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium">24/7 support</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -981,12 +1054,12 @@
                     <div class="flex items-center space-x-3">
                         <div class="w-11 h-11 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                             </svg>
                         </div>
                         <div>
                             <span class="text-xl font-bold text-white tracking-tight">FastSourcingBrothers</span>
-                            <span class="block text-xs text-slate-400 font-semibold">Sourcing Expert from China</span>
+                            <span class="block text-xs text-slate-400 font-semibold">Procurement Made Simple</span>
                         </div>
                     </div>
 
@@ -1009,19 +1082,18 @@
                         </a>
                     </div>
 
-                    <!-- Location -->
+                    <!-- Contact -->
                     <div class="flex items-center space-x-2 text-slate-400">
                         <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
-                        <span class="text-sm font-medium">Agadir, maroc</span>
+                        <span class="text-sm font-medium"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f88b8d8888978a8cb88b978d8a9b9d908d9ad69b9795">[email&#160;protected]</a></span>
                     </div>
                 </div>
 
                 <!-- Copyright -->
                 <div class="border-t border-slate-800 mt-8 pt-8 text-center">
-                    <p class="text-sm text-slate-400">&copy; 2025 FastSourcingBrothers. All rights reserved.</p>
+                    <p class="text-sm text-slate-400">© 2025 FastSourcingBrothers. All rights reserved. Simplifying procurement worldwide.</p>
                 </div>
             </div>
         </footer>
