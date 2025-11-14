@@ -21,5 +21,13 @@ class AdminUserSeeder extends Seeder
                 'role' => 'admin',
             ]
         );
+        User::updateOrCreate(
+            ['email' => 'Nada.tayebi.28@edu.uiz.ac.ma'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('Nada2334'), // You can change the password here
+                'role' => 'admin',
+            ]
+        );
     }
 }
