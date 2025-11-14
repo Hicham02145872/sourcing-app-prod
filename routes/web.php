@@ -67,6 +67,7 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/sourcing-orders', [App\Http\Controllers\Client\SourcingOrderController::class, 'index'])->name('sourcing-orders.index');
     Route::get('/sourcing-orders/{sourcingOrder}', [App\Http\Controllers\Client\SourcingOrderController::class, 'show'])->name('sourcing-orders.show');
     Route::get('/sourcing-orders/{sourcingOrder}/receipt', [App\Http\Controllers\Client\SourcingOrderController::class, 'showReceipt'])->name('sourcing-orders.receipt');
+    Route::get('/sourcing-orders/{sourcingOrder}/download-proof-of-payment', [App\Http\Controllers\Client\SourcingOrderController::class, 'downloadProofOfPayment'])->name('sourcing-orders.download-proof-of-payment');
     Route::get('/history', [SourcingRequestController::class, 'history'])->name('history');
 });
 

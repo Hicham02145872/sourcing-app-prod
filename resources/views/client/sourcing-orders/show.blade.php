@@ -220,6 +220,64 @@
                         </div>
                     </div>
 
+                    {{-- Payment Methods --}}
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden" x-data="{ selectedMethod: null }">
+                        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Available Payment Methods') }}</h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Choose your preferred payment method') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                @foreach($paymentMethods as $paymentMethod)
+                                    <button @click="selectedMethod = selectedMethod === '{{ $paymentMethod->name }}' ? null : '{{ $paymentMethod->name }}'" 
+                                            class="w-full p-4 text-left border rounded-lg transition-all duration-200"
+                                            :class="selectedMethod === '{{ $paymentMethod->name }}' ? 'border-blue-400 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-sm' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm'">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                @if($paymentMethod->logo_path)
+                                                    <div class="w-10 h-10 rounded-full border border-slate-200 bg-white p-1.5 shadow-sm flex items-center justify-center">
+                                                        <img src="{{ asset('storage/' . $paymentMethod->logo_path) }}" alt="{{ $paymentMethod->name }}" class="w-full h-full object-contain">
+                                                    </div>
+                                                @else
+                                                    <div class="w-10 h-10 flex items-center justify-center rounded-full border border-slate-200 bg-slate-50 shadow-sm">
+                                                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                                        </svg>
+                                                    </div>
+                                                @endif
+                                                <span class="text-base font-semibold text-slate-900 dark:text-white">{{ $paymentMethod->name }}</span>
+                                            </div>
+                                            <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200" :class="selectedMethod === '{{ $paymentMethod->name }}' ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </div>
+                                        <div x-show="selectedMethod === '{{ $paymentMethod->name }}'" 
+                                             x-transition.duration.300ms
+                                             class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                                            <div class="space-y-2.5">
+                                                @foreach($paymentMethod->details as $key => $value)
+                                                    <div class="flex justify-between items-center p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                        <span class="text-sm text-slate-600 dark:text-slate-400 font-medium">{{ $key }}:</span>
+                                                        <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ $value }}</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Payment Section --}}
                     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
@@ -290,8 +348,7 @@
                                     <p class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ __('Payment Proof Submitted') }}</p>
                                     <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ __('Your payment proof is under review. We will proceed with the order once verified.') }}</p>
                                     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                                        <a href="{{ asset('storage/' . $sourcingOrder->proof_of_payment_path) }}" 
-                                           target="_blank" 
+                                        <a href="{{ route('client.sourcing-orders.download-proof-of-payment', $sourcingOrder) }}" 
                                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-700 border-2 border-emerald-300 dark:border-emerald-700 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\PaymentMethod;
 use App\Models\SourcingOrder;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -25,8 +26,9 @@ class SourcingOrderController extends Controller
     public function show(SourcingOrder $sourcingOrder): View
     {
         $this->authorize('view', $sourcingOrder);
+        $paymentMethods = PaymentMethod::where('is_active', true)->get();
 
-        return view('client.sourcing-orders.show', compact('sourcingOrder'));
+        return view('client.sourcing-orders.show', compact('sourcingOrder', 'paymentMethods'));
     }
 
     public function uploadProofOfPayment(Request $request, SourcingOrder $sourcingOrder): RedirectResponse
@@ -65,5 +67,15 @@ class SourcingOrderController extends Controller
         $this->authorize('view', $sourcingOrder);
 
         return view('client.sourcing-orders.receipt', compact('sourcingOrder'));
+    }
+
+    public function downloadProofOfPayment(SourcingOrder $sourcingOrder)
+    {
+        $this->authorize('view', $sourcingOrder);
+        if (!$sourcingOrder->proof_of_payment_path) {
+            abort(404);
+        }
+
+        return Storage::disk('local')->download($sourcingOrder->proof_of_payment_path);
     }
 }

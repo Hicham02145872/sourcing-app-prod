@@ -20,7 +20,6 @@ class SocialMediaLinkSeeder extends Seeder
                 'linkedin_url' => 'https://linkedin.com',
                 'twitter_url' => 'https://twitter.com',
                 'whatsapp_number' => '+1234567890', // Placeholder number
-                'whatsapp_message' => '', // Default empty message
             ]
         );
     }
