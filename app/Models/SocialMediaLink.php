@@ -11,5 +11,7 @@ class SocialMediaLink extends Model
         'instagram_url',
         'linkedin_url',
         'twitter_url',
+        'whatsapp_number',
+        'whatsapp_message',
     ];
 }
