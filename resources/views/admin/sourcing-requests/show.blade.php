@@ -56,8 +56,11 @@
                                     @php
                                         $statusConfig = [
                                             'pending' => ['color' => 'amber', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-                                            'active' => ['color' => 'emerald', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
-                                            'completed' => ['color' => 'blue', 'icon' => 'M5 13l4 4L19 7'],
+                                            'in_review' => ['color' => 'blue', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'],
+                                            'quoted' => ['color' => 'purple', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                            'accepted' => ['color' => 'emerald', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                            'completed' => ['color' => 'green', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                            'rejected' => ['color' => 'red', 'icon' => 'M6 18L18 6M6 6l12 12'],
                                             'cancelled' => ['color' => 'red', 'icon' => 'M6 18L18 6M6 6l12 12'],
                                         ];
                                         $statusData = $statusConfig[$sourcingRequest->status] ?? $statusConfig['pending'];
@@ -90,8 +93,11 @@
                                             @php
                                                 $btnConfig = [
                                                     'pending' => ['color' => 'amber', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-                                                    'active' => ['color' => 'emerald', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
-                                                    'completed' => ['color' => 'blue', 'icon' => 'M5 13l4 4L19 7'],
+                                                    'in_review' => ['color' => 'blue', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'],
+                                                    'quoted' => ['color' => 'purple', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                    'accepted' => ['color' => 'emerald', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                    'completed' => ['color' => 'green', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                    'rejected' => ['color' => 'red', 'icon' => 'M6 18L18 6M6 6l12 12'],
                                                     'cancelled' => ['color' => 'red', 'icon' => 'M6 18L18 6M6 6l12 12'],
                                                 ];
                                                 $btnData = $btnConfig[$status] ?? $btnConfig['pending'];

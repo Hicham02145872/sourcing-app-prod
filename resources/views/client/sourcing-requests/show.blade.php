@@ -31,6 +31,15 @@
                     </svg>
                     {{ __('Back to Dashboard') }}
                 </a>
+                @if ($sourcingRequest->status === 'pending')
+                    <a href="{{ route('client.sourcing-requests.edit', $sourcingRequest) }}" 
+                       class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-700 border-2 border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        {{ __('Edit Request') }}
+                    </a>
+                @endif
             </div>
         </div>
     </x-slot>
@@ -323,6 +332,19 @@
                                     @endif
                                 </div>
                             @else
+                                @if($sourcingRequest->status === 'pending' || $sourcingRequest->status === 'in_review')
+                                    <div class="pt-6 border-t border-slate-100 dark:border-slate-700">
+                                        <form action="{{ route('client.sourcing-requests.cancel', $sourcingRequest) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="w-full py-3 px-4 bg-white dark:bg-slate-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-700 dark:text-slate-300 hover:text-red-600 border border-slate-300 dark:border-slate-600 hover:border-red-300 text-sm font-semibold rounded-lg shadow-sm transition-all duration-200 flex items-center justify-center gap-2">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                                {{ __('Cancel Request') }}
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
                                 <div class="text-center py-12 bg-slate-50 dark:bg-slate-700 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-600">
                                     <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

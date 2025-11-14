@@ -225,4 +225,13 @@ class SourcingRequestController extends Controller
 
         return redirect()->route('client.dashboard')->with('status', 'Sourcing request duplicated successfully!');
     }
+
+    public function cancel(SourcingRequest $sourcingRequest): RedirectResponse
+    {
+        $this->authorize('cancel', $sourcingRequest);
+
+        $sourcingRequest->transitionTo('rejected');
+
+        return redirect()->route('client.dashboard')->with('status', 'Sourcing request cancelled successfully!');
+    }
 }

@@ -37,7 +37,7 @@ class SourcingRequestPolicy
      */
     public function update(User $user, SourcingRequest $sourcingRequest): bool
     {
-        return $user->id === $sourcingRequest->user_id;
+        return $user->id === $sourcingRequest->user_id && $sourcingRequest->status === 'pending';
     }
 
     /**
@@ -45,7 +45,13 @@ class SourcingRequestPolicy
      */
     public function delete(User $user, SourcingRequest $sourcingRequest): bool
     {
-        return $user->id === $sourcingRequest->user_id;
+        return $user->id === $sourcingRequest->user_id && $sourcingRequest->status === 'pending';
+    }
+
+    public function cancel(User $user, SourcingRequest $sourcingRequest): bool
+    {
+        return $user->id === $sourcingRequest->user_id && 
+               ($sourcingRequest->status === 'pending' || $sourcingRequest->status === 'in_review');
     }
 
     /**
