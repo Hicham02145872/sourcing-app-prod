@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             IsoCountrySeeder::class,
             CategorySeeder::class,
             ServiceSeeder::class,
+            SocialMediaLinkSeeder::class,
         ]);
     }
 }

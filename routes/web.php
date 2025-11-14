@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\SocialMediaLinkController;
 use App\Http\Controllers\Client\ClientDashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CountryController;
@@ -44,6 +45,9 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::post('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'store'])->name('quotations.store');
     Route::get('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'index'])->name('quotations.index');
     Route::get('quotations/{quotation}', [App\Http\Controllers\Admin\QuotationController::class, 'show'])->name('quotations.show');
+
+    Route::get('/social-media-links', [SocialMediaLinkController::class, 'edit'])->name('social-media-links.edit');
+    Route::put('/social-media-links', [SocialMediaLinkController::class, 'update'])->name('social-media-links.update');
 
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
 });
