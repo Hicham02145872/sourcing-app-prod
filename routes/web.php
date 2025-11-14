@@ -70,6 +70,10 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/sourcing-orders/{sourcingOrder}/receipt', [App\Http\Controllers\Client\SourcingOrderController::class, 'showReceipt'])->name('sourcing-orders.receipt');
     Route::get('/sourcing-orders/{sourcingOrder}/download-proof-of-payment', [App\Http\Controllers\Client\SourcingOrderController::class, 'downloadProofOfPayment'])->name('sourcing-orders.download-proof-of-payment');
     Route::get('/history', [SourcingRequestController::class, 'history'])->name('history');
+
+    // Notification API routes for client sidebar
+    Route::get('/notifications-api', [App\Http\Controllers\Client\NotificationController::class, 'index'])->name('notifications.api.index');
+    Route::post('/notifications-api/{notification}/mark-as-read', [App\Http\Controllers\Client\NotificationController::class, 'markAsRead'])->name('notifications.api.mark-as-read');
 });
 
 Route::middleware('auth')->group(function () {

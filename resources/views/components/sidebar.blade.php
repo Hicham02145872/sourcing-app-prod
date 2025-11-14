@@ -282,4 +282,62 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-</style>
+    </style>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('notificationCenter', () => ({
+                notifications: [],
+                unreadCount: 0,
+                loading: true,
+
+                async init() {
+                    await this.fetchNotifications();
+                    // Optionally, set up polling for new notifications
+                    // setInterval(() => this.fetchNotifications(), 60000);
+                },
+
+                async fetchNotifications() {
+                    this.loading = true;
+                    try {
+                        const response = await fetch('/notifications-api'); // Adjust this API endpoint as needed
+                        const data = await response.json();
+                        this.notifications = data.notifications.data;
+                        this.unreadCount = data.notifications.data.filter(n => !n.read_at).length;
+                    } catch (error) {
+                        console.error('Error fetching notifications:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async markAsRead(notificationId, clickAction) {
+                    try {
+                        await fetch(`/notifications-api/${notificationId}/mark-as-read`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        });
+                        this.notifications = this.notifications.map(n => 
+                            n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
+                        );
+                        this.unreadCount = this.notifications.filter(n => !n.read_at).length;
+                        if (clickAction) {
+                            window.location.href = clickAction;
+                        }
+                    } catch (error) {
+                        console.error('Error marking notification as read:', error);
+                    }
+                },
+
+                formatDate(dateString) {
+                    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+                    return new Date(dateString).toLocaleDateString(undefined, options);
+                }
+            }));
+        });
+    </script>
+    @endpush

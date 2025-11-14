@@ -34,6 +34,31 @@ class FcmChannel
             return;
         }
 
-        $this->messaging->send($message);
+        try {
+            $report = $this->messaging->send($message);
+
+            foreach ($report->getItems() as $item) {
+                if ($item->isSuccess()) {
+                    \Illuminate\Support\Facades\Log::info('FCM Message sent successfully.', [
+                        'message_id' => $item->messageId(),
+                        'fcm_token' => $fcmToken,
+                        'notification_id' => $notification->id,
+                    ]);
+                } else {
+                    \Illuminate\Support\Facades\Log::error('FCM Message failed to send.', [
+                        'fcm_token' => $fcmToken,
+                        'notification_id' => $notification->id,
+                        'error_code' => $item->error()->messagingErrorCode()->value(),
+                        'error_message' => $item->error()->getMessage(),
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('FCM Sending Exception: ' . $e->getMessage(), [
+                'fcm_token' => $fcmToken,
+                'notification_id' => $notification->id,
+                'exception' => $e,
+            ]);
+        }
     }
 }
