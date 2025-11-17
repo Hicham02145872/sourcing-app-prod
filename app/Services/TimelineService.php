@@ -34,6 +34,36 @@ class TimelineService
                 'icon' => 'plus-circle'
             ];
 
+            // Add events for terminal statuses of the sourcing request itself
+            if ($request->status === 'rejected') {
+                $timeline[] = [
+                    'date' => $request->updated_at,
+                    'type' => 'request_rejected',
+                    'title' => __('Sourcing Request Rejected'),
+                    'description' => __('Your sourcing request for :product has been rejected.', ['product' => $request->product_name]),
+                    'link' => route('client.sourcing-requests.show', $request),
+                    'icon' => 'x-circle'
+                ];
+            } elseif ($request->status === 'cancelled') {
+                $timeline[] = [
+                    'date' => $request->updated_at,
+                    'type' => 'request_cancelled',
+                    'title' => __('Sourcing Request Cancelled'),
+                    'description' => __('Your sourcing request for :product has been cancelled.', ['product' => $request->product_name]),
+                    'link' => route('client.sourcing-requests.show', $request),
+                    'icon' => 'ban'
+                ];
+            } elseif ($request->status === 'completed') {
+                $timeline[] = [
+                    'date' => $request->updated_at,
+                    'type' => 'request_completed',
+                    'title' => __('Sourcing Request Completed'),
+                    'description' => __('Your sourcing request for :product has been completed.', ['product' => $request->product_name]),
+                    'link' => route('client.sourcing-requests.show', $request),
+                    'icon' => 'check-circle'
+                ];
+            }
+
             if ($request->quotation) {
                 $quotation = $request->quotation;
                 // Event: Quotation received
@@ -58,6 +88,15 @@ class TimelineService
                         'description' => __('You accepted the quotation for :product.', ['product' => $request->product_name]),
                         'link' => route('client.sourcing-requests.show', $request),
                         'icon' => 'check-circle'
+                    ];
+                } elseif ($quotation->status === 'rejected') {
+                    $timeline[] = [
+                        'date' => $quotation->updated_at,
+                        'type' => 'quotation_rejected',
+                        'title' => __('Quotation Rejected'),
+                        'description' => __('You rejected the quotation for :product.', ['product' => $request->product_name]),
+                        'link' => route('client.sourcing-requests.show', $request),
+                        'icon' => 'x-circle'
                     ];
                 }
 
