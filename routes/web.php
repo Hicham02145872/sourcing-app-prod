@@ -18,7 +18,7 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    if (auth()->user()->role === 'admin') {
+    if (auth()->user()->isAdmin()) {
         return redirect('/admin/dashboard');
     } else {
         return redirect('/client/dashboard');
@@ -50,6 +50,13 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::put('/social-media-links', [SocialMediaLinkController::class, 'update'])->name('social-media-links.update');
 
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
+
+    // Super Admin Routes
+    Route::middleware('role:super_admin')->group(function () {
+        Route::get('/super-admin/create-admin', [App\Http\Controllers\Admin\SuperAdminController::class, 'createAdmin'])->name('super-admin.create-admin');
+        Route::post('/super-admin/store-admin', [App\Http\Controllers\Admin\SuperAdminController::class, 'storeAdmin'])->name('super-admin.store-admin');
+        Route::get('/super-admin/list-admins', [App\Http\Controllers\Admin\SuperAdminController::class, 'listAdmins'])->name('super-admin.list-admins');
+    });
 });
 
 

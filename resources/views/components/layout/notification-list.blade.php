@@ -1,5 +1,5 @@
 {{-- Notifications List --}}
-<div x-show="!loading && !error && notifications.length > 0" 
+<div x-show="!loading && !error && notifications && notifications.length > 0" 
      class="max-h-[480px] overflow-y-auto custom-scrollbar">
     <template x-for="notification in notifications" :key="notification.id">
         <div @click="markAsRead(notification.id)" 

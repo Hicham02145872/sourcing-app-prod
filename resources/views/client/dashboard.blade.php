@@ -4,7 +4,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-blue-600 dark:bg-blue-700 rounded-lg flex items-center justify-center shadow-lg">
+                        <div class="w-12 h-12 bg-[#EF7722] rounded-lg flex items-center justify-center shadow-lg">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                             </svg>
@@ -18,7 +18,7 @@
                     </div>
                 </div>
                 <a href="{{ route('client.sourcing-requests.create') }}" 
-                   class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
+                   class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] rounded-lg transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -28,11 +28,11 @@
         </div>
     </x-slot>
 
-    <div class="py-25 bg-slate-50 dark:bg-slate-900 min-h-screen">
+    <div class="py-25 bg-[#EBEBEB] dark:bg-slate-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
             {{-- Welcome Banner --}}
-            <div class="relative bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 rounded-xl shadow-lg overflow-hidden mb-6">
+            <div class="relative bg-gradient-to-r from-[#EF7722] to-[#FAA533] dark:from-[#EF7722] dark:to-[#FAA533] rounded-xl shadow-lg overflow-hidden mb-6">
                 <div class="absolute inset-0 bg-grid-white/[0.05] bg-[size:16px_16px]"></div>
                 <div class="relative px-6 py-8">
                     <div class="flex items-center justify-between">
@@ -40,7 +40,7 @@
                             <h3 class="text-2xl font-bold text-white">
                                 {{ __('Welcome Back,') }} {{ Auth::user()->name }}!
                             </h3>
-                            <p class="text-sm text-blue-100 mt-2 max-w-xl">
+                            <p class="text-sm text-white/80 mt-2 max-w-xl">
                                 {{ __('Your centralized dashboard to manage and track the progress of all your sourcing requests.') }}
                             </p>
                         </div>
@@ -54,13 +54,13 @@
             </div>
 
             {{-- Statistics Bar --}}
-            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 mb-6">
-                <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50">
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 mb-6">
+                <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50">
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         {{-- Total Requests --}}
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 bg-[#EF7722]/10 dark:bg-[#EF7722]/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                 </svg>
                             </div>
@@ -72,8 +72,8 @@
 
                         {{-- Action Required --}}
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                            <div class="w-10 h-10 bg-[#FAA533]/10 dark:bg-[#FAA533]/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-[#FAA533]" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"/>
                                 </svg>
                             </div>
@@ -85,8 +85,8 @@
 
                         {{-- In Progress --}}
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 bg-[#0BA6DF]/10 dark:bg-[#0BA6DF]/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-[#0BA6DF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                 </svg>
                             </div>
@@ -98,8 +98,8 @@
 
                         {{-- Completed --}}
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 bg-[#0BA6DF]/10 dark:bg-[#0BA6DF]/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-[#0BA6DF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                             </div>
@@ -113,17 +113,17 @@
             </div>
 
             {{-- Sourcing Requests Section --}}
-            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 overflow-hidden">
                 {{-- Control Panel --}}
-                <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <div class="px-6 py-4 border-b border-[#EBEBEB] dark:border-slate-700">
                     <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                                <div class="w-2 h-2 bg-[#EF7722] rounded-full animate-pulse"></div>
                                 <div>
                                     <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ __('Sourcing Requests') }}</h3>
                                     <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                                        <span class="font-semibold text-blue-600 dark:text-blue-400">{{ $sourcingRequests->count() }}</span> {{ Str::plural(__('request'), $sourcingRequests->count()) }}
+                                        <span class="font-semibold text-[#EF7722]">{{ $sourcingRequests->count() }}</span> {{ Str::plural(__('request'), $sourcingRequests->count()) }}
                                     </p>
                                 </div>
                             </div>
@@ -138,7 +138,7 @@
                                            id="searchInput"
                                            placeholder="{{ __('Search product...') }}" 
                                            value="{{ request('search') }}" 
-                                           class="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white shadow-sm">
+                                           class="w-full pl-9 pr-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 dark:text-white shadow-sm">
                                     <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                     </svg>
@@ -146,7 +146,7 @@
 
                                 <select name="category" 
                                         id="categoryFilter"
-                                        class="px-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white font-medium shadow-sm">
+                                        class="px-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 dark:text-white font-medium shadow-sm">
                                     <option value="">{{ __('All Categories') }}</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
@@ -157,7 +157,7 @@
                                 
                                 <select name="status" 
                                         id="statusFilter" 
-                                        class="px-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white font-medium shadow-sm">
+                                        class="px-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 dark:text-white font-medium shadow-sm">
                                     <option value="all">{{ __('All Statuses') }}</option>
                                     <option value="quoted" {{ request('status') == 'quoted' ? 'selected' : '' }}>{{ __('Action Required') }}</option>
                                     <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>{{ __('In Progress') }}</option>
@@ -166,12 +166,12 @@
 
                                 <div class="flex gap-2">
                                     <button type="submit" 
-                                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm">
                                         {{ __('Filter') }}
                                     </button>
                                     <button type="button" 
                                             id="clearFilters"
-                                            class="px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium transition-all duration-200">
+                                            class="px-3 py-2 text-sm bg-[#EBEBEB] dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium transition-all duration-200">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                         </svg>
@@ -186,15 +186,15 @@
                     @if ($sourcingRequests->isEmpty())
                         {{-- Empty State --}}
                         <div class="text-center py-20 px-6">
-                            <div class="mx-auto w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-6">
-                                <svg class="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="mx-auto w-20 h-20 bg-[#EF7722]/10 dark:bg-[#EF7722]/20 rounded-lg flex items-center justify-center mb-6">
+                                <svg class="w-10 h-10 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                                 </svg>
                             </div>
                             <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{{ __('No requests yet') }}</h3>
                             <p class="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-sm mx-auto">{{ __('Start by creating your first sourcing request') }}</p>
                             <a href="{{ route('client.sourcing-requests.create') }}" 
-                               class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition-all duration-200">
+                               class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition-all duration-200">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
@@ -204,8 +204,8 @@
                     @else
                         {{-- Requests Table --}}
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                                <thead class="bg-slate-50 dark:bg-slate-900/50">
+                            <table class="min-w-full divide-y divide-[#EBEBEB] dark:divide-slate-700">
+                                <thead class="bg-[#EBEBEB] dark:bg-slate-900/50">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                                             {{ __('Request') }}
@@ -230,19 +230,19 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                                <tbody class="bg-white dark:bg-slate-800 divide-y divide-[#EBEBEB] dark:divide-slate-700">
                                     @foreach ($sourcingRequests as $request)
-                                        <tr class="hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors duration-150">
+                                        <tr class="hover:bg-[#EF7722]/5 dark:hover:bg-[#EF7722]/10 transition-colors duration-150">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center gap-3">
-                                                    <div class="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden flex-shrink-0">
+                                                    <div class="w-10 h-10 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600 overflow-hidden flex-shrink-0">
                                                         @if ($request->product_image)
                                                             <img src="{{ asset('storage/' . $request->product_image) }}"
                                                                  alt="{{ $request->product_name }}"
                                                                  class="w-full h-full object-cover">
                                                         @else
-                                                            <div class="w-full h-full flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
-                                                                <span class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                                                            <div class="w-full h-full flex items-center justify-center bg-[#EF7722]/10 dark:bg-[#EF7722]/20">
+                                                                <span class="text-sm font-bold text-[#EF7722]">
                                                                     {{ mb_substr($request->product_name, 0, 1) }}
                                                                 </span>
                                                             </div>
@@ -262,15 +262,15 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 @php
                                                     $statusConfig = [
-                                                        'pending' => ['color' => 'amber', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-                                                        'quoted' => ['color' => 'red', 'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
-                                                        'in_review' => ['color' => 'blue', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-                                                        'accepted' => ['color' => 'purple', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-                                                        'completed' => ['color' => 'emerald', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                        'pending' => ['color' => '#FAA533', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                        'quoted' => ['color' => '#EF7722', 'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
+                                                        'in_review' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                        'accepted' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                        'completed' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
                                                     ];
                                                     $statusData = $statusConfig[$request->status] ?? $statusConfig['pending'];
                                                 @endphp
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-{{ $statusData['color'] }}-100 dark:bg-{{ $statusData['color'] }}-900/30 text-{{ $statusData['color'] }}-700 dark:text-{{ $statusData['color'] }}-400">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold" style="background-color: {{ $statusData['color'] }}22; color: {{ $statusData['color'] }};">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
                                                     </svg>
@@ -285,7 +285,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center gap-1">
                                                     @foreach($request->destinations->take(3) as $destination)
-                                                        <span class="fi fi-{{ strtolower($destination->country->code) }} text-base border border-slate-200 dark:border-slate-600 rounded-sm" title="{{ $destination->country->name }}"></span>
+                                                        <span class="fi fi-{{ strtolower($destination->country->code) }} text-base border border-[#EBEBEB] dark:border-slate-600 rounded-sm" title="{{ $destination->country->name }}"></span>
                                                     @endforeach
                                                     @if($request->destinations->count() > 3)
                                                         <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 ml-1">
@@ -301,7 +301,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                                 <div class="flex items-center justify-end gap-2">
                                                     <a href="{{ route('client.sourcing-requests.show', $request) }}" 
-                                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-xs font-semibold rounded-lg transition-colors duration-200 shadow-sm">
+                                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-xs font-semibold rounded-lg transition-colors duration-200 shadow-sm">
                                                         {{ __('View') }}
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -313,7 +313,7 @@
                                                         <button @click="open = !open" 
                                                                 @click.away="open = false"
                                                                 type="button" 
-                                                                class="inline-flex items-center justify-center w-8 h-8 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-200">
+                                                                class="inline-flex items-center justify-center w-8 h-8 text-slate-600 dark:text-slate-300 hover:text-[#EF7722] dark:hover:text-[#EF7722] hover:bg-[#EBEBEB] dark:hover:bg-slate-700 rounded-lg transition-all duration-200">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                                             </svg>
@@ -321,11 +321,11 @@
                                                         
                                                         <div x-show="open" 
                                                              x-transition
-                                                             class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-20">
+                                                             class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-[#EBEBEB] dark:border-slate-700 py-1 z-20">
                                                             
                                                             @if ($request->status === 'pending')
                                                                 <a href="{{ route('client.sourcing-requests.edit', $request) }}" 
-                                                                   class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400">
+                                                                   class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-[#EBEBEB] dark:hover:bg-slate-700 hover:text-[#EF7722] dark:hover:text-[#EF7722]">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                                     </svg>
@@ -336,7 +336,7 @@
                                                             <form action="{{ route('client.sourcing-requests.duplicate', $request) }}" method="POST">
                                                                 @csrf
                                                                 <button type="submit" 
-                                                                        class="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400">
+                                                                        class="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-[#EBEBEB] dark:hover:bg-slate-700 hover:text-[#EF7722] dark:hover:text-[#EF7722]">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                                                     </svg>
@@ -348,7 +348,7 @@
                                                                 <form action="{{ route('client.sourcing-requests.cancel', $request) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure you want to cancel this request?') }}');">
                                                                     @csrf
                                                                     <button type="submit" 
-                                                                            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20">
+                                                                            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#FAA533] hover:bg-[#FAA533]/10 dark:hover:bg-[#FAA533]/10">
                                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                                         </svg>
@@ -382,7 +382,7 @@
 
                         {{-- Pagination --}}
                         @if($sourcingRequests->hasPages())
-                            <div class="mt-6 px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                            <div class="mt-6 px-6 py-4 border-t border-[#EBEBEB] dark:border-slate-700 bg-[#EBEBEB] dark:bg-slate-900/50">
                                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                                     <div class="text-sm text-slate-700 dark:text-slate-300">
                                         {{ __('Showing') }}
@@ -451,11 +451,11 @@
         }
 
         .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #3b82f6;
+            background: #EF7722;
         }
 
         .dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #2563eb;
+            background: #FAA533;
         }
 
         /* Smooth transitions */
@@ -469,6 +469,15 @@
         .bg-grid-white\/\[0\.05\] {
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
                               linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+
+        /* Custom focus styles for inputs with custom colors */
+        input:focus, select:focus {
+            outline: none;
+        }
+
+        button[type="submit"]:active {
+            transform: scale(0.98);
         }
     </style>
     @endpush
