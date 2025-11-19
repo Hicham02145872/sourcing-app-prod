@@ -34,7 +34,7 @@ class AdminDashboardController extends Controller
         $pendingPaymentSourcingOrders = SourcingOrder::where('status', SourcingOrder::STATUSES[0])->count(); // Assuming 'pending_payment' is the first status
         $pendingQuotations = Quotation::where('status', Quotation::STATUSES[0])->count(); // Assuming 'pending' is the first status
 
-        $recentActivities = Auth::user()->notifications()->latest()->take(5)->get();
+        $recentActivities = Auth::user()->notifications()->latest()->take(3)->get();
 
         return view('admin.dashboard', compact('totalUsers', 'sourcingRequestsByStatus', 'sourcingOrdersByStatus', 'quotationsByStatus', 'pendingSourcingRequests', 'pendingPaymentSourcingOrders', 'pendingQuotations', 'recentActivities'));
     }
