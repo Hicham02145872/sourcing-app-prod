@@ -380,7 +380,7 @@
                 {{-- Right Column --}}
                 <div class="lg:col-span-1 space-y-6">
                     {{-- Product Image Card --}}
-                    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-[#EBEBEB] dark:border-slate-700 overflow-hidden sticky top-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-[#EBEBEB] dark:border-slate-700 overflow-hidden">
                         <div class="px-6 py-4 border-b border-[#EBEBEB] dark:border-slate-700">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-[#FAA533]/10 dark:bg-[#FAA533]/20 rounded-lg flex items-center justify-center">
