@@ -36,6 +36,12 @@ window.fetch = async function (...args) {
     activeRequests++;
     showGlobalSpinner('Loading data...');
 
+    // Add Accept header for JSON
+    let options = args[1] || {};
+    options.headers = options.headers || {};
+    options.headers['Accept'] = 'application/json';
+    args[1] = options;
+
     try {
         return await originalFetch(...args);
     } finally {

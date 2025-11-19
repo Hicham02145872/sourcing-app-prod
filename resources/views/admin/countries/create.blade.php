@@ -24,7 +24,7 @@
                         <!-- Country Dropdown -->
                         <div>
                             <x-input-label for="country_code" :value="__('Select Country')" />
-                            <select id="country_code" name="code" class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                            <select id="country_code" name="code" class="block mt-1 w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-[#EF7722] focus:ring-[#EF7722] rounded-md shadow-sm" required>
                                 <option value="">{{ __('Select a country') }}</option>
                                 @foreach ($countries as $country)
                                     <option value="{{ $country->code }}" {{ old('code') == $country->code ? 'selected' : '' }}>
@@ -38,12 +38,12 @@
                     </div>
 
                     <div class="flex items-center justify-end mt-6">
-                        <x-primary-button class="ml-4 inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all duration-200">
+                        <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
                             {{ __('Create Country') }}
-                        </x-primary-button>
+                        </button>
                     </div>
                 </form>
             </div>

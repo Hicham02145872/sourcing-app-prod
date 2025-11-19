@@ -112,4 +112,28 @@ class QuotationController extends Controller
         $this->authorize('view', $quotation);
         return view('admin.quotations.show', compact('quotation'));
     }
+
+    public function approve(Quotation $quotation): RedirectResponse
+    {
+        $this->authorize('update', $quotation);
+
+        $quotation->update(['status' => 'approved']);
+
+        // You might want to dispatch an event here
+        // event(new QuotationApproved($quotation));
+
+        return redirect()->route('admin.quotations.show', $quotation)->with('status', 'Quotation approved successfully!');
+    }
+
+    public function reject(Quotation $quotation): RedirectResponse
+    {
+        $this->authorize('update', $quotation);
+
+        $quotation->update(['status' => 'rejected']);
+
+        // You might want to dispatch an event here
+        // event(new QuotationRejected($quotation));
+
+        return redirect()->route('admin.quotations.show', $quotation)->with('status', 'Quotation rejected successfully!');
+    }
 }

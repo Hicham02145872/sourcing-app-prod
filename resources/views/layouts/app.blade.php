@@ -458,14 +458,14 @@
     <x-sidebar :role="auth()->user()->role ?? 'client'" />
 
     <x-layout.header />
-    <div class="lg:ml-72 pt-16 flex flex-col flex-1">
+    <div class="lg:ml-72 pt-20 flex flex-col flex-1">
         {{-- Contenu Principal --}}
         <main class="flex-1 px-4 sm:px-6 lg:px-8 py-8 pb-16">
             {{ $slot }}
         </main>
 
         {{-- Footer Moderne --}}
-        <footer class="mt-auto border-t border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-slate-900">
+        <footer class="mt-auto border-t border-slate-200 dark:border-slate-700 p-4 bg-[#EBEBEB] dark:bg-slate-900">
             <div class="px-4 sm:px-6 lg:px-8 py-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">

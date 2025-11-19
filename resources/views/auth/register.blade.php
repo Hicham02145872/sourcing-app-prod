@@ -26,7 +26,7 @@
                 autofocus 
                 autocomplete="name"
                 placeholder="John Doe"
-                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
@@ -42,7 +42,7 @@
                 required 
                 autocomplete="username"
                 placeholder="name@company.com"
-                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
@@ -58,7 +58,7 @@
                 required 
                 autocomplete="tel"
                 placeholder="+1 (555) 000-0000"
-                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('phone')" class="mt-2" />
         </div>
 
@@ -73,7 +73,7 @@
                 required 
                 autocomplete="new-password"
                 placeholder="Create a strong password"
-                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
@@ -88,7 +88,7 @@
                 required 
                 autocomplete="new-password"
                 placeholder="Re-enter your password"
-                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
@@ -98,15 +98,15 @@
                    id="terms" 
                    name="terms" 
                    required
-                   class="mt-1 w-4 h-4 text-blue-600 border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-0">
+                   class="mt-1 w-4 h-4 text-[#EF7722] border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-0">
             <label for="terms" class="ml-3 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                I agree to the <a href="#" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium">Terms of Service</a> and <a href="#" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium">Privacy Policy</a>
+                I agree to the <a href="#" class="text-[#EF7722] hover:text-[#FAA533] font-medium">Terms of Service</a> and <a href="#" class="text-[#EF7722] hover:text-[#FAA533] font-medium">Privacy Policy</a>
             </label>
         </div>
 
         <!-- Submit Button -->
         <button type="submit"
-                class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-6">
+                class="w-full py-3.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2 mt-6">
             Create account
         </button>
     </form>
@@ -121,7 +121,7 @@
     <!-- Login Link -->
     <p class="text-center text-sm text-slate-600 dark:text-slate-400">
         Already have an account?
-        <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+        <a href="{{ route('login') }}" class="font-medium text-[#EF7722] hover:text-[#FAA533] transition-colors">
             Sign in
         </a>
     </p>

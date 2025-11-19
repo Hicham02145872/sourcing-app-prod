@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
@@ -49,5 +50,84 @@ class SuperAdminController extends Controller
     {
         $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
         return view('admin.super-admin.list-admins', compact('admins'));
+    }
+
+    /**
+     * Display the specified admin user (API endpoint for modal).
+     */
+    public function showAdmin($id): JsonResponse
+    {
+        $admin = User::whereIn('role', ['admin', 'super_admin'])
+                    ->findOrFail($id);
+        
+        return response()->json([
+            'id' => $admin->id,
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'role' => $admin->role,
+            'created_at' => $admin->created_at->toISOString(),
+            'formatted_created_at' => $admin->created_at->format('d M Y, H:i')
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified admin user.
+     */
+    public function editAdmin(User $admin): View
+    {
+        // Ensure we're only editing admin users
+        if (!in_array($admin->role, ['admin', 'super_admin'])) {
+            abort(404);
+        }
+        
+        return view('admin.super-admin.edit-admin', compact('admin'));
+    }
+
+    /**
+     * Update the specified admin user in storage.
+     */
+    public function updateAdmin(Request $request, User $admin): RedirectResponse
+    {
+        // Ensure we're only updating admin users
+        if (!in_array($admin->role, ['admin', 'super_admin'])) {
+            abort(404);
+        }
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class . ',email,' . $admin->id],
+            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $admin->name = $request->name;
+        $admin->email = $request->email;
+        if ($request->filled('password')) {
+            $admin->password = Hash::make($request->password);
+        }
+        $admin->save();
+
+        return redirect()->route('admin.super-admin.list-admins')->with('status', 'Admin user updated successfully!');
+    }
+
+    /**
+     * Remove the specified admin user from storage.
+     */
+    public function destroyAdmin(User $admin): RedirectResponse
+    {
+        // Ensure we're only deleting admin users
+        if (!in_array($admin->role, ['admin', 'super_admin'])) {
+            abort(404);
+        }
+
+        // Prevent deletion of the last super admin
+        $superAdminCount = User::where('role', 'super_admin')->count();
+        if ($admin->role === 'super_admin' && $superAdminCount <= 1) {
+            return redirect()->route('admin.super-admin.list-admins')
+                ->with('error', 'Cannot delete the last super admin user.');
+        }
+
+        $admin->delete();
+
+        return redirect()->route('admin.super-admin.list-admins')->with('status', 'Admin user deleted successfully!');
     }
 }

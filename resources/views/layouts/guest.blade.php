@@ -26,7 +26,7 @@
     <div class="min-h-screen flex">
         
         <!-- Left Panel - Brand Identity -->
-        <div class="hidden lg:flex lg:w-2/5 xl:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 relative overflow-hidden">
+        <div class="hidden lg:flex lg:w-2/5 xl:w-1/2 bg-gradient-to-br from-[#EF7722] via-[#FAA533] to-[#FF6B35] relative overflow-hidden">
             <!-- Subtle Pattern Overlay -->
             <div class="absolute inset-0 opacity-5">
                 <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -43,15 +43,9 @@
             <div class="relative z-10 flex flex-col justify-between p-12 xl:p-16 text-white w-full">
                 <!-- Logo & Brand -->
                 <div>
-                    <div class="inline-flex items-center gap-3 mb-16">
-                        <div class="w-12 h-12 bg-white/10 backdrop-blur-xl rounded-xl flex items-center justify-center border border-white/20">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                            </svg>
-                        </div>
-                        <span class="text-2xl font-semibold">fastSourcingBrothers</span>
-                    </div>
+                    <a href="/" class="mb-16">
+                        <img class="block h-[350px] w-auto" src="{{ asset('images/logo1.png') }}" alt="{{ config('app.name') }}">
+                    </a>
 
                     <!-- Main Message -->
                     <div class="max-w-md">
@@ -59,7 +53,7 @@
                             fastSourcingBrothers<br/>
                             <span class="font-semibold">Made Simple</span>
                         </h1>
-                        <p class="text-lg text-blue-100 leading-relaxed font-light">
+                        <p class="text-lg text-orange-100 leading-relaxed font-light">
                             Streamline your procurement process with intelligent automation and real-time supplier management.
                         </p>
                     </div>
@@ -67,12 +61,12 @@
 
                 <!-- Trust Indicators -->
                 <div class="space-y-6">
-                    <div class="flex items-center gap-4 text-blue-100">
+                    <div class="flex items-center gap-4 text-orange-100">
                         <div class="flex -space-x-2">
-                            <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-blue-600 flex items-center justify-center text-xs font-semibold">JD</div>
-                            <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-blue-600 flex items-center justify-center text-xs font-semibold">SM</div>
-                            <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-blue-600 flex items-center justify-center text-xs font-semibold">AK</div>
-                            <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-blue-600 flex items-center justify-center text-xs font-semibold">+99</div>
+                            <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-[#EF7722] flex items-center justify-center text-xs font-semibold">JD</div>
+                            <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-[#EF7722] flex items-center justify-center text-xs font-semibold">SM</div>
+                            <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-[#EF7722] flex items-center justify-center text-xs font-semibold">AK</div>
+                            <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-[#EF7722] flex items-center justify-center text-xs font-semibold">+99</div>
                         </div>
                         <span class="text-sm font-light">Trusted by 500+ clients worldwide</span>
                     </div>
@@ -100,16 +94,10 @@
             <div class="w-full max-w-md">
                 
                 <!-- Mobile Logo -->
-                <div class="lg:hidden mb-12 text-center">
-                    <div class="inline-flex items-center gap-3">
-                        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                            </svg>
-                        </div>
-                        <span class="text-xl font-semibold text-slate-900 dark:text-white">fastSourcingBrothers</span>
-                    </div>
+                <div class="lg:hidden mb-12">
+                    <a href="/">
+                        <img class="block h-[350px] w-auto" src="{{ asset('images/logo1.png') }}" alt="{{ config('app.name') }}">
+                    </a>
                 </div>
 
                 <!-- Form Card -->
@@ -118,9 +106,9 @@
                 </div>
 
                 <!-- Footer Links -->
-      
+                <div class="mt-8 text-center">
                     <p class="text-xs text-slate-400 dark:text-slate-500">
-                        © {{ date('Y') }} SmartSource. All rights reserved.
+                        © {{ date('Y') }} FastSourcingBrothers. All rights reserved.
                     </p>
                 </div>
             </div>

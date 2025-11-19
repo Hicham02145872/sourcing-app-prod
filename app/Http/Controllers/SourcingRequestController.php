@@ -37,8 +37,9 @@ class SourcingRequestController extends Controller
             ->paginate(10);
 
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
+        $categories = Category::all();
 
-        return view('client.sourcing-requests.handling', compact('sourcingRequests', 'paymentMethods'));
+        return view('client.sourcing-requests.handling', compact('sourcingRequests', 'paymentMethods', 'categories'));
     }
 
     /**

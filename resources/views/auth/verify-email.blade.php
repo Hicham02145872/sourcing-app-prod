@@ -1,8 +1,8 @@
 <x-guest-layout>
     <!-- Header -->
     <div class="mb-10">
-        <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <svg class="w-7 h-7 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-14 h-14 bg-[#EF7722]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <svg class="w-7 h-7 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
             </svg>
         </div>
@@ -15,7 +15,7 @@
     </div>
 
     <!-- Info Message -->
-    <div class="mb-8 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl">
+    <div class="mb-8 p-4 bg-[#EF7722]/10 border border-[#EF7722]/20 rounded-xl">
         <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed text-center">
             We've sent a verification link to your email address. Click the link to activate your account.
         </p>
@@ -23,12 +23,12 @@
 
     <!-- Success Status -->
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-8 p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-xl">
+        <div class="mb-8 p-4 bg-emerald-100 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/30 rounded-xl">
             <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                 </svg>
-                <p class="text-sm font-medium text-green-800 dark:text-green-300">
+                <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300">
                     Verification link sent successfully!
                 </p>
             </div>
@@ -41,7 +41,7 @@
         <form method="POST" action="{{ route('verification.send') }}">
             @csrf
             <button type="submit"
-                    class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    class="w-full py-3.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2">
                 Resend verification email
             </button>
         </form>

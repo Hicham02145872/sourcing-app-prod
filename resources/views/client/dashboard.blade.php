@@ -28,7 +28,7 @@
         </div>
     </x-slot>
 
-    <div class="py-25 bg-[#EBEBEB] dark:bg-slate-900 min-h-screen">
+    <div class="py-25 bg-[#fffff] dark:bg-slate-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
             {{-- Welcome Banner --}}

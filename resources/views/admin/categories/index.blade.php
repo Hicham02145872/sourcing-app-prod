@@ -9,8 +9,8 @@
                     <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5">{{ __('Organize and manage product categories') }}</p>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl font-medium text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
                         {{ __('Add Category') }}
@@ -30,8 +30,8 @@
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Total Categories') }}</p>
                             <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $categories->count() }}</p>
                         </div>
-                        <div class="w-10 h-10 bg-violet-100 dark:bg-violet-900/50 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-10 h-10 bg-[#EF7722]/10 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-[#EF7722] dark:text-[#FAA533]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                             </svg>
                         </div>
@@ -44,8 +44,8 @@
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Active Categories') }}</p>
                             <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $categories->count() }}</p>
                         </div>
-                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
@@ -69,18 +69,18 @@
 
             <!-- Success Message -->
             @if (session('success'))
-                <div class="bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 rounded-xl p-4 mb-6">
+                <div class="bg-emerald-50 dark:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-700 rounded-xl p-4 mb-6">
                     <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-medium text-green-800 dark:text-green-300">{{ session('success') }}</p>
+                            <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300">{{ session('success') }}</p>
                         </div>
                         <div class="ml-auto pl-3">
-                            <button type="button" class="inline-flex text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 transition-colors">
+                            <button type="button" class="inline-flex text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200 transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
@@ -90,6 +90,7 @@
                 </div>
             @endif
 
+            <!-- Search Card -->
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
                 <form action="{{ route('admin.categories.index') }}" method="GET">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
@@ -100,11 +101,11 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                     </svg>
                                 </div>
-                                <input type="text" name="search" placeholder="{{ __('Search categories...') }}" value="{{ request('search') }}" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-sm dark:bg-gray-700 dark:text-white">
+                                <input type="text" name="search" placeholder="{{ __('Search categories...') }}" value="{{ request('search') }}" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#EF7722] focus:border-[#EF7722] text-sm dark:bg-gray-700 dark:text-white">
                             </div>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-xl text-sm font-medium text-white hover:bg-indigo-700 transition-colors duration-200">
+                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
                                 {{ __('Search') }}
                             </button>
                         </div>
@@ -133,7 +134,7 @@
                                     {{ __('Status') }}
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        {{ __('Products') }}
+                                    {{ __('Products') }}
                                 </th>
                                 <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                     {{ __('Created Date') }}
@@ -151,8 +152,8 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <div class="w-8 h-8 bg-violet-100 dark:bg-violet-900/50 rounded-xl flex items-center justify-center mr-3">
-                                                <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div class="w-8 h-8 bg-[#EF7722]/10 rounded-xl flex items-center justify-center mr-3">
+                                                <svg class="w-4 h-4 text-[#EF7722] dark:text-[#FAA533]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                                                 </svg>
                                             </div>
@@ -163,7 +164,7 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700">
                                            {{ __('Active') }}
                                         </span>
                                     </td>
@@ -180,7 +181,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end space-x-2">
-                                            <a href="{{ route('admin.categories.edit', $category) }}" class="inline-flex items-center p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors" title="{{ __('Edit') }}">
+                                            <a href="{{ route('admin.categories.edit', $category) }}" class="inline-flex items-center p-1.5 text-gray-400 hover:text-[#EF7722] dark:hover:text-[#FAA533] transition-colors" title="{{ __('Edit') }}">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
@@ -212,11 +213,11 @@
                     </div>
                     <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">{{ __('No categories found') }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('Get started by creating your first category.') }}</p>
-                    <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center px-4 py-2 bg-violet-600 hover:bg-violet-700 border border-transparent rounded-xl font-medium text-sm text-white shadow-sm transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-{{ __('Add Category') }}
+                        {{ __('Add Category') }}
                     </a>
                 </div>
                 @endif

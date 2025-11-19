@@ -45,6 +45,8 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::post('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'store'])->name('quotations.store');
     Route::get('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'index'])->name('quotations.index');
     Route::get('quotations/{quotation}', [App\Http\Controllers\Admin\QuotationController::class, 'show'])->name('quotations.show');
+    Route::put('quotations/{quotation}/approve', [App\Http\Controllers\Admin\QuotationController::class, 'approve'])->name('quotations.approve');
+    Route::put('quotations/{quotation}/reject', [App\Http\Controllers\Admin\QuotationController::class, 'reject'])->name('quotations.reject');
 
     Route::get('/social-media-links', [SocialMediaLinkController::class, 'edit'])->name('social-media-links.edit');
     Route::put('/social-media-links', [SocialMediaLinkController::class, 'update'])->name('social-media-links.update');
@@ -56,6 +58,10 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
         Route::get('/super-admin/create-admin', [App\Http\Controllers\Admin\SuperAdminController::class, 'createAdmin'])->name('super-admin.create-admin');
         Route::post('/super-admin/store-admin', [App\Http\Controllers\Admin\SuperAdminController::class, 'storeAdmin'])->name('super-admin.store-admin');
         Route::get('/super-admin/list-admins', [App\Http\Controllers\Admin\SuperAdminController::class, 'listAdmins'])->name('super-admin.list-admins');
+        Route::get('/admins/{id}', [SuperAdminController::class, 'showAdmin'])->name('show-admin');
+        Route::get('/super-admin/admins/{admin}/edit', [App\Http\Controllers\Admin\SuperAdminController::class, 'editAdmin'])->name('super-admin.edit-admin');
+        Route::put('/super-admin/admins/{admin}', [App\Http\Controllers\Admin\SuperAdminController::class, 'updateAdmin'])->name('super-admin.update-admin');
+        Route::delete('/super-admin/admins/{admin}', [App\Http\Controllers\Admin\SuperAdminController::class, 'destroyAdmin'])->name('super-admin.destroy-admin');
     });
 });
 

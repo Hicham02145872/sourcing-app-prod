@@ -1,8 +1,9 @@
+{{-- components/layout/head.blade.php --}}
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#2563EB">
+    <meta name="theme-color" content="#EF7722">
     <meta name="description" content="Sourcing App - Plateforme Professionnelle d'Entreprise">
     
     <title>{{ isset($title) ? $title . ' - ' . config('app.name', 'Laravel') : config('app.name', 'Laravel') }}</title>
@@ -31,24 +32,24 @@
     @include('components.layout.firebase-config')
     @include('components.layout.dark-mode-script')
     
-    {{-- Enterprise Blue Theme Variables --}}
+    {{-- Enterprise Orange Theme Variables --}}
     <style>
         :root {
-            /* Enterprise Blue Palette */
-            --color-primary: #2563EB;
-            --color-primary-dark: #1E40AF;
-            --color-primary-light: #3B82F6;
-            --color-primary-lighter: #60A5FA;
-            --color-primary-lightest: #DBEAFE;
+            /* Enterprise Orange Palette */
+            --color-primary: #EF7722;
+            --color-primary-dark: #D2691E;
+            --color-primary-light: #FAA533;
+            --color-primary-lighter: #FBBF66;
+            --color-primary-lightest: #FEF3E6;
             
             /* Accent Colors */
-            --color-accent: #0066CC;
-            --color-accent-dark: #004C99;
+            --color-accent: #0BA6DF;
+            --color-accent-dark: #0987B8;
             
             /* Neutral Colors */
             --color-gray-50: #F9FAFB;
             --color-gray-100: #F3F4F6;
-            --color-gray-200: #E5E7EB;
+            --color-gray-200: #EBEBEB;
             --color-gray-300: #D1D5DB;
             --color-gray-400: #9CA3AF;
             --color-gray-500: #6B7280;
@@ -58,10 +59,10 @@
             --color-gray-900: #111827;
             
             /* Shadows */
-            --shadow-sm: 0 1px 2px 0 rgba(37, 99, 235, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(37, 99, 235, 0.1), 0 4px 6px -2px rgba(37, 99, 235, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(37, 99, 235, 0.1), 0 10px 10px -5px rgba(37, 99, 235, 0.04);
+            --shadow-sm: 0 1px 2px 0 rgba(239, 119, 34, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(239, 119, 34, 0.1), 0 2px 4px -1px rgba(239, 119, 34, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(239, 119, 34, 0.1), 0 4px 6px -2px rgba(239, 119, 34, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(239, 119, 34, 0.1), 0 10px 10px -5px rgba(239, 119, 34, 0.04);
             
             /* Transitions */
             --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -74,7 +75,7 @@
             scroll-behavior: smooth;
         }
         
-        /* Custom Scrollbar - Enterprise Blue */
+        /* Custom Scrollbar - Enterprise Orange */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -108,14 +109,14 @@
             background: var(--color-primary);
         }
         
-        /* Focus Visible - Enterprise Blue */
+        /* Focus Visible - Enterprise Orange */
         *:focus-visible {
             outline: 2px solid var(--color-primary);
             outline-offset: 2px;
             border-radius: 4px;
         }
         
-        /* Selection - Enterprise Blue */
+        /* Selection - Enterprise Orange */
         ::selection {
             background-color: var(--color-primary-lightest);
             color: var(--color-primary-dark);
@@ -149,8 +150,8 @@
             animation: fadeIn var(--transition-slow) ease-out;
         }
         
-        /* Pulse Animation - Blue */
-        @keyframes pulse-blue {
+        /* Pulse Animation - Orange */
+        @keyframes pulse-orange {
             0%, 100% {
                 opacity: 1;
             }
@@ -159,8 +160,8 @@
             }
         }
         
-        .animate-pulse-blue {
-            animation: pulse-blue 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .animate-pulse-orange {
+            animation: pulse-orange 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
     </style>
 </head>

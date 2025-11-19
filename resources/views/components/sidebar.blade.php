@@ -1,7 +1,7 @@
 {{-- resources/views/components/sidebar-enterprise-custom.blade.php --}}
 @props(['role' => 'client'])
 
-<aside class="fixed top-[4rem] bottom-0 left-0 z-50 w-72 bg-gradient-to-b from-white to-[#EBEBEB] dark:from-gray-800 dark:to-gray-900 border-r border-[#EBEBEB] dark:border-gray-700 shadow-xl transform transition-transform duration-300 lg:translate-x-0 flex flex-col" 
+<aside class="fixed top-[5rem] bottom-0 left-0 z-50 w-72 bg-gradient-to-b from-white to-[#EBEBEB] dark:from-gray-800 dark:to-gray-900 border-r border-[#EBEBEB] dark:border-gray-700 shadow-xl transform transition-transform duration-300 lg:translate-x-0 flex flex-col" 
        id="sidebar"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
     

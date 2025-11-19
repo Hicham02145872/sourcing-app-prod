@@ -4,7 +4,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-blue-600 dark:bg-blue-700 rounded-lg flex items-center justify-center shadow-lg">
+                        <div class="w-12 h-12 bg-gradient-to-br from-[#EF7722] to-[#FAA533] rounded-lg flex items-center justify-center shadow-lg">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
@@ -18,7 +18,7 @@
                     </div>
                 </div>
                 <a href="{{ route('admin.countries.create') }}" 
-                   class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
+                   class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all w-full sm:w-auto justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -59,11 +59,11 @@
                     <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                                <div class="w-2 h-2 bg-[#EF7722] rounded-full animate-pulse"></div>
                                 <div>
                                     <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ __('Countries Database') }}</h3>
                                     <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                                        <span class="font-semibold text-blue-600 dark:text-blue-400">{{ $countries->total() }}</span> {{ Str::plural(__('country'), $countries->total()) }}
+                                        <span class="font-semibold text-[#EF7722] dark:text-[#FAA533]">{{ $countries->total() }}</span> {{ Str::plural(__('country'), $countries->total()) }}
                                     </p>
                                 </div>
                             </div>
@@ -76,9 +76,9 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                     </svg>
                                 </div>
-                                <input type="text" name="search" placeholder="{{ __('Search countries...') }}" value="{{ request('search') }}" class="block w-full pl-10 pr-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm dark:bg-slate-700 dark:text-white font-medium shadow-sm">
+                                <input type="text" name="search" placeholder="{{ __('Search countries...') }}" value="{{ request('search') }}" class="block w-full pl-10 pr-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent text-sm dark:bg-slate-700 dark:text-white font-medium shadow-sm">
                             </div>
-                            <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                            <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
@@ -92,8 +92,8 @@
                 <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 bg-[#EF7722]/10 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-[#EF7722] dark:text-[#FAA533]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                             </div>
@@ -159,7 +159,7 @@
                         </thead>
                         <tbody class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                             @foreach ($countries as $country)
-                                <tr class="hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors duration-150">
+                                <tr class="hover:bg-[#EF7722]/5 dark:hover:bg-[#FAA533]/10 transition-colors duration-150">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-bold text-slate-900 dark:text-white">#{{ str_pad($country->id, 4, '0', STR_PAD_LEFT) }}</div>
                                     </td>
@@ -190,7 +190,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-right">
                                         <div class="flex items-center justify-end gap-2">
                                             <a href="{{ route('admin.countries.edit', $country) }}" 
-                                               class="inline-flex items-center p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" 
+                                               class="inline-flex items-center p-1.5 text-slate-400 hover:text-[#EF7722] dark:hover:text-[#FAA533] transition-colors" 
                                                title="{{ __('Edit') }}">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -218,15 +218,15 @@
                 {{-- Empty State --}}
                 @if($countries->isEmpty())
                 <div class="text-center py-20 px-6">
-                    <div class="mx-auto w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="mx-auto w-20 h-20 bg-[#EF7722]/10 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 text-[#EF7722] dark:text-[#FAA533]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{{ __('No Countries Found') }}</h3>
                     <p class="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-sm mx-auto">{{ __('Get started by creating your first country.') }}</p>
                     <a href="{{ route('admin.countries.create') }}" 
-                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition-all duration-200">
+                       class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -284,11 +284,11 @@
         }
 
         .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #3b82f6;
+            background: #EF7722;
         }
 
         .dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #2563eb;
+            background: #FAA533;
         }
 
         /* Smooth transitions */

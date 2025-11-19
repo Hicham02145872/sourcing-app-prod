@@ -6,12 +6,12 @@
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ __('Create Admin User') }}</h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Add a new administrator to the system') }}</p>
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ __('Edit Admin User') }}</h2>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Update the details of an administrator') }}</p>
                         </div>
                     </div>
                 </div>
@@ -38,15 +38,16 @@
                         </div>
                         <div>
                             <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Admin Account Details') }}</h3>
-                            <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-400">{{ __('Fill in the information below to create a new admin account') }}</p>
+                            <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-400">{{ __('Update the information for this admin account') }}</p>
                         </div>
                     </div>
                 </div>
 
                 {{-- FORM CONTENT --}}
                 <div class="p-6 sm:p-8">
-                    <form method="POST" action="{{ route('admin.super-admin.store-admin') }}" class="space-y-6">
+                    <form method="POST" action="{{ route('admin.super-admin.update-admin', $admin->id) }}" class="space-y-6">
                         @csrf
+                        @method('PUT')
 
                         {{-- NAME FIELD --}}
                         <div>
@@ -64,7 +65,7 @@
                                     id="name" 
                                     type="text" 
                                     name="name" 
-                                    value="{{ old('name') }}"
+                                    value="{{ old('name', $admin->name) }}"
                                     required 
                                     autofocus 
                                     autocomplete="name"
@@ -98,7 +99,7 @@
                                     id="email" 
                                     type="email" 
                                     name="email" 
-                                    value="{{ old('email') }}"
+                                    value="{{ old('email', $admin->email) }}"
                                     required 
                                     autocomplete="username"
                                     placeholder="{{ __('admin@example.com') }}"
@@ -123,13 +124,13 @@
                                 </svg>
                                 <p class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">{{ __('Security') }}</p>
                             </div>
+                            <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">{{ __('Leave password fields empty to keep current password') }}</p>
                         </div>
 
                         {{-- PASSWORD FIELD --}}
                         <div>
                             <label for="password" class="block text-sm font-bold text-slate-900 dark:text-white mb-2">
-                                {{ __('Password') }}
-                                <span class="text-red-600 dark:text-red-400">*</span>
+                                {{ __('New Password') }}
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -141,9 +142,8 @@
                                     id="password" 
                                     type="password" 
                                     name="password" 
-                                    required 
                                     autocomplete="new-password"
-                                    placeholder="{{ __('Enter password') }}"
+                                    placeholder="{{ __('Enter new password (optional)') }}"
                                     class="w-full pl-10 pr-12 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm transition-all placeholder-slate-400 dark:placeholder-slate-500"
                                 />
                                 <button 
@@ -161,7 +161,7 @@
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                {{ __('Minimum 8 characters with uppercase, lowercase, and numbers') }}
+                                {{ __('Minimum 8 characters with uppercase, lowercase, and numbers (optional)') }}
                             </p>
                             @error('password')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1.5">
@@ -176,8 +176,7 @@
                         {{-- CONFIRM PASSWORD FIELD --}}
                         <div>
                             <label for="password_confirmation" class="block text-sm font-bold text-slate-900 dark:text-white mb-2">
-                                {{ __('Confirm Password') }}
-                                <span class="text-red-600 dark:text-red-400">*</span>
+                                {{ __('Confirm New Password') }}
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -189,9 +188,8 @@
                                     id="password_confirmation" 
                                     type="password" 
                                     name="password_confirmation" 
-                                    required 
                                     autocomplete="new-password"
-                                    placeholder="{{ __('Confirm password') }}"
+                                    placeholder="{{ __('Confirm new password') }}"
                                     class="w-full pl-10 pr-12 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm transition-all placeholder-slate-400 dark:placeholder-slate-500"
                                 />
                                 <button 
@@ -222,9 +220,9 @@
                             </a>
                             <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-yellow-600 hover:from-yellow-600 hover:to-red-600 text-white text-sm font-bold rounded-lg shadow-lg hover:shadow-xl transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                {{ __('Create Admin') }}
+                                {{ __('Update Admin') }}
                             </button>
                         </div>
                     </form>
