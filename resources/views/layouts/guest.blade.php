@@ -7,6 +7,8 @@
 
     <title>{{ config('app.name', 'SmartSource') }} - Enterprise Sourcing Platform</title>
 
+    <link rel="icon" href="{{ asset('images/logo5.jpg') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700&display=swap" rel="stylesheet" />
@@ -43,12 +45,12 @@
             <div class="relative z-10 flex flex-col justify-between p-12 xl:p-16 text-white w-full">
                 <!-- Logo & Brand -->
                 <div>
-                    <a href="/" class="mb-16">
-                        <img class="block h-[350px] w-auto" src="{{ asset('images/logo1.png') }}" alt="{{ config('app.name') }}">
+                    <a href="/" class="mb-16 text-center block">
+                        <img class="h-auto max-w-[300px] mx-auto" src="{{ asset('images/logo0.png') }}" alt="{{ config('app.name') }}">
                     </a>
 
                     <!-- Main Message -->
-                    <div class="max-w-md">
+                    <div class="max-w-md mx-auto text-center">
                         <h1 class="text-4xl xl:text-5xl font-light mb-6 leading-tight">
                             fastSourcingBrothers<br/>
                             <span class="font-semibold">Made Simple</span>
@@ -60,8 +62,8 @@
                 </div>
 
                 <!-- Trust Indicators -->
-                <div class="space-y-6">
-                    <div class="flex items-center gap-4 text-orange-100">
+                <div class="space-y-6 flex flex-col items-center">
+                    <div class="flex items-center justify-center gap-4 text-orange-100">
                         <div class="flex -space-x-2">
                             <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-[#EF7722] flex items-center justify-center text-xs font-semibold">JD</div>
                             <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-[#EF7722] flex items-center justify-center text-xs font-semibold">SM</div>
@@ -71,7 +73,7 @@
                         <span class="text-sm font-light">Trusted by 500+ clients worldwide</span>
                     </div>
                     
-                    <div class="flex items-center gap-8 text-sm">
+                    <div class="flex items-center justify-center gap-8 text-sm">
                         <div class="flex items-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>

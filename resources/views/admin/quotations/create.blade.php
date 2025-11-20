@@ -74,7 +74,7 @@
                             <div class="space-y-1">
                                 <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Category') }}</p>
                                 <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-[#EF7722]/10 text-[#EF7722]">
-                                    {{ $sourcingRequest->category->name }}
+                                    {{ $sourcingRequest->category?->name }}
                                 </span>
                             </div>
                             <div class="space-y-1">

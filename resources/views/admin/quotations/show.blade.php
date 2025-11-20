@@ -106,7 +106,7 @@
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Category') }}</label>
-                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $quotation->sourcingRequest->category->name }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $quotation->sourcingRequest?->category?->name }}</p>
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Created Date') }}</label>

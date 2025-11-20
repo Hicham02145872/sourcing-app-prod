@@ -299,7 +299,7 @@
                                         {{-- Category --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-[#EF7722]/10 dark:bg-[#EF7722]/20 text-[#EF7722] dark:text-[#FAA533]">
-                                                {{ $request->category->name }}
+                                                {{ $request->category?->name }}
                                             </span>
                                         </td>
 

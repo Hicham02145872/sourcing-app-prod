@@ -229,7 +229,7 @@
                                                     </div>
                                                     <div>
                                                         <div class="text-sm font-bold text-slate-900 dark:text-white">{{ __('#') }}{{ $request->id }}</div>
-                                                        <div class="text-xs text-slate-500 dark:text-slate-400">{{ $request->category->name }}</div>
+                                                        <div class="text-xs text-slate-500 dark:text-slate-400">{{ $request->category?->name }}</div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -263,7 +263,7 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm text-slate-600 dark:text-slate-400">
-                                                    {{ $request->category->name }}
+                                                    {{ $request->category?->name }}
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">

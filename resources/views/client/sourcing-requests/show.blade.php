@@ -135,7 +135,7 @@
                                         <div>
                                             <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-2">{{ __('Category') }}</p>
                                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#EF7722]/10 text-[#EF7722]">
-                                                {{ $sourcingRequest->category->name }}
+                                                {{ $sourcingRequest->category?->name }}
                                             </span>
                                         </div>
 

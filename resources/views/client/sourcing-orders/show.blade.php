@@ -33,7 +33,7 @@
     </x-slot>
 
     <div class="py-25 bg-[#fffff] dark:bg-slate-900 min-h-screen">
-        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
+        <div class="max-w-7px mx-auto px-4 sm:px-6 lg:px-4">
             
             {{-- Status Banner --}}
             @php
@@ -90,7 +90,7 @@
                                     </div>
                                 </div>
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#EF7722]/10 text-[#EF7722]">
-                                    {{ $sourcingOrder->quotation->sourcingRequest->category->name }}
+                                    {{ $sourcingOrder->quotation?->sourcingRequest?->category?->name }}
                                 </span>
                             </div>
                         </div>
@@ -395,7 +395,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                                     </svg>
                                     <span class="text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1">{{ __('Category') }}</span>
-                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->quotation->sourcingRequest->category->name }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->quotation?->sourcingRequest?->category?->name }}</span>
                                 </div>
 
                                 <div class="flex items-center p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">
@@ -478,3 +478,6 @@
         }
     </style>
 </x-app-layout>
+
+
+

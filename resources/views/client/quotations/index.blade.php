@@ -163,7 +163,7 @@
                                                     </h3>
                                                     <div class="flex items-center gap-2 mt-1.5">
                                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#EF7722]/10 text-[#EF7722]">
-                                                            {{ $request->category->name }}
+                                                            {{ $request->category?->name }}
                                                         </span>
                                                         <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">
                                                             {{ $request->created_at->diffForHumans() }}

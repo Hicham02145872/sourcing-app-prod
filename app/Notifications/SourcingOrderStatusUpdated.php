@@ -79,10 +79,20 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
         $statusLabels = [
             'pending_payment' => __('Pending payment'),
             'paid' => __('Paid'),
-            'shipped' => __('Shipped'),
+            'shipment_preparing' => __('Shipment Preparing'),
+            'in_transit_china' => __('In Transit (Departure from China)'),
+            'arrival_uae' => __('Arrival in UAE'),
+            'customs_clearance_uae' => __('Customs Clearance in UAE'),
+            'in_transit_uae' => __('In Transit (Departure from UAE)'),
+            'arrival_destination_country' => __('Arrival in Destination Country'),
+            'customs_clearance_destination_country' => __('Customs Clearance in Destination Country'),
+            'out_for_delivery' => __('Out for Delivery'),
             'delivered' => __('Delivered'),
-            'completed' => __('Completed'),
-            'cancelled' => __('Cancelled'),
+            'delivery_failed' => __('Delivery Failed'),
+            'shipment_delayed' => __('Shipment Delayed'),
+            'shipment_returned' => __('Shipment Returned'),
+            'shipment_canceled' => __('Shipment Canceled'),
+            'order_completed' => __('Order Completed'),
             'on_hold' => __('On Hold'),
         ];
         return $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));

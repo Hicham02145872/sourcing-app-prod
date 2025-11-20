@@ -93,9 +93,9 @@
                                         <label for="category_id" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                             {{ __('Category') }} <span class="text-red-500">*</span>
                                         </label>
-                                        <select id="category_id" 
-                                                name="category_id" 
-                                                class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-slate-900 dark:text-white shadow-sm dark:bg-slate-700 text-sm" 
+                                        <select id="category_id"
+                                                name="category_id"
+                                                class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-slate-900 dark:text-white shadow-sm dark:bg-slate-700 text-sm tom-select-category" 
                                                 required>
                                             <option value="">{{ __('Select a category') }}</option>
                                             @foreach($categories as $category)
@@ -236,7 +236,7 @@
                                         <select id="destinations_0_service_id"
                                                 name="destinations[0][service_id]" 
                                                 required 
-                                                class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-sm shadow-sm dark:bg-slate-800 dark:text-white">
+                                                class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-sm shadow-sm dark:bg-slate-800 dark:text-white tom-select-service">
                                             <option value="">{{ __('Select') }}</option>
                                             @foreach($services as $service)
                                                 <option value="{{ $service->id }}">{{ $service->name }}</option>
@@ -376,7 +376,7 @@
                 };
             }
 
-            const initializeTomSelect = (element) => {
+            const initializeCountryTomSelect = (element) => {
                 if (element.tomselect) {
                     element.tomselect.destroy();
                 }
@@ -393,6 +393,13 @@
                         }
                     }
                 });
+            };
+
+            const initializeGenericTomSelect = (element) => {
+                if (element.tomselect) {
+                    element.tomselect.destroy();
+                }
+                new TomSelect(element, {});
             };
 
             Alpine.data('sourcingRequestForm', () => ({
@@ -427,7 +434,7 @@
                                 </div>
                                 <div>
                                     <label for="destinations_${newIndex}_service_id" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">{{ __('Service') }}</label>
-                                    <select id="destinations_${newIndex}_service_id" name="destinations[${newIndex}][service_id]" required class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-sm shadow-sm dark:bg-slate-800 dark:text-white">
+                                    <select id="destinations_${newIndex}_service_id" name="destinations[${newIndex}][service_id]" required class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-sm tom-select-service shadow-sm dark:bg-slate-800 dark:text-white">
                                         <option value="">{{ __('Select') }}</option>
                                         @foreach($services as $service)
                                             <option value="{{ $service->id }}">{{ $service->name }}</option>
@@ -452,7 +459,8 @@
                     const newBlock = this.getDestinationTemplate(newIndex);
                     container.appendChild(newBlock);
                     this.$nextTick(() => {
-                        initializeTomSelect(newBlock.querySelector('.tom-select-country'));
+                        initializeCountryTomSelect(newBlock.querySelector('.tom-select-country'));
+                        initializeGenericTomSelect(newBlock.querySelector('.tom-select-service'));
                     });
                 },
 
@@ -462,9 +470,13 @@
                     const block = event.target.closest('.destination-block');
                     
                     if (blocks.length > 1) {
-                        const select = block.querySelector('.tom-select-country');
-                        if (select && select.tomselect) {
-                            select.tomselect.destroy();
+                        const countrySelect = block.querySelector('.tom-select-country');
+                        if (countrySelect && countrySelect.tomselect) {
+                            countrySelect.tomselect.destroy();
+                        }
+                        const serviceSelect = block.querySelector('.tom-select-service');
+                        if (serviceSelect && serviceSelect.tomselect) {
+                            serviceSelect.tomselect.destroy();
                         }
                         
                         block.style.opacity = '0';
@@ -559,7 +571,13 @@
             }));
 
             document.querySelectorAll('.tom-select-country').forEach(el => {
-                initializeTomSelect(el);
+                initializeCountryTomSelect(el);
+            });
+            document.querySelectorAll('.tom-select-category').forEach(el => {
+                initializeGenericTomSelect(el);
+            });
+            document.querySelectorAll('.tom-select-service').forEach(el => {
+                initializeGenericTomSelect(el);
             });
         });
     </script>

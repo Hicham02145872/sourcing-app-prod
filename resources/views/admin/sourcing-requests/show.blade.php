@@ -183,7 +183,7 @@
                                     <div class="flex-1">
                                         <p class="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">{{ __('Category') }}</p>
                                         <span class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-[#EF7722]/10 dark:bg-[#EF7722]/20 text-[#EF7722] dark:text-[#FAA533] border border-[#EF7722]/20 dark:border-[#EF7722]/30">
-                                            {{ $sourcingRequest->category->name }}
+                                            {{ $sourcingRequest->category?->name }}
                                         </span>
                                     </div>
                                 </div>
