@@ -339,6 +339,32 @@
                             @enderror
                         </div>
 
+                        {{-- YOUTUBE --}}
+                        <div>
+                            <label for="youtube_url" class="block text-sm font-bold text-slate-900 dark:text-white mb-2">
+                                {{ __('YouTube Channel URL') }}
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
+                                    </svg>
+                                </div>
+                                <input id="youtube_url" 
+                                       name="youtube_url" 
+                                       type="url" 
+                                       value="{{ old('youtube_url', $socialMediaLinks->youtube_url) }}"
+                                       placeholder="https://youtube.com/your-channel"
+                                       class="block w-full pl-10 pr-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white">
+                            </div>
+                            @error('youtube_url')
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
                         {{-- ACTIONS --}}
                         <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-200 dark:border-slate-700">
                             <button type="button" onclick="window.location.reload()" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm">

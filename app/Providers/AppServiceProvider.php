@@ -36,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
             return new FcmChannel($messaging);
         });
 
-        View::composer(['components.layout.header', 'components.sidebar'], function ($view) {
+        View::composer(['components.layout.header', 'components.sidebar', 'client.dashboard'], function ($view) {
             try {
                 $socialMediaLinks = SocialMediaLink::first();
                 if (!$socialMediaLinks) {

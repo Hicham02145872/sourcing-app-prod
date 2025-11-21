@@ -23,6 +23,7 @@ class SocialMediaLinkController extends Controller
             'linkedin_url' => 'nullable|url',
             'twitter_url' => 'nullable|url',
             'whatsapp_number' => 'nullable|string',
+            'youtube_url' => 'nullable|url',
         ]);
 
         $socialMediaLinks = SocialMediaLink::first();

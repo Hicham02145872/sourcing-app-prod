@@ -42,7 +42,7 @@
                     <div class="hidden md:block w-8"></div>
 
                     {{-- Social Media Icons --}}
-                    @if ($socialMediaLinks->facebook_url || $socialMediaLinks->instagram_url || $socialMediaLinks->linkedin_url || $socialMediaLinks->twitter_url)
+                    @if ($socialMediaLinks->facebook_url || $socialMediaLinks->instagram_url || $socialMediaLinks->linkedin_url || $socialMediaLinks->twitter_url || $socialMediaLinks->youtube_url)
                     <div class="flex items-center gap-1">
                         @if ($socialMediaLinks->facebook_url)
                         <a href="{{ $socialMediaLinks->facebook_url }}" target="_blank" rel="noopener noreferrer"
@@ -80,6 +80,16 @@
                            title="Twitter">
                             <svg class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="#1DA1F2">
                                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                        </a>
+                        @endif
+
+                        @if ($socialMediaLinks->youtube_url)
+                        <a href="{{ $socialMediaLinks->youtube_url }}" target="_blank" rel="noopener noreferrer"
+                           class="p-2.5 rounded-xl transition-all duration-200 group"
+                           title="YouTube">
+                            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="#FF0000">
+                                <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
                             </svg>
                         </a>
                         @endif

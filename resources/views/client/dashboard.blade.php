@@ -31,6 +31,24 @@
     <div class="py-25 bg-[#fffff] dark:bg-slate-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
+            {{-- Watch Demo Banner --}}
+            @if($socialMediaLinks && $socialMediaLinks->youtube_url)
+            <div class="bg-[#EF7722]/10 dark:bg-[#EF7722]/20 border border-[#EF7722]/20 dark:border-[#EF7722]/30 rounded-xl p-4 flex items-center justify-between flex-wrap gap-4 mb-6">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-[#EF7722] dark:text-[#FAA533]">
+                        {{ __('New to our platform? Watch a quick demo to get started!') }}
+                    </p>
+                </div>
+                <a href="{{ $socialMediaLinks->youtube_url }}" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#EF7722] hover:bg-[#FAA533] rounded-lg shadow-sm transition-all duration-200 flex-shrink-0">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
+                    </svg>
+                    {{ __('Watch Demo') }}
+                </a>
+            </div>
+            @endif
+
             {{-- Welcome Banner --}}
             <div class="relative bg-gradient-to-r from-[#EF7722] to-[#FAA533] dark:from-[#EF7722] dark:to-[#FAA533] rounded-xl shadow-lg overflow-hidden mb-6">
                 <div class="absolute inset-0 bg-grid-white/[0.05] bg-[size:16px_16px]"></div>
