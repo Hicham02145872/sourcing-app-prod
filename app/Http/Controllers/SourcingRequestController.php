@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreSourcingRequestRequest;
 use App\Http\Requests\UpdateSourcingRequestRequest;
 use App\Services\TimelineService;
+use PDF;
 
 class SourcingRequestController extends Controller
 {
@@ -28,13 +29,25 @@ class SourcingRequestController extends Controller
         return view('client.sourcing-requests.index', compact('sourcingRequests'));
     }
 
-    public function handling(): View
+    public function handling(Request $request): View
     {
         $this->authorize('viewAny', SourcingRequest::class);
-        $sourcingRequests = auth()->user()->sourcingRequests()
-            ->where('status', 'in_review')
-            ->with('category', 'destinations.country', 'destinations.service', 'quotation')
-            ->paginate(10);
+        $query = auth()->user()->sourcingRequests()
+            ->with('category', 'destinations.country', 'destinations.service', 'quotation');
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('product_name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->has('category') && $request->category != '') {
+            $query->where('category_id', $request->category);
+        }
+
+        if ($request->has('status') && $request->status != 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $sourcingRequests = $query->paginate(10);
 
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
         $categories = Category::all();
@@ -185,10 +198,17 @@ class SourcingRequestController extends Controller
         return redirect()->route('client.dashboard')->with('status', 'Sourcing request deleted successfully!');
     }
 
-    public function history(TimelineService $timelineService): View
+    public function history(Request $request, TimelineService $timelineService): View
     {
         $user = auth()->user();
         $fullTimeline = $timelineService->generateTimeline($user);
+
+        if ($request->has('type') && $request->type != 'all') {
+            $type = $request->type;
+            $fullTimeline = $fullTimeline->filter(function ($event) use ($type) {
+                return str_starts_with($event['type'], $type);
+            });
+        }
 
         // Manually paginate the collection
         $perPage = 10;
@@ -203,6 +223,23 @@ class SourcingRequestController extends Controller
         );
 
         return view('client.history.index', ['timeline' => $paginatedTimeline]);
+    }
+
+    public function exportHistory(Request $request, TimelineService $timelineService)
+    {
+        $user = auth()->user();
+        $timeline = $timelineService->generateTimeline($user);
+
+        if ($request->has('type') && $request->type != 'all') {
+            $type = $request->type;
+            $timeline = $timeline->filter(function ($event) use ($type) {
+                return str_starts_with($event['type'], $type);
+            });
+        }
+
+        $pdf = PDF::loadView('client.history.pdf', compact('timeline'));
+
+        return $pdf->stream('history.pdf');
     }
 
     /**

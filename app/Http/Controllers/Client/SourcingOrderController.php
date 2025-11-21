@@ -13,13 +13,29 @@ use Illuminate\Http\RedirectResponse;
 use App\Models\User;
 use App\Notifications\ProofOfPaymentUploaded;
 use Illuminate\Support\Facades\Log;
+use PDF;
 
 class SourcingOrderController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $this->authorize('viewAny', SourcingOrder::class);
-        $sourcingOrders = Auth::user()->sourcingOrders()->with('quotation.sourcingRequest')->paginate(10);
+
+        $query = Auth::user()->sourcingOrders()->with('quotation.sourcingRequest');
+
+        if ($request->has('status') && $request->status != 'all') {
+            $status = $request->status;
+            if ($status === 'in_transit') {
+                $query->whereIn('status', ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'shipment_delayed']);
+            } elseif ($status === 'preparing') {
+                $query->where('status', 'shipment_preparing');
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        $sourcingOrders = $query->paginate(10);
+
         return view('client.sourcing-orders.index', compact('sourcingOrders'));
     }
 
@@ -77,5 +93,29 @@ class SourcingOrderController extends Controller
         }
 
         return Storage::disk('local')->download($sourcingOrder->proof_of_payment_path);
+    }
+
+    public function export(Request $request)
+    {
+        $this->authorize('viewAny', SourcingOrder::class);
+
+        $query = Auth::user()->sourcingOrders()->with('quotation.sourcingRequest');
+
+        if ($request->has('status') && $request->status != 'all') {
+            $status = $request->status;
+            if ($status === 'in_transit') {
+                $query->whereIn('status', ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'shipment_delayed']);
+            } elseif ($status === 'preparing') {
+                $query->where('status', 'shipment_preparing');
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        $sourcingOrders = $query->get();
+
+        $pdf = PDF::loadView('client.sourcing-orders.pdf', compact('sourcingOrders'));
+
+        return $pdf->stream('sourcing-orders.pdf');
     }
 }

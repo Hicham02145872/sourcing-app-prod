@@ -71,20 +71,20 @@
                                 </div>
                             </div>
                             
-                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-                                <select class="px-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 dark:text-white font-medium shadow-sm">
-                                    <option>{{ __('All Events') }}</option>
-                                    <option>{{ __('Orders') }}</option>
-                                    <option>{{ __('Quotations') }}</option>
-                                    <option>{{ __('Requests') }}</option>
+                            <form action="{{ route('client.history') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                                <select name="type" onchange="this.form.submit()" class="px-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 dark:text-white font-medium shadow-sm">
+                                    <option value="all" {{ request('type') == 'all' ? 'selected' : '' }}>{{ __('All Events') }}</option>
+                                    <option value="order" {{ request('type') == 'order' ? 'selected' : '' }}>{{ __('Orders') }}</option>
+                                    <option value="quotation" {{ request('type') == 'quotation' ? 'selected' : '' }}>{{ __('Quotations') }}</option>
+                                    <option value="request" {{ request('type') == 'request' ? 'selected' : '' }}>{{ __('Requests') }}</option>
                                 </select>
-                                <button class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                                <a href="{{ route('client.history.export', ['type' => request('type', 'all')]) }}" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
                                     {{ __('Export') }}
-                                </button>
-                            </div>
+                                </a>
+                            </form>
                         </div>
                     </div>
 

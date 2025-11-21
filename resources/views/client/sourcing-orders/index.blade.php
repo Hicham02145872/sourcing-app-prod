@@ -67,21 +67,21 @@
                                 </div>
                             </div>
                             
-                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-                                <select class="px-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 dark:text-white font-medium shadow-sm">
-                                    <option>{{ __('All Statuses') }}</option>
-                                    <option>{{ __('Pending Payment') }}</option>
-                                    <option>{{ __('Processing') }}</option>
-                                    <option>{{ __('Shipped') }}</option>
-                                    <option>{{ __('Delivered') }}</option>
+                            <form action="{{ route('client.sourcing-orders.index') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto" id="filter-form">
+                                <select name="status" onchange="document.getElementById('filter-form').submit()" class="px-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 dark:text-white font-medium shadow-sm">
+                                    <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>{{ __('All Statuses') }}</option>
+                                    <option value="pending_payment" {{ request('status') == 'pending_payment' ? 'selected' : '' }}>{{ __('Pending Payment') }}</option>
+                                    <option value="preparing" {{ request('status') == 'preparing' ? 'selected' : '' }}>{{ __('Preparing') }}</option>
+                                    <option value="in_transit" {{ request('status') == 'in_transit' ? 'selected' : '' }}>{{ __('In Transit') }}</option>
+                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('Completed') }}</option>
                                 </select>
-                                <button class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                                <a href="{{ route('client.sourcing-orders.export', ['status' => request('status', 'all')]) }}" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
                                     {{ __('Export') }}
-                                </button>
-                            </div>
+                                </a>
+                            </form>
                         </div>
                     </div>
 
@@ -96,12 +96,12 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Pending') }}</p>
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Pending Payment') }}</p>
                                     <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrders->where('status', 'pending_payment')->count() }}</p>
                                 </div>
                             </div>
 
-                            {{-- Processing --}}
+                            {{-- Preparing --}}
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-[#0BA6DF]/10 dark:bg-[#0BA6DF]/20 rounded-lg flex items-center justify-center">
                                     <svg class="w-5 h-5 text-[#0BA6DF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,12 +109,12 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Processing') }}</p>
-                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrders->where('status', 'processing')->count() }}</p>
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Preparing') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrders->where('status', 'shipment_preparing')->count() }}</p>
                                 </div>
                             </div>
 
-                            {{-- Shipped --}}
+                            {{-- In Transit --}}
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-[#EF7722]/10 dark:bg-[#EF7722]/20 rounded-lg flex items-center justify-center">
                                     <svg class="w-5 h-5 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,12 +122,12 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Shipped') }}</p>
-                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrders->where('status', 'shipped')->count() }}</p>
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('In Transit') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrders->whereIn('status', ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'shipment_delayed'])->count() }}</p>
                                 </div>
                             </div>
 
-                            {{-- Delivered --}}
+                            {{-- Completed --}}
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-[#0BA6DF]/10 dark:bg-[#0BA6DF]/20 rounded-lg flex items-center justify-center">
                                     <svg class="w-5 h-5 text-[#0BA6DF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,8 +135,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Delivered') }}</p>
-                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrders->where('status', 'delivered')->count() }}</p>
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Completed') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrders->where('status', 'order_completed')->count() }}</p>
                                 </div>
                             </div>
                         </div>
@@ -208,11 +208,24 @@
                                             @php
                                                 $statusConfig = [
                                                     'pending_payment' => ['color' => '#FAA533', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-                                                    'processing' => ['color' => '#0BA6DF', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'],
-                                                    'shipped' => ['color' => '#EF7722', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
+                                                    'paid' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                    'shipment_preparing' => ['color' => '#0BA6DF', 'icon' => 'M20 7l-8-4-8 4m16 0l-8-4m8 4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
+                                                    'in_transit_china' => ['color' => '#EF7722', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
+                                                    'arrival_uae' => ['color' => '#EF7722', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
+                                                    'customs_clearance_uae' => ['color' => '#EF7722', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
+                                                    'in_transit_uae' => ['color' => '#EF7722', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
+                                                    'arrival_destination_country' => ['color' => '#EF7722', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
+                                                    'customs_clearance_destination_country' => ['color' => '#EF7722', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
+                                                    'out_for_delivery' => ['color' => '#EF7722', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
                                                     'delivered' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                    'delivery_failed' => ['color' => '#F44336', 'icon' => 'M6 18L18 6M6 6l12 12'],
+                                                    'shipment_delayed' => ['color' => '#FFC107', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                    'shipment_returned' => ['color' => '#F44336', 'icon' => 'M6 18L18 6M6 6l12 12'],
+                                                    'shipment_canceled' => ['color' => '#F44336', 'icon' => 'M6 18L18 6M6 6l12 12'],
+                                                    'order_completed' => ['color' => '#4CAF50', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                    'on_hold' => ['color' => '#9E9E9E', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
                                                 ];
-                                                $statusData = $statusConfig[$order->status] ?? $statusConfig['pending_payment'];
+                                                $statusData = $statusConfig[$order->status] ?? ['color' => '#9E9E9E', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'];
                                             @endphp
                                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold" style="background-color: {{ $statusData['color'] }}22; color: {{ $statusData['color'] }};">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

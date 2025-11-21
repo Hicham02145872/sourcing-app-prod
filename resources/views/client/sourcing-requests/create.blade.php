@@ -111,8 +111,9 @@
                                         </label>
                                         <select id="sourcing_location" 
                                                 name="sourcing_location" 
-                                                class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-slate-900 dark:text-white shadow-sm dark:bg-slate-700 text-sm" 
+                                                class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-slate-900 dark:text-white shadow-sm dark:bg-slate-700 text-sm tom-select-location" 
                                                 required>
+                                            <option value="">{{ __('Select location') }}</option>
                                             <option value="china" {{ old('sourcing_location') == 'china' ? 'selected' : '' }}>{{ __('China') }}</option>
                                             <option value="dubai" {{ old('sourcing_location') == 'dubai' ? 'selected' : '' }}>{{ __('Dubai') }}</option>
                                         </select>
@@ -339,6 +340,8 @@
     </div>
 
     @push('scripts')
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/css/tom-select.bootstrap5.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/js/tom-select.complete.min.js"></script>
     <script>
         document.addEventListener('alpine:init', () => {
             const addressOptions = document.querySelectorAll('input[name="address_option"]');
@@ -381,7 +384,9 @@
                     element.tomselect.destroy();
                 }
                 new TomSelect(element, {
-                    plugins: { 'dropdown_header': { title: '{{ __("Select Country") }}' } },
+                    searchField: 'text',
+                    openOnFocus: true,
+                    placeholder: '{{ __("Select Country") }}',
                     render: {
                         option: function(data) {
                             const flag = data.flag ? `<span class="fi fi-${data.flag} mr-2"></span>` : '';
@@ -399,7 +404,10 @@
                 if (element.tomselect) {
                     element.tomselect.destroy();
                 }
-                new TomSelect(element, {});
+                new TomSelect(element, {
+                    searchField: 'text',
+                    openOnFocus: true
+                });
             };
 
             Alpine.data('sourcingRequestForm', () => ({
@@ -434,7 +442,7 @@
                                 </div>
                                 <div>
                                     <label for="destinations_${newIndex}_service_id" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">{{ __('Service') }}</label>
-                                    <select id="destinations_${newIndex}_service_id" name="destinations[${newIndex}][service_id]" required class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-sm tom-select-service shadow-sm dark:bg-slate-800 dark:text-white">
+                                    <select id="destinations_${newIndex}_service_id" name="destinations[${newIndex}][service_id]" required class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] text-sm shadow-sm dark:bg-slate-800 dark:text-white tom-select-service">
                                         <option value="">{{ __('Select') }}</option>
                                         @foreach($services as $service)
                                             <option value="{{ $service->id }}">{{ $service->name }}</option>
@@ -526,7 +534,6 @@
                             window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __("Please check the form for errors.") }}' }));
                             if (data.errors) {
                                 for (const field in data.errors) {
-                                    const errorPath = field.replace(/\./g, '-');
                                     const inputEl = document.querySelector(`[name="${field}"]`);
                                     if (inputEl) {
                                         inputEl.classList.add('border-red-500');
@@ -576,12 +583,14 @@
             document.querySelectorAll('.tom-select-category').forEach(el => {
                 initializeGenericTomSelect(el);
             });
+            document.querySelectorAll('.tom-select-location').forEach(el => {
+                initializeGenericTomSelect(el);
+            });
             document.querySelectorAll('.tom-select-service').forEach(el => {
                 initializeGenericTomSelect(el);
             });
         });
     </script>
-    @endpush
 
     <style>
         textarea::-webkit-scrollbar {
@@ -626,5 +635,70 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
+
+        /* Tom Select Custom Styling */
+        .ts-wrapper.single .ts-control {
+            border-color: #EBEBEB;
+            background-color: white;
+            border-radius: 0.5rem;
+            min-height: 2.375rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .ts-wrapper.single .ts-control {
+            border-color: #475569;
+            background-color: #1e293b;
+            color: white;
+        }
+
+        .ts-wrapper.focus .ts-control {
+            border-color: #EF7722;
+            box-shadow: 0 0 0 3px rgba(239, 119, 34, 0.1);
+        }
+
+        .ts-dropdown {
+            border-color: #EF7722;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark .ts-dropdown {
+            background-color: #1e293b;
+        }
+
+        .ts-dropdown .ts-dropdown-content .option {
+            padding: 0.5rem 0.75rem;
+            color: #334155;
+        }
+
+        .dark .ts-dropdown .ts-dropdown-content .option {
+            color: #e2e8f0;
+        }
+
+        .ts-dropdown .ts-dropdown-content .option.selected,
+        .ts-dropdown .ts-dropdown-content .option:hover {
+            background-color: #EF7722;
+            color: white;
+        }
+
+        .ts-input {
+            color: #334155;
+        }
+
+        .dark .ts-input {
+            color: white;
+        }
+
+        .ts-dropdown .ts-dropdown-content .option.selected,
+        .ts-dropdown .ts-dropdown-content .option:hover {
+            background-color: #EF7722;
+            color: white;
+        }
+        .dark .ts-dropdown .ts-dropdown-content .option.selected,
+        .dark .ts-dropdown .ts-dropdown-content .option:hover {
+            background-color: #FAA533;
+            color: white;
+        }
     </style>
+    @endpush
 </x-app-layout>

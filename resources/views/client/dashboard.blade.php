@@ -408,12 +408,30 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const clearFiltersBtn = document.getElementById('clearFilters');
             const filterForm = document.getElementById('filterForm');
             const searchInput = document.getElementById('searchInput');
             const categoryFilter = document.getElementById('categoryFilter');
             const statusFilter = document.getElementById('statusFilter');
+            const clearFiltersBtn = document.getElementById('clearFilters');
             
+            let debounceTimeout;
+
+            if(searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimeout);
+                    debounceTimeout = setTimeout(() => {
+                        filterForm.submit();
+                    }, 500); // 500ms delay
+                });
+            }
+
+            if(categoryFilter) {
+                categoryFilter.addEventListener('change', () => filterForm.submit());
+            }
+            if(statusFilter) {
+                statusFilter.addEventListener('change', () => filterForm.submit());
+            }
+
             if (clearFiltersBtn && filterForm) {
                 clearFiltersBtn.addEventListener('click', function() {
                     if (searchInput) searchInput.value = '';
@@ -424,61 +442,5 @@
             }
         });
     </script>
-
-    <style>
-        /* Enterprise table styling */
-        table {
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        /* Custom scrollbar for table */
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .dark .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #475569;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #EF7722;
-        }
-
-        .dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #FAA533;
-        }
-
-        /* Smooth transitions */
-        * {
-            transition-property: background-color, border-color, color, fill, stroke;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 150ms;
-        }
-
-        /* Grid background pattern */
-        .bg-grid-white\/\[0\.05\] {
-            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-        }
-
-        /* Custom focus styles for inputs with custom colors */
-        input:focus, select:focus {
-            outline: none;
-        }
-
-        button[type="submit"]:active {
-            transform: scale(0.98);
-        }
-    </style>
     @endpush
 </x-app-layout>

@@ -79,10 +79,12 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/quotations', [App\Http\Controllers\Client\QuotationController::class, 'index'])->name('quotations.index');
 
     Route::get('/sourcing-orders', [App\Http\Controllers\Client\SourcingOrderController::class, 'index'])->name('sourcing-orders.index');
+    Route::get('/sourcing-orders/export', [App\Http\Controllers\Client\SourcingOrderController::class, 'export'])->name('sourcing-orders.export');
     Route::get('/sourcing-orders/{sourcingOrder}', [App\Http\Controllers\Client\SourcingOrderController::class, 'show'])->name('sourcing-orders.show');
     Route::get('/sourcing-orders/{sourcingOrder}/receipt', [App\Http\Controllers\Client\SourcingOrderController::class, 'showReceipt'])->name('sourcing-orders.receipt');
     Route::get('/sourcing-orders/{sourcingOrder}/download-proof-of-payment', [App\Http\Controllers\Client\SourcingOrderController::class, 'downloadProofOfPayment'])->name('sourcing-orders.download-proof-of-payment');
     Route::get('/history', [SourcingRequestController::class, 'history'])->name('history');
+    Route::get('/history/export', [SourcingRequestController::class, 'exportHistory'])->name('history.export');
 
     // Notification API routes for client sidebar
     Route::get('/notifications-api', [App\Http\Controllers\Client\NotificationController::class, 'index'])->name('notifications.api.index');

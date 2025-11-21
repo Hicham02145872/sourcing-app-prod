@@ -108,7 +108,7 @@
                         </div>
                         
                         {{-- Filters --}}
-                        <form action="{{ route('client.sourcing-requests.index') }}" method="GET" id="filterForm" class="w-full lg:w-auto">
+                        <form action="{{ route('client.sourcing-requests.handling') }}" method="GET" id="filterForm" class="w-full lg:w-auto">
                             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
                                 <div class="relative flex-1 lg:w-64">
                                     <input type="text" 
@@ -315,12 +315,30 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const clearFiltersBtn = document.getElementById('clearFilters');
             const filterForm = document.getElementById('filterForm');
             const searchInput = document.getElementById('searchInput');
             const categoryFilter = document.getElementById('categoryFilter');
             const statusFilter = document.getElementById('statusFilter');
+            const clearFiltersBtn = document.getElementById('clearFilters');
             
+            let debounceTimeout;
+
+            if(searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimeout);
+                    debounceTimeout = setTimeout(() => {
+                        filterForm.submit();
+                    }, 500); // 500ms delay
+                });
+            }
+
+            if(categoryFilter) {
+                categoryFilter.addEventListener('change', () => filterForm.submit());
+            }
+            if(statusFilter) {
+                statusFilter.addEventListener('change', () => filterForm.submit());
+            }
+
             if (clearFiltersBtn && filterForm) {
                 clearFiltersBtn.addEventListener('click', function() {
                     if (searchInput) searchInput.value = '';
@@ -331,6 +349,7 @@
             }
         });
     </script>
+    @endpush
 
     <style>
         /* Enterprise table styling */
@@ -387,5 +406,4 @@
             transform: scale(0.98);
         }
     </style>
-    @endpush
 </x-app-layout>
