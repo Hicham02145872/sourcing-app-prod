@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreSourcingRequestRequest;
 use App\Http\Requests\UpdateSourcingRequestRequest;
 use App\Services\TimelineService;
+use App\Models\User;
+use App\Notifications\SourcingRequestCreated;
 use PDF;
 
 class SourcingRequestController extends Controller
@@ -90,7 +92,7 @@ class SourcingRequestController extends Controller
         $this->authorize('create', SourcingRequest::class);
         $validated = $request->validated();
 
-        DB::transaction(function () use ($request, $validated) {
+        $sourcingRequest = DB::transaction(function () use ($request, $validated) {
             if ($request->hasFile('product_image')) {
                 $validated['product_image'] = $request->file('product_image')->store('product_images', 'public');
             }
@@ -112,7 +114,15 @@ class SourcingRequestController extends Controller
             foreach ($validated['destinations'] as $destinationData) {
                 $sourcingRequest->destinations()->create($destinationData);
             }
+            
+            return $sourcingRequest;
         });
+        
+        // Notify admins and super admins
+        $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new SourcingRequestCreated($sourcingRequest));
+        }
 
         if ($request->expectsJson()) {
             return response()->json([
