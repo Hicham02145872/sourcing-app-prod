@@ -17,13 +17,24 @@
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('client.sourcing-requests.create') }}" 
-                   class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] rounded-lg transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    {{ __('New Request') }}
-                </a>
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('client.sourcing-requests.create') }}"
+                       class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#EF7722] hover:bg-[#FAA533] rounded-lg transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        {{ __('New Request') }}
+                    </a>
+                    @if($socialMediaLinks && $socialMediaLinks->youtube_url)
+                        <a href="{{ $socialMediaLinks->youtube_url }}" target="_blank" rel="noopener noreferrer"
+                           class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-[#EF7722] bg-transparent border-2 border-[#EF7722] rounded-lg transition-all duration-200 hover:bg-[#EF7722]/10 w-full sm:w-auto justify-center">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
+                            </svg>
+                            {{ __('Watch Demo') }}
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
     </x-slot>
@@ -33,19 +44,22 @@
             
             {{-- Watch Demo Banner --}}
             @if($socialMediaLinks && $socialMediaLinks->youtube_url)
-            <div class="bg-[#EF7722]/10 dark:bg-[#EF7722]/20 border border-[#EF7722]/20 dark:border-[#EF7722]/30 rounded-xl p-4 flex items-center justify-between flex-wrap gap-4 mb-6">
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-[#EF7722] dark:text-[#FAA533]">
-                        {{ __('New to our platform? Watch a quick demo to get started!') }}
-                    </p>
+            <div class="relative bg-gradient-to-r from-red-600 to-red-800 rounded-xl shadow-xl overflow-hidden mb-6 group">
+                <div class="absolute inset-0 bg-grid-white/[0.05] bg-[size:16px_16px]"></div>
+                <div class="relative p-4 flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-base font-semibold text-white">
+                            {{ __('New to our platform? Watch a quick demo to get started!') }}
+                        </p>
+                    </div>
+                    <a href="{{ $socialMediaLinks->youtube_url }}" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-700 bg-white hover:bg-red-100 rounded-lg shadow-md transition-all duration-200 flex-shrink-0 transform group-hover:scale-105">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
+                        </svg>
+                        {{ __('Watch Demo') }}
+                    </a>
                 </div>
-                <a href="{{ $socialMediaLinks->youtube_url }}" target="_blank" rel="noopener noreferrer"
-                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#EF7722] hover:bg-[#FAA533] rounded-lg shadow-sm transition-all duration-200 flex-shrink-0">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
-                    </svg>
-                    {{ __('Watch Demo') }}
-                </a>
             </div>
             @endif
 
