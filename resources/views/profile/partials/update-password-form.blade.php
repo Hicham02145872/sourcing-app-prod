@@ -1,92 +1,62 @@
-<section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-200/50 dark:border-blue-800/50 p-6">
-    <header>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-            {{ __('Profile Information') }}
+<!-- resources/views/profile/partials/update-password-form.blade.php -->
+<section class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-orange-200 dark:border-orange-800 p-8 w-full">
+    <header class="mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            {{ __('Update Password') }}
         </h2>
 
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account's profile information and email address.") }}
+        <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
+            {{ __('Ensure your account is using a long, random password to stay secure.') }}
         </p>
     </header>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+    <form method="post" action="{{ route('password.update') }}" class="space-y-8">
         @csrf
-    </form>
+        @method('put')
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
-        @csrf
-        @method('patch')
-
-        <div>
-            <x-input-label for="name" :value="__('Name')" class="text-gray-700 dark:text-gray-300 font-medium" />
-            <x-text-input id="name" 
-                          name="name" 
-                          type="text" 
-                          class="mt-2 block w-full dark:bg-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-500 rounded-lg transition-colors duration-200" 
-                          :value="old('name', $user->name)" 
-                          required 
-                          autofocus 
-                          autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <div class="w-full">
+            <label for="update_password_current_password" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Current Password') }}</label>
+            <input id="update_password_current_password" 
+                   name="current_password" 
+                   type="password" 
+                   class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500 text-base p-3" 
+                   autocomplete="current-password" />
+            @error('current_password', 'updatePassword')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div>
-            <x-input-label for="email" :value="__('Email')" class="text-gray-700 dark:text-gray-300 font-medium" />
-            <x-text-input id="email" 
-                          name="email" 
-                          type="email" 
-                          class="mt-2 block w-full dark:bg-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-500 rounded-lg transition-colors duration-200" 
-                          :value="old('email', $user->email)" 
-                          required 
-                          autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div class="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <p class="text-sm text-gray-800 dark:text-gray-200 flex items-start gap-2">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>
-                            {{ __('Your email address is unverified.') }}
-
-                            <button form="send-verification" class="underline text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 font-medium transition-colors duration-200">
-                                {{ __('Click here to re-send the verification email.') }}
-                            </button>
-                        </span>
-                    </p>
-
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
-                    @endif
-                </div>
-            @endif
+        <div class="w-full">
+            <label for="update_password_password" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('New Password') }}</label>
+            <input id="update_password_password" 
+                   name="password" 
+                   type="password" 
+                   class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500 text-base p-3" 
+                   autocomplete="new-password" />
+            @error('password', 'updatePassword')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div class="flex items-center gap-4 pt-4">
-            <x-primary-button class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 focus:ring-blue-500">
+        <div class="w-full">
+            <label for="update_password_password_confirmation" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Confirm Password') }}</label>
+            <input id="update_password_password_confirmation" 
+                   name="password_confirmation" 
+                   type="password" 
+                   class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500 text-base p-3" 
+                   autocomplete="new-password" />
+            @error('password_confirmation', 'updatePassword')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="flex items-center gap-4 w-full pt-4">
+            <button class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-md font-medium text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
                 {{ __('Save') }}
-            </x-primary-button>
+            </button>
 
-            @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-blue-600 dark:text-blue-400 font-medium flex items-center gap-2"
-                >
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
+            @if (session('status') === 'password-updated')
+                <p class="text-base text-green-600 dark:text-green-400 font-medium">
                     {{ __('Saved.') }}
                 </p>
             @endif
