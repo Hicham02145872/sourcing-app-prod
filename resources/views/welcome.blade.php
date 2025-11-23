@@ -308,20 +308,17 @@
                             <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
-                            <span class="text-sm font-bold">Trusted by 500+ Businesses</span>
+                            <span class="text-sm font-bold">{{ $contents['hero_badge']->value ?? 'Trusted by 500+ Businesses' }}</span>
                         </div>
 
                         <!-- Heading -->
                         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight">
-                            Your Sourcing,
-                            <span class="block gradient-text mt-2">
-                                Finally Simplified
-                            </span>
+                            {!! $contents['hero_title']->value ?? 'Your Sourcing,<span class="block gradient-text mt-2">Finally Simplified</span>' !!}
                         </h1>
 
                         <!-- Description -->
                         <p class="text-base sm:text-lg lg:text-xl text-slate-600 leading-relaxed">
-                            Submit your request in just a few clicks, receive competitive quotes from our experts, and track your order progress in real-time. Free yourself from the complexity of procurement.
+                            {{ $contents['hero_subtitle']->value ?? 'Submit your request in just a few clicks, receive competitive quotes from our experts, and track your order progress in real-time. Free yourself from the complexity of procurement.' }}
                         </p>
 
                         <!-- Trust Badges -->
@@ -349,7 +346,7 @@
                         <!-- Buttons -->
                         <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                             <a href="{{ route('register') }}" class="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-red-600 to-yellow-600 text-white rounded-lg sm:rounded-xl hover:shadow-2xl hover:scale-105 font-semibold text-center flex items-center justify-center space-x-2 active:scale-95 touch-button sm:touch-button shadow-lg shadow-red-500/30">
-                                <span>Start My First Request Free</span>
+                                <span>{{ $contents['hero_button']->value ?? 'Start My First Request Free' }}</span>
                                 <svg class="w-5 h-5 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                                 </svg>
@@ -403,10 +400,10 @@
                         <span class="text-sm font-bold">How It Works</span>
                     </div>
                     <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-                        A Simple 3-Step Process
+                        {{ $contents['how_it_works_title']->value ?? 'A Simple 3-Step Process' }}
                     </h2>
                     <p class="text-lg text-slate-600 max-w-3xl mx-auto">
-                        From request to delivery, we've streamlined every step to make sourcing effortless
+                        {{ $contents['how_it_works_subtitle']->value ?? "From request to delivery, we've streamlined every step to make sourcing effortless" }}
                     </p>
                 </div>
 
@@ -419,8 +416,8 @@
                             </svg>
                         </div>
                         <div class="text-sm font-bold text-red-600 mb-2">STEP 1</div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">Describe Your Needs</h3>
-                        <p class="text-slate-600">Fill out our smart form to tell us exactly what product you're looking for, quantities, and your specifications. It takes just minutes.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">{{ $contents['step1_title']->value ?? 'Describe Your Needs' }}</h3>
+                        <p class="text-slate-600">{{ $contents['step1_description']->value ?? "Fill out our smart form to tell us exactly what product you're looking for, quantities, and your specifications. It takes just minutes." }}</p>
                     </div>
 
                     <!-- Step 2 -->
@@ -431,8 +428,8 @@
                             </svg>
                         </div>
                         <div class="text-sm font-bold text-yellow-600 mb-2">STEP 2</div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">Receive & Compare Quotes</h3>
-                        <p class="text-slate-600">Our team of experts activates their network of qualified suppliers and sends you a selection of competitive quotes directly to your dashboard.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">{{ $contents['step2_title']->value ?? 'Receive & Compare Quotes' }}</h3>
+                        <p class="text-slate-600">{{ $contents['step2_description']->value ?? 'Our team of experts activates their network of qualified suppliers and sends you a selection of competitive quotes directly to your dashboard.' }}</p>
                     </div>
 
                     <!-- Step 3 -->
@@ -443,8 +440,8 @@
                             </svg>
                         </div>
                         <div class="text-sm font-bold text-red-600 mb-2">STEP 3</div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">Validate & Track Your Order</h3>
-                        <p class="text-slate-600">Accept the quote that suits you best. We transform your quote into an order and you can track its status until final delivery with real-time updates.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">{{ $contents['step3_title']->value ?? 'Validate & Track Your Order' }}</h3>
+                        <p class="text-slate-600">{{ $contents['step3_description']->value ?? 'Accept the quote that suits you best. We transform your quote into an order and you can track its status until final delivery with real-time updates.' }}</p>
                     </div>
                 </div>
             </div>
@@ -461,10 +458,10 @@
                         <span class="text-sm font-bold">Key Benefits</span>
                     </div>
                     <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-                        Take Control of Your Sourcing
+                        {{ $contents['benefits_title']->value ?? 'Take Control of Your Sourcing' }}
                     </h2>
                     <p class="text-lg text-slate-600 max-w-3xl mx-auto">
-                        Experience the advantages of a centralized, transparent, and expert-driven sourcing platform
+                        {{ $contents['benefits_subtitle']->value ?? 'Experience the advantages of a centralized, transparent, and expert-driven sourcing platform' }}
                     </p>
                 </div>
 
@@ -478,8 +475,8 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-slate-900 mb-3">Massive Time Savings</h3>
-                                <p class="text-slate-600">Stop wasting hours searching for and contacting suppliers. We do it for you, freeing up your time to focus on growing your business.</p>
+                                <h3 class="text-xl font-bold text-slate-900 mb-3">{{ $contents['benefit1_title']->value ?? 'Massive Time Savings' }}</h3>
+                                <p class="text-slate-600">{{ $contents['benefit1_description']->value ?? 'Stop wasting hours searching for and contacting suppliers. We do it for you, freeing up your time to focus on growing your business.' }}</p>
                             </div>
                         </div>
                     </div>
@@ -493,8 +490,8 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-slate-900 mb-3">Everything Centralized</h3>
-                                <p class="text-slate-600">No more scattered emails and Excel files. Manage all your requests, communications, and documents from one single, organized platform.</p>
+                                <h3 class="text-xl font-bold text-slate-900 mb-3">{{ $contents['benefit2_title']->value ?? 'Everything Centralized' }}</h3>
+                                <p class="text-slate-600">{{ $contents['benefit2_description']->value ?? 'No more scattered emails and Excel files. Manage all your requests, communications, and documents from one single, organized platform.' }}</p>
                             </div>
                         </div>
                     </div>
@@ -509,8 +506,8 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-slate-900 mb-3">Total Transparency</h3>
-                                <p class="text-slate-600">With our real-time tracking system and notifications, you always know exactly where your request stands. No more uncertainty.</p>
+                                <h3 class="text-xl font-bold text-slate-900 mb-3">{{ $contents['benefit3_title']->value ?? 'Total Transparency' }}</h3>
+                                <p class="text-slate-600">{{ $contents['benefit3_description']->value ?? 'With our real-time tracking system and notifications, you always know exactly where your request stands. No more uncertainty.' }}</p>
                             </div>
                         </div>
                     </div>
@@ -524,8 +521,8 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-slate-900 mb-3">Expert Service</h3>
-                                <p class="text-slate-600">Access a team of sourcing professionals who negotiate for you and ensure supplier quality. Benefit from their expertise and network.</p>
+                                <h3 class="text-xl font-bold text-slate-900 mb-3">{{ $contents['benefit4_title']->value ?? 'Expert Service' }}</h3>
+                                <p class="text-slate-600">{{ $contents['benefit4_description']->value ?? 'Access a team of sourcing professionals who negotiate for you and ensure supplier quality. Benefit from their expertise and network.' }}</p>
                             </div>
                         </div>
                     </div>
@@ -594,10 +591,10 @@
                         <span class="text-sm font-bold">Client Testimonials</span>
                     </div>
                     <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-                        They Trust Us
+                        {{ $contents['testimonials_title']->value ?? 'They Trust Us' }}
                     </h2>
                     <p class="text-lg text-slate-600 max-w-3xl mx-auto">
-                        Discover how SourceHub has helped businesses like yours succeed in their sourcing journey
+                        {{ $contents['testimonials_subtitle']->value ?? 'Discover how SourceHub has helped businesses like yours succeed in their sourcing journey' }}
                     </p>
                 </div>
 
@@ -621,7 +618,7 @@
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <p class="text-slate-600 mb-6 italic">"The platform has transformed our sourcing approach. We've saved 20% on costs and gained precious time. The team is professional and responsive."</p>
+                        <p class="text-slate-600 mb-6 italic">{{ $contents['testimonial1_text']->value ?? '"The platform has transformed our sourcing approach. We\'ve saved 20% on costs and gained precious time. The team is professional and responsive."' }}</p>
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
                                 JD
@@ -652,7 +649,7 @@
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <p class="text-slate-600 mb-6 italic">"Exceptional service from start to finish. The quality controls are rigorous and communication is excellent. I highly recommend!"</p>
+                        <p class="text-slate-600 mb-6 italic">{{ $contents['testimonial2_text']->value ?? '"Exceptional service from start to finish. The quality controls are rigorous and communication is excellent. I highly recommend!"' }}</p>
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
                                 SM
@@ -683,7 +680,7 @@
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
                         </div>
-                        <p class="text-slate-600 mb-6 italic">"Thanks to SourceHub, we found reliable suppliers and saved tremendously. Their market expertise is invaluable for our business."</p>
+                        <p class="text-slate-600 mb-6 italic">{{ $contents['testimonial3_text']->value ?? '"Thanks to SourceHub, we found reliable suppliers and saved tremendously. Their market expertise is invaluable for our business."' }}</p>
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
                                 PL
@@ -706,14 +703,14 @@
                     <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6bTAgMTBjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
                     <div class="relative z-10">
                         <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
-                            Ready to Optimize Your Sourcing?
+                            {{ $contents['cta_title']->value ?? 'Ready to Optimize Your Sourcing?' }}
                         </h2>
                         <p class="text-lg text-red-100 mb-8 max-w-2xl mx-auto">
-                            Join 500+ Client that have already trusted FastSourcingBrothers for their procurement needs.
+                            {{ $contents['cta_subtitle']->value ?? 'Join 500+ Client that have already trusted FastSourcingBrothers for their procurement needs.' }}
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                             <a href="{{ route('register') }}" class="inline-flex items-center px-8 py-4 bg-white text-red-600 rounded-xl hover:shadow-2xl hover:scale-105 transition-all font-semibold">
-                                <span>Create My Account</span>
+                                <span>{{ $contents['cta_button']->value ?? 'Create My Account' }}</span>
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                                 </svg>

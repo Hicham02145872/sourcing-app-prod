@@ -103,7 +103,7 @@
                                     required 
                                     autocomplete="username"
                                     placeholder="{{ __('admin@example.com') }}"
-                                    class="w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm transition-all placeholder-slate-400 dark:placeholder-slate-500"
+                                    class="w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-red-500 dark:focus:ring-400 focus:border-transparent bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm transition-all placeholder-slate-400 dark:placeholder-slate-500"
                                 />
                             </div>
                             @error('email')
@@ -114,6 +114,12 @@
                                     {{ $message }}
                                 </p>
                             @enderror
+                        </div>
+
+                        {{-- VERIFY EMAIL CHECKBOX --}}
+                        <div class="flex items-center space-x-2 pt-2">
+                            <input type="checkbox" name="verify_email" id="verify_email" class="form-checkbox h-5 w-5 text-red-600 rounded-md border-gray-300 shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50" @if($admin->hasVerifiedEmail()) checked @endif>
+                            <label for="verify_email" class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('Mark Email as Verified') }}</label>
                         </div>
 
                         {{-- PASSWORD DIVIDER --}}

@@ -23,6 +23,7 @@ class SendQueuedVerificationEmail implements ShouldQueue
     {
         $user = $event->user;
         $listener = class_basename(static::class);
+        $shouldSendEmail = false;
 
         try {
             Log::info("🔥 {$listener} STARTED", [
@@ -37,7 +38,7 @@ class SendQueuedVerificationEmail implements ShouldQueue
                 return;
             }
 
-            DB::transaction(function () use ($user, $listener) {
+            DB::transaction(function () use (&$user, $listener, &$shouldSendEmail) {
                 $user = \App\Models\User::where('id', $user->id)->lockForUpdate()->first();
 
                 if ($user->hasVerifiedEmail()) {
@@ -48,14 +49,17 @@ class SendQueuedVerificationEmail implements ShouldQueue
                 if (is_null($user->verification_email_sent_at)) {
                     $user->verification_email_sent_at = now();
                     $user->save();
-
-                    Log::info("📤 {$listener}: Sending email verification...", ['user_id' => $user->id]);
-                    $user->sendEmailVerificationNotification();
-                    Log::info("✅ {$listener}: Email sent successfully", ['user_id' => $user->id]);
+                    $shouldSendEmail = true;
                 } else {
                     Log::warning("⚠️ {$listener}: Verification email already sent", ['user_id' => $user->id]);
                 }
             });
+
+            if ($shouldSendEmail) {
+                Log::info("📤 {$listener}: Sending email verification...", ['user_id' => $user->id]);
+                $user->sendEmailVerificationNotification();
+                Log::info("✅ {$listener}: Email sent successfully", ['user_id' => $user->id]);
+            }
 
             Log::info("🏁 {$listener} COMPLETED", [
                 'user_id' => $user->id,

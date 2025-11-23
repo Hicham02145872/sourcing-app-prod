@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\WelcomePageContent;
+use App\Http\Controllers\Admin\WelcomePageContentController;
 use App\Http\Controllers\Admin\SocialMediaLinkController;
 use App\Http\Controllers\Client\ClientDashboardController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -13,8 +15,13 @@ use Illuminate\Http\Request;
 
 Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
+// Super Admin Initial Registration Route
+Route::get('/super-admin-init/register', [App\Http\Controllers\Admin\SuperAdminController::class, 'createSuperAdminRegistrationForm'])->name('super-admin.register-form');
+Route::post('/super-admin-init/register', [App\Http\Controllers\Admin\SuperAdminController::class, 'registerSuperAdmin'])->name('super-admin.register');
+
 Route::get('/', function () {
-    return view('welcome');
+    $contents = WelcomePageContent::all()->keyBy('key');
+    return view('welcome', compact('contents'));
 });
 
 Route::get('/dashboard', function () {
@@ -50,6 +57,9 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
 
     Route::get('/social-media-links', [SocialMediaLinkController::class, 'edit'])->name('social-media-links.edit');
     Route::put('/social-media-links', [SocialMediaLinkController::class, 'update'])->name('social-media-links.update');
+    
+    Route::get('/welcome-content', [WelcomePageContentController::class, 'index'])->name('welcome-content.index');
+    Route::post('/welcome-content', [WelcomePageContentController::class, 'update'])->name('welcome-content.update');
 
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
 
@@ -64,6 +74,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
         Route::delete('/super-admin/admins/{admin}', [App\Http\Controllers\Admin\SuperAdminController::class, 'destroyAdmin'])->name('super-admin.destroy-admin');
     });
 });
+
 
 
 Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('client.')->group(function () {
