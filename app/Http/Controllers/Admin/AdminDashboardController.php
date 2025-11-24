@@ -15,6 +15,7 @@ class AdminDashboardController extends Controller
     public function index()
     {
         $totalUsers = User::count();
+        $totalSourcingRequests = SourcingRequest::count(); // Add this line
         $sourcingRequestsByStatus = SourcingRequest::select('status', \DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
@@ -36,6 +37,6 @@ class AdminDashboardController extends Controller
 
         $recentActivities = Auth::user()->notifications()->latest()->take(3)->get();
 
-        return view('admin.dashboard', compact('totalUsers', 'sourcingRequestsByStatus', 'sourcingOrdersByStatus', 'quotationsByStatus', 'pendingSourcingRequests', 'pendingPaymentSourcingOrders', 'pendingQuotations', 'recentActivities'));
+        return view('admin.dashboard', compact('totalUsers', 'totalSourcingRequests', 'sourcingRequestsByStatus', 'sourcingOrdersByStatus', 'quotationsByStatus', 'pendingSourcingRequests', 'pendingPaymentSourcingOrders', 'pendingQuotations', 'recentActivities')); // Update compact here
     }
 }
