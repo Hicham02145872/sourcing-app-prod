@@ -483,11 +483,7 @@
                         </svg>
                         <span>&copy; {{ date('Y') }} <strong>{{ config('app.name') }}</strong>. Tous droits réservés.</span>
                     </div>
-                    <div class="flex items-center gap-6">
-                        <a href="{{ route('privacy-policy') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">{{ __('Confidentialité') }}</a>
-                        <a href="{{ route('terms-of-service') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">{{ __('Conditions') }}</a>
-                        <a href="{{ route('support') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">{{ __('Support') }}</a>
-                    </div>
+
                 </div>
             </div>
         </footer>
