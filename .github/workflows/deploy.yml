@@ -1,0 +1,22 @@
+name: Deploy Laravel Safe
+
+on:
+  push:
+    branches:
+      - feature/production-setup
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run safe deploy script on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 72.61.98.127
+          username: sourcing
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            bash /var/www/pull-safe.sh
