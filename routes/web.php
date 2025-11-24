@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SourcingRequestController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\PageController; // Add this line
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -23,6 +24,11 @@ Route::get('/', function () {
     $contents = WelcomePageContent::all()->keyBy('key');
     return view('welcome', compact('contents'));
 });
+
+// Public static pages
+Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy-policy');
+Route::get('/terms-of-service', [PageController::class, 'terms'])->name('terms-of-service');
+Route::get('/support', [PageController::class, 'support'])->name('support');
 
 Route::get('/dashboard', function () {
     if (auth()->user()->isAdmin()) {
