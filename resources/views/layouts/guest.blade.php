@@ -53,7 +53,7 @@
                     <div class="max-w-md mx-auto text-center">
                         <h1 class="text-4xl xl:text-5xl font-light mb-6 leading-tight">
                             fastSourcingBrothers<br/>
-                            <span class="font-semibold">Fade Simple</span>
+                            <span class="font-semibold">Made Simple</span>
                         </h1>
                         <p class="text-lg text-orange-100 leading-relaxed font-light">
                             Streamline your procurement process with intelligent automation and real-time supplier management.

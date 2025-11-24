@@ -34,7 +34,7 @@
                     {{-- Delivery Time Text --}}
                     <div class="md:flex items-center">
                         <p class="text-sm text-gray-600 dark:text-gray-300 font-medium whitespace-nowrap">
-                            Estimated delivery-time between 15 - 20 working days (China) and 1 - 7 working days (Dubai)
+                            {{ __('Estimated delivery-time between 15 - 20 working days (China) and 1 - 7 working days (Dubai)') }}
                         </p>
                     </div>
 

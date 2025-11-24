@@ -16,20 +16,15 @@
                                 'bg-[#FAA533]/10 dark:bg-[#FAA533]/20': notification.type === 'warning',
                                 'bg-red-100 dark:bg-red-900/20': notification.type === 'error'
                              }">
-                            <svg class="h-5 w-5" 
-                                 :class="{
-                                    'text-[#0BA6DF] dark:text-[#0BA6DF]': notification.type === 'info',
-                                    'text-[#10b981] dark:text-[#10b981]': notification.type === 'success',
-                                    'text-[#FAA533] dark:text-[#FAA533]': notification.type === 'warning',
-                                    'text-red-600 dark:text-red-400': notification.type === 'error'
-                                 }"
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path x-show="notification.type === 'info'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                <path x-show="notification.type === 'success'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                <path x-show="notification.type === 'warning'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                <path x-show="notification.type === 'error'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
+                                                         <svg class="h-5 w-5"
+                                                             :class="{
+                                                                'text-[#0BA6DF] dark:text-[#0BA6DF]': notification.type === 'info',
+                                                                'text-[#10b981] dark:text-[#10b981]': notification.type === 'success',
+                                                                'text-[#FAA533] dark:text-[#FAA533]': notification.type === 'warning',
+                                                                'text-red-600 dark:text-red-400': notification.type === 'error'
+                                                             }"
+                                                             fill="none" stroke="currentColor" viewBox="0 0 24 24" x-html="getNotificationIcon(notification.type)">
+                                                        </svg>                        </div>
                         <span x-show="!notification.read_at" 
                               class="absolute -top-1 -right-1 w-3 h-3 bg-[#EF7722] dark:bg-[#FAA533] rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
                     </div>

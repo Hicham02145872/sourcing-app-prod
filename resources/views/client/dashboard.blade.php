@@ -42,6 +42,28 @@
     <div class="py-25 bg-[#fffff] dark:bg-slate-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
+            {{-- Spam Folder Warning Banner (Minimalist & Dismissible) --}}
+            <div x-data="{ show: localStorage.getItem('spam_warning_dismissed') !== 'true' }" x-show="show" x-transition.opacity class="relative bg-orange-100 dark:bg-orange-900/20 rounded-lg shadow-sm mb-6 border border-orange-200 dark:border-orange-800 p-3">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 mt-0.5">
+                        <svg class="h-5 w-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-orange-800 dark:text-orange-300">
+                            {{ __('spam_warning_message') }}
+                        </p>
+                    </div>
+                    <button @click="show = false; localStorage.setItem('spam_warning_dismissed', 'true')" class="flex-shrink-0 -mt-1 -mr-1 p-1 rounded-md text-orange-600 hover:bg-orange-200 dark:text-orange-400 dark:hover:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        <span class="sr-only">{{ __('Dismiss') }}</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
             {{-- Watch Demo Banner --}}
             @if($socialMediaLinks && $socialMediaLinks->youtube_url)
             <div class="relative bg-gradient-to-r from-red-600 to-red-800 rounded-xl shadow-xl overflow-hidden mb-6 group">

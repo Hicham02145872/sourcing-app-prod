@@ -253,7 +253,7 @@
         </div>
 
 
-        <form method="POST" action="{{ route('logout') }}">
+        <form method="POST" action="{{ route('logout') }}" onsubmit="localStorage.removeItem('spam_warning_dismissed')">
             @csrf
             <button type="submit" class="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 border border-red-200 dark:border-red-500/20 hover:border-red-300 dark:hover:border-red-500/30 hover:translate-x-1 group">
                 <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

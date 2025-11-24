@@ -330,20 +330,23 @@
                     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
                 },
 
-                showToast(notification) {
-                    window.dispatchEvent(new CustomEvent('show-success-toast', { 
-                        detail: notification.notification?.title || 'Nouvelle notification' 
-                    }));
-                },
-
-                showSuccessToast(message) {
-                    window.dispatchEvent(new CustomEvent('show-success-toast', { detail: message }));
-                },
-
-                showErrorToast(message) {
-                    window.dispatchEvent(new CustomEvent('show-error-toast', { detail: message }));
-                },
-
+                                showToast(notification) {
+                                    const type = notification.notification?.type || 'default'; // Default to 'default' type if not specified
+                                    const message = notification.notification?.title || 'Nouvelle notification';
+                                    if (type === 'error' || type === 'warning') { // Consider 'warning' as an error for toast purposes
+                                        window.dispatchEvent(new CustomEvent('show-error-toast', { detail: message }));
+                                    } else {
+                                        window.dispatchEvent(new CustomEvent('show-success-toast', { detail: message }));
+                                    }
+                                },
+                
+                                showSuccessToast(message) {
+                                    window.dispatchEvent(new CustomEvent('show-success-toast', { detail: message }));
+                                },
+                
+                                showErrorToast(message) {
+                                    window.dispatchEvent(new CustomEvent('show-error-toast', { detail: message }));
+                                },
                 destroy() {
                     this.stopPolling();
                 }
@@ -475,9 +478,9 @@
                         <span>&copy; {{ date('Y') }} <strong>{{ config('app.name') }}</strong>. Tous droits réservés.</span>
                     </div>
                     <div class="flex items-center gap-6">
-                        <a href="#" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Confidentialité</a>
-                        <a href="#" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Conditions</a>
-                        <a href="#" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">Support</a>
+                        <a href="{{ route('privacy-policy') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">{{ __('Confidentialité') }}</a>
+                        <a href="{{ route('terms-of-service') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">{{ __('Conditions') }}</a>
+                        <a href="{{ route('support') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium">{{ __('Support') }}</a>
                     </div>
                 </div>
             </div>
@@ -488,4 +491,105 @@
     @if(auth()->user() && auth()->user()->role === 'client')
         <script src="//code.tidio.co/fcoeyvf3lyzubcu375ojfn87yy6zf6l1.js" async></script>
     @endif
+
+    {{-- Toast Notification Manager --}}
+    <div x-data="toastManager()" class="fixed inset-x-0 top-0 flex items-start justify-center px-4 py-6 pointer-events-none sm:p-6 sm:items-start sm:justify-end z-50">
+        <div class="w-full flex flex-col items-center space-y-4 sm:items-end">
+            <template x-for="toast in toasts" :key="toast.id">
+                <div
+                    x-show="toast.show"
+                    x-transition:enter="transform ease-out duration-300 transition"
+                    x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+                    x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="max-w-sm w-full shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
+                    :class="{
+                        'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700': toast.type === 'success',
+                        'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700': toast.type === 'error'
+                    }"
+                >
+                    <div class="p-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg x-show="toast.type === 'success'" class="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <svg x-show="toast.type === 'error'" class="h-6 w-6 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3 w-0 flex-1 pt-0.5">
+                                <p class="text-sm font-medium"
+                                    :class="{
+                                        'text-green-800 dark:text-green-200': toast.type === 'success',
+                                        'text-red-800 dark:text-red-200': toast.type === 'error'
+                                    }"
+                                    x-text="toast.message"></p>
+                            </div>
+                            <div class="ml-4 flex-shrink-0 flex">
+                                <button @click="removeToast(toast.id)"
+                                    class="rounded-md inline-flex focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                    :class="{
+                                        'bg-green-50 text-green-400 hover:text-green-500 focus:ring-green-500 dark:bg-green-900/20 dark:text-green-300 dark:hover:text-green-400': toast.type === 'success',
+                                        'bg-red-50 text-red-400 hover:text-red-500 focus:ring-red-500 dark:bg-red-900/20 dark:text-red-300 dark:hover:text-red-400': toast.type === 'error'
+                                    }"
+                                >
+                                    <span class="sr-only">Close</span>
+                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('toastManager', () => ({
+                toasts: [],
+                init() {
+                    window.addEventListener('show-success-toast', (event) => {
+                        this.addToast(event.detail, 'success');
+                    });
+                    window.addEventListener('show-error-toast', (event) => {
+                        this.addToast(event.detail, 'error');
+                    });
+                    // For status messages coming from Laravel's `with('status', ...)`
+                    @if(session('status'))
+                        this.addToast("{{ session('status') }}", 'success');
+                    @endif
+                    @if(session('error'))
+                        this.addToast("{{ session('error') }}", 'error');
+                    @endif
+                },
+                addToast(message, type) {
+                    const id = Date.now();
+                    this.toasts.push({
+                        id: id,
+                        message: message,
+                        type: type,
+                        show: true
+                    });
+                    setTimeout(() => this.removeToast(id), 5000); // Auto-remove after 5 seconds
+                },
+                removeToast(id) {
+                    this.toasts = this.toasts.map(toast => {
+                        if (toast.id === id) {
+                            toast.show = false; // Trigger leave transition
+                        }
+                        return toast;
+                    });
+                    setTimeout(() => {
+                        this.toasts = this.toasts.filter(toast => toast.id !== id);
+                    }, 300); // Remove from DOM after transition
+                }
+            }));
+        });
+    </script>
 </body>

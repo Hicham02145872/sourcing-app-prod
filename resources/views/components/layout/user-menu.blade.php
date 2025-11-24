@@ -56,7 +56,7 @@
 
             {{-- Logout Section --}}
             <div class="border-t border-[#EBEBEB] dark:border-slate-700">
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout') }}" onsubmit="localStorage.removeItem('spam_warning_dismissed')">
                     @csrf
                     <button type="submit" 
                             class="flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 group">
