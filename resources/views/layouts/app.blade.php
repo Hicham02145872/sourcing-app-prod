@@ -6,6 +6,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ isset($title) ? $title . ' - ' . config('app.name', 'Laravel') : config('app.name', 'Laravel') }}</title>
 
+    @props([
+        'adminSourcingRequestCount' => 0,
+        'clientQuotationCount' => 0,
+    ])
+
+
     <link rel="icon" href="{{ asset('images/logo5.jpg') }}">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
@@ -458,7 +464,7 @@
 </head>
 
 <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900" x-data="{ sidebarOpen: false }" x-cloak>
-    <x-sidebar :role="auth()->user()->role ?? 'client'" />
+    <x-sidebar :role="auth()->user()->role ?? 'client'" :adminSourcingRequestCount="$adminSourcingRequestCount ?? 0" :clientQuotationCount="$clientQuotationCount ?? 0" />
 
     <x-layout.header />
     <div class="lg:ml-72 pt-20 flex flex-col flex-1">
