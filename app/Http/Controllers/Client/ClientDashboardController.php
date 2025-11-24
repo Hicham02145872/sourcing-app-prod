@@ -43,8 +43,6 @@ class ClientDashboardController extends Controller
         $sourcingRequests = $query->latest()->paginate(3)->withQueryString();
         
         $totalClientQuotations = $user->quotations()->count();
-        // Temporarily dump the value to debug
-        dd($totalClientQuotations); // THIS LINE IS NOW UNCOMMENTED
         $categories = Category::all();
 
         return view('client.dashboard', compact('sourcingRequests', 'totalClientQuotations', 'categories'));
