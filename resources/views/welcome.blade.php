@@ -4,7 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FastSourcingBrothers – Global B2B Sourcing Partner</title>
-    <link rel="icon" href="{{ asset('images/logo5.jpg') }}">
+    
+    <!-- Favicons & Icons -->
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo5.jpg') }}">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ asset('images/logo5.jpg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo5.jpg') }}">
 
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
