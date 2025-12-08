@@ -204,7 +204,7 @@
                     <div class="text-center lg:text-left reveal">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100 text-red-700 text-xs font-bold uppercase tracking-wide mb-6">
                             <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                            Trusted by 200+ Clients
+                            Trusted by 200+ 
                         </div>
 
                         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
@@ -481,9 +481,9 @@
 
                     <div class="flex flex-col gap-4 text-sm">
                         <h4 class="font-bold text-slate-900">Contact</h4>
-                        <a href="mailto:contact@fastsourcingbrothers.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
+                        <a href="mailto:fastsourcingbrothers@gmail.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            contact@fastsourcingbrothers.com
+                            fastsourcingbrothers@gmail.com
                         </a>
                         <a href="tel:+212646522071" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
