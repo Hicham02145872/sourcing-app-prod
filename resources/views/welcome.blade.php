@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="icon" href="{{ asset('images/logo5.jpg') }}">
-    <title>SourceHub - Simplify Your Sourcing Process</title>
+    <title>FastSourcingBrothers - Simplify Your Sourcing Process</title>
     
     <!-- Font: Inter (Standard Pro moderne) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -159,7 +159,7 @@
                 <!-- Logo -->
                 <a href="/" class="flex-shrink-0 flex items-center gap-2">
                     <img class="h-10 w-auto" src="{{ asset('images/logo1.png') }}" alt="{{ config('app.name') }}">
-                    <span class="font-bold text-lg tracking-tight hidden sm:block">SourceHub</span>
+                    <span class="font-bold text-lg tracking-tight hidden sm:block">FastSourcingBrothers</span>
                 </a>
 
                 <!-- Desktop Menu -->
@@ -204,7 +204,7 @@
                     <div class="text-center lg:text-left reveal">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100 text-red-700 text-xs font-bold uppercase tracking-wide mb-6">
                             <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                            Trusted by 200+ Businesses
+                            Trusted by 200+ Clients
                         </div>
 
                         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
