@@ -7,6 +7,8 @@ use App\Events\QuotationCreated;
 use App\Events\QuotationRejected;
 use App\Events\SourcingOrderStatusChanged;
 use App\Events\SourcingRequestStatusChanged;
+use App\Events\UserRegistered;
+use App\Listeners\SendQueuedVerificationEmail;
 use App\Listeners\SendQuotationAcceptedNotification;
 use App\Listeners\SendQuotationCreatedNotification;
 use App\Listeners\SendQuotationRejectedNotification;
@@ -26,6 +28,9 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
+        UserRegistered::class => [
+            SendQueuedVerificationEmail::class,
+        ],
         QuotationCreated::class => [
             UpdateSourcingRequestStatusOnQuotationCreated::class,
             SendQuotationCreatedNotification::class,
