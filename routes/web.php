@@ -16,9 +16,7 @@ use Illuminate\Http\Request;
 
 Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
-// Super Admin Initial Registration Route
-Route::get('/super-admin-init/register', [App\Http\Controllers\Admin\SuperAdminController::class, 'createSuperAdminRegistrationForm'])->name('super-admin.register-form');
-Route::post('/super-admin-init/register', [App\Http\Controllers\Admin\SuperAdminController::class, 'registerSuperAdmin'])->name('super-admin.register');
+
 
 Route::get('/', function () {
     $contents = WelcomePageContent::all()->keyBy('key');
@@ -64,8 +62,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::get('/social-media-links', [SocialMediaLinkController::class, 'edit'])->name('social-media-links.edit');
     Route::put('/social-media-links', [SocialMediaLinkController::class, 'update'])->name('social-media-links.update');
     
-    Route::get('/welcome-content', [WelcomePageContentController::class, 'index'])->name('welcome-content.index');
-    Route::post('/welcome-content', [WelcomePageContentController::class, 'update'])->name('welcome-content.update');
+
 
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
 

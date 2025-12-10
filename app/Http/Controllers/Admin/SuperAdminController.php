@@ -15,39 +15,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SuperAdminController extends Controller
 {
-    /**
-     * Display the form for initial super admin registration.
-     */
-    public function createSuperAdminRegistrationForm(): View
-    {
-        return view('admin.super-admin.register');
-    }
 
-    /**
-     * Handle an incoming super admin registration request.
-     */
-    public function registerSuperAdmin(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'super_admin',
-            'email_verified_at' => now(), // Super Admin email is verified on creation
-        ]);
-        
-        $user->markEmailAsVerified(); // Mark email as verified in the session
-
-        Auth::login($user);
-
-        return redirect()->route('admin.dashboard')->with('status', 'Super Admin created and logged in!');
-    }
     /**
      * Display the admin creation form.
      */

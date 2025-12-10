@@ -12,12 +12,38 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::create([
-            'name' => 'Hicham Altit',
-            'email' => 'mehdi@gmail.com',
-            'password' => \Illuminate\Support\Facades\Hash::make('Hicham2334'),
-            'role' => 'super_admin',
-            'email_verified_at' => now(),
-        ]);
+        // Delete the old super admin if exists
+        \App\Models\User::where('email', 'mehdi@gmail.com')->delete();
+
+        // Add new super admins
+        \App\Models\User::updateOrCreate(
+            ['email' => 'fastsourcingbrothers2@gmail.com'],
+            [
+                'name' => 'Super Admin 1',
+                'password' => \Illuminate\Support\Facades\Hash::make('MOHAMMED12345'),
+                'role' => 'super_admin',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        \App\Models\User::updateOrCreate(
+            ['email' => 'fastsourcingbrothers1@gmail.com'],
+            [
+                'name' => 'Super Admin 2',
+                'password' => \Illuminate\Support\Facades\Hash::make('MOHAMMED12345'),
+                'role' => 'super_admin',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        \App\Models\User::updateOrCreate(
+            ['email' => 'contact@fastsourcingbrothers.com'],
+            [
+                'name' => 'Super Admin Contact',
+                'password' => \Illuminate\Support\Facades\Hash::make('contact@fastsourcingbrothers.com'),
+                'role' => 'super_admin',
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }

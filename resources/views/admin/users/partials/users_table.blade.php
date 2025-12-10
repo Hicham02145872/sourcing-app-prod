@@ -36,6 +36,20 @@
                                         </span>
                                     </td>
 
+                                    <td class="px-8 py-5 text-sm text-gray-600 dark:text-gray-400">
+                                        {{ $user->created_at->format('d M Y') }}
+                                    </td>
+                                    <td class="px-8 py-5 text-right text-sm font-medium">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user and all their associated data (sourcing requests, quotations, orders)?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 transition-colors">
+                                                    {{ __('Delete') }}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
