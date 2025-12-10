@@ -165,51 +165,7 @@
             @endif
         </nav>
 
-        {{-- Notification Center --}}
-        <div class="mx-3 mb-4 mt-2" x-data="notificationCenter" x-init="init()">
-            <div class="bg-[#FAA533]/10 dark:bg-[#FAA533]/10 rounded-lg p-4 border border-[#FAA533]/30 dark:border-[#FAA533]/20">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 bg-[#EF7722] dark:bg-[#EF7722] rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Notifications') }}</h3>
-                    </div>
-                    <span x-show="unreadCount > 0" class="bg-[#EF7722] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center" x-text="unreadCount > 9 ? '9+' : unreadCount"></span>
-                </div>
-                
-                <div class="space-y-2" x-show="!loading && notifications.length > 0">
-                    <template x-for="notification in notifications.slice(0, 3)" :key="notification.id">
-                        <div class="bg-white dark:bg-slate-800 rounded-lg p-3 border border-[#FAA533]/20 dark:border-[#FAA533]/10 hover:border-[#FAA533]/40 dark:hover:border-[#FAA533]/30 transition-colors cursor-pointer">
-                            <a :href="notification.click_action || '#'" @click.prevent="markAsRead(notification.id, notification.click_action)">
-                                <div class="flex items-start gap-2">
-                                    <div x-show="!notification.read_at" class="w-2 h-2 bg-[#EF7722] rounded-full mt-1.5 flex-shrink-0"></div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-900 dark:text-white" x-text="notification.title"></p>
-                                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5 line-clamp-1" x-text="notification.body"></p>
-                                        <p class="text-xs text-slate-500 dark:text-slate-500 mt-1" x-text="formatDate(notification.created_at)"></p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </template>
-                </div>
 
-                <div x-show="!loading && notifications.length === 0" class="text-center py-4">
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('No new notifications') }}</p>
-                </div>
-
-                <div x-show="loading" class="text-center py-4">
-                    <div class="inline-block w-4 h-4 border-2 border-[#FAA533]/30 border-t-[#EF7722] dark:border-[#FAA533]/20 dark:border-t-[#FAA533] rounded-full animate-spin"></div>
-                </div>
-
-                <a href="{{ route('notifications.index') }}" class="w-full mt-3 px-3 py-2 text-xs font-semibold text-[#EF7722] dark:text-[#FAA533] hover:bg-[#FAA533]/10 dark:hover:bg-[#FAA533]/10 rounded-lg transition-colors text-center block border border-[#EF7722]/30 dark:border-[#FAA533]/20">
-                    {{ __('View All Notifications') }}
-                </a>
-            </div>
-        </div>
     </div>
 
     {{-- Footer / User Info & Logout --}}
@@ -309,62 +265,3 @@
         overflow: hidden;
     }
 </style>
-
-@push('scripts')
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('notificationCenter', () => ({
-            notifications: [],
-            unreadCount: 0,
-            loading: true,
-            error: null,
-
-            async init() {
-                await this.fetchNotifications();
-                // Optionally, set up polling for new notifications
-                // setInterval(() => this.fetchNotifications(), 60000);
-            },
-
-            async fetchNotifications() {
-                this.loading = true;
-                try {
-                    const response = await fetch('{{ route("notifications.index") }}', {
-                    const data = await response.json();
-                    this.notifications = data.notifications.data;
-                    this.unreadCount = data.notifications.data.filter(n => !n.read_at).length;
-                } catch (error) {
-                    console.error('Error fetching notifications:', error);
-                } finally {
-                    this.loading = false;
-                }
-            },
-
-            async markAsRead(notificationId, clickAction) {
-                try {
-                    await fetch(`/notifications/${notificationId}/read`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    });
-                    this.notifications = this.notifications.map(n => 
-                        n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
-                    );
-                    this.unreadCount = this.notifications.filter(n => !n.read_at).length;
-                    if (clickAction) {
-                        window.location.href = clickAction;
-                    }
-                } catch (error) {
-                    console.error('Error marking notification as read:', error);
-                }
-            },
-
-            formatDate(dateString) {
-                const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
-                return new Date(dateString).toLocaleDateString(undefined, options);
-            }
-        }));
-    });
-</script>
-@endpush

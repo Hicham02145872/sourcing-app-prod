@@ -21,7 +21,7 @@ class CategoryController extends Controller
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        $categories = $query->paginate(10); // Paginate with 10 categories per page
+        $categories = $query->orderBy('created_at', 'desc')->paginate(10); // Paginate with 10 categories per page
 
         return view('admin.categories.index', compact('categories'));
     }

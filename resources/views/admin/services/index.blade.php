@@ -8,20 +8,7 @@
                     </h2>
                     <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5">{{ __('Manage your service catalog and offerings') }}</p>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        {{ __('Export') }}
-                    </button>
-                    <a href="{{ route('admin.services.create') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        {{ __('Add Service') }}
-                    </a>
-                </div>
+
             </div>
         </div>
     </x-slot>
@@ -34,7 +21,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Total Services') }}</p>
-                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $services->count() }}</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $services->total() }}</p>
                         </div>
                         <div class="w-10 h-10 bg-[#EF7722]/10 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-[#EF7722] dark:text-[#FAA533]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +35,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('Active Services') }}</p>
-                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $services->count() }}</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{{ $services->total() }}</p>
                         </div>
                         <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,6 +82,16 @@
                     </div>
                 </div>
             @endif
+
+            <!-- Add Service Button -->
+            <div class="flex justify-end mb-6">
+                <a href="{{ route('admin.services.create') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    {{ __('Add Service') }}
+                </a>
+            </div>
 
             <!-- Search Card -->
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">

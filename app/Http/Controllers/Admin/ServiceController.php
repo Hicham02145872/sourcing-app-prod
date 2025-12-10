@@ -21,7 +21,7 @@ class ServiceController extends Controller
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        $services = $query->paginate(10);
+        $services = $query->orderBy('created_at', 'desc')->paginate(10);
 
         return view('admin.services.index', compact('services'));
     }
