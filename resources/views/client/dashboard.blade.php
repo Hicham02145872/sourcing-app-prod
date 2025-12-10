@@ -42,45 +42,97 @@
     <div class="py-25 bg-[#fffff] dark:bg-slate-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
-            {{-- Spam Folder Warning Banner (Minimalist & Dismissible) --}}
-            <div x-data="{ show: localStorage.getItem('spam_warning_dismissed') !== 'true' }" x-show="show" x-transition.opacity class="relative bg-orange-100 dark:bg-orange-900/20 rounded-lg shadow-sm mb-6 border border-orange-200 dark:border-orange-800 p-3">
-                <div class="flex items-start gap-3">
-                    <div class="flex-shrink-0 mt-0.5">
-                        <svg class="h-5 w-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
+            {{-- IMPROVED SPAM FOLDER WARNING BANNER --}}
+            {{-- High visibility: Amber background, thick left border, shadow --}}
+            <div x-data="{ show: localStorage.getItem('spam_warning_dismissed') !== 'true' }" 
+                 x-show="show" 
+                 x-transition:leave="transition ease-in duration-300"
+                 x-transition:leave-start="opacity-100 transform scale-100"
+                 x-transition:leave-end="opacity-0 transform scale-95"
+                 class="relative bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded-r-lg shadow-md mb-8 p-4 sm:p-5">
+                
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                        {{-- Animated Pulse Icon --}}
+                        <span class="relative flex h-6 w-6">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-6 w-6 bg-amber-100 dark:bg-amber-800 items-center justify-center">
+                              <svg class="h-4 w-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                              </svg>
+                          </span>
+                        </span>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-orange-800 dark:text-orange-300">
+                    <div class="flex-1 min-w-0 pt-0.5">
+                        <h3 class="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">
+                            {{ __('Important: Check your Email') }}
+                        </h3>
+                        <p class="text-sm text-amber-700 dark:text-amber-400 leading-relaxed">
                             {{ __('spam_warning_message') }}
                         </p>
                     </div>
-                    <button @click="show = false; localStorage.setItem('spam_warning_dismissed', 'true')" class="flex-shrink-0 -mt-1 -mr-1 p-1 rounded-md text-orange-600 hover:bg-orange-200 dark:text-orange-400 dark:hover:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                    <button @click="show = false; localStorage.setItem('spam_warning_dismissed', 'true')" 
+                            class="flex-shrink-0 -mt-1 -mr-1 p-1.5 bg-amber-100 dark:bg-amber-800/50 hover:bg-amber-200 dark:hover:bg-amber-800 rounded-lg text-amber-600 dark:text-amber-400 transition-colors duration-200 group"
+                            title="{{ __('Don\'t show this again') }}">
                         <span class="sr-only">{{ __('Dismiss') }}</span>
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <svg class="h-5 w-5 transform group-hover:rotate-90 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
             </div>
 
-            {{-- Watch Demo Banner --}}
+            {{-- IMPROVED WATCH DEMO BANNER --}}
+            {{-- High visibility: YouTube Red Gradient, Play Button Watermark, Call to Action --}}
             @if($socialMediaLinks && $socialMediaLinks->youtube_url)
-            <div class="relative bg-gradient-to-r from-red-600 to-red-800 rounded-xl shadow-xl overflow-hidden mb-6 group">
-                <div class="absolute inset-0 bg-grid-white/[0.05] bg-[size:16px_16px]"></div>
-                <div class="relative p-4 flex items-center justify-between flex-wrap gap-4">
+            <div x-data="{ show: localStorage.getItem('youtube_demo_dismissed') !== 'true' }" 
+                 x-show="show" 
+                 x-transition:leave="transition ease-in duration-300"
+                 x-transition:leave-start="opacity-100 transform translate-y-0"
+                 x-transition:leave-end="opacity-0 transform -translate-y-4"
+                 class="relative bg-gradient-to-br from-[#FF0000] to-[#C4302B] rounded-xl shadow-lg shadow-red-500/20 overflow-hidden mb-8 group">
+                
+                {{-- Decorative background elements --}}
+                <div class="absolute inset-0 bg-grid-white/[0.1] bg-[size:20px_20px]"></div>
+                <div class="absolute -right-6 -bottom-6 text-white/10 transform rotate-12 pointer-events-none">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
+                    </svg>
+                </div>
+
+                <div class="relative px-6 py-5 flex items-center justify-between flex-wrap gap-5">
                     <div class="flex-1 min-w-0">
-                        <p class="text-base font-semibold text-white">
-                            {{ __('New to our platform? Watch a quick demo to get started!') }}
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/20 text-white backdrop-blur-sm">
+                                {{ __('Tutorial') }}
+                            </span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">
+                            {{ __('New to our platform?') }}
+                        </h3>
+                        <p class="text-red-100 text-sm font-medium">
+                            {{ __('Watch a quick 2-minute demo to learn how to source products efficiently.') }}
                         </p>
                     </div>
-                    <a href="{{ $socialMediaLinks->youtube_url }}" target="_blank" rel="noopener noreferrer"
-                       class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-700 bg-white hover:bg-red-100 rounded-lg shadow-md transition-all duration-200 flex-shrink-0 transform group-hover:scale-105">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
-                        </svg>
-                        {{ __('Watch Demo') }}
-                    </a>
+                    
+                    <div class="flex items-center gap-3">
+                        <a href="{{ $socialMediaLinks->youtube_url }}" target="_blank" rel="noopener noreferrer"
+                           class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-[#C4302B] bg-white hover:bg-red-50 rounded-full shadow-lg transition-all duration-200 transform hover:scale-105">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
+                            </svg>
+                            {{ __('Watch Demo') }}
+                        </a>
+                        
+                        <button @click="show = false; localStorage.setItem('youtube_demo_dismissed', 'true')"
+                                class="p-2 rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-600 focus:ring-white"
+                                title="{{ __('Dismiss') }}">
+                            <span class="sr-only">{{ __('Dismiss') }}</span>
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             @endif
