@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\WelcomePageContent;
+
 use App\Http\Controllers\Admin\WelcomePageContentController;
 use App\Http\Controllers\Admin\SocialMediaLinkController;
 use App\Http\Controllers\Client\ClientDashboardController;
@@ -19,8 +19,7 @@ Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('la
 
 
 Route::get('/', function () {
-    $contents = WelcomePageContent::all()->keyBy('key');
-    return view('welcome', compact('contents'));
+    return view('welcome');
 });
 
 // Public static pages
