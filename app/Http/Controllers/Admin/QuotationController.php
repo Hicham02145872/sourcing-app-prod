@@ -80,16 +80,40 @@ class QuotationController extends Controller
     public function store(Request $request, Messaging $messaging): RedirectResponse
     {
         $this->authorize('create', Quotation::class);
+        
         $validated = $request->validate([
             'sourcing_request_id' => 'required|exists:sourcing_requests,id',
-            'unit_price' => 'required|numeric',
-            'commission_service' => 'required|numeric',
-            'unit_weight' => 'required|numeric',
-            'delivery_cost_china' => 'required|numeric',
+            'unit_price' => 'required|numeric|min:0',
+            'commission_service' => 'required|numeric|min:0',
+            'unit_weight' => 'required|numeric|min:0',
+            'delivery_cost_china' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
         ]);
 
-        $amount = $validated['unit_price'] + $validated['commission_service'] + $validated['delivery_cost_china'];
+        // Get the sourcing request and load its destinations
+        $sourcingRequest = SourcingRequest::with('destinations')->findOrFail($validated['sourcing_request_id']);
+
+        // Calculate total quantity from all destinations
+        $totalQuantity = $sourcingRequest->destinations->sum('quantity');
+        
+        // Ensure totalQuantity is at least 1 (or 0 if an empty request should result in 0 total)
+        // Assuming at least one destination with quantity > 0 is required by validation.
+        $totalQuantity = max(1, $totalQuantity);
+        
+        // Calculate total amount: (unit_price * totalQuantity) + commission + delivery
+        $subtotal = $validated['unit_price'] * $totalQuantity;
+        $amount = $subtotal + $validated['commission_service'] + $validated['delivery_cost_china'];
+
+        // Debug log
+        Log::info('Quotation Calculation', [
+            'unit_price' => $validated['unit_price'],
+            'quantity' => $totalQuantity,
+            'subtotal' => $subtotal,
+            'commission_service' => $validated['commission_service'],
+            'delivery_cost_china' => $validated['delivery_cost_china'],
+            'total_amount' => $amount,
+            'currency' => $validated['currency']
+        ]);
 
         $quotation = Quotation::create([
             'sourcing_request_id' => $validated['sourcing_request_id'],
