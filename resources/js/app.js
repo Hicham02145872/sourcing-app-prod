@@ -1,12 +1,16 @@
 import './bootstrap';
-
-import Alpine from 'alpinejs';
 import Chart from 'chart.js/auto';
 
-window.Alpine = Alpine;
 window.Chart = Chart;
 
-Alpine.start();
+
+
+// En Livewire 3, Alpine est déjà disponible globalement ou via Livewire.
+// On attend que Livewire soit prêt pour s'assurer que Alpine est disponible.
+document.addEventListener('livewire:init', () => {
+    // Si vous avez besoin d'accéder à Alpine :
+    // window.Alpine = Livewire.Alpine;
+});
 
 // --- Global Loading Spinner Logic ---
 let activeRequests = 0;

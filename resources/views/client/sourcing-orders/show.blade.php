@@ -3,37 +3,38 @@
     ['label' => __('Sourcing Orders'), 'url' => route('client.sourcing-orders.index')],
     ['label' => __('Details')]
 ]">
-    <x-slot name="header">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-[#EF7722] rounded-lg flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                                {{ __('Order Details') }}
-                            </h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Order') }} #{{ $sourcingOrder->id }}</p>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ route('client.sourcing-orders.index') }}" 
-                   class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    {{ __('Back to Orders') }}
-                </a>
-            </div>
-        </div>
-    </x-slot>
+    
 
-    <div class="py-25 bg-[#fffff] dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7px mx-auto px-4 sm:px-6 lg:px-4">
+    <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
+            
+            @if (session('success'))
+                <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-medium shadow-sm">
+                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-medium shadow-sm">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg shadow-sm">
+                    <div class="px-4 py-2 border-b border-red-200 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span class="text-xs font-bold uppercase tracking-wider">{{ __('Validation Errors') }}</span>
+                    </div>
+                    <ul class="px-4 py-3 list-disc list-inside text-sm font-medium">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             
             {{-- Status Banner --}}
             @php
@@ -74,7 +75,39 @@
                 {{-- Main Content --}}
                 <div class="lg:col-span-2 space-y-6">
                     
+
+                    {{-- Tracking Information --}}
+                    @if($sourcingOrder->tracking_number)
+                        <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden mb-6">
+                            <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700 flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                     <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Tracking Information') }}</h3>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Track your shipment status') }}</p>
+                                    </div>
+                                </div>
+                                 <a href="{{ route('client.tracking.index', ['number' => $sourcingOrder->tracking_number]) }}" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-lg transition-colors">
+                                    {{ __('Track Order') }}
+                                </a>
+                            </div>
+                            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Tracking Number') }}</p>
+                                    <p class="text-lg font-mono font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->tracking_number }}</p>
+                                </div>
+                                 <div>
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Carrier') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->tracking_carrier ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Product Information --}}
+
                     <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -160,6 +193,43 @@
                         </div>
                     </div>
 
+                    {{-- Quality Control Media --}}
+                    @if($sourcingOrder->media->count() > 0)
+                        <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden transform transition-all hover:shadow-md">
+                            <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Quality Control Media') }}</h3>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Photos and videos from product inspection') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                    @foreach($sourcingOrder->media as $media)
+                                        <div class="relative group rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 aspect-square cursor-pointer transform transition-transform hover:scale-[1.02]" onclick="openMediaModal('{{ asset('storage/' . $media->file_path) }}', '{{ $media->file_type }}')">
+                                            @if($media->file_type === 'video')
+                                                <video src="{{ asset('storage/' . $media->file_path) }}" class="w-full h-full object-cover"></video>
+                                                <div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+                                                    <svg class="w-12 h-12 text-white opacity-90 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                </div>
+                                                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/70 text-white text-[10px] font-bold rounded uppercase tracking-wider">Video</span>
+                                            @else
+                                                <img src="{{ asset('storage/' . $media->file_path) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Quotation Details --}}
                     <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700">
@@ -188,7 +258,7 @@
                                     </div>
                                     <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Weight') }}</p>
-                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('g') }}</span></p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingOrder->quotation->weight_unit ?? __('g') }}</span></p>
                                     </div>
                                     <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Local Delivery') }}</p>
@@ -418,7 +488,6 @@
                                 </span>
                             </div>
 
-                            {{-- Grand Total --}}
                             <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
                                 <div class="p-5 bg-gradient-to-br from-[#EF7722] to-[#FAA533] rounded-lg shadow-sm">
                                     <div class="text-center">
@@ -428,6 +497,34 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {{-- Refund proof download link moved to the dedicated Refund Status page as per user request --}}
+
+                            @php
+                                $lastRefundRequest = $sourcingOrder->refundRequests()->latest()->first();
+                            @endphp
+
+                            @if($lastRefundRequest)
+                                <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
+                                    <a href="{{ route('client.refund-requests.show', $lastRefundRequest) }}" 
+                                       class="w-full py-2.5 px-4 bg-amber-50 text-amber-600 hover:bg-amber-100 dark:bg-amber-900/10 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        {{ __('View Refund Status') }}
+                                    </a>
+                                </div>
+                            @elseif(in_array($sourcingOrder->status, ['paid', 'delivered', 'order_completed']))
+                                <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
+                                    <button type="button" @click="$dispatch('open-modal', 'refund-request-modal')" 
+                                            class="w-full py-2.5 px-4 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 border border-red-200 dark:border-red-900/30 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                                        </svg>
+                                        {{ __('Request Refund') }}
+                                    </button>
+                                </div>
+                            @endif
 
                             <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
                                 <div class="text-center text-xs text-slate-500 dark:text-slate-400 space-y-1">
@@ -442,6 +539,59 @@
             </div>
         </div>
     </div>
+
+    <!-- Media Modal -->
+    <div id="mediaModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity duration-300" onclick="closeMediaModal()">
+        <button class="absolute top-4 right-4 text-white/70 hover:text-white z-[110] transition-colors bg-white/10 hover:bg-white/20 rounded-full p-2" onclick="closeMediaModal()">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div class="max-w-7xl max-h-[95vh] p-2 relative flex items-center justify-center" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl hidden object-contain">
+            <video id="modalVideo" src="" controls class="max-w-full max-h-[90vh] rounded-lg shadow-2xl hidden bg-black border border-slate-800"></video>
+        </div>
+    </div>
+
+    <script>
+        function openMediaModal(url, type) {
+            const modal = document.getElementById('mediaModal');
+            const img = document.getElementById('modalImage');
+            const vid = document.getElementById('modalVideo');
+            
+            modal.classList.remove('hidden');
+            // Small trigger animation or opacity fade could be added here
+            
+            if (type === 'video') {
+                img.classList.add('hidden');
+                vid.src = url;
+                vid.classList.remove('hidden');
+                // Auto play if desired
+                // vid.play(); 
+            } else {
+                vid.classList.add('hidden');
+                vid.pause();
+                img.src = url;
+                img.classList.remove('hidden');
+            }
+        }
+        
+        function closeMediaModal() {
+            const modal = document.getElementById('mediaModal');
+            const vid = document.getElementById('modalVideo');
+            const img = document.getElementById('modalImage');
+            
+            modal.classList.add('hidden');
+            vid.pause();
+            vid.src = '';
+            img.src = '';
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeMediaModal();
+            }
+        });
+    </script>
 
     <style>
         /* Custom scrollbar styling */
@@ -477,6 +627,128 @@
             transition-duration: 150ms;
         }
     </style>
+
+    {{-- Enhanced Refund Request Modal --}}
+    <x-modal name="refund-request-modal" :show="false" focusable>
+        <div class="relative overflow-hidden">
+            <!-- Decorative Background Element -->
+            <div class="absolute -right-8 -top-8 w-32 h-32 bg-red-500/10 rounded-full blur-3xl"></div>
+            
+            <div class="p-8">
+                <!-- Modal Header -->
+                <div class="flex items-center gap-4 mb-10">
+                    <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-200 dark:shadow-none">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ __('Request Refund') }}</h2>
+                        <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 mt-1 leading-relaxed max-w-sm">{{ __('Submit your claim with details and evidence for our support team to review.') }}</p>
+                    </div>
+                </div>
+
+                <form action="{{ route('client.sourcing-orders.refund-request', $sourcingOrder) }}" method="POST" enctype="multipart/form-data" class="space-y-8" x-data="{ type: 'full', fileName: '' }">
+                    @csrf
+                    
+                    <!-- Refund Type Selection -->
+                    <div class="space-y-4">
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Refund Type') }}</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <label class="relative flex p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 group" :class="type === 'full' ? 'border-[#EF7722] bg-[#EF7722]/5 shadow-md shadow-[#EF7722]/10 ring-4 ring-[#EF7722]/5' : 'border-[#EBEBEB] dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-[#EF7722]'">
+                                <input type="radio" name="type" value="full" class="hidden" x-model="type">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors" :class="type === 'full' ? 'bg-[#EF7722] text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 group-hover:bg-[#EF7722]/20 group-hover:text-[#EF7722]'">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-black transition-colors" :class="type === 'full' ? 'text-[#EF7722]' : 'text-slate-900 dark:text-white'">{{ __('Full Refund') }}</span>
+                                        <span class="text-[11px] font-medium text-slate-500 mt-0.5">{{ __('Recover 100% of order cost') }}</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="relative flex p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 group" :class="type === 'partial' ? 'border-[#EF7722] bg-[#EF7722]/5 shadow-md shadow-[#EF7722]/10 ring-4 ring-[#EF7722]/5' : 'border-[#EBEBEB] dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-[#EF7722]'">
+                                <input type="radio" name="type" value="partial" class="hidden" x-model="type">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors" :class="type === 'partial' ? 'bg-[#EF7722] text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 group-hover:bg-[#EF7722]/20 group-hover:text-[#EF7722]'">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m.599-1c.51-.598.401-1.571 0-2.599M12 16h.01"/></svg>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-black transition-colors" :class="type === 'partial' ? 'text-[#EF7722]' : 'text-slate-900 dark:text-white'">{{ __('Partial Refund') }}</span>
+                                        <span class="text-[11px] font-medium text-slate-500 mt-0.5">{{ __('Specify a custom amount') }}</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Amount Input (Conditional) -->
+                    <div x-show="type === 'partial'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-3">
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Requested Amount') }} ({{ $sourcingOrder->quotation->currency }})</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <span class="text-slate-400 font-bold">$</span>
+                            </div>
+                            <input type="number" name="amount_requested" step="0.01" min="0" max="{{ $sourcingOrder->quotation->amount }}" class="block w-full pl-10 pr-4 py-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-[#EF7722]/10 focus:border-[#EF7722] font-black text-xl text-slate-900 dark:text-white transition-all outline-none" placeholder="0.00">
+                        </div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{{ __('Maximum allowed') }}: <span class="text-[#EF7722]">{{ number_format($sourcingOrder->quotation->amount, 2) }}</span></p>
+                    </div>
+
+                    <!-- Category & Description -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1 space-y-3">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Category') }}</label>
+                            <select name="reason_category" required class="w-full bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-100 dark:border-slate-800 rounded-2xl py-4 px-4 focus:ring-4 focus:ring-[#EF7722]/10 focus:border-[#EF7722] font-black text-sm text-slate-900 dark:text-white transition-all outline-none appearance-none">
+                                <option value="">{{ __('Reason...') }}</option>
+                                <option value="Damaged Product">{{ __('Damaged Product') }}</option>
+                                <option value="Wrong Item">{{ __('Wrong Item') }}</option>
+                                <option value="Poor Quality">{{ __('Poor Quality') }}</option>
+                                <option value="Shipping Delay">{{ __('Shipping Delay') }}</option>
+                                <option value="Quantity Issue">{{ __('Quantity Issue') }}</option>
+                                <option value="Other">{{ __('Other') }}</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2 space-y-3">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Details') }}</label>
+                            <textarea name="reason_description" rows="1" required class="w-full bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-100 dark:border-slate-800 rounded-2xl py-4 px-4 focus:ring-4 focus:ring-[#EF7722]/10 focus:border-[#EF7722] font-medium text-sm text-slate-900 dark:text-white transition-all outline-none" placeholder="{{ __('Explain the problem in detail...') }}"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced File Upload -->
+                    <div class="space-y-4">
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Evidence Portfolio') }}</label>
+                        <div class="relative">
+                            <input type="file" name="evidence[]" multiple accept="image/*,video/*" 
+                                @change="fileName = $event.target.files.length + ' files selected'"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl p-10 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-900/30 transition-all group-hover:border-[#EF7722] group-hover:bg-[#EF7722]/5">
+                                <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <svg class="w-8 h-8 text-slate-400 group-hover:text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                </div>
+                                <p class="text-[13px] font-black text-slate-900 dark:text-white mb-1" x-text="fileName || '{{ __('Drop photos or videos here') }}'"></p>
+                                <p class="text-[11px] font-medium text-slate-400 italic">Maximize claim approval by attaching clear media proof</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                             <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-[10px] font-black uppercase tracking-wider">{{ __('Max 50MB/file') }}</span>
+                             <span class="px-3 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-full text-[10px] font-black uppercase tracking-wider">{{ __('Multiple Files Allowed') }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-6 mt-10 border-t border-slate-100 dark:border-slate-800">
+                        <button type="button" @click="$dispatch('close-modal', 'refund-request-modal')" class="w-full sm:w-auto px-8 py-4 text-[11px] font-black text-slate-400 hover:text-slate-900 dark:hover:text-white uppercase tracking-widest transition-colors">
+                            {{ __('Dismiss') }}
+                        </button>
+                        <button type="submit" class="w-full sm:w-auto px-10 py-4 bg-slate-900 dark:bg-[#EF7722] hover:bg-black dark:hover:bg-[#FAA533] text-white text-[11px] font-black rounded-2xl shadow-xl transition-all duration-300 uppercase tracking-[0.2em] transform hover:-translate-y-1 active:scale-95">
+                            {{ __('Submit Claim') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </x-modal>
 </x-app-layout>
 
 

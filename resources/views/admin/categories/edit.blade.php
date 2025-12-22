@@ -1,21 +1,37 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-bold text-2xl text-gray-900 dark:text-white tracking-tight">
-                {{ __('Edit Category') }}
-            </h2>
-            <a href="{{ route('admin.categories.index') }}" 
-               class="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-lg shadow-sm transition-all duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                {{ __('Back to Categories') }}
-            </a>
-        </div>
-    </x-slot>
+    <!-- Main Container: Enterprise Slate Background -->
+    <div class="min-h-screen bg-slate-50/80 font-sans text-slate-900 pb-12">
+        
+        <!-- Top Navigation / Breadcrumb Area (Sticky) -->
+        <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-4 md:py-0 gap-4">
+                    <div class="flex items-center gap-2">
+                        <!-- Back Button -->
+                        <a href="{{ route('admin.categories.index') }}" class="group inline-flex items-center justify-center h-8 w-8 rounded-full bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 hover:border-orange-200 transition-colors" title="{{ __('Back') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+                        </a>
+                        
+                        <div class="h-6 w-px bg-slate-200 mx-1"></div>
 
-    <div class="py-8 bg-gray-50 dark:bg-gray-900">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div>
+                            <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
+                                {{ __('Edit Category') }}
+                            </h1>
+                            <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">
+                                <a href="{{ route('admin.dashboard') }}" class="hover:text-slate-700 transition-colors">{{ __('Dashboard') }}</a>
+                                <span class="mx-1.5">/</span>
+                                <a href="{{ route('admin.categories.index') }}" class="hover:text-slate-700 transition-colors">{{ __('Categories') }}</a>
+                                <span class="mx-1.5">/</span>
+                                <span class="font-medium text-slate-700">{{ $category->name }}</span>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
                 <form method="POST" action="{{ route('admin.categories.update', $category) }}">
                     @csrf

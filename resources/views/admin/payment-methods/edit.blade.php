@@ -1,36 +1,42 @@
-<x-app-layout :breadcrumb="[
-    ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
-    ['label' => __('Payment Methods'), 'url' => route('admin.payment-methods.index')],
-    ['label' => __('Edit')]
-]">
-    <x-slot name="header">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-[#EF7722] to-[#FAA533] rounded-lg flex items-center justify-center shadow-lg">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                        </div>
+<x-app-layout>
+    <!-- Main Container: Enterprise Slate Background -->
+    <div class="min-h-screen bg-slate-50/80 font-sans text-slate-900 pb-12">
+        
+        <!-- Top Navigation / Breadcrumb Area (Sticky) -->
+        <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-4 md:py-0 gap-4">
+                    <div class="flex items-center gap-2">
+                        <!-- Back Button -->
+                        <a href="{{ route('admin.payment-methods.index') }}" class="group inline-flex items-center justify-center h-8 w-8 rounded-full bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 hover:border-orange-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+                        </a>
+                        
+                        <div class="h-6 w-px bg-slate-200 mx-1"></div>
+
                         <div>
-                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ __('Edit Payment Method') }}</h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Update payment method information and settings') }}</p>
+                            <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
+                                {{ __('Edit Payment Method') }}
+                            </h1>
+                            <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">
+                                <a href="{{ route('admin.dashboard') }}" class="hover:text-slate-700 transition-colors">{{ __('Dashboard') }}</a>
+                                <span class="mx-1.5">/</span>
+                                <a href="{{ route('admin.payment-methods.index') }}" class="hover:text-slate-700 transition-colors">{{ __('Payment Methods') }}</a>
+                                <span class="mx-1.5">/</span>
+                                <span class="font-medium text-slate-700">{{ $paymentMethod->name }}</span>
+                            </nav>
                         </div>
                     </div>
+                    
+                    <!-- Global Actions -->
+                    <div class="flex items-center gap-2">
+                         <!-- Add any global actions here if needed -->
+                    </div>
                 </div>
-                <a href="{{ route('admin.payment-methods.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    {{ __('Back to List') }}
-                </a>
             </div>
         </div>
-    </x-slot>
 
-    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <form method="POST" action="{{ route('admin.payment-methods.update', $paymentMethod) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')

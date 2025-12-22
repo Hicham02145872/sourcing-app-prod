@@ -1,45 +1,5 @@
 <x-app-layout :clientQuotationCount="$totalClientQuotations">
-    <x-slot name="header">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-[#EF7722] rounded-lg flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                                {{ __('Client Dashboard') }}
-                            </h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Manage and track your sourcing requests efficiently') }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <a href="{{ route('client.sourcing-requests.create') }}"
-                       class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#EF7722] hover:bg-[#FAA533] rounded-lg transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        {{ __('New Request') }}
-                    </a>
-                    @if($socialMediaLinks && $socialMediaLinks->youtube_url)
-                        <a href="{{ $socialMediaLinks->youtube_url }}" target="_blank" rel="noopener noreferrer"
-                           class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-[#EF7722] bg-transparent border-2 border-[#EF7722] rounded-lg transition-all duration-200 hover:bg-[#EF7722]/10 w-full sm:w-auto justify-center">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
-                            </svg>
-                            {{ __('Watch Demo') }}
-                        </a>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </x-slot>
-
-    <div class="py-25 bg-[#fffff] dark:bg-slate-900 min-h-screen">
+    <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
             {{-- IMPROVED SPAM FOLDER WARNING BANNER --}}

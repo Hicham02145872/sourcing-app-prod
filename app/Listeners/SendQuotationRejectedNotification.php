@@ -6,40 +6,49 @@ use App\Events\QuotationRejected;
 use App\Models\User;
 use App\Notifications\QuotationRejected as QuotationRejectedNotification;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SendQuotationRejectedNotification
 {
     /**
      * Handle the event.
      *
-     * @param  \App\Events\QuotationRejected  $event
      * @return void
      */
     public function handle(QuotationRejected $event)
     {
         $quotation = $event->quotation;
-        $lockKey = 'quotation_rejected_notification:' . $quotation->id;
+        $lockKey = 'quotation_rejected_notification:'.$quotation->id;
 
         if (Cache::has($lockKey)) {
             Log::debug('QuotationRejected notification already sent recently', [
                 'quotation_id' => $quotation->id,
                 'lock_key' => $lockKey,
             ]);
+
             return;
         }
 
         Cache::put($lockKey, true, now()->addSeconds(60));
 
         try {
-            $admins = User::where('role', 'admin')->get();
+            $assignedAdminId = $quotation->sourcingRequest->assigned_to_admin_id;
+
+            $admins = User::where('role', 'super_admin')
+                ->when($assignedAdminId, function ($query) use ($assignedAdminId) {
+                    $query->orWhere(function ($q) use ($assignedAdminId) {
+                        $q->where('role', 'admin')
+                            ->where('id', $assignedAdminId);
+                    });
+                })
+                ->get();
 
             foreach ($admins as $admin) {
                 $admin->notify(new QuotationRejectedNotification($quotation));
             }
 
-            Log::info('QuotationRejected notification sent to all admins', [
+            Log::info('QuotationRejected notification sent to relevant admins', [
                 'quotation_id' => $quotation->id,
                 'sourcing_request_id' => $quotation->sourcing_request_id,
             ]);

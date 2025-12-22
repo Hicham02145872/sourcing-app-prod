@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             SocialMediaLinkSeeder::class,
             SuperAdminSeeder::class,
-            WelcomePageContentSeeder::class,
+            GoogleSheetSettingSeeder::class,
         ]);
     }
 }

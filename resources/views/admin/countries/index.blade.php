@@ -1,29 +1,36 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-[#EF7722] to-[#FAA533] rounded-lg flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
+    <!-- Main Container: Enterprise Slate Background -->
+    <div class="min-h-screen bg-slate-50/80 font-sans text-slate-900 pb-12">
+        
+        <!-- Top Navigation / Breadcrumb Area (Sticky) -->
+        <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-4 md:py-0 gap-4">
+                    <div class="flex items-center gap-2">
                         <div>
-                            <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                            <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
                                 {{ __('Countries Management') }}
-                            </h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Manage countries and their information') }}</p>
+                            </h1>
+                            <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">
+                                <a href="{{ route('admin.dashboard') }}" class="hover:text-slate-700 transition-colors">{{ __('Dashboard') }}</a>
+                                <span class="mx-1.5">/</span>
+                                <span class="font-medium text-slate-700">{{ __('Countries') }}</span>
+                            </nav>
                         </div>
                     </div>
+                    
+                    <!-- Global Actions -->
+                    <div>
+                         <a href="{{ route('admin.countries.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded transition-colors shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            {{ __('Add Country') }}
+                        </a>
+                    </div>
                 </div>
-
             </div>
         </div>
-    </x-slot>
 
-    <div class="py-25 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {{-- Success Message --}}
             @if (session('success'))
                 <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg p-4 mb-6">
@@ -47,16 +54,6 @@
                 </div>
             @endif
 
-            <!-- Add Country Button -->
-            <div class="flex justify-end mb-6">
-                <a href="{{ route('admin.countries.create') }}" 
-                   class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    {{ __('Add Country') }}
-                </a>
-            </div>
 
             {{-- Control Panel --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 mb-6">

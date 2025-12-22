@@ -24,7 +24,7 @@ class StoreSourcingRequestRequest extends FormRequest
         return [
             'product_name' => 'required|string|max:255',
             'product_url' => 'nullable|url|max:255',
-            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'category_id' => 'required|exists:categories,id',
             'note' => 'nullable|string',
             'phone_number' => 'nullable|string|max:255',

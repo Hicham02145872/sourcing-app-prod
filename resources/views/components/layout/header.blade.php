@@ -1,8 +1,8 @@
-<header class="fixed top-0 left-0 right-0 z-40
+<header id="app-header" class="fixed top-0 left-0 right-0 z-40
     bg-white text-gray-900
     dark:bg-gradient-to-b dark:from-gray-800 dark:to-gray-900 dark:text-white
     border-b border-gray-700 dark:border-gray-700
-    shadow-sm">
+    shadow-sm transition-all duration-300">
 
     <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
@@ -101,6 +101,7 @@
                 @endif
 
                 @include('components.layout.dark-mode-toggle')
+
                 @include('components.layout.language-switcher')
                 @include('components.layout.notification-center')
                 @include('components.layout.user-menu')

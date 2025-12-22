@@ -1,0 +1,85 @@
+<div class="space-y-6">
+    <!-- 1. Order Status & Workflow -->
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                {{ __('Workflow & Statut') }}
+            </h3>
+            <span class="text-xs text-slate-500">{{ __('Dernière maj:') }} {{ $sourcingOrder->updated_at->format('d/m/Y H:i') }}</span>
+        </div>
+        <div class="p-6">
+            <div class="flex flex-col sm:flex-row gap-4 items-end">
+                <div class="w-full sm:flex-1">
+                    <label for="status" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Mettre à jour le statut') }}</label>
+                    <select wire:model="status" id="status" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-slate-50">
+                        @foreach (App\Models\SourcingOrder::STATUSES as $statusOption)
+                            <option value="{{ $statusOption }}">
+                                {{ ucfirst(str_replace('_', ' ', $statusOption)) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <button wire:click="updateStatus" wire:loading.attr="disabled" class="w-full sm:w-auto px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors shadow-sm h-[38px] flex items-center justify-center gap-2">
+                    <span wire:loading.remove wire:target="updateStatus">{{ __('Mettre à jour') }}</span>
+                    <span wire:loading wire:target="updateStatus">{{ __('Action...') }}</span>
+                    <svg wire:loading wire:target="updateStatus" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </button>
+            </div>
+            
+            @if(auth()->user()->isSuperAdmin())
+                <div class="mt-6 pt-6 border-t border-slate-100">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('Assignation (Super Admin)') }}</label>
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1">
+                            <select wire:change="assignTo($event.target.value)" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white">
+                                <option value="">{{ __('Non assigné') }}</option>
+                                @foreach($admins as $admin)
+                                    <option value="{{ $admin->id }}" {{ $sourcingOrder->assigned_to_admin_id == $admin->id ? 'selected' : '' }}>
+                                        {{ $admin->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @if($sourcingOrder->assigned_to_admin_id)
+                            <div class="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded text- emerald-700 text-xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                <span class="font-semibold">{{ $sourcingOrder->assignedAdmin->name }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- 2. Shipping & Tracking -->
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                {{ __('Expédition & Suivi') }}
+            </h3>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="tracking_number" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Numéro de suivi') }}</label>
+                    <input type="text" wire:model.defer="tracking_number" id="tracking_number" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-slate-50" placeholder="Ex: ME49508327">
+                </div>
+                <div>
+                    <label for="tracking_carrier" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Transporteur') }}</label>
+                    <input type="text" wire:model.defer="tracking_carrier" id="tracking_carrier" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-slate-50" placeholder="Ex: Faster.ae, DHL...">
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button wire:click="updateTracking" wire:loading.attr="disabled" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors shadow-sm flex items-center gap-2">
+                    <span wire:loading.remove wire:target="updateTracking">{{ __('Enregistrer le suivi') }}</span>
+                    <span wire:loading wire:target="updateTracking">{{ __('Enregistrement...') }}</span>
+                    <svg wire:loading wire:target="updateTracking" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,20 +1,36 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 -m-6 p-6 mb-0">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="font-semibold text-3xl text-gray-900 dark:text-white tracking-tight">
-                        {{ __('Categories') }}
-                    </h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1.5">{{ __('Organize and manage product categories') }}</p>
+    <!-- Main Container: Enterprise Slate Background -->
+    <div class="min-h-screen bg-slate-50/80 font-sans text-slate-900 pb-12">
+        
+        <!-- Top Navigation / Breadcrumb Area (Sticky) -->
+        <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-4 md:py-0 gap-4">
+                    <div class="flex items-center gap-2">
+                        <div>
+                            <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
+                                {{ __('Categories') }}
+                            </h1>
+                            <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">
+                                <a href="{{ route('admin.dashboard') }}" class="hover:text-slate-700 transition-colors">{{ __('Dashboard') }}</a>
+                                <span class="mx-1.5">/</span>
+                                <span class="font-medium text-slate-700">{{ __('Categories') }}</span>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- Global Actions -->
+                    <div>
+                         <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded transition-colors shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            {{ __('Add Category') }}
+                        </a>
+                    </div>
                 </div>
-
             </div>
         </div>
-    </x-slot>
 
-    <div class="py-25 bg-gray-50 dark:bg-gray-900 min-h-screen">
-        <div class="max-w-full mx-auto sm:px-6 lg:px-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Stats Card -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
@@ -60,7 +76,8 @@
                 </div>
             </div>
 
-            <!-- Success Message -->
+            <!-- Toast-compatible session success message could be here, but we use global layout toasts usually. 
+                 Keeping it for now if needed, but making it fully translatable. -->
             @if (session('success'))
                 <div class="bg-emerald-50 dark:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-700 rounded-xl p-4 mb-6">
                     <div class="flex items-start">
@@ -70,7 +87,7 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300">{{ session('success') }}</p>
+                            <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300">{{ __(session('success')) }}</p>
                         </div>
                         <div class="ml-auto pl-3">
                             <button type="button" class="inline-flex text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200 transition-colors">
@@ -83,15 +100,6 @@
                 </div>
             @endif
 
-            <!-- Add Category Button -->
-            <div class="flex justify-end mb-6">
-                <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    {{ __('Add Category') }}
-                </a>
-            </div>
 
             <!-- Search Card -->
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
@@ -180,7 +188,7 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $category->created_at ? $category->created_at->translatedFormat('d M Y') : 'N/A' }}
+                                        {{ $category->created_at ? $category->created_at->translatedFormat('d M Y') : __('N/A') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end space-x-2">

@@ -13,6 +13,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
     
     <script>
             tailwind.config = {
@@ -208,7 +209,7 @@
 
                         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
                             Sourcing made <br>
-                            <span class="gradient-text">effortless.</span>
+                            <span class="gradient-text" id="typed-text"></span>
                         </h1>
 
                         <p class="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
@@ -642,6 +643,27 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- TYPED.JS ANIMATION ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const typed = new Typed('#typed-text', {
+                strings: [
+                    'effortless.',
+                    'efficient.',
+                    'reliable.',
+                    'seamless.',
+                    'transparent.'
+                ],
+                typeSpeed: 80,
+                backSpeed: 50,
+                backDelay: 2000,
+                startDelay: 500,
+                loop: true,
+                showCursor: true,
+                cursorChar: '|',
+                smartBackspace: true
+            });
         });
     </script>
 </body>

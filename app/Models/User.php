@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
-use App\Models\SourcingRequest;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, MustVerifyEmailTrait;
+    use HasFactory, MustVerifyEmailTrait, Notifiable;
 
     protected $fillable = [
         'name',
@@ -20,6 +19,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'fcm_token',
+        'can_delete_clients',
+        'profile_photo_path',
     ];
 
     protected $hidden = [
@@ -33,6 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'verification_email_sent_at' => 'datetime',
             'password' => 'hashed',
+            'can_delete_clients' => 'boolean',
         ];
     }
 
@@ -64,5 +66,41 @@ class User extends Authenticatable implements MustVerifyEmail
     public function quotations()
     {
         return $this->hasMany(Quotation::class);
+    }
+
+    public function assignedSourcingRequests()
+    {
+        return $this->hasMany(SourcingRequest::class, 'assigned_to_admin_id');
+    }
+
+    public function assignedSourcingOrders()
+    {
+        return $this->hasMany(SourcingOrder::class, 'assigned_to_admin_id');
+    }
+
+    public function getRoleLabel(): string
+    {
+        return match ($this->role) {
+            'super_admin' => 'Super Admin',
+            'admin' => 'Administrator',
+            'client' => 'Client',
+            default => ucfirst($this->role ?? 'User'),
+        };
+    }
+
+    /**
+     * Send the email verification notification.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new \App\Notifications\CustomVerifyEmail);
+    }
+
+    /**
+     * Check if the user has permission to delete clients.
+     */
+    public function canDeleteClients(): bool
+    {
+        return $this->isSuperAdmin() || (bool) $this->can_delete_clients;
     }
 }

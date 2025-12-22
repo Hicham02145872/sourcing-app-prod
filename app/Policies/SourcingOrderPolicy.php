@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\SourcingOrder;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class SourcingOrderPolicy
 {
@@ -13,7 +12,7 @@ class SourcingOrderPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isClient();
+        return true;
     }
 
     /**
@@ -21,15 +20,19 @@ class SourcingOrderPolicy
      */
     public function view(User $user, SourcingOrder $sourcingOrder): bool
     {
-        return $user->id === $sourcingOrder->user_id || $user->isAdmin();
+        if ($user->isAdmin() || $user->isSuperAdmin()) {
+            return true;
+        }
+
+        return $sourcingOrder->user_id === $user->id;
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether the user can view financial data.
      */
-    public function create(User $user): bool
+    public function viewFinancials(User $user, SourcingOrder $sourcingOrder): bool
     {
-        return $user->isClient();
+        return $user->isAdmin() || $user->isSuperAdmin();
     }
 
     /**
@@ -37,30 +40,28 @@ class SourcingOrderPolicy
      */
     public function update(User $user, SourcingOrder $sourcingOrder): bool
     {
-        return $user->isAdmin() || ($user->isClient() && $user->id === $sourcingOrder->user_id);
+        return $user->isAdmin() || $user->isSuperAdmin();
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Determine whether the user can upload proof of payment.
      */
-    public function delete(User $user, SourcingOrder $sourcingOrder): bool
+    public function uploadProofOfPayment(User $user, SourcingOrder $sourcingOrder): bool
     {
-        return $user->isAdmin();
+        // Admin and Super Admin can always upload
+        if ($user->isAdmin() || $user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Clients can upload only for their own orders
+        return $sourcingOrder->user_id === $user->id;
     }
 
     /**
-     * Determine whether the user can restore the model.
+     * Determine whether the user can request a refund for the order.
      */
-    public function restore(User $user, SourcingOrder $sourcingOrder): bool
+    public function requestRefund(User $user, SourcingOrder $sourcingOrder): bool
     {
-        return $user->isAdmin();
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, SourcingOrder $sourcingOrder): bool
-    {
-        return $user->isAdmin();
+        return $sourcingOrder->user_id === $user->id;
     }
 }

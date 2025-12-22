@@ -36,13 +36,23 @@
     @endif
 
     <!-- Actions -->
-    <div class="space-y-4">
+    <div class="space-y-4" 
+         x-data="{ countdown: {{ session('status') == 'verification-link-sent' ? 60 : 0 }} }" 
+         x-init="if (countdown > 0) { const timer = setInterval(() => { countdown--; if (countdown <= 0) clearInterval(timer); }, 1000); }">
         <!-- Resend Button -->
         <form method="POST" action="{{ route('verification.send') }}">
             @csrf
             <button type="submit"
-                    class="w-full py-3.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2">
-                Resend verification email
+                    x-bind:disabled="countdown > 0"
+                    class="w-full py-3.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98]">
+                <span x-show="countdown === 0">{{ __('Resend verification email') }}</span>
+                <span x-show="countdown > 0" x-cloak class="flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ __('Resend available in') }} <span x-text="countdown"></span>s
+                </span>
             </button>
         </form>
 
@@ -51,7 +61,7 @@
             @csrf
             <button type="submit"
                     class="w-full py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">
-                Log out
+                {{ __('Log out') }}
             </button>
         </form>
     </div>

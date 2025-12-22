@@ -4,18 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
-
 
 class SuperAdminController extends Controller
 {
-
     /**
      * Display the admin creation form.
      */
@@ -31,7 +28,7 @@ class SuperAdminController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -41,6 +38,7 @@ class SuperAdminController extends Controller
             'password' => Hash::make($request->password),
             'role' => 'admin', // Always create as 'admin'
             'email_verified_at' => now(), // Set email as verified
+            'can_delete_clients' => $request->has('can_delete_clients'),
         ]);
 
         return redirect()->route('admin.super-admin.create-admin')->with('status', 'Admin user created successfully!');
@@ -51,7 +49,8 @@ class SuperAdminController extends Controller
      */
     public function listAdmins(): View
     {
-        $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
+        $admins = User::where('role', 'admin')->get();
+
         return view('admin.super-admin.list-admins', compact('admins'));
     }
 
@@ -61,15 +60,15 @@ class SuperAdminController extends Controller
     public function showAdmin($id): JsonResponse
     {
         $admin = User::whereIn('role', ['admin', 'super_admin'])
-                    ->findOrFail($id);
-        
+            ->findOrFail($id);
+
         return response()->json([
             'id' => $admin->id,
             'name' => $admin->name,
             'email' => $admin->email,
             'role' => $admin->role,
             'created_at' => $admin->created_at->toISOString(),
-            'formatted_created_at' => $admin->created_at->format('d M Y, H:i')
+            'formatted_created_at' => $admin->created_at->format('d M Y, H:i'),
         ]);
     }
 
@@ -79,10 +78,10 @@ class SuperAdminController extends Controller
     public function editAdmin(User $admin): View
     {
         // Ensure we're only editing admin users
-        if (!in_array($admin->role, ['admin', 'super_admin'])) {
+        if (! in_array($admin->role, ['admin', 'super_admin'])) {
             abort(404);
         }
-        
+
         return view('admin.super-admin.edit-admin', compact('admin'));
     }
 
@@ -92,13 +91,13 @@ class SuperAdminController extends Controller
     public function updateAdmin(Request $request, User $admin): RedirectResponse
     {
         // Ensure we're only updating admin users
-        if (!in_array($admin->role, ['admin', 'super_admin'])) {
+        if (! in_array($admin->role, ['admin', 'super_admin'])) {
             abort(404);
         }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class . ',email,' . $admin->id],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class.',email,'.$admin->id],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -109,13 +108,8 @@ class SuperAdminController extends Controller
         }
 
         // Handle email verification status
-        if ($request->has('verify_email')) {
-            if (is_null($admin->email_verified_at)) {
-                $admin->email_verified_at = now();
-            }
-        } else {
-            $admin->email_verified_at = null;
-        }
+        $admin->email_verified_at = $request->has('verify_email') ? ($admin->email_verified_at ?? now()) : null;
+        $admin->can_delete_clients = $request->has('can_delete_clients');
 
         $admin->save();
 
@@ -128,7 +122,7 @@ class SuperAdminController extends Controller
     public function destroyAdmin(User $admin): RedirectResponse
     {
         // Ensure we're only deleting admin users
-        if (!in_array($admin->role, ['admin', 'super_admin'])) {
+        if (! in_array($admin->role, ['admin', 'super_admin'])) {
             abort(404);
         }
 

@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\SourcingRequest;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class SourcingRequestPolicy
 {
@@ -13,7 +12,7 @@ class SourcingRequestPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isClient();
+        return $user->isClient() || $user->isAdmin();
     }
 
     /**
@@ -50,7 +49,7 @@ class SourcingRequestPolicy
 
     public function cancel(User $user, SourcingRequest $sourcingRequest): bool
     {
-        return $user->id === $sourcingRequest->user_id && 
+        return $user->id === $sourcingRequest->user_id &&
                ($sourcingRequest->status === 'pending' || $sourcingRequest->status === 'in_review');
     }
 

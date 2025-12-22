@@ -1,34 +1,7 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-[#EF7722] rounded-lg flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                                {{ __('Sourcing Requests') }}
-                            </h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Manage and track all your sourcing requests') }}</p>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ route('client.sourcing-requests.create') }}" 
-                   class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] rounded-lg transition-all duration-200 shadow-sm hover:shadow w-full sm:w-auto justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    {{ __('New Request') }}
-                </a>
-            </div>
-        </div>
-    </x-slot>
+    
 
-    <div class="py-12 bg-[#fffff] dark:bg-slate-900 min-h-screen">
+    <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
             {{-- Statistics Bar --}}

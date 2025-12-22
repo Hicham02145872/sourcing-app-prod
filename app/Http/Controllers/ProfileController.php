@@ -11,6 +11,9 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected \App\Services\ImageProcessingService $imageService
+    ) {}
     /**
      * Display the user's profile form.
      */
@@ -28,6 +31,23 @@ class ProfileController extends Controller
     {
         // Update the user's profile information
         $request->user()->fill($request->validated());
+
+        // Handle Profile Photo Upload
+        if ($request->hasFile('photo')) {
+            $path = $this->imageService->compressAndStore(
+                $request->file('photo'),
+                'profile-photos',
+                'public',
+                500 // Max width for avatars
+            );
+
+            // Delete old photo if exists
+            if ($request->user()->profile_photo_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($request->user()->profile_photo_path);
+            }
+
+            $request->user()->profile_photo_path = $path;
+        }
         // If the user is changing their email, reset the email verification status
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;

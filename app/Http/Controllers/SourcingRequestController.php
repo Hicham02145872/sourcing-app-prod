@@ -2,32 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSourcingRequestRequest;
+use App\Http\Requests\UpdateSourcingRequestRequest;
 use App\Models\Category;
 use App\Models\Country;
 use App\Models\PaymentMethod;
 use App\Models\Service;
 use App\Models\SourcingRequest;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use App\Http\Requests\StoreSourcingRequestRequest;
-use App\Http\Requests\UpdateSourcingRequestRequest;
-use App\Services\TimelineService;
 use App\Models\User;
 use App\Notifications\SourcingRequestCreated;
+use App\Services\TimelineService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 use PDF;
 
 class SourcingRequestController extends Controller
 {
+    public function __construct(
+        protected \App\Services\ImageProcessingService $imageService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index(): View
     {
         $this->authorize('viewAny', SourcingRequest::class);
-        $sourcingRequests = auth()->user()->sourcingRequests()->with('category', 'destinations.country', 'destinations.service')->get();
+        $sourcingRequests = auth()->user()->sourcingRequests()
+            ->with(['category', 'destinations.country', 'destinations.service'])
+            ->latest()
+            ->get();
+
         return view('client.sourcing-requests.index', compact('sourcingRequests'));
     }
 
@@ -35,10 +43,11 @@ class SourcingRequestController extends Controller
     {
         $this->authorize('viewAny', SourcingRequest::class);
         $query = auth()->user()->sourcingRequests()
-            ->with('category', 'destinations.country', 'destinations.service', 'quotation');
+            ->with(['category', 'destinations.country', 'destinations.service', 'quotation'])
+            ->latest();
 
         if ($request->has('search') && $request->search != '') {
-            $query->where('product_name', 'like', '%' . $request->search . '%');
+            $query->where('product_name', 'like', '%'.$request->search.'%');
         }
 
         if ($request->has('category') && $request->category != '') {
@@ -80,6 +89,7 @@ class SourcingRequestController extends Controller
         $categories = \App\Models\Category::all();
         $countries = \App\Models\Country::all();
         $services = \App\Models\Service::all();
+
         // Pass the data to the view
         return view('client.sourcing-requests.create', compact('categories', 'countries', 'services'));
     }
@@ -94,7 +104,10 @@ class SourcingRequestController extends Controller
 
         $sourcingRequest = DB::transaction(function () use ($request, $validated) {
             if ($request->hasFile('product_image')) {
-                $validated['product_image'] = $request->file('product_image')->store('product_images', 'public');
+                $validated['product_image'] = $this->imageService->compressAndStore(
+                    $request->file('product_image'),
+                    'product_images'
+                );
             }
 
             $sourcingRequest = $request->user()->sourcingRequests()->create([
@@ -114,12 +127,22 @@ class SourcingRequestController extends Controller
             foreach ($validated['destinations'] as $destinationData) {
                 $sourcingRequest->destinations()->create($destinationData);
             }
-            
+
             return $sourcingRequest;
         });
-        
-        // Notify admins and super admins
-        $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
+
+        // Notify only the assigned admin and all super admins
+        $assignedAdminId = $sourcingRequest->assigned_to_admin_id;
+
+        $admins = User::where('role', 'super_admin')
+            ->when($assignedAdminId, function ($query) use ($assignedAdminId) {
+                $query->orWhere(function ($q) use ($assignedAdminId) {
+                    $q->where('role', 'admin')
+                        ->where('id', $assignedAdminId);
+                });
+            })
+            ->get();
+
         foreach ($admins as $admin) {
             $admin->notify(new SourcingRequestCreated($sourcingRequest));
         }
@@ -127,7 +150,7 @@ class SourcingRequestController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Sourcing request created successfully!',
-                'redirect_url' => route('client.dashboard')
+                'redirect_url' => route('client.dashboard'),
             ]);
         }
 
@@ -152,43 +175,71 @@ class SourcingRequestController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSourcingRequestRequest $request, SourcingRequest $sourcingRequest): RedirectResponse
+    public function update(UpdateSourcingRequestRequest $request, SourcingRequest $sourcingRequest)
     {
         $this->authorize('update', $sourcingRequest);
 
         $validated = $request->validated();
 
-        DB::transaction(function () use ($request, $sourcingRequest, $validated) {
-            if ($request->hasFile('product_image')) {
-                // Delete old image if exists
-                if ($sourcingRequest->product_image) {
-                    Storage::disk('public')->delete($sourcingRequest->product_image);
+        try {
+            DB::transaction(function () use ($request, $sourcingRequest, $validated) {
+                if ($request->hasFile('product_image')) {
+                    // Delete old image if exists
+                    if ($sourcingRequest->product_image) {
+                        Storage::disk('public')->delete($sourcingRequest->product_image);
+                    }
+                    $validated['product_image'] = $this->imageService->compressAndStore(
+                        $request->file('product_image'),
+                        'product_images'
+                    );
                 }
-                $validated['product_image'] = $request->file('product_image')->store('product_images', 'public');
+
+                $sourcingRequest->update([
+                    'product_name' => $validated['product_name'],
+                    'product_url' => $validated['product_url'] ?? null,
+                    'product_image' => $validated['product_image'] ?? $sourcingRequest->product_image,
+                    'category_id' => $validated['category_id'],
+                    'note' => $validated['note'] ?? null,
+                    'phone_number' => $validated['phone_number'] ?? null,
+                    'address' => $validated['address'] ?? null,
+                    'latitude' => $validated['latitude'] ?? null,
+                    'longitude' => $validated['longitude'] ?? null,
+                    'shipping_method' => $validated['shipping_method'] ?? null,
+                    'sourcing_location' => $validated['sourcing_location'],
+                ]);
+
+                // Update destinations
+                $sourcingRequest->destinations()->delete(); // Delete existing destinations
+                foreach ($validated['destinations'] as $destinationData) {
+                    $sourcingRequest->destinations()->create($destinationData);
+                }
+            });
+
+            // Support for AJAX requests
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'message' => 'Sourcing request updated successfully!',
+                    'redirect_url' => route('client.sourcing-requests.show', $sourcingRequest),
+                ]);
             }
 
-            $sourcingRequest->update([
-                'product_name' => $validated['product_name'],
-                'product_url' => $validated['product_url'] ?? null,
-                'product_image' => $validated['product_image'] ?? $sourcingRequest->product_image,
-                'category_id' => $validated['category_id'],
-                'note' => $validated['note'] ?? null,
-                'phone_number' => $validated['phone_number'] ?? null,
-                'address' => $validated['address'] ?? null,
-                'latitude' => $validated['latitude'] ?? null,
-                'longitude' => $validated['longitude'] ?? null,
-                'shipping_method' => $validated['shipping_method'] ?? null,
-                'sourcing_location' => $validated['sourcing_location'],
+            return redirect()->route('client.sourcing-requests.show', $sourcingRequest)->with('status', 'Sourcing request updated successfully!');
+        } catch (\Exception $e) {
+            \Log::error('Sourcing Request Update Error: '.$e->getMessage(), [
+                'request_id' => $sourcingRequest->id,
+                'user_id' => auth()->id(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
-            // Update destinations
-            $sourcingRequest->destinations()->delete(); // Delete existing destinations
-            foreach ($validated['destinations'] as $destinationData) {
-                $sourcingRequest->destinations()->create($destinationData);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'message' => 'An error occurred while updating the sourcing request.',
+                    'error' => $e->getMessage(),
+                ], 500);
             }
-        });
 
-        return redirect()->route('client.sourcing-requests.show', $sourcingRequest)->with('status', 'Sourcing request updated successfully!');
+            return back()->withInput()->with('error', 'An error occurred while updating the sourcing request. Please try again.');
+        }
     }
 
     /**
@@ -262,6 +313,8 @@ class SourcingRequestController extends Controller
         DB::transaction(function () use ($sourcingRequest) {
             $newSourcingRequest = $sourcingRequest->replicate();
             $newSourcingRequest->status = 'pending';
+            $newSourcingRequest->assigned_to_admin_id = null;
+            $newSourcingRequest->assigned_at = null;
             $newSourcingRequest->created_at = now();
             $newSourcingRequest->updated_at = now();
             $newSourcingRequest->save();

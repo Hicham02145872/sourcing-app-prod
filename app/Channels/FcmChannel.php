@@ -3,8 +3,8 @@
 namespace App\Channels;
 
 use Illuminate\Notifications\Notification;
-use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 class FcmChannel
 {
@@ -19,7 +19,6 @@ class FcmChannel
      * Send the given notification.
      *
      * @param  mixed  $notifiable
-     * @param  \Illuminate\Notifications\Notification  $notification
      * @return void
      */
     public function send($notifiable, Notification $notification)
@@ -35,30 +34,22 @@ class FcmChannel
         }
 
         try {
-            $report = $this->messaging->send($message);
+            $response = $this->messaging->send($message);
 
-            foreach ($report->getItems() as $item) {
-                if ($item->isSuccess()) {
-                    \Illuminate\Support\Facades\Log::info('FCM Message sent successfully.', [
-                        'message_id' => $item->messageId(),
-                        'fcm_token' => $fcmToken,
-                        'notification_id' => $notification->id,
-                    ]);
-                } else {
-                    \Illuminate\Support\Facades\Log::error('FCM Message failed to send.', [
-                        'fcm_token' => $fcmToken,
-                        'notification_id' => $notification->id,
-                        'error_code' => $item->error()->messagingErrorCode()->value(),
-                        'error_message' => $item->error()->getMessage(),
-                    ]);
-                }
-            }
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('FCM Sending Exception: ' . $e->getMessage(), [
+            \Illuminate\Support\Facades\Log::info('FCM Message sent successfully.', [
+                'message_id' => $response,
                 'fcm_token' => $fcmToken,
                 'notification_id' => $notification->id,
-                'exception' => $e,
             ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('FCM Sending Exception: '.$e->getMessage(), [
+                'fcm_token' => $fcmToken,
+                'notification_id' => $notification->id,
+                'exception_class' => get_class($e),
+            ]);
+
+            // Re-throw to trigger NotificationFailed event
+            throw $e;
         }
     }
 }

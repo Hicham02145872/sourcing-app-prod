@@ -17,9 +17,9 @@
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flag-icons@6.6.2/css/flag-icons.min.css" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
     <script defer src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.csp.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         [x-cloak] { display: none !important; }
         
@@ -377,13 +377,15 @@
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
 
-        async function requestPermissionAndGetToken() {
+        // Rendre disponible globalement pour le bouton "Soft Invite"
+        window.requestFcmPermission = async function() {
             try {
                 if (!('Notification' in window)) {
                     console.warn('🚫 Notifications non supportées');
-                    return;
+                    return false;
                 }
 
+                console.log("🔔 Demande de permission...");
                 const permission = await Notification.requestPermission();
                 
                 if (permission === 'granted') {
@@ -393,13 +395,21 @@
                     
                     if (currentToken) {
                         console.log("✅ FCM Token obtenu");
-                        await sendTokenToServer(currentToken);
+                        const success = await sendTokenToServer(currentToken);
+                        if (success) {
+                            window.dispatchEvent(new CustomEvent('show-success-toast', { detail: 'Notifications activées avec succès !' }));
+                            return true;
+                        }
                     }
+                } else if (permission === 'denied') {
+                    window.dispatchEvent(new CustomEvent('show-error-toast', { detail: 'Permission refusée. Vous pouvez la réactiver dans les paramètres de votre navigateur.' }));
                 }
+                return false;
             } catch (err) {
                 console.error("❌ Erreur Firebase:", err);
+                return false;
             }
-        }
+        };
 
         async function sendTokenToServer(token, retries = 3) {
             for (let attempt = 1; attempt <= retries; attempt++) {
@@ -431,26 +441,41 @@
             console.log("🔔 Notification reçue:", payload);
             
             if (payload.notification) {
-                new Notification(payload.notification.title, {
-                    body: payload.notification.body,
-                    icon: payload.notification.icon || '/icon-192x192.png',
-                    badge: '/badge-72x72.png',
-                    tag: payload.data?.notification_id || 'default',
-                });
+                // Si l'app est ouverte, on peut aussi afficher une notification native
+                // ou simplement laisser Livewire/Alpine gérer le toast via l'événement 'notification-received'
+                try {
+                    new Notification(payload.notification.title, {
+                        body: payload.notification.body,
+                        icon: payload.notification.icon || '/icon-192x192.png',
+                    });
+                } catch (e) {
+                    console.warn("Erreur lors de l'affichage de la notification native:", e);
+                }
             }
             
             window.dispatchEvent(new CustomEvent('notification-received', { detail: payload }));
         });
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                .then((registration) => {
-                    console.log("✅ Service Worker enregistré");
-                    @auth
-                        requestPermissionAndGetToken();
-                    @endauth
-                })
-                .catch(err => console.error("❌ Erreur Service Worker:", err));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                    .then((registration) => {
+                        console.log("✅ Service Worker enregistré");
+                        @auth
+                            // On ne demande pas automatiquement la permission si elle n'est pas déjà accordée
+                            // pour respecter le principe de "Soft Invite".
+                            // Mais si elle est déjà accordée, on rafraîchit le token.
+                            if (Notification.permission === 'granted') {
+                                getToken(messaging, {
+                                    vapidKey: "{{ config('services.firebase.vapid_key', 'BPQOA9LTMjO8gw3dVtLIYQce5giuHlV77aRoRU8MK4EnT6ZN3iIoEip3j2xvdAXwqpCa9ggFmAAE-rEC--MKuGg') }}"
+                                }).then(token => {
+                                    if (token) sendTokenToServer(token);
+                                });
+                            }
+                        @endauth
+                    })
+                    .catch(err => console.error("❌ Erreur Service Worker:", err));
+            });
         }
     </script>
 <script>
@@ -463,18 +488,28 @@
     </script>
 </head>
 
-<body class="font-sans antialiased bg-gray-50 dark:bg-gray-900" x-data="{ sidebarOpen: false }" x-cloak>
+    <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900" x-data="{ sidebarOpen: false }" x-cloak>
     <x-sidebar :role="auth()->user()->role ?? 'client'" :adminSourcingRequestCount="$adminSourcingRequestCount ?? 0" :clientQuotationCount="$clientQuotationCount ?? 0" />
 
     <x-layout.header />
-    <div class="lg:ml-72 pt-20 flex flex-col flex-1">
+
+    <div class="lg:ml-64 pt-24 flex flex-col flex-1 min-h-screen">
+        <!-- Page Header -->
+        @if (isset($header))
+            <header class="bg-white dark:bg-gray-800 shadow">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    {{ $header }}
+                </div>
+            </header>
+        @endif
+
         {{-- Contenu Principal --}}
-        <main class="flex-1 px-4 sm:px-6 lg:px-8 py-8 pb-16">
+        <main class="flex-1">
             {{ $slot }}
         </main>
-
+        
         {{-- Footer Moderne --}}
-        <footer class="mt-auto border-t border-slate-200 dark:border-slate-700 p-4 bg-[#EBEBEB] dark:bg-slate-900">
+        <footer class="mt-auto border-t border-slate-100 dark:border-slate-800 p-4 bg-slate-50/50 dark:bg-slate-900/50">
             <div class="px-4 sm:px-6 lg:px-8 py-4">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -557,10 +592,14 @@
                 toasts: [],
                 init() {
                     window.addEventListener('show-success-toast', (event) => {
-                        this.addToast(event.detail, 'success');
+                        const detail = event.detail;
+                        const message = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail[0] : (detail.detail || detail.message || JSON.stringify(detail)));
+                        this.addToast(message, 'success');
                     });
                     window.addEventListener('show-error-toast', (event) => {
-                        this.addToast(event.detail, 'error');
+                        const detail = event.detail;
+                        const message = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail[0] : (detail.detail || detail.message || JSON.stringify(detail)));
+                        this.addToast(message, 'error');
                     });
                     // For status messages coming from Laravel's `with('status', ...)`
                     @if(session('status'))
@@ -594,4 +633,5 @@
             }));
         });
     </script>
+    @livewireScripts
 </body>

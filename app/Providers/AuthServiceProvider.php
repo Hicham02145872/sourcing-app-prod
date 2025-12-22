@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\SourcingRequest;
-use App\Policies\SourcingRequestPolicy;
 use App\Models\Quotation;
-use App\Policies\QuotationPolicy;
 use App\Models\SourcingOrder;
+use App\Models\SourcingRequest;
+use App\Policies\QuotationPolicy;
 use App\Policies\SourcingOrderPolicy;
+use App\Policies\SourcingRequestPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -16,6 +16,7 @@ class AuthServiceProvider extends ServiceProvider
         SourcingRequest::class => SourcingRequestPolicy::class,
         Quotation::class => QuotationPolicy::class,
         SourcingOrder::class => SourcingOrderPolicy::class,
+        \App\Models\RefundRequest::class => \App\Policies\RefundRequestPolicy::class,
     ];
 
     public function register(): void

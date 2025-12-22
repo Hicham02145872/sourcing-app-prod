@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ProformaInvoiceMail;
 use App\Models\Quotation;
 use App\Models\SourcingOrder;
-use App\Models\User;
-use App\Notifications\QuotationAccepted;
-use App\Notifications\QuotationRejected;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ProformaInvoiceMail;
-use Illuminate\Support\Facades\Log;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 use App\Models\SourcingRequest;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
 
 class QuotationController extends Controller
 {
@@ -26,7 +24,8 @@ class QuotationController extends Controller
         $sourcingRequests = SourcingRequest::where('user_id', auth()->id())
             ->whereHas('quotation') // Quotation must exist
             ->whereDoesntHave('quotation.order') // But SourcingOrder must NOT exist
-            ->with('category', 'destinations.country', 'destinations.service', 'quotation')
+            ->with(['category', 'destinations.country', 'destinations.service', 'quotation'])
+            ->latest()
             ->get();
 
         return view('client.quotations.index', compact('sourcingRequests'));
@@ -54,6 +53,8 @@ class QuotationController extends Controller
                     'quotation_id' => $q->id,
                     'total_amount' => $q->amount,
                     'status' => 'pending_payment',
+                    // Auto-assign to the admin who handled the request
+                    'assigned_to_admin_id' => $q->sourcingRequest->assigned_to_admin_id,
                 ]);
                 $newSourcingOrder->load('user'); // Eager load the user relationship
 
@@ -66,7 +67,8 @@ class QuotationController extends Controller
                 return $newSourcingOrder; // Return the created order
             });
         } catch (\Exception $e) {
-            Log::error('Error accepting quotation: ' . $e->getMessage());
+            Log::error('Error accepting quotation: '.$e->getMessage());
+
             return redirect()->back()->withErrors(['generic' => $e->getMessage()]);
         }
 
@@ -74,15 +76,15 @@ class QuotationController extends Controller
 
         // Generate and send pro-forma invoice
         try {
-            Log::debug('Attempting to generate PDF for Sourcing Order #' . $sourcingOrder->id);
+            Log::debug('Attempting to generate PDF for Sourcing Order #'.$sourcingOrder->id);
             $pdf = Pdf::loadView('pdf.proforma-invoice', compact('sourcingOrder'));
-            Log::debug('PDF generated successfully for Sourcing Order #' . $sourcingOrder->id);
+            Log::debug('PDF generated successfully for Sourcing Order #'.$sourcingOrder->id);
 
-            Log::debug('Attempting to send pro-forma invoice email to ' . $sourcingOrder->user->email . ' for Sourcing Order #' . $sourcingOrder->id);
+            Log::debug('Attempting to send pro-forma invoice email to '.$sourcingOrder->user->email.' for Sourcing Order #'.$sourcingOrder->id);
             Mail::to($sourcingOrder->user->email)->queue(new ProformaInvoiceMail($sourcingOrder));
-            Log::debug('Pro-forma invoice email sent successfully for Sourcing Order #' . $sourcingOrder->id);
+            Log::debug('Pro-forma invoice email sent successfully for Sourcing Order #'.$sourcingOrder->id);
         } catch (\Exception $e) {
-            Log::error('Failed to send pro-forma invoice for order #' . $sourcingOrder->id . '. Error: ' . $e->getMessage(), ['exception' => $e]);
+            Log::error('Failed to send pro-forma invoice for order #'.$sourcingOrder->id.'. Error: '.$e->getMessage(), ['exception' => $e]);
             // Do not block the user flow if email fails
         }
 

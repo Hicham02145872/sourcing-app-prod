@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Events\ProofOfPaymentUploadedEvent;
 use App\Events\QuotationAccepted;
 use App\Events\QuotationCreated;
 use App\Events\QuotationRejected;
@@ -38,6 +39,7 @@ class EventServiceProvider extends ServiceProvider
         QuotationAccepted::class => [
             UpdateSourcingRequestStatusOnQuotationAccepted::class,
             SendQuotationAcceptedNotification::class,
+            \App\Listeners\CopyEstimatesToSourcingOrder::class,
         ],
         QuotationRejected::class => [
             UpdateSourcingRequestStatusOnQuotationRejected::class,
@@ -48,7 +50,15 @@ class EventServiceProvider extends ServiceProvider
         ],
         SourcingOrderStatusChanged::class => [
             SendSourcingOrderStatusUpdatedNotification::class,
+            \App\Listeners\UpdateOrderStatusInGoogleSheet::class,
         ],
+        ProofOfPaymentUploadedEvent::class => [
+            \App\Listeners\SyncOrderToGoogleSheet::class,
+        ],
+        \Illuminate\Notifications\Events\NotificationFailed::class => [
+            \App\Listeners\PruneInvalidFcmTokens::class,
+        ],
+
     ];
 
     /**

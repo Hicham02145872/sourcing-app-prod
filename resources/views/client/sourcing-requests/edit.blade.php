@@ -1,34 +1,7 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-[#EF7722] rounded-lg flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                                {{ __('Edit Sourcing Request') }}
-                            </h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Update your product details and requirements') }}</p>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ route('client.dashboard') }}" 
-                   class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-200 shadow-sm w-full sm:w-auto justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                    {{ __('Cancel') }}
-                </a>
-            </div>
-        </div>
-    </x-slot>
+    
 
-    <div class="py-25 bg-[#fffff] dark:bg-slate-900 min-h-screen">
+    <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4">
             {{-- Progress Steps --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 p-6 mb-6">

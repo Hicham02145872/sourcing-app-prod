@@ -1,248 +1,187 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-[#EF7722] to-[#FAA533] rounded-lg flex items-center justify-center shadow-lg">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-4a2 2 0 012-2h12a2 2 0 012 2v4zM13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                            </svg>
-                        </div>
+    <!-- Main Container: Enterprise Slate Background -->
+    <div class="min-h-screen bg-slate-50/80 font-sans text-slate-900 pb-12">
+        
+        <!-- Top Navigation / Breadcrumb Area -->
+        <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-4 md:py-0 gap-4">
+                    <div class="flex items-center gap-2">
+                        <!-- Branding Icon -->
+                        <span class="inline-flex items-center justify-center h-8 w-8 rounded bg-orange-100 text-orange-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        </span>
                         <div>
-                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ __('Client Management') }}</h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ __('Manage and monitor all your clients') }}</p>
+                            <h1 class="text-lg font-bold text-slate-900 leading-tight">{{ __('Client Management') }}</h1>
+                            <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">
+                                <span class="hover:text-slate-700 cursor-pointer">Dashboard</span>
+                                <span class="mx-1.5">/</span>
+                                <span class="font-medium text-slate-700">Clients</span>
+                            </nav>
                         </div>
                     </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        {{ __('Export') }}
-                    </button>
-                    <a href="{{ route('admin.users.create') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        {{ __('Add Client') }}
-                    </a>
+                    
+                    <!-- Global Actions -->
+                    <div class="flex items-center gap-3">
+                        <button onclick="window.location.reload()" class="p-2 text-slate-400 hover:text-slate-600 transition-colors" title="Actualiser">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </button>
+                        <div class="h-6 w-px bg-slate-200"></div>
+                        <span class="text-xs text-slate-500">{{ $users->total() }} records</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </x-slot>
 
-    <div class="py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-            
-            {{-- STATISTICS CARDS --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {{-- Total Clients --}}
-                <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+            <!-- Section 1: KPIs (Summary Cards) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Total Clients -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-orange-300 transition-colors group">
+                    <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-sm font-semibold text-slate-600 dark:text-slate-400">{{ __('Total Clients') }}</p>
-                            <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2">{{ $totalUsers }}</p>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 font-semibold mt-2 flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                                </svg>
-                                {{ __('All registered') }}
-                            </p>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ __('Total Clients') }}</p>
+                            <h3 class="mt-1 text-2xl font-bold text-slate-900">{{ number_format($totalUsers) }}</h3>
                         </div>
-                        <div class="w-12 h-12 bg-[#EF7722]/10 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-4a2 2 0 012-2h12a2 2 0 012 2v4zM13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                            </svg>
+                        <div class="p-1.5 bg-slate-50 rounded text-slate-400 group-hover:text-orange-600 group-hover:bg-orange-50 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         </div>
                     </div>
+                    <div class="mt-2 text-xs text-slate-400">Base de données complète</div>
                 </div>
 
-                {{-- Active Clients --}}
-                <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between">
+                <!-- Active -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-emerald-300 transition-colors group">
+                    <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-sm font-semibold text-slate-600 dark:text-slate-400">{{ __('Active') }}</p>
-                            <p class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">{{ $activeUsers }}</p>
-                            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-2 flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                {{ __('Currently active') }}
-                            </p>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ __('Active') }}</p>
+                            <h3 class="mt-1 text-2xl font-bold text-slate-900">{{ number_format($activeUsers) }}</h3>
                         </div>
-                        <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
+                        <div class="p-1.5 bg-emerald-50 rounded text-emerald-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                     </div>
+                    <div class="mt-2 text-xs text-emerald-600 font-medium">Comptes vérifiés</div>
                 </div>
 
-                {{-- New This Month --}}
-                <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between">
+                <!-- New This Month -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-blue-300 transition-colors group">
+                    <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-sm font-semibold text-slate-600 dark:text-slate-400">{{ __('New This Month') }}</p>
-                            <p class="text-3xl font-bold text-amber-600 dark:text-amber-400 mt-2">{{ $newUsersThisMonth }}</p>
-                            <p class="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-2 flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                {{ __('Recent signups') }}
-                            </p>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ __('New This Month') }}</p>
+                            <h3 class="mt-1 text-2xl font-bold text-slate-900">{{ number_format($newUsersThisMonth) }}</h3>
                         </div>
-                        <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/50 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
+                        <div class="p-1.5 bg-blue-50 rounded text-blue-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                         </div>
                     </div>
+                    <div class="mt-2 text-xs text-blue-600 font-medium">Croissance récente</div>
                 </div>
 
-                {{-- Inactive Clients --}}
-                <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between">
+                <!-- Inactive -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-slate-300 transition-colors group">
+                    <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-sm font-semibold text-slate-600 dark:text-slate-400">{{ __('Inactive') }}</p>
-                            <p class="text-3xl font-bold text-slate-600 dark:text-slate-400 mt-2">{{ $inactiveUsers }}</p>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 font-semibold mt-2 flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                {{ __('Not active recently') }}
-                            </p>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ __('Inactive') }}</p>
+                            <h3 class="mt-1 text-2xl font-bold text-slate-900">{{ number_format($inactiveUsers) }}</h3>
                         </div>
-                        <div class="w-12 h-12 bg-slate-100 dark:bg-slate-900/50 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
+                        <div class="p-1.5 bg-slate-100 rounded text-slate-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                         </div>
                     </div>
+                    <div class="mt-2 text-xs text-slate-400">À relancer</div>
                 </div>
             </div>
 
-            {{-- MAIN TABLE CARD --}}
-            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-                
-                {{-- HEADER --}}
-                <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 bg-[#EF7722] rounded-full animate-pulse"></div>
-                        <div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('All Clients') }}</h3>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                                <span class="font-semibold text-[#EF7722]">{{ $users->total() }}</span> {{ Str::plural('client', $users->total()) }}
-                            </p>
+            <!-- Section 2: Toolbar & Filters (Sticky) -->
+            <div class="sticky top-20 z-10 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+                <form action="{{ route('admin.users.index') }}" method="GET" class="flex flex-col lg:flex-row gap-3 items-center justify-between">
+                    
+                    <!-- Search & Filters Group -->
+                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto flex-1">
+                        <!-- Search -->
+                        <div class="relative w-full sm:w-72">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search users...') }}"
+                                class="w-full pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-orange-500 block transition-colors">
+                        </div>
+
+                        <!-- Role Filter -->
+                        <div class="w-full sm:w-40">
+                            <select name="role" class="w-full px-3 py-1.5 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-orange-500 block">
+                                <option value="">{{ __('All Roles') }}</option>
+                                <option value="client" {{ request('role') == 'client' ? 'selected' : '' }}>{{ __('Client') }}</option>
+                                <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="w-full sm:w-40">
+                            <select name="status" class="w-full px-3 py-1.5 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-orange-500 block">
+                                <option value="">{{ __('All Status') }}</option>
+                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
+                                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>{{ __('Inactive') }}</option>
+                            </select>
+                        </div>
+
+                        <!-- FCM Filter -->
+                        <div class="w-full sm:w-40">
+                            <select name="fcm_status" class="w-full px-3 py-1.5 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-orange-500 block">
+                                <option value="">{{ __('All Devices') }}</option>
+                                <option value="has_token" {{ request('fcm_status') == 'has_token' ? 'selected' : '' }}>{{ __('With Token') }}</option>
+                                <option value="no_token" {{ request('fcm_status') == 'no_token' ? 'selected' : '' }}>{{ __('No Token') }}</option>
+                            </select>
                         </div>
                     </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2 w-full lg:w-auto justify-end">
+                        <a href="{{ route('admin.users.index') }}" class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-300 rounded-md transition-colors">
+                            {{ __('Reset') }}
+                        </a>
+                        <button type="submit" class="px-4 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-md transition-colors shadow-sm flex items-center gap-2">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                            {{ __('Filter') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Section 3: Data Table -->
+            <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('User Profile') }}</th>
+                                <th scope="col" class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Role') }}</th>
+                                <th scope="col" class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Status') }}</th>
+                                <th scope="col" class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Joined') }}</th>
+                                <th scope="col" class="px-6 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200" id="users-table-body" x-data="{ expandedId: null }">
+                            @include('admin.users.partials.users_table_rows', ['users' => $users])
+                        </tbody>
+                    </table>
                 </div>
 
-                {{-- FILTERS --}}
-                <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                    <form action="{{ route('admin.users.index') }}" method="GET" class="space-y-4 sm:space-y-0 sm:flex sm:items-center sm:gap-4">
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
-                            {{-- SEARCH --}}
-                            <div class="relative flex-1 max-w-md">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
-                                </div>
-                                <input type="text" 
-                                       name="search"
-                                       placeholder="{{ __('Search by name or email...') }}" 
-                                       value="{{ request('search') }}"
-                                       class="block w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white">
-                            </div>
-
-                            {{-- STATUS FILTER --}}
-                            <div class="w-full sm:w-40">
-                                <select name="status" class="block w-full px-4 py-2.5 text-sm border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 shadow-sm font-semibold text-slate-900 dark:text-white">
-                                    <option value="">{{ __('All Status') }}</option>
-                                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
-                                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>{{ __('Inactive') }}</option>
-                                </select>
-                            </div>
-
-                            {{-- ROLE FILTER --}}
-                            <div class="w-full sm:w-40">
-                                <select name="role" class="block w-full px-4 py-2.5 text-sm border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 shadow-sm font-semibold text-slate-900 dark:text-white">
-                                    <option value="">{{ __('All Roles') }}</option>
-                                    <option value="client" {{ request('role') == 'client' ? 'selected' : '' }}>{{ __('Client') }}</option>
-                                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3">
-                            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                                </svg>
-                                {{ __('Filter') }}
-                            </button>
-                            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm">
-                                {{ __('Clear') }}
-                            </a>
-                        </div>
-                    </form>
-                </div>
-
-                {{-- CONTENT --}}
-                @if ($users->isEmpty())
-                    {{-- EMPTY STATE --}}
-                    <div class="text-center py-20 px-6">
-                        <div class="mx-auto w-20 h-20 bg-[#EF7722]/10 rounded-lg flex items-center justify-center mb-6">
-                            <svg class="w-10 h-10 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-4a2 2 0 012-2h12a2 2 0 012 2v4zM13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">{{ __('No clients found') }}</h3>
-                    </div>
-                @else
-                    {{-- TABLE --}}
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                                <tr>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                                        {{ __('Client') }}
-                                    </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                                        {{ __('Email') }}
-                                    </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                                        {{ __('Role') }}
-                                    </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                                        {{ __('Status') }}
-                                    </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                                        {{ __('Joined') }}
-                                    </th>
-                                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                                        {{ __('Actions') }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700" id="users-table-body">
-                                @include('admin.users.partials.users_table')
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- PAGINATION --}}
-                    <div id="users-pagination" class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                        @include('admin.users.partials.pagination')
+                <!-- Pagination -->
+                @if($users->hasPages())
+                    <div id="users-pagination" class="bg-white px-6 py-3 border-t border-slate-200">
+                        {{ $users->links() }}
                     </div>
                 @endif
             </div>
+
         </div>
     </div>
 
     @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.querySelector('input[name="search"]');
@@ -253,19 +192,28 @@
             function fetchUsers(searchTerm, page = 1) {
                 const status = document.querySelector('select[name="status"]').value;
                 const role = document.querySelector('select[name="role"]').value;
+                const fcm_status = document.querySelector('select[name="fcm_status"]').value;
                 
                 axios.get('{{ route('admin.users.index') }}', {
                     params: { 
                         search: searchTerm, 
                         page: page,
                         status: status,
-                        role: role
+                        role: role,
+                        fcm_status: fcm_status
                     },
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(response => {
-                    usersTableBody.innerHTML = response.data.table;
-                    usersPagination.innerHTML = response.data.pagination;
+                    // Assuming the controller returns 'table' and 'pagination' HTML fragments
+                    // If your controller returns the full view, you might need to parse it differently
+                    if(response.data.table) {
+                        usersTableBody.innerHTML = response.data.table;
+                    }
+                    if(response.data.pagination) {
+                        if(usersPagination) usersPagination.innerHTML = response.data.pagination;
+                    }
+                    // Re-attach pagination listeners after content update
                     attachPaginationListeners();
                 })
                 .catch(error => {
@@ -280,14 +228,15 @@
                 }, 300);
             });
 
-            document.querySelectorAll('select[name="status"], select[name="role"]').forEach(select => {
+            document.querySelectorAll('select[name="status"], select[name="role"], select[name="fcm_status"]').forEach(select => {
                 select.addEventListener('change', function() {
                     fetchUsers(searchInput.value);
                 });
             });
 
             function attachPaginationListeners() {
-                usersPagination.querySelectorAll('.pagination a').forEach(link => {
+                if(!usersPagination) return;
+                usersPagination.querySelectorAll('a').forEach(link => {
                     link.removeEventListener('click', handlePaginationClick);
                     link.addEventListener('click', handlePaginationClick);
                 });
@@ -295,52 +244,16 @@
 
             function handlePaginationClick(event) {
                 event.preventDefault();
-                const url = new URL(this.href);
-                const page = url.searchParams.get('page');
-                const searchTerm = searchInput.value;
-                fetchUsers(searchTerm, page);
+                if(this.getAttribute('href')) {
+                    const url = new URL(this.href);
+                    const page = url.searchParams.get('page');
+                    const searchTerm = searchInput.value;
+                    fetchUsers(searchTerm, page);
+                }
             }
 
             attachPaginationListeners();
         });
     </script>
     @endpush
-
-    <style>
-        table {
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        tbody tr {
-            transition: background-color 0.2s ease;
-        }
-
-        tbody tr:hover {
-            background-color: #f8fafc;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        * {
-            transition-property: background-color, border-color, color, fill, stroke;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 150ms;
-        }
-    </style>
 </x-app-layout>

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
 class SourcingRequest extends Model
 {
@@ -34,7 +33,48 @@ class SourcingRequest extends Model
         'latitude',
         'longitude',
         'sourcing_location',
+        'assigned_to_admin_id',
+        'assigned_at',
     ];
+
+    protected $casts = [
+        'assigned_at' => 'datetime',
+    ];
+
+    public function assignedAdmin()
+    {
+        return $this->belongsTo(User::class, 'assigned_to_admin_id');
+    }
+
+    public function isAssigned()
+    {
+        return ! is_null($this->assigned_to_admin_id);
+    }
+
+    public function isAssignedTo(User $user)
+    {
+        return $this->assigned_to_admin_id === $user->id;
+    }
+
+    public function claim(User $user)
+    {
+        if ($this->isAssigned() && ! $this->isAssignedTo($user)) {
+            throw new \Exception('Request is already assigned to another admin.');
+        }
+
+        $this->update([
+            'assigned_to_admin_id' => $user->id,
+            'assigned_at' => now(),
+        ]);
+    }
+
+    public function release()
+    {
+        $this->update([
+            'assigned_to_admin_id' => null,
+            'assigned_at' => null,
+        ]);
+    }
 
     public function user()
     {
@@ -54,8 +94,8 @@ class SourcingRequest extends Model
     public function countries()
     {
         return $this->belongsToMany(Country::class, 'sourcing_request_destinations')
-                    ->withPivot('quantity')
-                    ->withTimestamps();
+            ->withPivot('quantity')
+            ->withTimestamps();
     }
 
     public function quotation()
@@ -68,9 +108,12 @@ class SourcingRequest extends Model
         return $this->hasOneThrough(SourcingOrder::class, Quotation::class);
     }
 
-    public function canTransitionTo(string $newStatus, User $user = null): bool
+    public function canTransitionTo(string $newStatus, ?User $user = null): bool
     {
         $user = $user ?? auth()->user(); // Use provided user or authenticated user
+
+        // Map super_admin to admin for transition checks
+        $effectiveRole = ($user->role === 'super_admin') ? 'admin' : $user->role;
 
         $allowedTransitions = [
             'pending' => [
@@ -79,7 +122,7 @@ class SourcingRequest extends Model
             ],
             'in_review' => [
                 'client' => ['rejected'], // Client can cancel their own request in review
-                'admin' => ['quoted', 'rejected'], // Admin can quote or reject
+                'admin' => ['rejected'], // Admin can reject, but 'quoted' is handled by Quotation creation
             ],
             'quoted' => [
                 'client' => ['accepted', 'rejected'], // Client can accept or reject a quotation
@@ -94,12 +137,12 @@ class SourcingRequest extends Model
         ];
 
         // Check if the current status has defined transitions
-        if (!isset($allowedTransitions[$this->status])) {
+        if (! isset($allowedTransitions[$this->status])) {
             return false;
         }
 
         // Check if the new status is allowed for the current status
-        if (!in_array($newStatus, $allowedTransitions[$this->status][$user->role] ?? [])) {
+        if (! in_array($newStatus, $allowedTransitions[$this->status][$effectiveRole] ?? [])) {
             return false;
         }
 
@@ -111,9 +154,9 @@ class SourcingRequest extends Model
         return true;
     }
 
-    public function transitionTo(string $newStatus, User $user = null): bool
+    public function transitionTo(string $newStatus, ?User $user = null): bool
     {
-        if (!$this->canTransitionTo($newStatus, $user)) {
+        if (! $this->canTransitionTo($newStatus, $user)) {
             throw new \Exception("Invalid status transition from '{$this->status}' to '{$newStatus}' for user role '{$user->role}'.");
         }
 
