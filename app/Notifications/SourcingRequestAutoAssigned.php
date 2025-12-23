@@ -16,7 +16,7 @@ class SourcingRequestAutoAssigned extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database', 'fcm'];
+        return ['database', 'mail', 'fcm'];
     }
 
     public function toMail(object $notifiable): MailMessage

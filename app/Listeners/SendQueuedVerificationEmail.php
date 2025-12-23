@@ -9,9 +9,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-class SendQueuedVerificationEmail implements ShouldQueue
+class SendQueuedVerificationEmail
 {
-    use InteractsWithQueue;
 
     public $tries = 1;
     public $afterCommit = true;

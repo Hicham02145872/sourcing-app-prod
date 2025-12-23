@@ -33,17 +33,13 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-
-        $channels = ['mail', 'database'];
+        $channels = ['database', 'mail'];
 
         if ($notifiable->fcm_token) {
-
             $channels[] = 'fcm';
-
         }
 
         return $channels;
-
     }
 
     /**

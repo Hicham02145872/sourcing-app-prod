@@ -23,7 +23,8 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        $channels = ['mail', 'database'];
+        $channels = ['database', 'mail'];
+
         if ($notifiable->fcm_token) {
             $channels[] = 'fcm';
         }

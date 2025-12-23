@@ -29,12 +29,36 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\SourcingRequest::observe(\App\Observers\SourcingRequestObserver::class);
 
         Notification::extend('fcm', function ($app) {
-            // SUPPRIMEZ la ligne withApiKey() - elle n'existe pas!
-            $factory = (new Factory)->withServiceAccount(config('firebase.projects.app.credentials'));
+            $credentials = config('firebase.projects.app.credentials');
 
-            $messaging = $factory->createMessaging();
+            if (! $credentials || ! file_exists($credentials)) {
+                \Illuminate\Support\Facades\Log::warning('FCM Notification skipped: Credentials file missing at '.$credentials);
 
-            return new FcmChannel($messaging);
+                return new class
+                {
+                    public function send($notifiable, $notification)
+                    {
+                        // Logic to skip sending
+                    }
+                };
+            }
+
+            try {
+                $factory = (new Factory)->withServiceAccount($credentials);
+                $messaging = $factory->createMessaging();
+
+                return new FcmChannel($messaging);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('FCM Driver Error: '.$e->getMessage());
+
+                return new class
+                {
+                    public function send($notifiable, $notification)
+                    {
+                        // Logic to skip sending
+                    }
+                };
+            }
         });
 
         View::composer(['components.layout.header', 'components.sidebar', 'client.dashboard'], function ($view) {
