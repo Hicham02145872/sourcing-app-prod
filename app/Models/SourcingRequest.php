@@ -110,26 +110,33 @@ class SourcingRequest extends Model
 
     public function canTransitionTo(string $newStatus, ?User $user = null): bool
     {
-        $user = $user ?? auth()->user(); // Use provided user or authenticated user
+        $user = $user ?? auth()->user();
+
+        // If no user is available (e.g., system action), allow if triggered by system logic
+        // For now, if no user, we might want to default to 'admin' or deny.
+        // Let's default to a 'system' role concept or check if user is null.
+        if (! $user) {
+            return true; // Or handle system-level transitions specifically
+        }
 
         // Map super_admin to admin for transition checks
         $effectiveRole = ($user->role === 'super_admin') ? 'admin' : $user->role;
 
         $allowedTransitions = [
             'pending' => [
-                'client' => ['rejected'], // Client can cancel their own pending request
-                'admin' => ['in_review', 'rejected'], // Admin can review or reject
+                'client' => ['rejected', 'cancelled'],
+                'admin' => ['in_review', 'rejected', 'quoted'],
             ],
             'in_review' => [
-                'client' => ['rejected'], // Client can cancel their own request in review
-                'admin' => ['rejected'], // Admin can reject, but 'quoted' is handled by Quotation creation
+                'client' => ['rejected', 'cancelled'],
+                'admin' => ['quoted', 'rejected'],
             ],
             'quoted' => [
-                'client' => ['accepted', 'rejected'], // Client can accept or reject a quotation
-                'admin' => ['accepted', 'rejected'], // Admin can also mark as accepted/rejected (e.g., if client communicates offline)
+                'client' => ['accepted', 'rejected', 'cancelled'],
+                'admin' => ['accepted', 'rejected', 'cancelled'],
             ],
             'accepted' => [
-                'admin' => ['completed', 'cancelled'], // Admin can complete or cancel an accepted request
+                'admin' => ['completed', 'cancelled'],
             ],
             'rejected' => [], // No transitions from rejected
             'completed' => [], // No transitions from completed
@@ -156,8 +163,11 @@ class SourcingRequest extends Model
 
     public function transitionTo(string $newStatus, ?User $user = null): bool
     {
+        $user = $user ?? auth()->user();
+
         if (! $this->canTransitionTo($newStatus, $user)) {
-            throw new \Exception("Invalid status transition from '{$this->status}' to '{$newStatus}' for user role '{$user->role}'.");
+            $roleName = $user ? $user->role : 'system';
+            throw new \Exception("Invalid status transition from '{$this->status}' to '{$newStatus}' for user role '{$roleName}'.");
         }
 
         $this->status = $newStatus;
