@@ -25,6 +25,11 @@ trait NotificationFilterTrait
             return $notifications;
         }
 
+        // Clients see all their notifications (already filtered by $user->notifications())
+        if ($user->isClient()) {
+            return $notifications;
+        }
+
         // Extract all entity IDs from notifications
         $sourcingRequestIds = [];
         $quotationIds = [];

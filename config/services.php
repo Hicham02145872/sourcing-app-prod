@@ -46,4 +46,8 @@ return [
         'vapid_key' => env('FIREBASE_VAPID_KEY'),
     ],
 
+    'google' => [
+        'credentials_path' => env('GOOGLE_APPLICATION_CREDENTIALS_PATH', 'app/secure/credentials.json'),
+    ],
+
 ];

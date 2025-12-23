@@ -176,6 +176,10 @@ class NotificationController extends Controller
                 'is_read' => ! is_null($notification->read_at),
                 'type' => $notification->type ?? null,
                 'category' => $data['category'] ?? null,
+                'sourcing_request_id' => $data['sourcing_request_id'] ?? null,
+                'quotation_id' => $data['quotation_id'] ?? null,
+                'sourcing_order_id' => $data['sourcing_order_id'] ?? null,
+                'refund_request_id' => $data['refund_request_id'] ?? null,
             ];
         });
 

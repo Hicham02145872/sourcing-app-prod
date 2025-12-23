@@ -41,7 +41,7 @@ class GoogleSheetService
         $this->client->setScopes([Sheets::SPREADSHEETS]);
         $this->client->setAccessType('offline');
 
-        $credentialsPath = storage_path(env('GOOGLE_APPLICATION_CREDENTIALS_PATH'));
+        $credentialsPath = storage_path(config('services.google.credentials_path'));
         if (! file_exists($credentialsPath)) {
             Log::error('Google Sheets API credentials file not found at: '.$credentialsPath);
             throw new \Exception('Google Sheets API credentials file not found.');
@@ -765,7 +765,7 @@ class GoogleSheetService
             }
 
             // Check if credentials file exists
-            $credentialsPath = storage_path(env('GOOGLE_APPLICATION_CREDENTIALS_PATH'));
+            $credentialsPath = storage_path(config('services.google.credentials_path'));
             if (! file_exists($credentialsPath)) {
                 return [
                     'success' => false,
