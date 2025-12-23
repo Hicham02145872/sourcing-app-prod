@@ -73,13 +73,22 @@
                     <input type="text" wire:model.defer="tracking_carrier" id="tracking_carrier" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-slate-50" placeholder="Ex: Faster.ae, DHL...">
                 </div>
             </div>
-            <div class="mt-4 flex justify-end">
+            <div class="mt-4 flex flex-col sm:flex-row justify-end gap-3">
+                <button type="button"
+                        @click.prevent="window.dispatchEvent(new CustomEvent('show-success-toast', { detail: '{{ __('Coming Soon') }}' }))"
+                        class="px-4 py-2 bg-slate-100 text-slate-600 border border-slate-200 text-sm font-medium rounded transition-colors shadow-sm flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" /></svg>
+                    {{ __('Deep Tracking') }}
+                    <span class="text-[10px] font-bold bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded uppercase">{{ __('Soon') }}</span>
+                </button>
+
                 <button wire:click="updateTracking" wire:loading.attr="disabled" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors shadow-sm flex items-center gap-2">
                     <span wire:loading.remove wire:target="updateTracking">{{ __('Enregistrer le suivi') }}</span>
                     <span wire:loading wire:target="updateTracking">{{ __('Enregistrement...') }}</span>
                     <svg wire:loading wire:target="updateTracking" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 </button>
             </div>
+
         </div>
     </div>
 </div>

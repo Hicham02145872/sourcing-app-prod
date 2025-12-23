@@ -516,14 +516,17 @@
                                 </div>
                             @elseif(in_array($sourcingOrder->status, ['paid', 'delivered', 'order_completed']))
                                 <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
-                                    <button type="button" @click="$dispatch('open-modal', 'refund-request-modal')" 
-                                            class="w-full py-2.5 px-4 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 border border-red-200 dark:border-red-900/30 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
-                                        </svg>
-                                        {{ __('Request Refund') }}
-                                    </button>
-                                </div>
+                                    <button type="button" 
+                                             @click.prevent="window.dispatchEvent(new CustomEvent('show-success-toast', { detail: '{{ __('Coming Soon') }}' }))"
+                                             class="w-full py-2.5 px-4 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 border border-red-200 dark:border-red-900/30 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm">
+                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                                         </svg>
+                                         {{ __('Request Refund') }}
+                                         <span class="text-[10px] font-bold bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded uppercase">{{ __('Soon') }}</span>
+                                     </button>
+                                 </div>
+
                             @endif
 
                             <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
