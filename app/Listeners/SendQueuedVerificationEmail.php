@@ -14,7 +14,7 @@ class SendQueuedVerificationEmail implements ShouldQueue
     use InteractsWithQueue;
 
 
-    public $tries = 1;
+    public $tries = 3;
     public $afterCommit = true;
 
     /**

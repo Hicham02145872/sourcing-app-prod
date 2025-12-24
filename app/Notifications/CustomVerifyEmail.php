@@ -12,12 +12,14 @@ class CustomVerifyEmail extends VerifyEmailBase implements ShouldQueue
 {
     use Queueable;
     
-    public ?string $queue = 'mail';
-
     /**
-     * Send the notification after the transaction commits.
+     * Create a new notification instance.
      */
-    public ?bool $afterCommit = true;
+    public function __construct()
+    {
+        $this->onQueue('mail');
+        $this->afterCommit();
+    }
 
     /**
      * Get the mail representation of the notification.
