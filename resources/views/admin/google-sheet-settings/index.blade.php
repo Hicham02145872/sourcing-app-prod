@@ -194,16 +194,20 @@
                             <div class="flex items-center justify-between gap-3 flex-wrap">
                                 <div class="flex items-center gap-2">
                                     <button type="button" id="testConnectionBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded transition-colors shadow-sm flex items-center gap-2">
-                                        <svg id="testBtnIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                        </svg>
+                                        <span id="testBtnIcon">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                            </svg>
+                                        </span>
                                         <span id="testBtnText">{{ __('Test connection') }}</span>
                                     </button>
                                     
                                     <button type="button" id="installHeadersBtn" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded transition-colors shadow-sm flex items-center gap-2">
-                                        <svg id="installBtnIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                        </svg>
+                                        <span id="installBtnIcon">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                        </span>
                                         <span id="installBtnText">{{ __('Install headers') }}</span>
                                     </button>
 
@@ -346,6 +350,9 @@
             const btnIcon = document.getElementById('testBtnIcon');
             const resultContainer = document.getElementById('testResultContainer');
             
+            // Capture original state
+            const originalIcon = btnIcon.innerHTML;
+            
             // Show loading state
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-wait');
@@ -463,7 +470,7 @@
                 btn.disabled = false;
                 btn.classList.remove('opacity-75', 'cursor-wait');
                 btnText.textContent = '{{ __("Test connection") }}';
-                btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>';
+                btnIcon.innerHTML = originalIcon;
             }
         });
 

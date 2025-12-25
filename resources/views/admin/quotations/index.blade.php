@@ -111,7 +111,7 @@
                     <div class="flex flex-col lg:flex-row gap-4 items-end lg:items-center justify-between">
                         
                         <!-- Inputs Group -->
-                        <div class="flex flex-col md:flex-row gap-4 w-full lg:w-auto flex-1">
+                        <div class="flex flex-col md:flex-row gap-4 w-full lg:w-auto flex-1 md:items-end">
                             <div class="w-full md:w-64">
                                 <label for="search" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Search') }}</label>
                                 <div class="relative">
