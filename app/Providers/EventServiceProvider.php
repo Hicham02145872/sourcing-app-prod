@@ -6,18 +6,21 @@ use App\Events\ProofOfPaymentUploadedEvent;
 use App\Events\QuotationAccepted;
 use App\Events\QuotationCreated;
 use App\Events\QuotationRejected;
+use App\Events\RefundRequestUpdated;
 use App\Events\SourcingOrderStatusChanged;
 use App\Events\SourcingRequestStatusChanged;
 use App\Listeners\SendQuotationAcceptedNotification;
 use App\Listeners\SendQuotationCreatedNotification;
 use App\Listeners\SendQuotationRejectedNotification;
+use App\Listeners\SendRefundStatusNotification;
 use App\Listeners\SendSourcingOrderStatusUpdatedNotification;
 use App\Listeners\SendSourcingRequestStatusChangeNotification;
 use App\Listeners\UpdateSourcingRequestStatusOnQuotationAccepted;
 use App\Listeners\UpdateSourcingRequestStatusOnQuotationCreated;
 use App\Listeners\UpdateSourcingRequestStatusOnQuotationRejected;
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -27,9 +30,9 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
-        \Illuminate\Auth\Events\Registered::class => [
-            \Illuminate\Auth\Listeners\SendEmailVerificationNotification::class,
-        ],
+        // \Illuminate\Auth\Events\Registered::class => [
+        //     \Illuminate\Auth\Listeners\SendEmailVerificationNotification::class,
+        // ],
         QuotationCreated::class => [
             UpdateSourcingRequestStatusOnQuotationCreated::class,
             SendQuotationCreatedNotification::class,
@@ -56,7 +59,9 @@ class EventServiceProvider extends ServiceProvider
         \Illuminate\Notifications\Events\NotificationFailed::class => [
             \App\Listeners\PruneInvalidFcmTokens::class,
         ],
-
+        RefundRequestUpdated::class => [
+            SendRefundStatusNotification::class,
+        ],
     ];
 
     /**
@@ -64,14 +69,11 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
-    }
-
-    /**
-     * Determine if events and listeners should be automatically discovered.
-     */
-    public function shouldDiscoverEvents(): bool
-    {
-        return true;
+        Log::info('EventServiceProvider booting...');
+        foreach ($this->listen as $event => $listeners) {
+            foreach ($listeners as $listener) {
+                Event::listen($event, $listener);
+            }
+        }
     }
 }
