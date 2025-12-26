@@ -161,6 +161,8 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
             'cancelled' => __('Cancelled'),
 
+            'negotiating' => __('Negotiating'),
+
         ];
 
         return $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));

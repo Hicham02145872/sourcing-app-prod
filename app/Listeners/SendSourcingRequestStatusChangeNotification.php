@@ -37,17 +37,31 @@ class SendSourcingRequestStatusChangeNotification
         Cache::put($lockKey, true, 60); // Verrou pour 60 secondes
 
         try {
-            // Notifier le client
-            $clientUser->notify(new SourcingRequestStatusUpdatedNotification($sourcingRequest));
+            // Notifier le client s'il s'agit d'une action admin
+            if ($adminUser->isAdmin()) {
+                $clientUser->notify(new SourcingRequestStatusUpdatedNotification($sourcingRequest));
+                Log::info('SourcingRequestStatusUpdated notification sent to client', [
+                    'sourcing_request_id' => $sourcingRequest->id,
+                    'user_id' => $clientUser->id,
+                ]);
+            }
 
-            Log::info('SourcingRequestStatusUpdated notification sent to client for Sourcing Request', [
-                'sourcing_request_id' => $sourcingRequest->id,
-                'user_id' => $clientUser->id,
-                'status' => $sourcingRequest->status,
-            ]);
+            // Notifier l'admin s'il s'agit d'une action client
+            if ($adminUser->isClient()) {
+                $assignedAdmin = $sourcingRequest->assignedAdmin;
+                if ($assignedAdmin) {
+                    $notification = $sourcingRequest->status === 'negotiating'
+                        ? new \App\Notifications\QuotationNegotiationRequested($sourcingRequest)
+                        : new \App\Notifications\AdminSourcingRequestStatusUpdated($sourcingRequest);
 
-
-
+                    $assignedAdmin->notify($notification);
+                    Log::info('SourcingRequest status update notification sent to admin', [
+                        'sourcing_request_id' => $sourcingRequest->id,
+                        'admin_id' => $assignedAdmin->id,
+                        'type' => get_class($notification),
+                    ]);
+                }
+            }
         } catch (Exception $e) {
             Cache::forget($lockKey); // Libérer le verrou en cas d'erreur
             Log::error('Failed to send SourcingRequestStatusUpdated notification.', [

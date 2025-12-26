@@ -193,6 +193,11 @@
                                     </p>
                                 </div>
                             </div>
+                            
+                            {{-- Archived Link --}}
+                            <a href="{{ route('client.sourcing-requests.archived') }}" class="text-xs font-semibold text-slate-500 hover:text-red-500 underline decoration-slate-300 hover:decoration-red-300 transition-colors ml-2">
+                                {{ __('View Archived') }}
+                            </a>
                         </div>
                         
                         {{-- Filters --}}
@@ -333,6 +338,7 @@
                                                         'in_review' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
                                                         'accepted' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
                                                         'completed' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                                        'negotiating' => ['color' => '#3B82F6', 'icon' => 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'],
                                                     ];
                                                     $statusData = $statusConfig[$request->status] ?? $statusConfig['pending'];
                                                 @endphp

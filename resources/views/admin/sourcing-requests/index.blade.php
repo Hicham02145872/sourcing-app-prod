@@ -23,10 +23,13 @@
                     
                     <!-- Global Actions -->
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('admin.sourcing-requests.create') }}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 text-xs font-semibold rounded transition-colors shadow-sm">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-200 text-slate-500 text-xs font-semibold rounded transition-colors shadow-sm cursor-not-allowed group relative">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             {{ __('New Request') }}
-                        </a>
+                            <span class="absolute -top-8 right-0 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                {{ __('Coming Soon') }}
+                            </span>
+                        </div>
                         <button type="button" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-medium rounded transition-colors shadow-sm">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             {{ __('Export') }}

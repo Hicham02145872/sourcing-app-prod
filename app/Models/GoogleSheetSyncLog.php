@@ -148,6 +148,19 @@ class GoogleSheetSyncLog extends Model
     }
 
     /**
+     * Get user-friendly status label.
+     */
+    public function getStatusLabel(): string
+    {
+        return match ($this->status) {
+            'success' => __('Success'),
+            'error' => __('Error'),
+            'warning' => __('Warning'),
+            default => __('Info'),
+        };
+    }
+
+    /**
      * Get user-friendly error message.
      */
     public function getFriendlyErrorMessage(): string
@@ -199,13 +212,13 @@ class GoogleSheetSyncLog extends Model
         $errorMessage = $this->error_message ?? '';
 
         if (str_contains($errorMessage, 'does not have permission') || str_contains($errorMessage, 'forbidden')) {
-            $settingsUrl = route('admin.google-sheet-settings.index');
+            $settingsUrl = route('admin.google-sheets.settings');
 
             return __('Make sure you have shared your Google Sheet with the service account email. <a href=":url" class="text-blue-600 hover:underline">Check settings</a>', ['url' => $settingsUrl]);
         }
 
         if (str_contains($errorMessage, 'not found') || str_contains($errorMessage, '404')) {
-            $settingsUrl = route('admin.google-sheet-settings.index');
+            $settingsUrl = route('admin.google-sheets.settings');
 
             return __('Verify the Google Sheet URL is correct. <a href=":url" class="text-blue-600 hover:underline">Update settings</a>', ['url' => $settingsUrl]);
         }
@@ -215,7 +228,7 @@ class GoogleSheetSyncLog extends Model
         }
 
         if (str_contains($errorMessage, 'credentials') || str_contains($errorMessage, 'authentication')) {
-            $settingsUrl = route('admin.google-sheet-settings.index');
+            $settingsUrl = route('admin.google-sheets.settings');
 
             return __('Re-upload your Google Sheets credentials file. <a href=":url" class="text-blue-600 hover:underline">Go to settings</a>', ['url' => $settingsUrl]);
         }

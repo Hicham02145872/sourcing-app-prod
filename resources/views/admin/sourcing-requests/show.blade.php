@@ -68,6 +68,31 @@
                     <!-- 1. Assignment & Workflow Card (Livewire) -->
                     <livewire:admin.sourcing-request-workflow :sourcingRequest="$sourcingRequest" />
 
+                    @if($sourcingRequest->status === 'negotiating' && $sourcingRequest->quotation?->negotiation_notes)
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg shadow-sm">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-bold text-blue-800">{{ __('Negotiation Requested by Client') }}</h3>
+                                    <div class="mt-2 text-sm text-blue-700">
+                                        <p class="italic">"{{ $sourcingRequest->quotation->negotiation_notes }}"</p>
+                                    </div>
+                                    <div class="mt-4">
+                                        <div class="-mx-2 -my-1.5 flex">
+                                            <a href="{{ route('admin.quotations.edit', $sourcingRequest->quotation) }}" class="px-2 py-1.5 rounded-md text-sm font-medium text-blue-800 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-50 focus:ring-blue-600 transition-colors">
+                                                {{ __('Update Quotation') }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- 2. Product Details Card -->
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
@@ -144,7 +169,11 @@
                         <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                                 <h3 class="text-sm font-semibold text-slate-900">{{ __('Quotation Information') }}</h3>
-                                <a href="{{ route('admin.quotations.show', $sourcingRequest->quotation) }}" class="text-xs text-orange-600 hover:text-orange-700 font-bold uppercase tracking-wider">{{ __('View full quotation') }}</a>
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('admin.quotations.edit', $sourcingRequest->quotation) }}" class="text-xs text-blue-600 hover:text-blue-700 font-bold uppercase tracking-wider">{{ __('Edit') }}</a>
+                                    <span class="text-slate-200">|</span>
+                                    <a href="{{ route('admin.quotations.show', $sourcingRequest->quotation) }}" class="text-xs text-orange-600 hover:text-orange-700 font-bold uppercase tracking-wider">{{ __('View full quotation') }}</a>
+                                </div>
                             </div>
                             <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>

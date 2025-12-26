@@ -123,12 +123,15 @@ class GoogleSheetService
         }
     }
 
-    public function ensureHeaders()
+    public function ensureHeaders(): array
     {
         if ($this->sheetId === null) {
             Log::error("Could not find sheet ID for sheet name: {$this->sheetName}. Cannot style headers.");
 
-            return;
+            return [
+                'success' => false,
+                'message' => __("Could not find sheet ID for sheet name: :name. Please check your sheet name configuration.", ['name' => $this->sheetName]),
+            ];
         }
 
         try {
@@ -314,10 +317,25 @@ class GoogleSheetService
                     'spreadsheetId' => $this->spreadsheetId,
                     'sheetName' => $this->sheetName,
                 ]);
+
+                return [
+                    'success' => true,
+                    'message' => __('Headers installed and styled successfully.'),
+                ];
             }
+
+            return [
+                'success' => true,
+                'message' => __('Headers already exist. No changes were made.'),
+            ];
+
         } catch (\Exception $e) {
             Log::error('Failed to ensure and style Google Sheet headers: '.$e->getMessage());
-            throw new \Exception('Failed to ensure and style Google Sheet headers: '.$e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => __('Failed to ensure and style Google Sheet headers: :error', ['error' => $e->getMessage()]),
+            ];
         }
     }
 

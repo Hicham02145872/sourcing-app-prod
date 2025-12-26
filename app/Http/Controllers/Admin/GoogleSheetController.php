@@ -23,10 +23,22 @@ class GoogleSheetController extends Controller
         }
 
         $setting = GoogleSheetSetting::first();
-        $credentialsExist = Storage::exists('app/secure/credentials.json');
+        $credentialsExist = Storage::exists('secure/credentials.json');
+        $syncStats = \App\Models\GoogleSheetSyncLog::getStats();
 
         // Try to get connection status
         $connectionStatus = null;
+        $serviceEmail = null;
+        
+        if ($credentialsExist) {
+            try {
+                $creds = json_decode(Storage::get('secure/credentials.json'), true);
+                $serviceEmail = $creds['client_email'] ?? null;
+            } catch (\Exception $e) {
+                // Ignore decoding errors
+            }
+        }
+
         if ($credentialsExist && $setting) {
             try {
                 $connectionStatus = GoogleSheetService::testConnection();
@@ -38,7 +50,7 @@ class GoogleSheetController extends Controller
             }
         }
 
-        return view('admin.google-sheets.settings', compact('setting', 'credentialsExist', 'connectionStatus'));
+        return view('admin.google-sheets.settings', compact('setting', 'credentialsExist', 'connectionStatus', 'syncStats', 'serviceEmail'));
     }
 
     /**
@@ -71,8 +83,8 @@ class GoogleSheetController extends Controller
             }
 
             // Ensure secure directory exists
-            if (! Storage::exists('app/secure')) {
-                Storage::makeDirectory('app/secure');
+            if (! Storage::exists('secure')) {
+                Storage::makeDirectory('secure');
             }
 
             // Store the file
@@ -111,7 +123,7 @@ class GoogleSheetController extends Controller
     /**
      * Test Google Sheets API connection.
      */
-    public function testConnection(): RedirectResponse
+    public function testConnection(Request $request): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
     {
         if (! auth()->user()->isSuperAdmin()) {
             abort(403);
@@ -119,6 +131,10 @@ class GoogleSheetController extends Controller
 
         try {
             $result = GoogleSheetService::testConnection();
+
+            if ($request->expectsJson()) {
+                return response()->json($result);
+            }
 
             if ($result['success']) {
                 $message = 'Connection successful! Connected to: '.($result['details']['spreadsheet_title'] ?? 'Unknown');
@@ -128,6 +144,10 @@ class GoogleSheetController extends Controller
                 return back()->with('error', 'Connection failed: '.$result['message']);
             }
         } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Connection test error: '.$e->getMessage());
         }
     }
@@ -135,14 +155,19 @@ class GoogleSheetController extends Controller
     /**
      * Install headers in the Google Sheet.
      */
-    public function installHeaders(): RedirectResponse
+    public function installHeaders(Request $request): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
     {
         if (! auth()->user()->isSuperAdmin()) {
             abort(403);
         }
 
         try {
-            $result = GoogleSheetService::installHeaders();
+            $service = new GoogleSheetService;
+            $result = $service->ensureHeaders();
+
+            if ($request->expectsJson()) {
+                return response()->json($result);
+            }
 
             if ($result['success']) {
                 return back()->with('success', $result['message']);
@@ -150,8 +175,90 @@ class GoogleSheetController extends Controller
                 return back()->with('error', $result['message']);
             }
         } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Error installing headers: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Create the configured sheet (tab) if it doesn't exist.
+     */
+    public function createSheet(): \Illuminate\Http\JsonResponse
+    {
+        if (! auth()->user()->isSuperAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $setting = GoogleSheetSetting::first();
+            if (! $setting || ! $setting->sheet_name) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sheet name is not configured.',
+                ]);
+            }
+
+            $service = new GoogleSheetService;
+            $service->createSheet($setting->sheet_name);
+
+            // Auto install headers after creation
+            $service->ensureHeaders();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Sheet '{$setting->sheet_name}' created successfully with headers.",
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create sheet: '.$e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Dispatch job to sync all orders to Google Sheet.
+     */
+    public function syncAll(): \Illuminate\Http\JsonResponse
+    {
+        if (! auth()->user()->isSuperAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            \App\Jobs\SyncAllOrdersToGoogleSheet::dispatch();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sync job dispatched successfully. This may take a few minutes.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to dispatch sync job: '.$e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Clear all sync logs.
+     */
+    public function clearLogs(): \Illuminate\Http\JsonResponse
+    {
+        if (! auth()->user()->isSuperAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        \App\Models\GoogleSheetSyncLog::truncate();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Logs cleared successfully.',
+        ]);
     }
 
     /**

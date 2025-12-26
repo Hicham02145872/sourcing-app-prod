@@ -186,6 +186,65 @@ class QuotationController extends Controller
         return redirect()->route('admin.quotations.show', $quotation)->with('status', 'Quotation approved successfully!');
     }
 
+    public function edit(Quotation $quotation): View
+    {
+        $this->authorize('update', $quotation);
+        $quotation->load('sourcingRequest.user', 'sourcingRequest.destinations');
+
+        return view('admin.quotations.edit', compact('quotation'));
+    }
+
+    public function update(Request $request, Quotation $quotation): RedirectResponse
+    {
+        $this->authorize('update', $quotation);
+
+        $validated = $request->validate([
+            'unit_price' => 'required|numeric|min:0',
+            'commission_service' => 'required|numeric|min:0',
+            'unit_weight' => 'required|numeric|min:0',
+            'weight_unit' => 'required|string|in:g,kg,colis',
+            'delivery_cost_china' => 'required|numeric|min:0',
+            'currency' => 'required|string|max:3',
+            'estimated_product_cost' => 'nullable|numeric|min:0',
+            'estimated_shipping_cost' => 'nullable|numeric|min:0',
+            'estimated_other_costs' => 'nullable|numeric|min:0',
+        ]);
+
+        $sourcingRequest = $quotation->sourcingRequest;
+        $totalQuantity = $sourcingRequest->destinations->sum('quantity');
+        $totalQuantity = max(1, $totalQuantity);
+
+        $subtotal = $validated['unit_price'] * $totalQuantity;
+        $amount = $subtotal + $validated['commission_service'] + $validated['delivery_cost_china'];
+
+        $estimatedProductCostTotal = null;
+        if (isset($validated['estimated_product_cost'])) {
+            $estimatedProductCostTotal = $validated['estimated_product_cost'] * $totalQuantity;
+        }
+
+        $quotation->update([
+            'amount' => $amount,
+            'unit_price' => $validated['unit_price'],
+            'commission_service' => $validated['commission_service'],
+            'unit_weight' => $validated['unit_weight'],
+            'weight_unit' => $validated['weight_unit'],
+            'delivery_cost_china' => $validated['delivery_cost_china'],
+            'currency' => $validated['currency'],
+            'status' => 'pending', // Reset to pending for approval if needed, or set to 'quoted' directly
+            'estimated_product_cost' => $estimatedProductCostTotal,
+            'estimated_shipping_cost' => $validated['estimated_shipping_cost'] ?? null,
+            'estimated_other_costs' => $validated['estimated_other_costs'] ?? null,
+        ]);
+
+        // If the request was negotiating, transition it back to quoted
+        if ($sourcingRequest->status === 'negotiating') {
+            $sourcingRequest->transitionTo('quoted');
+        }
+
+        return redirect()->route('admin.sourcing-requests.show', $sourcingRequest)
+            ->with('status', 'Quotation updated successfully and sent back to client.');
+    }
+
     public function reject(Quotation $quotation): RedirectResponse
     {
         $this->authorize('update', $quotation);

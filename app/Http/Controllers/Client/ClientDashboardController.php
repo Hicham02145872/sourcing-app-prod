@@ -11,7 +11,9 @@ class ClientDashboardController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = $user->sourcingRequests()->with('category', 'destinations.country', 'destinations.service');
+        $query = $user->sourcingRequests()
+            ->whereNotIn('status', ['cancelled', 'rejected']) // Exclude archived
+            ->with('category', 'destinations.country', 'destinations.service');
 
         // Search by product name
         if ($request->has('search') && $request->search) {

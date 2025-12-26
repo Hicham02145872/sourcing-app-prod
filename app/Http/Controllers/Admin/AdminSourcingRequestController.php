@@ -48,17 +48,19 @@ class AdminSourcingRequestController extends Controller
                 if ($request->client_type === 'existing') {
                     $userId = $request->user_id;
                 } else {
+                    $plainPassword = Str::random(12);
                     $user = User::create([
                         'name' => $request->client_name,
                         'email' => $request->client_email,
                         'phone' => $request->client_phone,
-                        'password' => Hash::make(Str::random(12)),
+                        'password' => Hash::make($plainPassword),
                         'role' => 'client',
+                        'email_verified_at' => now(), // Auto-verify
                     ]);
                     $userId = $user->id;
 
-                    // Trigger welcome/verification email if needed
-                    $user->sendEmailVerificationNotification();
+                    // Send credentials to the user
+                    $user->notify(new \App\Notifications\ClientAccountCreated($plainPassword));
                 }
 
                 // 2. Handle Product Image

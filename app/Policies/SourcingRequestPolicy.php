@@ -44,7 +44,8 @@ class SourcingRequestPolicy
      */
     public function delete(User $user, SourcingRequest $sourcingRequest): bool
     {
-        return $user->id === $sourcingRequest->user_id && $sourcingRequest->status === 'pending';
+        return $user->id === $sourcingRequest->user_id && 
+               in_array($sourcingRequest->status, ['pending', 'cancelled', 'rejected']);
     }
 
     public function cancel(User $user, SourcingRequest $sourcingRequest): bool

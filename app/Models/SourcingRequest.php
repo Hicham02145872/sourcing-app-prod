@@ -13,6 +13,7 @@ class SourcingRequest extends Model
         'pending',
         'in_review',
         'quoted',
+        'negotiating',
         'accepted',
         'completed',
         'rejected',
@@ -132,8 +133,12 @@ class SourcingRequest extends Model
                 'admin' => ['quoted', 'rejected'],
             ],
             'quoted' => [
-                'client' => ['accepted', 'rejected', 'cancelled'],
+                'client' => ['accepted', 'rejected', 'negotiating', 'cancelled'],
                 'admin' => ['accepted', 'rejected', 'cancelled'],
+            ],
+            'negotiating' => [
+                'client' => ['rejected', 'cancelled'],
+                'admin' => ['quoted', 'rejected'],
             ],
             'accepted' => [
                 'admin' => ['completed', 'cancelled'],

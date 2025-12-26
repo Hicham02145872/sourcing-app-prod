@@ -1,0 +1,459 @@
+<x-app-layout>
+    <!-- Main Container: Slate background for enterprise feel -->
+    <div class="min-h-screen bg-slate-50/80 font-sans text-slate-900 pb-12">
+        
+        <!-- Top Navigation / Breadcrumb Area -->
+        <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-4 md:py-0 gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center h-8 w-8 rounded bg-orange-100 text-orange-600">
+                            <!-- Pen/Document Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </span>
+                        <div>
+                            <h1 class="text-lg font-bold text-slate-900 leading-tight">{{ __('Update Quotation') }}</h1>
+                            <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">
+                                <span class="hover:text-slate-700">{{ __('Dashboard') }}</span>
+                                <span class="mx-1.5">/</span>
+                                <span class="hover:text-slate-700">{{ __('Quotations') }}</span>
+                                <span class="mx-1.5">/</span>
+                                <span class="font-medium text-slate-700">{{ __('Update Quote #') }}{{ $quotation->id }}</span>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- Global Actions -->
+                    <div class="flex items-center gap-3">
+                        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded border border-blue-200">
+                            <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-blue-500"></span>
+                            <span class="text-xs font-semibold text-blue-600">{{ __('Editing Mode') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+            <form method="POST" action="{{ route('admin.quotations.update', $quotation) }}">
+                @csrf
+                @method('PUT')
+                
+                <!-- Section 1: Selected Request Summary -->
+                <div class="bg-orange-50 rounded-lg border border-orange-200 shadow-sm p-5 mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-orange-100 rounded-md text-orange-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-orange-900 uppercase tracking-wide">{{ __('Related Sourcing Request') }}</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-orange-600/70 mb-1">{{ __('Product Name') }}</p>
+                            <p class="text-sm font-bold text-slate-800">{{ $quotation->sourcingRequest->product_name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-orange-600/70 mb-1">{{ __('Category') }}</p>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white text-orange-600 border border-orange-200 shadow-sm">
+                                {{ $quotation->sourcingRequest->category?->name }}
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-orange-600/70 mb-1">{{ __('Client') }}</p>
+                            <div class="flex items-center gap-2">
+                                <div class="h-5 w-5 rounded-full bg-orange-200 flex items-center justify-center text-[10px] font-bold text-orange-700">
+                                    {{ substr($quotation->sourcingRequest->user->name, 0, 1) }}
+                                </div>
+                                <p class="text-sm font-medium text-slate-800">{{ $quotation->sourcingRequest->user->name }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($quotation->negotiation_notes)
+                        <div class="mt-6 p-4 bg-blue-100/50 border border-blue-200 rounded-lg">
+                            <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                </svg>
+                                {{ __('Client Negotiation Notes') }}
+                            </h4>
+                            <p class="text-sm text-blue-700 italic">"{{ $quotation->negotiation_notes }}"</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Section 2: Main Form -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50">
+                        <h3 class="text-sm font-semibold text-slate-900">{{ __('Quotation Details') }}</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">{{ __('Update the financial and logistical data as requested.') }}</p>
+                    </div>
+
+                    <div class="p-6 space-y-8">
+                        
+                        <!-- Subsection: Basic & Currency -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
+                                <svg class="w-4 h-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">{{ __('Currency Settings') }}</h4>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="currency" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Currency') }} <span class="text-red-500">*</span></label>
+                                    <select id="currency" name="currency" required
+                                        class="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors">
+                                        <option value="">{{ __('Select currency') }}</option>
+                                        @foreach(['USD', 'EUR', 'GBP', 'MAD', 'JPY', 'CNY', 'CAD', 'AUD', 'AED'] as $curr)
+                                            <option value="{{ $curr }}" {{ old('currency', $quotation->currency) == $curr ? 'selected' : '' }}>{{ $curr }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subsection: Pricing -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
+                                <svg class="w-4 h-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">{{ __('Financial Details') }}</h4>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="unit_price" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Unit Price') }} <span class="text-red-500">*</span></label>
+                                    <div class="relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-slate-400 sm:text-sm font-serif italic currency-symbol">$</span>
+                                        </div>
+                                        <input type="number" step="0.0001" name="unit_price" id="unit_price" required placeholder="0.00" value="{{ old('unit_price', $quotation->unit_price) }}"
+                                            class="pl-12 block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors font-medium">
+                                    </div>
+                                    <p class="mt-1 text-[10px] text-slate-400">{{ __('Price per unit excluding fees') }}</p>
+                                </div>
+
+                                <div>
+                                    <label for="commission_service" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Service Commission') }} <span class="text-red-500">*</span></label>
+                                    <div class="relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-slate-400 sm:text-sm font-serif italic currency-symbol">$</span>
+                                        </div>
+                                        <input type="number" step="0.01" name="commission_service" id="commission_service" required placeholder="0.00" value="{{ old('commission_service', $quotation->commission_service) }}"
+                                            class="pl-12 block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors font-medium">
+                                    </div>
+                                    <p class="mt-1 text-[10px] text-slate-400">{{ __('Commission amount per unit') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subsection: Logistics -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
+                                <svg class="w-4 h-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">{{ __('Logistics') }}</h4>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="unit_weight" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Unit Weight') }} <span class="text-red-500">*</span></label>
+                                    <div class="relative rounded-md shadow-sm">
+                                        <input type="number" step="0.01" name="unit_weight" id="unit_weight" required placeholder="0.00" value="{{ old('unit_weight', $quotation->unit_weight) }}"
+                                            class="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors font-medium">
+                                        <div class="absolute inset-y-0 right-0 flex items-center">
+                                            <select name="weight_unit" class="h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-slate-500 sm:text-xs font-bold rounded-md focus:ring-0 focus:border-transparent">
+                                                <option value="g" {{ $quotation->weight_unit == 'g' ? 'selected' : '' }}>g</option>
+                                                <option value="kg" {{ $quotation->weight_unit == 'kg' ? 'selected' : '' }}>kg</option>
+                                                <option value="colis" {{ $quotation->weight_unit == 'colis' ? 'selected' : '' }}>{{ __('package') }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1 text-[10px] text-slate-400">{{ __('Weight in grams (g)') }}</p>
+                                </div>
+
+                                <div>
+                                    <label for="delivery_cost_china" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Shipping Fees') }} <span class="text-red-500">*</span></label>
+                                    <div class="relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-slate-400 sm:text-sm font-serif italic currency-symbol">$</span>
+                                        </div>
+                                        <input type="number" step="0.01" name="delivery_cost_china" id="delivery_cost_china" required placeholder="0.00" value="{{ old('delivery_cost_china', $quotation->delivery_cost_china) }}"
+                                            class="pl-12 block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors font-medium">
+                                    </div>
+                                    <p class="mt-1 text-[10px] text-slate-400">{{ __('Domestic delivery cost') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subsection: Financial Estimation (Optional) -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">{{ __('Cost Estimation') }}</h4>
+                                    <span class="ml-2 px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-semibold rounded">{{ __('Optional') }}</span>
+                                </div>
+                                <button type="button" id="toggle-estimates" class="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1">
+                                    <span id="toggle-text">{{ __('Show') }}</span>
+                                    <svg id="toggle-icon" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div id="estimates-section" class="hidden space-y-4">
+                                <div class="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                                    <p class="text-xs text-blue-800">
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        {{ __('Estimate costs to analyze profitability before sending quotation to client') }}
+                                    </p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <!-- Estimated Product Cost (UNIT) -->
+                                    <div>
+                                        <label for="estimated_product_cost" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                            {{ __('Estimated Unit Product Cost') }}
+                                        </label>
+                                        <div class="relative rounded-md shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-slate-400 sm:text-sm font-serif italic currency-symbol">$</span>
+                                            </div>
+                                            @php $totalQuantity = $quotation->sourcingRequest->destinations->sum('quantity'); @endphp
+                                            <input type="number" step="0.01" name="estimated_product_cost" id="estimated_product_cost" placeholder="0.00" 
+                                                value="{{ old('estimated_product_cost', $quotation->estimated_product_cost ? $quotation->estimated_product_cost / max(1, $totalQuantity) : null) }}"
+                                                class="pl-12 block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors font-medium border-l-4 border-l-orange-400"
+                                                oninput="calculateEstimatedProfit()">
+                                        </div>
+                                        <p class="mt-1 text-[10px] text-slate-400">
+                                            {{ __('Purchase cost per unit for') }} <strong class="text-slate-600">{{ $totalQuantity }}</strong> {{ __('units') }}
+                                        </p>
+                                        <div id="est-total-cost-preview" class="text-[10px] text-orange-600 font-bold ml-1"></div>
+                                    </div>
+
+                                    <!-- Estimated Shipping Cost (TOTAL) -->
+                                    <div>
+                                        <label for="estimated_shipping_cost" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                            {{ __('Total Estimated Shipping') }}
+                                        </label>
+                                        <div class="relative rounded-md shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-slate-400 sm:text-sm font-serif italic currency-symbol">$</span>
+                                            </div>
+                                            <input type="number" step="0.01" name="estimated_shipping_cost" id="estimated_shipping_cost" placeholder="0.00" value="{{ old('estimated_shipping_cost', $quotation->estimated_shipping_cost) }}"
+                                                class="pl-12 block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors font-medium"
+                                                oninput="calculateEstimatedProfit()">
+                                        </div>
+                                        <p class="mt-1 text-[10px] text-slate-400">{{ __('Total logistics costs') }}</p>
+                                    </div>
+
+                                    <!-- Estimated Other Costs (TOTAL) -->
+                                    <div>
+                                        <label for="estimated_other_costs" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                            {{ __('Total Other Costs') }}
+                                        </label>
+                                        <div class="relative rounded-md shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-slate-400 sm:text-sm font-serif italic currency-symbol">$</span>
+                                            </div>
+                                            <input type="number" step="0.01" name="estimated_other_costs" id="estimated_other_costs" placeholder="0.00" value="{{ old('estimated_other_costs', $quotation->estimated_other_costs) }}"
+                                                class="pl-12 block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors font-medium"
+                                                oninput="calculateEstimatedProfit()">
+                                        </div>
+                                        <p class="mt-1 text-[10px] text-slate-400">{{ __('Total customs, taxes, etc.') }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Estimated Profit Display -->
+                                <div id="profit-preview" class="hidden mt-4 p-4 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg border border-slate-200">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-xs font-bold text-slate-600 uppercase">{{ __('Estimated Net Profit (Total)') }}</span>
+                                        <span id="estimated-profit-amount" class="text-xl font-bold text-slate-900">$0.00</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs text-slate-500 mb-2">
+                                        <span>{{ __('Profit Margin') }}</span>
+                                        <span id="estimated-profit-margin" class="font-semibold">0%</span>
+                                    </div>
+                                    <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
+                                        <div id="profit-margin-bar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                    <p id="margin-warning" class="mt-2 text-xs hidden"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <!-- Footer Actions -->
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
+                        <a href="{{ route('admin.sourcing-requests.show', $quotation->sourcing_request_id) }}" 
+                           class="px-4 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-medium rounded transition-colors shadow-sm">
+                            {{ __('Cancel') }}
+                        </a>
+                        <button type="submit" 
+                            class="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors shadow-sm flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            {{ __('Update Quotation') }}
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Info Box -->
+            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                         <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">{{ __('Important Information') }}</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>{{ __('Updating this quotation will notify the client.') }}</li>
+                                <li>{{ __('The status will be reset to "Quoted".') }}</li>
+                                <li>{{ __('Negotiation notes will be preserved for history.') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        // Currency signs map
+        const currencySymbols = {
+            'USD': '$',
+            'EUR': '€',
+            'GBP': '£',
+            'MAD': 'MAD',
+            'JPY': '¥',
+            'CNY': '¥',
+            'CAD': 'CA$',
+            'AUD': 'A$',
+            'AED': 'AED'
+        };
+
+        function getSelectedCurrencySymbol() {
+            const currency = document.getElementById('currency').value;
+            return currencySymbols[currency] || '$';
+        }
+
+        // Toggle estimates section
+        document.getElementById('toggle-estimates').addEventListener('click', function() {
+            const section = document.getElementById('estimates-section');
+            const icon = document.getElementById('toggle-icon');
+            const text = document.getElementById('toggle-text');
+            
+            section.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+            text.textContent = section.classList.contains('hidden') ? '{{ __("Show") }}' : '{{ __("Hide") }}';
+        });
+
+        // Update currency symbols across the page
+        document.getElementById('currency').addEventListener('change', function() {
+            const symbol = getSelectedCurrencySymbol();
+            const elements = document.querySelectorAll('.currency-symbol');
+            elements.forEach(el => {
+                el.textContent = symbol;
+            });
+            calculateEstimatedProfit();
+        });
+
+        // Calculate estimated profit in real-time
+        function calculateEstimatedProfit() {
+            const totalQuantity = {{ $quotation->sourcingRequest->destinations->sum('quantity') }};
+            const unitPrice = parseFloat(document.querySelector('[name="unit_price"]')?.value || 0);
+            const commission = parseFloat(document.querySelector('[name="commission_service"]')?.value || 0);
+            const deliveryCost = parseFloat(document.querySelector('[name="delivery_cost_china"]')?.value || 0);
+            
+            const unitProductCost = parseFloat(document.getElementById('estimated_product_cost')?.value || 0);
+            const shippingCost = parseFloat(document.getElementById('estimated_shipping_cost')?.value || 0);
+            const otherCosts = parseFloat(document.getElementById('estimated_other_costs')?.value || 0);
+
+            const symbol = getSelectedCurrencySymbol();
+
+            // Calculate Total Cost Preview (for user feedback)
+            const totalCostPreview = document.getElementById('est-total-cost-preview');
+            const estimatedTotalProductCost = unitProductCost * totalQuantity;
+            
+            if (unitProductCost > 0 && totalQuantity > 0) {
+                totalCostPreview.textContent = `{{ __('Scale Total') }}: ~${symbol}${estimatedTotalProductCost.toFixed(2)}`;
+            } else {
+                totalCostPreview.textContent = '';
+            }
+
+            // Calculate TOTALS
+            // Revenue = Total
+            const totalRevenue = (unitPrice * totalQuantity) + commission + deliveryCost;
+            
+            // Costs = (Unit Cost * Qty) + Shipping + Others
+            const totalCosts = estimatedTotalProductCost + shippingCost + otherCosts;
+            
+            const profit = totalRevenue - totalCosts;
+            const margin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+
+            // Show/hide profit preview
+            const profitPreview = document.getElementById('profit-preview');
+            if (unitProductCost > 0 || shippingCost > 0 || otherCosts > 0) {
+                profitPreview.classList.remove('hidden');
+                
+                // Update values
+                document.getElementById('estimated-profit-amount').textContent = 
+                    symbol + profit.toFixed(2);
+                document.getElementById('estimated-profit-margin').textContent = 
+                    margin.toFixed(1) + '%';
+                
+                // Update progress bar
+                const bar = document.getElementById('profit-margin-bar');
+                bar.style.width = Math.max(0, Math.min(100, margin)) + '%';
+                
+                // Color coding and warnings
+                const warningEl = document.getElementById('margin-warning');
+                if (margin < 10) {
+                    bar.className = 'h-full bg-red-500 transition-all duration-300';
+                    warningEl.textContent = '⚠️ {{ __("Low margin! Consider adjusting prices.") }}';
+                    warningEl.className = 'mt-2 text-xs text-red-700 font-semibold';
+                    warningEl.classList.remove('hidden');
+                } else if (margin < 15) {
+                    bar.className = 'h-full bg-amber-500 transition-all duration-300';
+                    warningEl.textContent = '⚡ {{ __("Acceptable margin. Review if possible.") }}';
+                    warningEl.className = 'mt-2 text-xs text-amber-700 font-semibold';
+                    warningEl.classList.remove('hidden');
+                } else {
+                    bar.className = 'h-full bg-emerald-500 transition-all duration-300';
+                    warningEl.textContent = '✓ {{ __("Good profit margin!") }}';
+                    warningEl.className = 'mt-2 text-xs text-emerald-700 font-semibold';
+                    warningEl.classList.remove('hidden');
+                }
+            } else {
+                profitPreview.classList.add('hidden');
+            }
+        }
+
+        // Attach listeners to pricing fields
+        ['unit_price', 'commission_service', 'delivery_cost_china'].forEach(name => {
+            const field = document.querySelector(`[name="${name}"]`);
+            if (field) {
+                field.addEventListener('input', calculateEstimatedProfit);
+            }
+        });
+
+        // Trigger initial calculation
+        window.addEventListener('load', () => {
+             calculateEstimatedProfit();
+             const symbol = getSelectedCurrencySymbol();
+             document.querySelectorAll('.currency-symbol').forEach(el => el.textContent = symbol);
+        });
+    </script>
+    @endpush
+</x-app-layout>

@@ -138,10 +138,11 @@ class SourcingRequestCreate extends Component
                 'phone' => $this->client_phone,
                 'password' => Hash::make($tempPassword),
                 'role' => 'client',
+                'email_verified_at' => now(), // Auto-verify
             ]);
 
-            // Trigger welcome/verification email if needed
-            // $user->sendEmailVerificationNotification();
+            // Send credentials to the user
+            $user->notify(new \App\Notifications\ClientAccountCreated($tempPassword));
         } else {
             $user = User::findOrFail($this->user_id);
         }

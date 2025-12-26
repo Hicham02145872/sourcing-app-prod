@@ -15,6 +15,7 @@ class Quotation extends Model
         'sent', // Quotation has been sent to the client
         'accepted', // Client accepted the quotation
         'rejected', // Client rejected the quotation
+        'negotiating', // Client requested negotiation
         'expired', // Quotation validity period has passed
     ];
 
@@ -34,6 +35,7 @@ class Quotation extends Model
         'estimated_other_costs',
         'estimated_net_profit',
         'weight_unit',
+        'negotiation_notes',
     ];
 
     protected $casts = [

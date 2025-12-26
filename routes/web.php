@@ -67,16 +67,26 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::post('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'store'])->name('quotations.store');
     Route::get('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'index'])->name('quotations.index');
     Route::get('quotations/{quotation}', [App\Http\Controllers\Admin\QuotationController::class, 'show'])->name('quotations.show');
+    Route::get('quotations/{quotation}/edit', [App\Http\Controllers\Admin\QuotationController::class, 'edit'])->name('quotations.edit');
+    Route::put('quotations/{quotation}', [App\Http\Controllers\Admin\QuotationController::class, 'update'])->name('quotations.update');
     Route::put('quotations/{quotation}/approve', [App\Http\Controllers\Admin\QuotationController::class, 'approve'])->name('quotations.approve');
     Route::put('quotations/{quotation}/reject', [App\Http\Controllers\Admin\QuotationController::class, 'reject'])->name('quotations.reject');
 
     Route::get('/social-media-links', [SocialMediaLinkController::class, 'edit'])->name('social-media-links.edit');
     Route::put('/social-media-links', [SocialMediaLinkController::class, 'update'])->name('social-media-links.update');
 
-    Route::get('google-sheet-settings', [GoogleSheetSettingsController::class, 'index'])->name('google-sheet-settings.index');
-    Route::put('google-sheet-settings', [GoogleSheetSettingsController::class, 'update'])->name('google-sheet-settings.update');
-    Route::post('google-sheet-settings/test-connection', [GoogleSheetSettingsController::class, 'testConnection'])->name('google-sheet-settings.test-connection');
-    Route::post('google-sheet-settings/install-headers', [GoogleSheetSettingsController::class, 'installHeaders'])->name('google-sheet-settings.install-headers');
+        // Google Sheets Management (Super Admin & Admin)
+        Route::prefix('google-sheets')->name('google-sheets.')->group(function () {
+            Route::get('/settings', [App\Http\Controllers\Admin\GoogleSheetController::class, 'index'])->name('settings');
+            Route::post('/upload-credentials', [App\Http\Controllers\Admin\GoogleSheetController::class, 'uploadCredentials'])->name('upload-credentials');
+            Route::post('/test-connection', [App\Http\Controllers\Admin\GoogleSheetController::class, 'testConnection'])->name('test-connection');
+            Route::post('/create-sheet', [App\Http\Controllers\Admin\GoogleSheetController::class, 'createSheet'])->name('create-sheet');
+            Route::post('/sync-all', [App\Http\Controllers\Admin\GoogleSheetController::class, 'syncAll'])->name('sync-all');
+            Route::post('/install-headers', [App\Http\Controllers\Admin\GoogleSheetController::class, 'installHeaders'])->name('install-headers');
+            Route::post('/update-settings', [App\Http\Controllers\Admin\GoogleSheetController::class, 'updateSettings'])->name('update-settings');
+            Route::post('/clear-logs', [App\Http\Controllers\Admin\GoogleSheetController::class, 'clearLogs'])->name('clear-logs');
+            Route::get('/logs', [App\Http\Controllers\Admin\GoogleSheetController::class, 'logs'])->name('logs');
+        });
 
     // Sales Margin Report
     Route::get('/reports/sales-margin', [ReportController::class, 'salesMarginReport'])->name('reports.sales-margin');
@@ -98,18 +108,6 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
         Route::get('/super-admin/admins/{admin}/edit', [App\Http\Controllers\Admin\SuperAdminController::class, 'editAdmin'])->name('super-admin.edit-admin');
         Route::put('/super-admin/admins/{admin}', [App\Http\Controllers\Admin\SuperAdminController::class, 'updateAdmin'])->name('super-admin.update-admin');
         Route::delete('/super-admin/admins/{admin}', [App\Http\Controllers\Admin\SuperAdminController::class, 'destroyAdmin'])->name('super-admin.destroy-admin');
-
-        // Google Sheets Management (Super Admin Only)
-        Route::prefix('google-sheets')->name('google-sheets.')->group(function () {
-            Route::get('/settings', [App\Http\Controllers\Admin\GoogleSheetController::class, 'index'])->name('settings');
-            Route::post('/upload-credentials', [App\Http\Controllers\Admin\GoogleSheetController::class, 'uploadCredentials'])->name('upload-credentials');
-            Route::post('/test-connection', [App\Http\Controllers\Admin\GoogleSheetController::class, 'testConnection'])->name('test-connection');
-            Route::post('/create-sheet', [App\Http\Controllers\Admin\GoogleSheetSettingsController::class, 'createSheet'])->name('create-sheet');
-            Route::post('/sync-all', [App\Http\Controllers\Admin\GoogleSheetSettingsController::class, 'syncAll'])->name('sync-all');
-            Route::post('/install-headers', [App\Http\Controllers\Admin\GoogleSheetController::class, 'installHeaders'])->name('install-headers');
-            Route::post('/update-settings', [App\Http\Controllers\Admin\GoogleSheetController::class, 'updateSettings'])->name('update-settings');
-            Route::get('/logs', [App\Http\Controllers\Admin\GoogleSheetController::class, 'logs'])->name('logs');
-        });
     });
 });
 
@@ -117,12 +115,14 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/sourcing-requests/handling', [SourcingRequestController::class, 'handling'])->name('sourcing-requests.handling');
+    Route::get('/sourcing-requests/history-requests', [SourcingRequestController::class, 'archived'])->name('sourcing-requests.archived');
     Route::resource('sourcing-requests', SourcingRequestController::class);
     Route::post('/sourcing-requests/{sourcingRequest}/duplicate', [SourcingRequestController::class, 'duplicate'])->name('sourcing-requests.duplicate');
     Route::post('/sourcing-requests/{sourcingRequest}/cancel', [SourcingRequestController::class, 'cancel'])->name('sourcing-requests.cancel');
     Route::match(['get', 'post'], '/sourcing-orders/{sourcingOrder}/upload-proof-of-payment', [App\Http\Controllers\Client\SourcingOrderController::class, 'uploadProofOfPayment'])->name('sourcing-orders.upload-proof-of-payment');
     Route::post('/quotations/{quotation}/accept', [App\Http\Controllers\Client\QuotationController::class, 'accept'])->name('quotations.accept');
     Route::post('/quotations/{quotation}/reject', [App\Http\Controllers\Client\QuotationController::class, 'reject'])->name('quotations.reject');
+    Route::post('/quotations/{quotation}/negotiate', [App\Http\Controllers\Client\QuotationController::class, 'negotiate'])->name('quotations.negotiate');
     Route::get('/quotations', [App\Http\Controllers\Client\QuotationController::class, 'index'])->name('quotations.index');
 
     Route::get('/sourcing-orders', [App\Http\Controllers\Client\SourcingOrderController::class, 'index'])->name('sourcing-orders.index');

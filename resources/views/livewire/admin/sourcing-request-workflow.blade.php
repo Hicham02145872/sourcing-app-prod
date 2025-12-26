@@ -60,7 +60,7 @@
             <p class="text-[10px] uppercase tracking-wider font-bold text-slate-500 mb-3">{{ __('Changer le statut') }}</p>
             <div class="flex flex-wrap gap-2">
                 @foreach (\App\Models\SourcingRequest::STATUSES as $status)
-                    @php if($status === 'quoted' && $sourcingRequest->status !== 'quoted') continue; @endphp
+                    @php if(in_array($status, ['quoted', 'negotiating', 'completed'])) continue; @endphp
                     @if ($sourcingRequest->canTransitionTo($status, auth()->user()) || $sourcingRequest->status === $status)
                         <button type="button" 
                                 wire:click="updateStatus('{{ $status }}')"

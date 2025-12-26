@@ -22,7 +22,9 @@ class QuotationController extends Controller
     {
         $this->authorize('viewAny', Quotation::class);
         $sourcingRequests = SourcingRequest::where('user_id', auth()->id())
-            ->whereHas('quotation') // Quotation must exist
+            ->whereHas('quotation', function ($query) {
+                $query->where('status', '!=', 'rejected');
+            })
             ->whereDoesntHave('quotation.order') // But SourcingOrder must NOT exist
             ->with(['category', 'destinations.country', 'destinations.service', 'quotation'])
             ->latest()
@@ -98,10 +100,38 @@ class QuotationController extends Controller
         DB::transaction(function () use ($quotation) {
             // Update the quotation status
             $quotation->update(['status' => 'rejected']);
+            
+            // Also reject the sourcing request
+            $quotation->sourcingRequest->transitionTo('rejected', auth()->user());
         });
 
         event(new \App\Events\QuotationRejected($quotation));
 
         return redirect()->route('client.sourcing-requests.show', $quotation->sourcingRequest)->with('status', 'Quotation rejected successfully.');
+    }
+
+    public function negotiate(Request $request, Quotation $quotation): RedirectResponse
+    {
+        $this->authorize('update', $quotation);
+
+        $request->validate([
+            'negotiation_notes' => 'required|string|max:1000',
+        ]);
+
+        DB::transaction(function () use ($request, $quotation) {
+            // Update the quotation status and notes
+            $quotation->update([
+                'status' => 'negotiating',
+                'negotiation_notes' => $request->negotiation_notes,
+            ]);
+            
+            // Also update the sourcing request status to negotiating
+            $quotation->sourcingRequest->transitionTo('negotiating', auth()->user());
+        });
+
+        // We can dispatch an event if needed, for now let's just log or notify admin
+        Log::info('Client requested negotiation for quotation #'.$quotation->id);
+
+        return redirect()->route('client.sourcing-requests.show', $quotation->sourcingRequest)->with('status', 'Negotiation request sent successfully. We will review your request and get back to you.');
     }
 }

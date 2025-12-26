@@ -32,11 +32,26 @@ class SourcingRequestController extends Controller
     {
         $this->authorize('viewAny', SourcingRequest::class);
         $sourcingRequests = auth()->user()->sourcingRequests()
+            ->whereNotIn('status', ['cancelled', 'rejected'])
             ->with(['category', 'destinations.country', 'destinations.service'])
             ->latest()
             ->get();
 
         return view('client.sourcing-requests.index', compact('sourcingRequests'));
+    }
+
+    public function archived(): View
+    {
+        $this->authorize('viewAny', SourcingRequest::class);
+        $sourcingRequests = auth()->user()->sourcingRequests()
+            ->whereIn('status', ['cancelled', 'rejected'])
+            ->with(['category', 'destinations.country', 'destinations.service'])
+            ->latest()
+            ->paginate(10);
+        
+        $categories = Category::all();
+
+        return view('client.sourcing-requests.archived', compact('sourcingRequests', 'categories'));
     }
 
     public function handling(Request $request): View
@@ -256,7 +271,7 @@ class SourcingRequestController extends Controller
 
         $sourcingRequest->delete();
 
-        return redirect()->route('client.dashboard')->with('status', 'Sourcing request deleted successfully!');
+        return redirect()->back()->with('status', 'Sourcing request deleted successfully!');
     }
 
     public function history(Request $request, TimelineService $timelineService): View

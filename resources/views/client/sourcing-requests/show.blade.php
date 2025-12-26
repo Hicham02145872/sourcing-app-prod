@@ -36,15 +36,28 @@
                         </div>
 
                         {{-- Status --}}
+                        @php
+                            $statusConfig = [
+                                'pending' => ['color' => '#FAA533', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                'quoted' => ['color' => '#EF7722', 'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
+                                'in_review' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                'accepted' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                'completed' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                'negotiating' => ['color' => '#3B82F6', 'icon' => 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'],
+                                'rejected' => ['color' => '#EF4444', 'icon' => 'M6 18L18 6M6 6l12 12'],
+                                'cancelled' => ['color' => '#64748B', 'icon' => 'M6 18L18 6M6 6l12 12'],
+                            ];
+                            $statusData = $statusConfig[$sourcingRequest->status] ?? $statusConfig['pending'];
+                        @endphp
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-[#0BA6DF]/10 dark:bg-[#0BA6DF]/20 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-[#0BA6DF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ $statusData['color'] }}22;">
+                                <svg class="w-5 h-5" style="color: {{ $statusData['color'] }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
                                 </svg>
                             </div>
                             <div>
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Status') }}</p>
-                                <p class="text-lg font-bold text-slate-900 dark:text-white capitalize">{{ str_replace('_', ' ', $sourcingRequest->status) }}</p>
+                                <p class="text-lg font-bold text-slate-900 dark:text-white capitalize">{{ __(str_replace('_', ' ', $sourcingRequest->status)) }}</p>
                             </div>
                         </div>
 
@@ -237,8 +250,8 @@
                                 </div>
 
                                 {{-- Action Buttons --}}
-                                @if($sourcingRequest->quotation->order === null)
-                                    <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                                @if($sourcingRequest->quotation->order === null && !in_array($sourcingRequest->quotation->status, ['negotiating', 'rejected', 'accepted']))
+                                    <div class="mt-6 flex flex-col sm:flex-row gap-3" x-data="{ showNegotiateModal: false }">
                                         <form action="{{ route('client.quotations.accept', $sourcingRequest->quotation) }}" method="POST" class="flex-1">
                                             @csrf
                                             <button type="submit" class="w-full py-3 px-4 bg-[#EF7722] hover:bg-[#FAA533] text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow">
@@ -248,15 +261,100 @@
                                                 {{ __('Accept & Order') }}
                                             </button>
                                         </form>
-                                        <form action="{{ route('client.quotations.reject', $sourcingRequest->quotation) }}" method="POST" class="flex-1">
+
+                                        <button type="button" 
+                                                @click="showNegotiateModal = true"
+                                                class="flex-1 py-3 px-4 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-[#EBEBEB] dark:border-slate-600 font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2">
+                                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                            </svg>
+                                            {{ __('Negotiate') }}
+                                        </button>
+
+                                        <form action="{{ route('client.quotations.reject', $sourcingRequest->quotation) }}" method="POST" class="flex-1" onsubmit="return confirm('{{ __('Are you sure you want to definitively reject this quotation? This action cannot be undone.') }}');">
                                             @csrf
-                                            <button type="submit" class="w-full py-3 px-4 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-[#EBEBEB] dark:border-slate-600 font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2">
+                                            <button type="submit" class="w-full py-3 px-4 bg-white dark:bg-slate-700 text-red-600 dark:text-red-400 border border-[#EBEBEB] dark:border-slate-600 font-semibold rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all flex items-center justify-center gap-2">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                 </svg>
-                                                {{ __('Reject') }}
+                                                {{ __('Definitive Rejection') }}
                                             </button>
                                         </form>
+
+                                        {{-- Negotiation Modal --}}
+                                        <div x-show="showNegotiateModal" 
+                                             class="fixed inset-0 z-50 overflow-y-auto" 
+                                             style="display: none;"
+                                             x-transition:enter="transition ease-out duration-300"
+                                             x-transition:enter-start="opacity-0"
+                                             x-transition:enter-end="opacity-100"
+                                             x-transition:leave="transition ease-in duration-200"
+                                             x-transition:leave-start="opacity-100"
+                                             x-transition:leave-end="opacity-0">
+                                            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                                                <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="showNegotiateModal = false">
+                                                    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+                                                </div>
+
+                                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                                                <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-200 dark:border-slate-700">
+                                                    <form action="{{ route('client.quotations.negotiate', $sourcingRequest->quotation) }}" method="POST">
+                                                        @csrf
+                                                        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Request Changes / Negotiate') }}</h3>
+                                                            <button type="button" @click="showNegotiateModal = false" class="text-slate-400 hover:text-slate-500 transition-colors">
+                                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="p-6">
+                                                            <div class="space-y-4">
+                                                                <div>
+                                                                    <label for="negotiation_notes" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                                                        {{ __('Reason for Negotiation') }}
+                                                                    </label>
+                                                                    <textarea name="negotiation_notes" 
+                                                                              id="negotiation_notes" 
+                                                                              rows="4" 
+                                                                              required
+                                                                              placeholder="{{ __('Example: The price is too high for my budget, I would like a discount of 5% or more information about shipping times...') }}"
+                                                                              class="w-full px-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-slate-50 dark:bg-slate-700 dark:text-white transition-all"></textarea>
+                                                                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                                                        {{ __('Your request will be sent to the administrator assigned to your order.') }}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-3">
+                                                            <button type="button" @click="showNegotiateModal = false" class="flex-1 py-2 px-4 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm">
+                                                                {{ __('Cancel') }}
+                                                            </button>
+                                                            <button type="submit" class="flex-1 py-2 px-4 bg-[#EF7722] hover:bg-[#FAA533] text-white font-bold rounded-lg transition-all shadow-sm hover:shadow text-sm">
+                                                                {{ __('Submit Request') }}
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @elseif($sourcingRequest->quotation->status === 'negotiating')
+                                    <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                                        <div class="flex items-center gap-3">
+                                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                                                {{ __('Negotiation in progress. We are reviewing your request.') }}
+                                            </p>
+                                        </div>
+                                        @if($sourcingRequest->quotation->negotiation_notes)
+                                            <div class="mt-3 text-xs text-blue-700 dark:text-blue-400 italic">
+                                                "{{ $sourcingRequest->quotation->negotiation_notes }}"
+                                            </div>
+                                        @endif
                                     </div>
                                 @endif
                             </div>
