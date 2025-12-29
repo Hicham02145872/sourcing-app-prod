@@ -165,8 +165,8 @@
                                                     <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{{ __('Details') }}:</span>
                                                     @foreach($event['metadata'] as $key => $value)
                                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg">
-                                                            <span class="text-slate-500 dark:text-slate-400">{{ $key }}:</span>
-                                                            <span>{{ $value }}</span>
+                                                        <span class="text-slate-500 dark:text-slate-400">{{ $key === 'ID' ? __('Display ID') : $key }}:</span>
+                                                        <span>{{ $key === 'ID' ? '#' . ($value * 5) : $value }}</span>
                                                         </span>
                                                     @endforeach
                                                 </div>

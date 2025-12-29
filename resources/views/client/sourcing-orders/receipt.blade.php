@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('Invoice - Order #') }}{{ $sourcingOrder->id }}</title>
+    <title>{{ __('Invoice') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -59,7 +59,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-900">{{ __('Commercial Invoice') }}</h1>
-                        <p class="text-sm text-gray-600">{{ __('Order #') }}{{ $sourcingOrder->id }}</p>
+
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -92,9 +92,7 @@
                     </div>
                     <div class="text-right">
                         <div class="bg-white/10 backdrop-blur-sm px-6 py-4 rounded-xl border border-white/20">
-                            <div class="text-sm text-gray-200 mb-1 uppercase tracking-wider font-medium">{{ __('Invoice Number') }}</div>
-                            <div class="text-3xl font-bold tracking-tight">#{{ str_pad($sourcingOrder->id, 6, '0', STR_PAD_LEFT) }}</div>
-                            <div class="text-sm text-gray-200 mt-3 uppercase tracking-wider font-medium">{{ __('Date Issued') }}</div>
+                            <div class="text-sm text-gray-200 mb-1 uppercase tracking-wider font-medium">{{ __('Date Issued') }}</div>
                             <div class="text-lg font-semibold">{{ now()->format('F d, Y') }}</div>
                         </div>
                     </div>
@@ -139,10 +137,7 @@
                                 <i class="fas fa-envelope text-gray-800 text-sm"></i>
                                 <span class="text-sm">{{ $sourcingOrder->user->email }}</span>
                             </div>
-                            <div class="flex items-center gap-2 text-gray-600">
-                                <i class="fas fa-id-card text-gray-800 text-sm"></i>
-                                <span class="text-sm">{{ __('Customer ID:') }} #{{ str_pad($sourcingOrder->user->id, 5, '0', STR_PAD_LEFT) }}</span>
-                            </div>
+
                             <div class="flex items-center gap-2 text-gray-600">
                                 <i class="fas fa-calendar text-gray-800 text-sm"></i>
                                 <span class="text-sm">{{ __('Member since:') }} {{ $sourcingOrder->user->created_at->format('M d, Y') }}</span>
@@ -211,10 +206,7 @@
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="p-6">
                                         <div class="font-semibold text-gray-900 text-lg">{{ $sourcingOrder->quotation->sourcingRequest->product_name }}</div>
-                                        <div class="text-sm text-gray-500 mt-2 flex items-center gap-2">
-                                            <i class="fas fa-hashtag text-gray-800 text-xs"></i>
-                                            <span>{{ __('Order Reference:') }} #{{ str_pad($sourcingOrder->id, 6, '0', STR_PAD_LEFT) }}</span>
-                                        </div>
+
                                         <div class="text-sm text-gray-500 mt-1 flex items-center gap-2">
                                             <i class="fas fa-industry text-gray-800 text-xs"></i>
                                             <span>{{ __('Category:') }} {{ $sourcingOrder->quotation->sourcingRequest->category->name ?? 'N/A' }}</span>

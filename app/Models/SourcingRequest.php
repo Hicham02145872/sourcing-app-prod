@@ -47,6 +47,14 @@ class SourcingRequest extends Model
         return $this->belongsTo(User::class, 'assigned_to_admin_id');
     }
 
+    /**
+     * Get the custom display ID (always odd).
+     */
+    public function getDisplayIdAttribute(): int
+    {
+        return $this->id * 5;
+    }
+
     public function isAssigned()
     {
         return ! is_null($this->assigned_to_admin_id);

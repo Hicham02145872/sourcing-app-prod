@@ -48,6 +48,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::patch('sourcing-orders/{sourcingOrder}/update-status', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateStatus'])->name('sourcing-orders.update-status');
     Route::put('sourcing-orders/{sourcingOrder}/update-financials', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateFinancials'])->name('sourcing-orders.update-financials');
     Route::post('sourcing-orders/{sourcingOrder}/sync-to-sheet', [App\Http\Controllers\Admin\SourcingOrderController::class, 'syncToGoogleSheet'])->name('sourcing-orders.sync-to-sheet');
+    Route::get('sourcing-orders/{sourcingOrder}/shipping-label', [App\Http\Controllers\Admin\SourcingOrderController::class, 'showShippingLabel'])->name('sourcing-orders.shipping-label');
     Route::patch('sourcing-orders/{sourcingOrder}/tracking', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateTracking'])->name('sourcing-orders.update-tracking'); // Added tracking route
     Route::post('sourcing-orders/{sourcingOrder}/media', [App\Http\Controllers\Admin\SourcingOrderController::class, 'uploadMedia'])->name('sourcing-orders.media.store');
     Route::delete('media/{media}', [App\Http\Controllers\Admin\SourcingOrderController::class, 'deleteMedia'])->name('media.destroy');
@@ -112,6 +113,11 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
         // Shipment Timeline Calendar (Super Admin Only)
         Route::get('/shipment-calendar', [App\Http\Controllers\Admin\ShipmentCalendarController::class, 'index'])->name('shipment-calendar.index');
         Route::get('/shipment-calendar/events', [App\Http\Controllers\Admin\ShipmentCalendarController::class, 'getEvents'])->name('shipment-calendar.events');
+
+        // Shipping Fees (Super Admin Only)
+        Route::resource('shipping-fees', App\Http\Controllers\Admin\ShippingFeeController::class)
+            ->only(['index', 'edit', 'update'])
+            ->parameters(['shipping-fees' => 'country']);
     });
 });
 
@@ -133,6 +139,7 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/sourcing-orders/export', [App\Http\Controllers\Client\SourcingOrderController::class, 'export'])->name('sourcing-orders.export');
     Route::get('/sourcing-orders/{sourcingOrder}', [App\Http\Controllers\Client\SourcingOrderController::class, 'show'])->name('sourcing-orders.show');
     Route::get('/sourcing-orders/{sourcingOrder}/receipt', [App\Http\Controllers\Client\SourcingOrderController::class, 'showReceipt'])->name('sourcing-orders.receipt');
+    Route::get('/sourcing-orders/{sourcingOrder}/shipping-label', [App\Http\Controllers\Client\SourcingOrderController::class, 'showShippingLabel'])->name('sourcing-orders.shipping-label');
     Route::get('/sourcing-orders/{sourcingOrder}/download-proof-of-payment', [App\Http\Controllers\Client\SourcingOrderController::class, 'downloadProofOfPayment'])->name('sourcing-orders.download-proof-of-payment');
     Route::post('/sourcing-orders/{sourcingOrder}/refund-request', [App\Http\Controllers\Client\RefundRequestController::class, 'store'])->name('sourcing-orders.refund-request');
     Route::get('/refund-requests/{refundRequest}', [App\Http\Controllers\Client\RefundRequestController::class, 'show'])->name('refund-requests.show');
@@ -148,6 +155,9 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/tracking/data', [App\Http\Controllers\Client\TrackingController::class, 'data'])->name('tracking.data');
     Route::get('/tracking/17track', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackIndex'])->name('tracking.17track.index');
     Route::get('/tracking/1track/data', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackData'])->name('tracking.17track.data');
+
+    // Shipping Fees
+    Route::get('/shipping-fees', [App\Http\Controllers\Client\ShippingFeeController::class, 'index'])->name('shipping-fees.index');
 });
 
 Route::middleware('auth')->group(function () {

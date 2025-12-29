@@ -19,7 +19,11 @@ class SourcingRequestWorkflow extends Component
     public function updateStatus($status)
     {
         // Security check
-        if (! $this->sourcingRequest->isAssignedTo(auth()->user()) && ! auth()->user()->isSuperAdmin()) {
+        $isAssignedToMe = $this->sourcingRequest->isAssignedTo(auth()->user());
+        $isSuperAdmin = auth()->user()->isSuperAdmin();
+        $isClaimingAction = is_null($this->sourcingRequest->assigned_to_admin_id) && $status === 'in_review';
+
+        if (! $isAssignedToMe && ! $isSuperAdmin && ! $isClaimingAction) {
             $this->dispatch('show-error-toast', message: __('You cannot modify a dossier that is not assigned to you.'));
 
             return;

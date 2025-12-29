@@ -20,4 +20,9 @@ class Country extends Model
     {
         return $this->hasMany(SourcingRequestDestination::class);
     }
+
+    public function shippingFee()
+    {
+        return $this->hasOne(ShippingFee::class);
+    }
 }

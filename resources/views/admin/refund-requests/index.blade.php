@@ -168,7 +168,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="ml-4">
-                                                    <div class="text-sm font-bold text-slate-900">#{{ $request->sourcingOrder->id }}</div>
+                                                    <div class="text-sm font-bold text-slate-900">#{{ $request->sourcingOrder->display_id }}</div>
                                                     <div class="text-[11px] text-slate-500 font-medium">{{ $request->user->name }}</div>
                                                 </div>
                                             </div>

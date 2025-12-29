@@ -6,18 +6,27 @@ use App\Models\SourcingRequest;
 
 class SourcingRequestObserver
 {
-    public static bool $isAutoAssigning = false;
-
     /**
      * Handle the SourcingRequest "created" event.
      */
     public function created(SourcingRequest $sourcingRequest): void
     {
-        // Round Robin Auto-Assignment: Distribute new requests evenly among admins
-        if (! $sourcingRequest->assigned_to_admin_id) {
-            static::$isAutoAssigning = true;
-            $this->assignSmartLoadBalance($sourcingRequest);
-            static::$isAutoAssigning = false;
+        // Round Robin Auto-Assignment removed.
+    }
+
+    /**
+     * Handle the SourcingRequest "updating" event.
+     */
+    public function updating(SourcingRequest $sourcingRequest): void
+    {
+        // Auto-assign to the admin who changes status to 'in_review'
+        if ($sourcingRequest->isDirty('status') && $sourcingRequest->status === 'in_review') {
+            $user = auth()->user();
+            if ($user && ($user->role === 'admin' || $user->role === 'super_admin') && ! $sourcingRequest->assigned_to_admin_id) {
+                // Ensure we don't overwrite if already assigned (though logic says ! assigned)
+                 $sourcingRequest->assigned_to_admin_id = $user->id;
+                 $sourcingRequest->assigned_at = now();
+            }
         }
     }
 
@@ -26,10 +35,6 @@ class SourcingRequestObserver
      */
     public function updated(SourcingRequest $sourcingRequest): void
     {
-        // If it's part of auto-assignment, we've already sent a specific notification
-        if (static::$isAutoAssigning) {
-            return;
-        }
 
         // Automatically sync assignment to the related Sourcing Order
         if ($sourcingRequest->isDirty('assigned_to_admin_id')) {
@@ -77,54 +82,4 @@ class SourcingRequestObserver
         }
     }
 
-    /**
-     * Smart Load-Balancing Assignment Logic
-     */
-    private function assignSmartLoadBalance(SourcingRequest $sourcingRequest): void
-    {
-        // 1. Get all eligible admins with their count of "active" sourcing requests and orders
-        // Active Request = status not in ['completed', 'rejected', 'cancelled']
-        // Active Order = status not in ['delivered', 'shipment_canceled', 'order_completed']
-        $admins = \App\Models\User::where('role', 'admin')
-            ->withCount([
-                'assignedSourcingRequests as active_requests_count' => function ($query) {
-                    $query->whereNotIn('status', ['completed', 'rejected', 'cancelled']);
-                },
-                'assignedSourcingOrders as active_orders_count' => function ($query) {
-                    $query->whereNotIn('status', ['delivered', 'shipment_canceled', 'order_completed']);
-                },
-            ])
-            ->get();
-
-        if ($admins->isEmpty()) {
-            return;
-        }
-
-        // 2. Find the admin with the minimum workload
-        // Sort by active_requests_count (primary), then active_orders_count (secondary), then by ID
-        $nextAdmin = $admins->sortBy([
-            ['active_requests_count', 'asc'],
-            ['active_orders_count', 'asc'],
-            ['id', 'asc'],
-        ])->first();
-
-        if ($nextAdmin) {
-            // 3. Execute Assignment
-            $sourcingRequest->update([
-                'assigned_to_admin_id' => $nextAdmin->id,
-                'assigned_at' => now(),
-            ]);
-
-            // 4. Notify specifically for Auto-Assignment (Target Admin + Super Admins)
-            $notifiables = \App\Models\User::where('role', 'super_admin')
-                ->orWhere('id', $nextAdmin->id)
-                ->get();
-
-            foreach ($notifiables as $notifiable) {
-                $notifiable->notify(new \App\Notifications\SourcingRequestAutoAssigned($sourcingRequest, $nextAdmin->active_requests_count));
-            }
-
-            \Illuminate\Support\Facades\Log::info("Smart Allocation: Assigned Sourcing Request #{$sourcingRequest->id} to Admin #{$nextAdmin->id} (Workload: {$nextAdmin->active_requests_count} active tickets, {$nextAdmin->active_orders_count} active orders)");
-        }
-    }
 }

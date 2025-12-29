@@ -16,7 +16,7 @@
 
                         <div>
                             <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
-                                {{ __('Order') }} #{{ str_pad($sourcingOrder->id, 5, '0', STR_PAD_LEFT) }}
+                                {{ __('Order') }} #{{ $sourcingOrder->display_id }}
                                 @php
                                     $statusColors = [
                                         'pending_payment' => 'bg-amber-50 text-amber-700 border-amber-200',
@@ -52,6 +52,14 @@
                         </button>
                         
                         <div class="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+                        @if($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+                            <a href="{{ route('admin.sourcing-orders.shipping-label', $sourcingOrder) }}" target="_blank"
+                               class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded transition-colors shadow-sm">
+                                <i class="fas fa-tag"></i>
+                                {{ __('Label') }}
+                            </a>
+                        @endif
 
                         <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 text-xs font-medium rounded transition-colors shadow-sm">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
@@ -317,7 +325,7 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Order ID') }}</p>
-                                    <p class="text-sm font-mono text-slate-700">#{{ str_pad($sourcingOrder->id, 5, '0', STR_PAD_LEFT) }}</p>
+                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('Internal Order Reference') }} #{{ $sourcingOrder->display_id }}</h3>
                                 </div>
                             </div>
 

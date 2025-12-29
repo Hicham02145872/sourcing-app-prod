@@ -148,8 +148,7 @@
                                                         @endif
                                                     </div>
                                                     <div>
-                                                        <div class="text-sm font-bold text-slate-900 dark:text-white">{{ __('#') }}{{ $request->id }}</div>
-                                                        <div class="text-xs text-slate-500 dark:text-slate-400">{{ $request->category?->name }}</div>
+                                                        <div class="text-sm font-bold text-slate-900 dark:text-white">{{ $request->category?->name }}</div>
                                                     </div>
                                                 </div>
                                             </td>

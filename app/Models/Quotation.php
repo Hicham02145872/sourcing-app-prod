@@ -36,6 +36,8 @@ class Quotation extends Model
         'estimated_net_profit',
         'weight_unit',
         'negotiation_notes',
+        'actual_sourcing_location',
+        'sourcing_note',
     ];
 
     protected $casts = [
@@ -78,7 +80,7 @@ class Quotation extends Model
                     + ($this->estimated_shipping_cost ?? 0)
                     + ($this->estimated_other_costs ?? 0);
 
-        return $this->amount - $totalCosts;
+        return (float) $this->amount - $totalCosts;
     }
 
     /**
@@ -91,5 +93,13 @@ class Quotation extends Model
         }
 
         return ($this->estimated_net_profit / $this->amount) * 100;
+    }
+
+    /**
+     * Get the custom display ID (always odd).
+     */
+    public function getDisplayIdAttribute(): int
+    {
+        return $this->id * 5;
     }
 }

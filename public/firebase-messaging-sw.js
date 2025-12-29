@@ -18,7 +18,7 @@ const messaging = firebase.messaging();
 // Handle background messages when app is closed
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message:', payload);
-  
+
   // Check if notification object exists
   if (!payload.notification && !payload.data) {
     console.warn('Payload has no notification or data');
@@ -27,48 +27,61 @@ messaging.onBackgroundMessage((payload) => {
 
   // Extract notification data with fallbacks
   // If no notification object, create one from data
-  const notificationTitle = payload.notification?.title || 
-                           payload.data?.title || 
-                           'Nouvelle notification';
-  
-  const notificationBody = payload.notification?.body || 
-                          payload.data?.body || 
-                          '';
-  
-  const notificationIcon = payload.notification?.icon || 
-                          payload.data?.icon || 
-                          '/firebase-logo.png';
-  
+  const notificationTitle = payload.notification?.title ||
+    payload.data?.title ||
+    'Nouvelle notification';
+
+  const notificationBody = payload.notification?.body ||
+    payload.data?.body ||
+    '';
+
+  const notificationIcon = payload.notification?.icon ||
+    payload.data?.icon ||
+    '/firebase-logo.png';
+
   const notificationOptions = {
     body: notificationBody,
     icon: notificationIcon,
     badge: '/badge-72x72.png',
     tag: payload.data?.notification_id || 'notification-default',
     data: payload.data || {},
-    requireInteraction: false
+    actions: payload.notification?.actions || payload.data?.actions ? JSON.parse(payload.data.actions) : [],
+    requireInteraction: true
   };
 
   // Show the notification
   self.registration.showNotification(notificationTitle, notificationOptions)
+    .then(() => {
+      // Update badge count if available in data
+      if (navigator.setAppBadge && payload.data?.unread_count) {
+        navigator.setAppBadge(parseInt(payload.data.unread_count))
+          .catch(error => console.error('Error setting app badge:', error));
+      }
+    })
     .catch(error => console.error('Error showing notification:', error));
 });
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
-  console.log('[firebase-messaging-sw.js] Notification clicked:', event);
-  
+  console.log('[firebase-messaging-sw.js] Notification click/action:', event.action, event);
+
   event.notification.close();
-  
-  // Get the URL to open from notification data
-  const urlToOpen = event.notification.data?.click_action || '/';
-  
+
+  let targetUrl = event.notification.data?.click_action || '/';
+
+  // Handle specific actions
+  if (event.action === 'view_request') {
+    targetUrl = event.notification.data?.request_url || targetUrl;
+  } else if (event.action === 'view_order') {
+    targetUrl = event.notification.data?.order_url || targetUrl;
+  }
+
   // Validate URL is from same origin
-  let targetUrl = urlToOpen;
   try {
-    const url = new URL(urlToOpen, self.location.origin);
+    const url = new URL(targetUrl, self.location.origin);
     targetUrl = url.toString();
   } catch (error) {
-    console.warn('Invalid URL in click_action:', urlToOpen);
+    console.warn('Invalid URL:', targetUrl);
     targetUrl = '/';
   }
 

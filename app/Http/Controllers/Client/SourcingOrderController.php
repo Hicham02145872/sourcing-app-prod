@@ -138,4 +138,5 @@ class SourcingOrderController extends Controller
 
         return $pdf->stream('sourcing-orders.pdf');
     }
+
 }

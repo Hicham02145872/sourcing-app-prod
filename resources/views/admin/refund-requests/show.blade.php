@@ -158,7 +158,7 @@
                         <div class="space-y-4">
                             <div class="flex justify-between items-center">
                                 <span class="text-xs text-slate-500">{{ __('Order ID') }}</span>
-                                <a href="{{ route('admin.sourcing-orders.show', $refundRequest->sourcingOrder) }}" class="text-sm font-bold hover:text-orange-400 transition-colors">#{{ $refundRequest->sourcingOrder->id }}</a>
+                                <a href="{{ route('admin.sourcing-orders.show', $refundRequest->sourcingOrder) }}" class="text-sm font-bold hover:text-orange-400 transition-colors">#{{ $refundRequest->sourcingOrder->display_id }}</a>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-xs text-slate-500">{{ __('Total Price') }}</span>

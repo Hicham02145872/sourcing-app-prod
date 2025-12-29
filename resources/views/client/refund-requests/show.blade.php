@@ -16,9 +16,9 @@
                             <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">
                                 <a href="{{ route('dashboard') }}" class="hover:text-slate-700 dark:hover:text-slate-300">{{ __('Dashboard') }}</a>
                                 <span class="mx-1.5">/</span>
-                                <a href="{{ route('client.sourcing-orders.show', $refundRequest->sourcingOrder) }}" class="hover:text-slate-700 dark:hover:text-slate-300">{{ __('Order') }} #{{ $refundRequest->sourcingOrder->id }}</a>
+                                <a href="{{ route('client.sourcing-orders.show', $refundRequest->sourcingOrder) }}" class="hover:text-slate-700 dark:hover:text-slate-300">{{ __('Order Details') }}</a>
                                 <span class="mx-1.5">/</span>
-                                <span class="font-medium text-slate-700 dark:text-slate-400">#{{ $refundRequest->id }}</span>
+                                <span class="font-medium text-slate-700 dark:text-slate-400">{{ __('Refund Request') }}</span>
                             </nav>
                         </div>
                     </div>
@@ -182,10 +182,7 @@
                             <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Associated Order') }}</h3>
                         </div>
                         <div class="p-6 space-y-4">
-                            <div class="flex justify-between items-center">
-                                <span class="text-xs text-slate-500">{{ __('Order ID') }}</span>
-                                <span class="text-xs font-bold text-slate-900 dark:text-white">#{{ $refundRequest->sourcingOrder->id }}</span>
-                            </div>
+
                             <div class="flex justify-between items-center">
                                 <span class="text-xs text-slate-500">{{ __('Paid Total') }}</span>
                                 <span class="text-xs font-black text-slate-900 dark:text-white">{{ number_format($refundRequest->sourcingOrder->total_amount, 2) }} {{ $refundRequest->sourcingOrder->quotation->currency }}</span>
@@ -206,7 +203,7 @@
                         </div>
                         <div>
                             <h4 class="text-xs font-bold text-orange-900 dark:text-orange-300 uppercase tracking-widest mb-1">{{ __('Case Reference') }}</h4>
-                            <p class="text-[10px] font-medium text-orange-800 dark:text-orange-400/80 leading-relaxed">{{ __('Your claim is currently handled by our priority support team. For any updates, please reference ticket #') }}{{ $refundRequest->id }}.</p>
+                            <p class="text-[10px] font-medium text-orange-800 dark:text-orange-400/80 leading-relaxed">{{ __('Your claim is currently handled by our priority support team. We will notify you of any updates.') }}</p>
                         </div>
                     </div>
                 </div>

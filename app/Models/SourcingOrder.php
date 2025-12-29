@@ -50,8 +50,6 @@ class SourcingOrder extends Model
         'initial_estimated_product_cost',
         'initial_estimated_shipping_cost',
         'initial_estimated_other_costs',
-        'initial_estimated_other_costs',
-        'cost_adjustment_notes',
         'cost_adjustment_notes',
         'assigned_to_admin_id',
         'refund_amount',
@@ -80,7 +78,6 @@ class SourcingOrder extends Model
         'rejection_loss_cost' => 'decimal:2',
         'net_profit_or_loss' => 'decimal:2',
         'initial_estimated_product_cost' => 'decimal:2',
-        'initial_estimated_shipping_cost' => 'decimal:2',
         'initial_estimated_shipping_cost' => 'decimal:2',
         'initial_estimated_other_costs' => 'decimal:2',
         'refund_amount' => 'decimal:2',
@@ -177,18 +174,26 @@ class SourcingOrder extends Model
     {
         return [
             'id' => $this->id,
-            'created_at' => $this->created_at->toDateTimeString(),
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'status' => $this->status,
-            'client_name' => $this->user->name ?? 'N/A',
-            'client_email' => $this->user->email ?? 'N/A',
-            'product_name' => $this->quotation->sourcingRequest->product_name ?? 'N/A',
-            'quantity' => $this->quotation->quantity ?? 0,
+            'client_name' => $this->user->name,
+            'client_email' => $this->user->email,
+            'product_name' => $this->quotation->sourcingRequest->product_name,
+            'quantity' => $this->quotation->sourcingRequest->destinations->sum('quantity'),
             'total_amount' => $this->total_amount,
-            'currency' => $this->currency ?? 'USD',
-            'shipping_method' => $this->shipping_method ?? 'N/A',
-            'tracking_number' => $this->tracking_number ?? '',
-            'admin_assigned' => $this->assignedAdmin->name ?? 'Unassigned',
-            'net_profit' => $this->net_profit_or_loss ?? 0,
+            'currency' => $this->quotation->currency,
+            'shipping_method' => $this->quotation->sourcingRequest->shipping_method,
+            'tracking_number' => $this->tracking_number,
+            'admin_assigned' => $this->assignedAdmin?->name ?? 'N/A',
+            'net_profit' => $this->net_profit_or_loss,
         ];
+    }
+
+    /**
+     * Get the custom display ID (always odd).
+     */
+    public function getDisplayIdAttribute(): int
+    {
+        return $this->id * 5;
     }
 }

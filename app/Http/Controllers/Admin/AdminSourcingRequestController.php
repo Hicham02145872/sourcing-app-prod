@@ -165,18 +165,8 @@ class AdminSourcingRequestController extends Controller
     {
         $currentUser = auth()->user();
 
-        // 1. Auto-Claim Logic
-        if (is_null($sourcingRequest->assigned_to_admin_id)) {
-            // Automatically assign to current admin
-            $sourcingRequest->update([
-                'assigned_to_admin_id' => $currentUser->id,
-                'assigned_at' => now(),
-            ]);
-
-            session()->flash('success', 'Dossier automatiquement assigné à vous.');
-        }
-        // 2. Security Check
-        elseif ($sourcingRequest->assigned_to_admin_id !== $currentUser->id) {
+        // 1. Auto-Claim Logic REMOVED
+        if ($sourcingRequest->assigned_to_admin_id !== $currentUser->id && !is_null($sourcingRequest->assigned_to_admin_id)) {
             // Super Admin can see everything
             if ($currentUser->isSuperAdmin()) {
                 session()->flash('warning', 'Attention: Ce dossier est assigné à un autre administrateur ('.($sourcingRequest->assignedAdmin->name ?? 'Inconnu').').');
@@ -196,8 +186,12 @@ class AdminSourcingRequestController extends Controller
      */
     public function updateStatus(Request $request, SourcingRequest $sourcingRequest): RedirectResponse
     {
-        // Security: Ensure the user owns the ticket or is Super Admin
-        if (! $sourcingRequest->isAssignedTo(auth()->user()) && ! auth()->user()->isSuperAdmin()) {
+        // Security: Ensure the user owns the ticket or is Super Admin OR is claiming it (unassigned -> in_review)
+        $isAssignedToMe = $sourcingRequest->isAssignedTo(auth()->user());
+        $isSuperAdmin = auth()->user()->isSuperAdmin();
+        $isClaimingAction = is_null($sourcingRequest->assigned_to_admin_id) && $request->input('status') === 'in_review';
+
+        if (! $isAssignedToMe && ! $isSuperAdmin && ! $isClaimingAction) {
             abort(403, 'Vous ne pouvez pas modifier un dossier qui ne vous est pas assigné.');
         }
 

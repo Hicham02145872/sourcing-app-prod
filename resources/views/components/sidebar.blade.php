@@ -100,6 +100,15 @@
                             </svg>
                             <span>{{ __('History') }}</span>
                         </a>
+
+                        <a href="{{ route('client.shipping-fees.index') }}" 
+                           class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('client.shipping-fees.index') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a6 6 0 0 1 12 0v1.5a.75.75 0 0 1-.75.75h-10.5a.75.75 0 0 1-.75-.75v-1.5Z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 3c-2.25 0-4.125 1.875-4.125 4.125S8.25 11.25 10.5 11.25 14.625 9.375 14.625 7.125 12.75 3 10.5 3Z" />
+                            </svg>
+                            <span>{{ __('Shipping Fees') }}</span>
+                        </a>
                      </div>
                 </div>
 
@@ -174,6 +183,16 @@
                             <span class="ml-auto text-[9px] font-bold bg-amber-50 text-amber-600 border border-amber-100 px-1.5 py-0.5 rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300">{{ __('Coming Soon') }}</span>
                         </div>
 
+                        @if(auth()->user()->isSuperAdmin())
+                        <a href="{{ route('admin.shipping-fees.index') }}" 
+                           class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.shipping-fees.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a6 6 0 0 1 12 0v1.5a.75.75 0 0 1-.75.75h-10.5a.75.75 0 0 1-.75-.75v-1.5Z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 3c-2.25 0-4.125 1.875-4.125 4.125S8.25 11.25 10.5 11.25 14.625 9.375 14.625 7.125 12.75 3 10.5 3Z" />
+                            </svg>
+                            <span>{{ __('Shipping Fees') }}</span>
+                        </a>
+                        @endif
                      </div>
                 </div>
 

@@ -61,7 +61,7 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        View::composer(['components.layout.header', 'components.sidebar', 'client.dashboard'], function ($view) {
+        View::composer(['components.layout.header', 'components.sidebar', 'client.dashboard', 'client.shipping-fees.index', 'livewire.client.shipping-fees-list'], function ($view) {
             try {
                 $socialMediaLinks = SocialMediaLink::first();
                 if (! $socialMediaLinks) {

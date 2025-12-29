@@ -75,7 +75,6 @@
                 {{-- Main Content --}}
                 <div class="lg:col-span-2 space-y-6">
                     
-
                     {{-- Expédition & Suivi --}}
                     <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden mb-6 relative group">
                         <!-- Coming Soon Overlay -->
@@ -422,24 +421,32 @@
                                         {{ __('Submit Payment Proof') }}
                                     </button>
                                 </form>
-                            @elseif($sourcingOrder->proof_of_payment_path)
+                            @elseif($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
                                 <div class="text-center p-6 bg-[#0BA6DF]/10 dark:bg-[#0BA6DF]/20 rounded-lg border-2 border-[#0BA6DF]">
                                     <div class="w-14 h-14 bg-[#0BA6DF]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <svg class="w-7 h-7 text-[#0BA6DF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
                                     </div>
-                                    <p class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ __('Payment Proof Submitted') }}</p>
-                                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ __('Your payment proof is under review. We will proceed with the order once verified.') }}</p>
+                                    @if(in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+                                        <p class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ __('Payment Verified') }}</p>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ __('Your order is being processed.') }}</p>
+                                    @else
+                                        <p class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ __('Payment Proof Submitted') }}</p>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ __('Your payment proof is under review. We will proceed with the order once verified.') }}</p>
+                                    @endif
+
                                     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                                        <a href="{{ route('client.sourcing-orders.download-proof-of-payment', $sourcingOrder) }}" 
-                                           class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-[#0BA6DF] bg-white dark:bg-slate-700 border-2 border-[#0BA6DF] rounded-lg hover:bg-[#0BA6DF]/5 transition-colors shadow-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                            {{ __('View Document') }}
-                                        </a>
+                                        @if($sourcingOrder->proof_of_payment_path)
+                                            <a href="{{ route('client.sourcing-orders.download-proof-of-payment', $sourcingOrder) }}" 
+                                               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-[#0BA6DF] bg-white dark:bg-slate-700 border-2 border-[#0BA6DF] rounded-lg hover:bg-[#0BA6DF]/5 transition-colors shadow-sm">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                {{ __('View Document') }}
+                                            </a>
+                                        @endif
                                         <a href="{{ route('client.sourcing-orders.receipt', $sourcingOrder) }}" target="_blank"
                                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-[#EF7722] bg-white dark:bg-slate-700 border-2 border-[#EF7722] rounded-lg hover:bg-[#EF7722]/5 transition-colors shadow-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -447,6 +454,7 @@
                                             </svg>
                                             {{ __('Print Receipt') }}
                                         </a>
+
                                     </div>
                                 </div>
                             @endif
@@ -475,12 +483,13 @@
                             
                             {{-- Key Details --}}
                             <div class="space-y-3">
+
                                 <div class="flex items-center p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">
                                     <svg class="w-4 h-4 mr-3 text-[#EF7722] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                                     </svg>
                                     <span class="text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1">{{ __('Order ID') }}</span>
-                                    <span class="text-sm font-bold text-slate-900 dark:text-white">#{{ $sourcingOrder->id }}</span>
+                                    <span class="text-sm font-bold text-[#EF7722]">#{{ $sourcingOrder->display_id }}</span>
                                 </div>
 
                                 <div class="flex items-center p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">

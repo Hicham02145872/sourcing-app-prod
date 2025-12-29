@@ -78,6 +78,16 @@ class SourcingOrderController extends Controller
         return view('admin.sourcing-orders.show', compact('sourcingOrder'));
     }
 
+    public function showShippingLabel(SourcingOrder $sourcingOrder)
+    {
+        $this->authorize('view', $sourcingOrder);
+
+        $pdf = Pdf::loadView('admin.sourcing-orders.shipping-label', compact('sourcingOrder'));
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->download('shipping-label-'.$sourcingOrder->id.'.pdf');
+    }
+
     public function downloadProofOfPayment(SourcingOrder $sourcingOrder)
     {
         $this->authorize('view', $sourcingOrder);

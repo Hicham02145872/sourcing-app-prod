@@ -167,8 +167,8 @@
                                                     @endif
                                                 </div>
                                                 <div>
-                                                    <div class="text-sm font-bold text-slate-900 dark:text-white">{{ __('#') }}{{ $order->id }}</div>
-                                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ $order->quotation?->sourcingRequest?->category?->name }}</div>
+                                                    <div class="text-xs font-semibold text-[#EF7722] mb-0.5">#{{ $order->display_id }}</div>
+                                                    <div class="text-sm font-bold text-slate-900 dark:text-white">{{ $order->quotation?->sourcingRequest?->category?->name }}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -247,13 +247,15 @@
                                             <div class="text-xs text-slate-500 dark:text-slate-400">{{ $order->updated_at->diffForHumans() }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right">
-                                            <a href="{{ route('client.sourcing-orders.show', $order) }}" 
-                                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-xs font-semibold rounded-lg transition-colors duration-200 shadow-sm">
-                                                {{ __('View') }}
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                                </svg>
-                                            </a>
+                                            <div class="flex items-center justify-end gap-2">
+                                                <a href="{{ route('client.sourcing-orders.show', $order) }}" 
+                                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-xs font-semibold rounded-lg transition-colors duration-200 shadow-sm">
+                                                    {{ __('View') }}
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                    </svg>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

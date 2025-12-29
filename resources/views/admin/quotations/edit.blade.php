@@ -111,6 +111,32 @@
                                         @endforeach
                                     </select>
                                 </div>
+
+                                <div>
+                                    <label for="actual_sourcing_location" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Actual Sourcing Location') }} <span class="text-red-500">*</span></label>
+                                    <select id="actual_sourcing_location" name="actual_sourcing_location" required
+                                        class="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors capitalize">
+                                        <option value="china" {{ old('actual_sourcing_location', $quotation->actual_sourcing_location) == 'china' ? 'selected' : '' }}>{{ __('China') }}</option>
+                                        <option value="dubai" {{ old('actual_sourcing_location', $quotation->actual_sourcing_location) == 'dubai' ? 'selected' : '' }}>{{ __('Dubai') }}</option>
+                                    </select>
+                                    <p class="mt-1 text-[10px] text-slate-400">{{ __('The location where the product will actually be sourced from.') }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Sourcing Note (Shown only when alternative location selected) -->
+                            <div id="sourcing_note_container" class="{{ old('actual_sourcing_location', $quotation->actual_sourcing_location) != $quotation->sourcingRequest->sourcing_location ? '' : 'hidden' }} mt-6 p-4 bg-orange-50 border border-orange-100 rounded-lg">
+                                <label for="sourcing_note" class="block text-[10px] font-bold text-orange-600 uppercase mb-2">
+                                    {{ __('Note about Alternative Sourcing') }}
+                                </label>
+                                <textarea id="sourcing_note" name="sourcing_note" rows="3"
+                                    class="block w-full px-3 py-2 text-sm bg-white border border-orange-200 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                                    placeholder="{{ __('Explain why this location was chosen and any impact on delivery...') }}">{{ old('sourcing_note', $quotation->sourcing_note) }}</textarea>
+                                <p class="mt-2 text-[10px] text-orange-500/80 italic">
+                                    <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    {{ __('This note will be visible to the client to help them understand the change.') }}
+                                </p>
                             </div>
                         </div>
 
@@ -445,6 +471,18 @@
             const field = document.querySelector(`[name="${name}"]`);
             if (field) {
                 field.addEventListener('input', calculateEstimatedProfit);
+            }
+        });
+
+        // Toggle sourcing note visibility
+        document.getElementById('actual_sourcing_location').addEventListener('change', function() {
+            const container = document.getElementById('sourcing_note_container');
+            const requestedLocation = "{{ $quotation->sourcingRequest->sourcing_location }}";
+            
+            if (this.value !== requestedLocation) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
             }
         });
 

@@ -201,7 +201,7 @@
                                         <td class="px-6 py-3 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
                                                 <div class="h-8 w-8 rounded bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 text-xs font-mono">
-                                                    {{ $order->id }}
+                                                    {{ $order->display_id }}
                                                 </div>
                                                 @if($order->quotation->sourcingRequest->product_image)
                                                     <img src="{{ Storage::url($order->quotation->sourcingRequest->product_image) }}" class="h-10 w-10 rounded object-cover border border-slate-200 shrink-0" alt="{{ __('Product') }}">
@@ -316,6 +316,17 @@
                                                     title="{{ __('Sync to Google Sheet') }}">
                                                     <svg class="w-4 h-4 group-[.loading]:animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                                 </button>
+
+                                                <!-- Shipping Label -->
+                                                @if($order->proof_of_payment_path || in_array($order->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+                                                    <a href="{{ route('admin.sourcing-orders.shipping-label', $order) }}" target="_blank"
+                                                       class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors" 
+                                                       title="{{ __('Shipping Label') }}">
+                                                        <svg class="w-4 h-4 mx-auto" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </a>
+                                                @endif
  
                                                  <!-- Print -->
                                                 <button type="button" onclick="window.print()" 

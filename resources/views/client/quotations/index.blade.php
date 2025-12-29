@@ -131,9 +131,12 @@
                                         <div class="flex-1 min-w-0">
                                             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
                                                 <div class="flex-1 min-w-0">
-                                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#EF7722] transition-colors truncate">
-                                                        {{ $request->product_name }}
-                                                    </h3>
+                                                    <div class="flex items-center gap-2 mb-0.5">
+                                                        <span class="text-xs font-bold text-[#EF7722]">#{{ $request->quotation ? $request->quotation->display_id : $request->display_id }}</span>
+                                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#EF7722] transition-colors truncate">
+                                                            {{ $request->product_name }}
+                                                        </h3>
+                                                    </div>
                                                     <div class="flex items-center gap-2 mt-1.5">
                                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#EF7722]/10 text-[#EF7722]">
                                                             {{ $request->category?->name }}

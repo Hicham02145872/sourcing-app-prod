@@ -105,6 +105,8 @@ class QuotationController extends Controller
             'weight_unit' => 'required|string|in:g,kg,colis',
             'delivery_cost_china' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
+            'actual_sourcing_location' => 'required|string|in:china,dubai',
+            'sourcing_note' => 'nullable|string',
             // Financial estimation fields (optional)
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
@@ -155,14 +157,21 @@ class QuotationController extends Controller
             'delivery_cost_china' => $validated['delivery_cost_china'],
             'currency' => $validated['currency'],
             'status' => 'pending', // Default status
+            'actual_sourcing_location' => $validated['actual_sourcing_location'],
             // Financial estimation fields
             'estimated_product_cost' => $estimatedProductCostTotal,
             'estimated_shipping_cost' => $validated['estimated_shipping_cost'] ?? null,
             'estimated_other_costs' => $validated['estimated_other_costs'] ?? null,
+            'sourcing_note' => $validated['sourcing_note'] ?? null,
             // estimated_net_profit will be calculated by QuotationObserver
         ]);
 
         event(new \App\Events\QuotationCreated($quotation));
+
+        // Notify client if sourcing location differs from requested
+        if ($quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location) {
+            $sourcingRequest->user->notify(new \App\Notifications\AlternativeSourcingNotification($quotation));
+        }
 
         return redirect()->route('admin.dashboard')->with('status', 'Quotation created successfully!');
     }
@@ -205,6 +214,8 @@ class QuotationController extends Controller
             'weight_unit' => 'required|string|in:g,kg,colis',
             'delivery_cost_china' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
+            'actual_sourcing_location' => 'required|string|in:china,dubai',
+            'sourcing_note' => 'nullable|string',
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
@@ -231,10 +242,18 @@ class QuotationController extends Controller
             'delivery_cost_china' => $validated['delivery_cost_china'],
             'currency' => $validated['currency'],
             'status' => 'pending', // Reset to pending for approval if needed, or set to 'quoted' directly
+            'actual_sourcing_location' => $validated['actual_sourcing_location'],
+            // Financial estimation fields
             'estimated_product_cost' => $estimatedProductCostTotal,
             'estimated_shipping_cost' => $validated['estimated_shipping_cost'] ?? null,
             'estimated_other_costs' => $validated['estimated_other_costs'] ?? null,
+            'sourcing_note' => $validated['sourcing_note'] ?? null,
         ]);
+
+        // Notify client if sourcing location changed and is different from requested
+        if ($quotation->wasChanged('actual_sourcing_location') && $quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location) {
+            $sourcingRequest->user->notify(new \App\Notifications\AlternativeSourcingNotification($quotation));
+        }
 
         // If the request was negotiating, transition it back to quoted
         if ($sourcingRequest->status === 'negotiating') {
