@@ -50,12 +50,8 @@ class SourcingRequestObserver
                 }
             }
 
-            // 2. Notify the NEW admin and all super admins
-            $admins = \App\Models\User::where('role', 'super_admin')
-                ->when($newAdminId && $newAdminId !== auth()->id(), function ($query) use ($newAdminId) {
-                    $query->orWhere('id', $newAdminId);
-                })
-                ->get();
+            // 2. Notify all admins and super admins
+            $admins = \App\Models\User::whereIn('role', ['admin', 'super_admin'])->get();
 
             foreach ($admins as $admin) {
                 $admin->notify(new \App\Notifications\SourcingRequestAssigned($sourcingRequest));

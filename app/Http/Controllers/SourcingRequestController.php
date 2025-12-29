@@ -146,17 +146,8 @@ class SourcingRequestController extends Controller
             return $sourcingRequest;
         });
 
-        // Notify only the assigned admin and all super admins
-        $assignedAdminId = $sourcingRequest->assigned_to_admin_id;
-
-        $admins = User::where('role', 'super_admin')
-            ->when($assignedAdminId, function ($query) use ($assignedAdminId) {
-                $query->orWhere(function ($q) use ($assignedAdminId) {
-                    $q->where('role', 'admin')
-                        ->where('id', $assignedAdminId);
-                });
-            })
-            ->get();
+        // Notify all admins and super admins
+        $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
 
         foreach ($admins as $admin) {
             $admin->notify(new SourcingRequestCreated($sourcingRequest));
