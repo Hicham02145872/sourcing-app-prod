@@ -393,34 +393,47 @@
                                 </div>
                             @endif
 
-                            @if($sourcingOrder->status === 'pending_payment')
-                                <form action="{{ route('client.sourcing-orders.upload-proof-of-payment', $sourcingOrder) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                                    @csrf
-                                    <div>
-                                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('Upload Proof of Payment') }}</label>
-                                        <input type="file" 
-                                               name="proof_of_payment" 
-                                               class="block w-full text-sm text-slate-600 dark:text-slate-400
-                                                      file:mr-4 file:py-2.5 file:px-4
-                                                      file:rounded-lg file:border-0
-                                                      file:text-sm file:font-semibold
-                                                      file:bg-[#EF7722] file:text-white
-                                                      hover:file:bg-[#FAA533]
-                                                      file:cursor-pointer file:transition-colors
-                                                      border-2 border-dashed border-[#EBEBEB] dark:border-slate-600 rounded-lg
-                                                      hover:border-[#EF7722] dark:hover:border-[#FAA533] transition-colors
-                                                      cursor-pointer p-2"
-                                               required/>
-                                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ __('Accepted formats: PDF, JPG, PNG (Max: 5MB)') }}</p>
-                                    </div>
-                                    <button type="submit" 
-                                            class="w-full py-3 px-4 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-bold rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        {{ __('Submit Payment Proof') }}
-                                    </button>
-                                </form>
+                                @if($sourcingOrder->status === 'pending_payment')
+                                    <form id="payment-proof-form" action="{{ route('client.sourcing-orders.upload-proof-of-payment', $sourcingOrder) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                        @csrf
+                                        <div>
+                                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('Upload Proof of Payment') }}</label>
+                                            <input type="file" 
+                                                   id="proof_of_payment"
+                                                   name="proof_of_payment" 
+                                                   accept="image/*,application/pdf"
+                                                   class="block w-full text-sm text-slate-600 dark:text-slate-400
+                                                          file:mr-4 file:py-2.5 file:px-4
+                                                          file:rounded-lg file:border-0
+                                                          file:text-sm file:font-semibold
+                                                          file:bg-[#EF7722] file:text-white
+                                                          hover:file:bg-[#FAA533]
+                                                          file:cursor-pointer file:transition-colors
+                                                          border-2 border-dashed border-[#EBEBEB] dark:border-slate-600 rounded-lg
+                                                          hover:border-[#EF7722] dark:hover:border-[#FAA533] transition-colors
+                                                          cursor-pointer p-2"
+                                                   required/>
+                                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400 italic">
+                                                {{ __('Accepted formats: PDF, JPG, PNG. Large images will be auto-optimized.') }}
+                                            </p>
+                                        </div>
+                                        <button type="submit" id="submit-proof-btn"
+                                                class="w-full py-3 px-4 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-bold rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <span id="btn-text" class="flex items-center gap-2">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                {{ __('Submit Payment Proof') }}
+                                            </span>
+                                            <span id="btn-loading" class="hidden items-center gap-2">
+                                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                {{ __('Optimizing & Uploading...') }}
+                                            </span>
+                                        </button>
+                                    </form>
                             @elseif($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
                                 <div class="text-center p-6 bg-[#0BA6DF]/10 dark:bg-[#0BA6DF]/20 rounded-lg border-2 border-[#0BA6DF]">
                                     <div class="w-14 h-14 bg-[#0BA6DF]/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -622,6 +635,91 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") {
                 closeMediaModal();
+            }
+        });
+
+        // Image Compression Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('payment-proof-form');
+            if (!form) return;
+
+            form.addEventListener('submit', async function(e) {
+                const fileInput = document.getElementById('proof_of_payment');
+                const file = fileInput.files[0];
+                const btn = document.getElementById('submit-proof-btn');
+                const btnText = document.getElementById('btn-text');
+                const btnLoading = document.getElementById('btn-loading');
+
+                if (!file || !file.type.startsWith('image/')) {
+                    // Not an image or no file, proceed normally (e.g. PDF)
+                    btn.disabled = true;
+                    btnText.classList.add('hidden');
+                    btnLoading.classList.remove('hidden');
+                    return;
+                }
+
+                e.preventDefault();
+                btn.disabled = true;
+                btnText.classList.add('hidden');
+                btnLoading.classList.remove('hidden');
+
+                try {
+                    const compressedFile = await compressImage(file);
+                    
+                    // Create a new FileList containing the compressed file
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(compressedFile);
+                    fileInput.files = dataTransfer.files;
+
+                    // Now submit the form
+                    form.submit();
+                } catch (error) {
+                    console.error('Compression failed:', error);
+                    alert('Compression failed. Attempting to upload original file.');
+                    form.submit();
+                }
+            });
+
+            async function compressImage(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+                            const MAX_WIDTH = 1600;
+
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            canvas.toBlob((blob) => {
+                                if (!blob) {
+                                    reject(new Error('Canvas to Blob failed'));
+                                    return;
+                                }
+                                const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                });
+                                resolve(newFile);
+                            }, 'image/jpeg', 0.8); // 80% quality
+                        };
+                        img.onerror = reject;
+                    };
+                    reader.onerror = reject;
+                });
             }
         });
     </script>

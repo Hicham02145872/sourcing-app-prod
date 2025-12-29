@@ -57,6 +57,11 @@ class SourcingOrderController extends Controller
     public function uploadProofOfPayment(Request $request, SourcingOrder $sourcingOrder): RedirectResponse
     {
         $this->authorize('uploadProofOfPayment', $sourcingOrder);
+        
+        $request->validate([
+            'proof_of_payment' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240', // 10MB limit as fallback
+        ]);
+
         Log::debug('uploadProofOfPayment method called', ['method' => $request->method(), 'request' => $request->all()]);
 
         if ($request->hasFile('proof_of_payment') && $request->file('proof_of_payment')->isValid()) {
