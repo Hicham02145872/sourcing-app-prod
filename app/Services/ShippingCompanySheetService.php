@@ -19,10 +19,8 @@ class ShippingCompanySheetService
     
     // Configuration constants
     const IMAGE_COLUMN_INDEX = 9; // J column (0-indexed)
-    const LABEL_COLUMN_INDEX = 10; // K column
-    const ROW_HEIGHT = 120; // Increased for better label visibility
+    const ROW_HEIGHT = 100;
     const IMAGE_COLUMN_WIDTH = 100;
-    const LABEL_COLUMN_WIDTH = 250; // Larger for the shipping label
 
     public function __construct(ShippingCompany $company)
     {
@@ -217,7 +215,8 @@ class ShippingCompanySheetService
             ],
         ]);
 
-        // 2. Resize Columns
+        // 2. Resize Image Column (One time check usually, but ensuring it here doesn't hurt or we can move it)
+        // Optimally we only do this once during header setup, but let's leave it for now to ensure robustness
         $requests[] = new Request([
             'updateDimensionProperties' => [
                 'range' => [
@@ -228,21 +227,6 @@ class ShippingCompanySheetService
                 ],
                 'properties' => [
                     'pixelSize' => self::IMAGE_COLUMN_WIDTH,
-                ],
-                'fields' => 'pixelSize',
-            ],
-        ]);
-
-        $requests[] = new Request([
-            'updateDimensionProperties' => [
-                'range' => [
-                    'sheetId' => $sheetId,
-                    'dimension' => 'COLUMNS',
-                    'startIndex' => self::LABEL_COLUMN_INDEX,
-                    'endIndex' => self::LABEL_COLUMN_INDEX + 1,
-                ],
-                'properties' => [
-                    'pixelSize' => self::LABEL_COLUMN_WIDTH,
                 ],
                 'fields' => 'pixelSize',
             ],
@@ -313,7 +297,6 @@ class ShippingCompanySheetService
         'address' => 'Adresse',
         'phone' => 'Téléphone',
         'product_image' => 'Photo',
-        'shipping_label' => 'Label Shipping',
         'weight' => 'Poids (kg)', // Placeholder for future
         'notes' => 'Notes',
     ];
