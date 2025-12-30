@@ -219,6 +219,62 @@ class SourcingOrderController extends Controller
         }
     }
 
+    /**
+     * Manually sync a sourcing order to the specialized Shipping Company Sheet
+     */
+    public function manualSyncToShippingCompanySheet(SourcingOrder $sourcingOrder): JsonResponse
+    {
+        $this->authorize('update', $sourcingOrder);
+
+        if (!$sourcingOrder->shipping_company_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucune compagnie d\'expédition assignée à cette commande.',
+            ], 422);
+        }
+
+        try {
+            $sourcingOrder->load(['shippingCompany', 'user', 'quotation.sourcingRequest']);
+
+            if (!$sourcingOrder->shippingCompany->google_sheet_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La compagnie d\'expédition n\'a pas de Google Sheet configuré.',
+                ], 422);
+            }
+
+            // Rate limit check specific to this action if needed, or rely on service
+            
+            $service = new \App\Services\ShippingCompanySheetService($sourcingOrder->shippingCompany);
+            // $service->ensureHeaders(); // Optional: run only if suspected missing
+
+            $dto = \App\DTOs\ShippingSheetRowDTO::fromOrder($sourcingOrder);
+            $service->upsertRow($dto);
+
+            $sourcingOrder->update([
+                'sheet_synced_at' => now(),
+                'sheet_sync_error' => null
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Synchronisé avec succès vers le Sheet de la compagnie !',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Manual shipping sheet sync failed for Order #{$sourcingOrder->id}: " . $e->getMessage());
+            
+            $sourcingOrder->update([
+                'sheet_sync_error' => substr($e->getMessage(), 0, 1000)
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de synchronisation: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function updateFinancials(Request $request, SourcingOrder $sourcingOrder): RedirectResponse
     {
         // Policy check: use viewFinancials or update. Since update is strictly admin, it's safe.

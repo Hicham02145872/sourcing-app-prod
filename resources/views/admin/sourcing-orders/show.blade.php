@@ -471,6 +471,59 @@
 
                 <!-- RIGHT COLUMN: Sidebar (1/3) -->
                 <div class="lg:col-span-1 space-y-6">
+
+                    <!-- Shipping Company Integration -->
+                    @if($sourcingOrder->shippingCompany)
+                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('Shipping & Logistics') }}</h3>
+                            <!-- Status Indicator -->
+                            @if($sourcingOrder->sheet_sync_error)
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100" title="{{ $sourcingOrder->sheet_sync_error }}">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    {{ __('Error') }}
+                                </span>
+                            @elseif($sourcingOrder->sheet_synced_at)
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    {{ __('Synced') }}
+                                </span>
+                            @endif
+                        </div>
+                        <div class="p-5">
+                            <div class="mb-4">
+                                <p class="text-[10px] text-slate-400 uppercase mb-1">{{ __('Assigned Company') }}</p>
+                                <a href="{{ route('admin.shipping-companies.index') }}" class="text-sm font-bold text-indigo-600 hover:underline">
+                                    {{ $sourcingOrder->shippingCompany->name }}
+                                </a>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                @if($sourcingOrder->shippingCompany->google_sheet_id)
+                                    <a href="https://docs.google.com/spreadsheets/d/{{ $sourcingOrder->shippingCompany->google_sheet_id }}" target="_blank" 
+                                       class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 text-xs font-bold rounded transition-colors">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.586l4 4a1 1 0 01.586 1.414V19a2 2 0 01-2 2z"/></svg>
+                                        {{ __('Open Google Sheet') }}
+                                    </a>
+                                    
+                                    <button type="button" 
+                                            onclick="syncToShippingSheet({{ $sourcingOrder->id }})"
+                                            class="sync-shipping-btn flex items-center justify-center gap-2 w-full px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded transition-colors shadow-sm">
+                                        <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span class="btn-text">{{ __('Force Sync to Sheet') }}</span>
+                                    </button>
+                                    @if($sourcingOrder->sheet_synced_at)
+                                        <p class="text-[10px] text-center text-slate-400 mt-2">
+                                            {{ __('Last synced:') }} {{ \Carbon\Carbon::parse($sourcingOrder->sheet_synced_at)->diffForHumans() }}
+                                        </p>
+                                    @endif
+                                @else
+                                    <p class="text-xs text-orange-500 italic">{{ __('No Sheet ID configured for this company.') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                     
                     <!-- 1. Product Image -->
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-1">
@@ -599,7 +652,6 @@
         function syncToGoogleSheet(orderId) {
             const button = event.currentTarget;
             const originalText = button.querySelector('.sync-text').textContent;
-            const svg = button.querySelector('svg');
             
             // UI Loading state
             button.disabled = true;
@@ -627,10 +679,48 @@
                 showToast("{{ __('Error during synchronization') }}", 'error');
             })
             .finally(() => {
-                // Reset
                 button.disabled = false;
                 button.classList.remove('opacity-70', 'cursor-not-allowed', 'loading');
                 button.querySelector('.sync-text').textContent = originalText;
+            });
+        }
+
+        function syncToShippingSheet(orderId) {
+            const button = event.currentTarget;
+            const textSpan = button.querySelector('.btn-text');
+            const originalText = textSpan.textContent;
+            
+            // UI Loading state
+            button.disabled = true;
+            button.classList.add('opacity-70', 'cursor-not-allowed', 'loading');
+            textSpan.textContent = "{{ __('Syncing...') }}";
+            
+            fetch(`/admin/sourcing-orders/${orderId}/sync-shipping-sheet`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500); // Reload to show new status
+                } else {
+                    showToast(data.message, 'error');
+                    button.disabled = false;
+                    button.classList.remove('opacity-70', 'cursor-not-allowed', 'loading');
+                    textSpan.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Sync error:', error);
+                showToast("{{ __('Error during synchronization') }}", 'error');
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-not-allowed', 'loading');
+                textSpan.textContent = originalText;
             });
         }
 

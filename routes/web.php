@@ -47,6 +47,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::patch('sourcing-orders/{sourcingOrder}/update-status', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateStatus'])->name('sourcing-orders.update-status');
     Route::put('sourcing-orders/{sourcingOrder}/update-financials', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateFinancials'])->name('sourcing-orders.update-financials');
     Route::post('sourcing-orders/{sourcingOrder}/sync-to-sheet', [App\Http\Controllers\Admin\SourcingOrderController::class, 'syncToGoogleSheet'])->name('sourcing-orders.sync-to-sheet');
+    Route::post('sourcing-orders/{sourcingOrder}/sync-shipping-sheet', [App\Http\Controllers\Admin\SourcingOrderController::class, 'manualSyncToShippingCompanySheet'])->name('sourcing-orders.sync-shipping-sheet');
     Route::get('sourcing-orders/{sourcingOrder}/shipping-label', [App\Http\Controllers\Admin\SourcingOrderController::class, 'showShippingLabel'])->name('sourcing-orders.shipping-label');
     Route::patch('sourcing-orders/{sourcingOrder}/tracking', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateTracking'])->name('sourcing-orders.update-tracking'); // Added tracking route
     Route::post('sourcing-orders/{sourcingOrder}/media', [App\Http\Controllers\Admin\SourcingOrderController::class, 'uploadMedia'])->name('sourcing-orders.media.store');
@@ -118,7 +119,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
             ->only(['index']);
 
         // Shipping Companies Management (Super Admin Only)
-        Route::get('/shipping-companies', \App\Livewire\Admin\ShippingCompanyManager::class)->name('shipping-companies.index');
+        Route::get('/shipping-companies', [App\Http\Controllers\Admin\ShippingCompanyController::class, 'index'])->name('shipping-companies.index');
     });
 });
 

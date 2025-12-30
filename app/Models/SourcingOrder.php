@@ -54,6 +54,8 @@ class SourcingOrder extends Model
         'assigned_to_admin_id',
         'refund_amount',
         'shipping_company_id',
+        'sheet_synced_at',
+        'sheet_sync_error',
     ];
 
     /**

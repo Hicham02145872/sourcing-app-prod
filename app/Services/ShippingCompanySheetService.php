@@ -16,6 +16,11 @@ class ShippingCompanySheetService
     protected $client;
     protected $sheetsService;
     protected $company;
+    
+    // Configuration constants
+    const IMAGE_COLUMN_INDEX = 9; // J column (0-indexed)
+    const ROW_HEIGHT = 100;
+    const IMAGE_COLUMN_WIDTH = 100;
 
     public function __construct(ShippingCompany $company)
     {
@@ -119,7 +124,7 @@ class ShippingCompanySheetService
         $this->sheetsService->spreadsheets->batchUpdate($this->company->google_sheet_id, $batchUpdateRequest);
     }
 
-    public function upsertRow(array $data, $orderId)
+    public function upsertRow(\App\DTOs\ShippingSheetRowDTO $dto)
     {
         $sheetName = $this->company->sheet_name ?? 'Sheet1';
         $syncedFields = array_keys(self::AVAILABLE_FIELDS);
@@ -130,25 +135,27 @@ class ShippingCompanySheetService
 
         // Fetch existing IDs
         $range = $sheetName . "!{$idColumn}:{$idColumn}";
-        $response = $this->sheetsService->spreadsheets_values->get($this->company->google_sheet_id, $range);
-        $values = $response->getValues();
+        try {
+            $response = $this->sheetsService->spreadsheets_values->get($this->company->google_sheet_id, $range);
+            $values = $response->getValues();
+        } catch (\Google\Service\Exception $e) {
+            throw new \Exception("Google API Error reading sheet: " . $e->getMessage());
+        }
 
         $rowIndex = -1;
         if (!empty($values)) {
             foreach ($values as $index => $row) {
-                // Determine if row matches ID (trimming whitespace and handling potential numeric/string differences)
-                if (isset($row[0]) && trim((string)$row[0]) === trim((string)$orderId)) {
+                if (isset($row[0]) && trim((string)$row[0]) === trim((string)$dto->id)) {
                     $rowIndex = $index + 1;
                     break;
                 }
             }
         }
 
-        // Prepare row data including image
-        $rowValues = [];
-        foreach ($syncedFields as $field) {
-            $rowValues[] = $data[$field] ?? '';
-        }
+        $rowValues = $dto->toArray();
+
+        // Prepare requests for batch update or single update
+        $requests = [];
 
         if ($rowIndex !== -1) {
             // Update
@@ -158,19 +165,89 @@ class ShippingCompanySheetService
                 $this->company->google_sheet_id,
                 $updateRange,
                 $body,
-                ['valueInputOption' => 'USER_ENTERED'] // Changed to USER_ENTERED for better formula/image support if needed
+                ['valueInputOption' => 'USER_ENTERED']
             );
         } else {
             // Append
             $appendRange = $sheetName . "!A:ZZ";
             $body = new ValueRange(['values' => [$rowValues]]);
-            $this->sheetsService->spreadsheets_values->append(
+            $response = $this->sheetsService->spreadsheets_values->append(
                 $this->company->google_sheet_id,
                 $appendRange,
                 $body,
                 ['valueInputOption' => 'USER_ENTERED']
             );
+            
+            // Extract new row index from update range like "Sheet1!A10:Z10"
+            $updatedRange = $response->getUpdates()->getUpdatedRange();
+            if (preg_match('/!A(\d+):/', $updatedRange, $matches)) {
+                $rowIndex = intval($matches[1]);
+            }
         }
+
+        if ($rowIndex !== -1) {
+            $this->applyRowFormatting($rowIndex, $dto->isCanceled);
+        }
+    }
+
+    protected function applyRowFormatting($rowIndex, $isCanceled)
+    {
+        $sheetName = $this->company->sheet_name ?? 'Sheet1';
+        $sheetId = $this->getSheetIdByName($sheetName);
+        
+        if ($sheetId === null) return;
+
+        $requests = [];
+
+        // 1. Resize Row (to show image bigger)
+        $requests[] = new Request([
+            'updateDimensionProperties' => [
+                'range' => [
+                    'sheetId' => $sheetId,
+                    'dimension' => 'ROWS',
+                    'startIndex' => $rowIndex - 1,
+                    'endIndex' => $rowIndex,
+                ],
+                'properties' => [
+                    'pixelSize' => self::ROW_HEIGHT,
+                ],
+                'fields' => 'pixelSize',
+            ],
+        ]);
+
+        // 2. Resize Image Column (One time check usually, but ensuring it here doesn't hurt or we can move it)
+        // Optimally we only do this once during header setup, but let's leave it for now to ensure robustness
+        
+        // 3. Apply Cancellation Style (Strikethrough + Red Background) or Reset
+        $backgroundColor = $isCanceled 
+            ? ['red' => 1.0, 'green' => 0.8, 'blue' => 0.8] // Light Red
+            : ['red' => 1, 'green' => 1, 'blue' => 1]; // White
+
+        $textDecoration = $isCanceled ? true : false;
+
+        $requests[] = new Request([
+            'repeatCell' => [
+                'range' => [
+                    'sheetId' => $sheetId,
+                    'startRowIndex' => $rowIndex - 1,
+                    'endRowIndex' => $rowIndex,
+                    'startColumnIndex' => 0,
+                    'endColumnIndex' => count(self::AVAILABLE_FIELDS),
+                ],
+                'cell' => [
+                    'userEnteredFormat' => [
+                        'backgroundColor' => $backgroundColor,
+                        'textFormat' => [
+                            'strikethrough' => $textDecoration,
+                        ],
+                    ],
+                ],
+                'fields' => 'userEnteredFormat(backgroundColor,textFormat.strikethrough)',
+            ],
+        ]);
+
+        $batchUpdateRequest = new BatchUpdateSpreadsheetRequest(['requests' => $requests]);
+        $this->sheetsService->spreadsheets->batchUpdate($this->company->google_sheet_id, $batchUpdateRequest);
     }
 
     protected function getSheetIdByName($sheetName)

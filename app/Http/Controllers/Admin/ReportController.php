@@ -18,7 +18,7 @@ class ReportController extends Controller
 
         $orders = $query->paginate(10);
 
-        // Aggregations in MAD
+        
         $dailyTotal = $this->calculateTotalInMad(
             SourcingOrder::whereDate('sourcing_orders.updated_at', \Carbon\Carbon::today())->with('quotation')->get(),
             'net_profit_or_loss'
