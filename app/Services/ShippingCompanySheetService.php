@@ -217,20 +217,6 @@ class ShippingCompanySheetService
 
         // 2. Resize Image Column (One time check usually, but ensuring it here doesn't hurt or we can move it)
         // Optimally we only do this once during header setup, but let's leave it for now to ensure robustness
-        $requests[] = new Request([
-            'updateDimensionProperties' => [
-                'range' => [
-                    'sheetId' => $sheetId,
-                    'dimension' => 'COLUMNS',
-                    'startIndex' => self::IMAGE_COLUMN_INDEX,
-                    'endIndex' => self::IMAGE_COLUMN_INDEX + 1,
-                ],
-                'properties' => [
-                    'pixelSize' => self::IMAGE_COLUMN_WIDTH,
-                ],
-                'fields' => 'pixelSize',
-            ],
-        ]);
         
         // 3. Apply Cancellation Style (Strikethrough + Red Background) or Reset
         $backgroundColor = $isCanceled 

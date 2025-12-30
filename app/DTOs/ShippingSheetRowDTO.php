@@ -14,6 +14,8 @@ class ShippingSheetRowDTO
         public int $quantity,
         public string $trackingNumber,
         public string $clientName,
+        public string $address,
+        public string $phone,
         public string $productImage,
         public string $weight = '',
         public string $notes = '',
