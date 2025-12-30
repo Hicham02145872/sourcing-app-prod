@@ -203,7 +203,7 @@
                                                     @endif
                                                 </div>
                                                 <div>
-                                                    <div class="text-sm font-mono font-medium text-orange-600">#{{ str_pad($quotation->id, 5, '0', STR_PAD_LEFT) }}</div>
+                                                    <div class="text-sm font-mono font-medium text-orange-600">#{{ $quotation->display_id }}</div>
                                                     <div class="text-[11px] text-slate-400">{{ $quotation->sourcingRequest->category->name ?? 'N/A' }}</div>
                                                 </div>
                                             </div>

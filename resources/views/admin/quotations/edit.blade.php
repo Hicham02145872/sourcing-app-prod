@@ -18,7 +18,7 @@
                                 <span class="mx-1.5">/</span>
                                 <span class="hover:text-slate-700">{{ __('Quotations') }}</span>
                                 <span class="mx-1.5">/</span>
-                                <span class="font-medium text-slate-700">{{ __('Update Quote #') }}{{ $quotation->id }}</span>
+                                <span class="font-medium text-slate-700">{{ __('Update Quote #') }}{{ $quotation->display_id }}</span>
                             </nav>
                         </div>
                     </div>

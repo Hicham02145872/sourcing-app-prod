@@ -16,7 +16,7 @@
 
                         <div>
                             <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
-                                {{ __('Quotation') }} <span class="text-slate-400 font-normal">#{{ str_pad($quotation->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                {{ __('Quotation') }} <span class="text-slate-400 font-normal">#{{ $quotation->display_id }}</span>
                             </h1>
                             <nav class="hidden sm:flex text-xs text-slate-500 mt-0.5" aria-label="Breadcrumb">
                                 <a href="{{ route('admin.dashboard') }}" class="hover:text-orange-600 transition-colors">{{ __('Dashboard') }}</a>

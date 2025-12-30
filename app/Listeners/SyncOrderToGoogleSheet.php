@@ -84,7 +84,7 @@ class SyncOrderToGoogleSheet implements ShouldQueue
             Log::debug("GoogleSheetService initialized for order #{$order->id}");
 
             Log::debug("Upserting row to Google Sheet for order #{$order->id}");
-            $googleSheetService->upsertRow($data, $order->id);
+            $googleSheetService->upsertRow($data, $order->display_id, $order->id);
             Log::debug("Row upserted to Google Sheet for order #{$order->id}");
 
             // Marquer comme synchronisé (garder en cache pendant 24h)

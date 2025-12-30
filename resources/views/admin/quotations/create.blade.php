@@ -52,6 +52,10 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-orange-600/70 mb-1">{{ __('Request ID') }}</p>
+                            <p class="text-sm font-mono font-bold text-orange-600">#{{ $sourcingRequest->display_id }}</p>
+                        </div>
+                        <div>
                             <p class="text-[10px] font-bold uppercase tracking-wider text-orange-600/70 mb-1">{{ __('Product Name') }}</p>
                             <p class="text-sm font-bold text-slate-800">{{ $sourcingRequest->product_name }}</p>
                         </div>

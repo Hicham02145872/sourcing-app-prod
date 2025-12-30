@@ -52,9 +52,11 @@ class EventServiceProvider extends ServiceProvider
         SourcingOrderStatusChanged::class => [
             SendSourcingOrderStatusUpdatedNotification::class,
             \App\Listeners\UpdateOrderStatusInGoogleSheet::class,
+            \App\Listeners\SyncOrderToShippingCompanySheet::class,
         ],
         ProofOfPaymentUploadedEvent::class => [
             \App\Listeners\SyncOrderToGoogleSheet::class,
+            \App\Listeners\SyncOrderToShippingCompanySheet::class,
         ],
         \Illuminate\Notifications\Events\NotificationFailed::class => [
             \App\Listeners\PruneInvalidFcmTokens::class,

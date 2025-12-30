@@ -1,0 +1,212 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\ShippingCompany;
+use Google\Client;
+use Google\Service\Sheets;
+use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
+use Google\Service\Sheets\Request;
+use Google\Service\Sheets\ValueRange;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
+class ShippingCompanySheetService
+{
+    protected $client;
+    protected $sheetsService;
+    protected $company;
+
+    public function __construct(ShippingCompany $company)
+    {
+        $this->company = $company;
+
+        if (!$this->company->google_sheet_id) {
+            throw new \Exception('Shipping company does not have a Google Sheet ID configured.');
+        }
+
+        $this->client = new Client();
+        $this->client->setApplicationName('Sourcing App - Shipping Company Integration');
+        $this->client->setScopes([Sheets::SPREADSHEETS]);
+        $this->client->setAccessType('offline');
+
+        $credentialsPath = storage_path(config('services.google.credentials_path'));
+        if (!file_exists($credentialsPath)) {
+            throw new \Exception('Google Sheets API credentials file not found.');
+        }
+        $this->client->setAuthConfig($credentialsPath);
+
+        $this->sheetsService = new Sheets($this->client);
+    }
+
+    public function ensureHeaders(): array
+    {
+        try {
+            $sheetName = $this->company->sheet_name ?? 'Sheet1';
+            
+            // Check if headers exist
+            $range = $sheetName . '!A1:Z1';
+            $response = $this->sheetsService->spreadsheets_values->get($this->company->google_sheet_id, $range);
+            $values = $response->getValues();
+
+            if (empty($values)) {
+                $headers = array_values(self::AVAILABLE_FIELDS);
+                
+                // Write headers
+                $body = new ValueRange(['values' => [$headers]]);
+                $params = ['valueInputOption' => 'RAW'];
+                $this->sheetsService->spreadsheets_values->update(
+                    $this->company->google_sheet_id, 
+                    $range, 
+                    $body, 
+                    $params
+                );
+
+                // Style headers
+                $sheetId = $this->getSheetIdByName($sheetName);
+                if ($sheetId !== null) {
+                    $this->styleHeaders($sheetId, count($headers));
+                }
+
+                return ['success' => true, 'message' => 'Headers installed successfully.'];
+            }
+
+            return ['success' => true, 'message' => 'Headers already exist.'];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to ensure headers for shipping company: ' . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    protected function styleHeaders($sheetId, $columnCount)
+    {
+        $requests = [
+            new Request([
+                'repeatCell' => [
+                    'range' => [
+                        'sheetId' => $sheetId,
+                        'startRowIndex' => 0,
+                        'endRowIndex' => 1,
+                        'startColumnIndex' => 0,
+                        'endColumnIndex' => $columnCount,
+                    ],
+                    'cell' => [
+                        'userEnteredFormat' => [
+                            'backgroundColor' => ['red' => 0.2, 'green' => 0.2, 'blue' => 0.2],
+                            'horizontalAlignment' => 'CENTER',
+                            'textFormat' => [
+                                'bold' => true,
+                                'foregroundColor' => ['red' => 1, 'green' => 1, 'blue' => 1],
+                            ],
+                        ],
+                    ],
+                    'fields' => 'userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)',
+                ],
+            ]),
+            new Request([
+                'updateSheetProperties' => [
+                    'properties' => [
+                        'sheetId' => $sheetId,
+                        'gridProperties' => ['frozenRowCount' => 1],
+                    ],
+                    'fields' => 'gridProperties.frozenRowCount',
+                ],
+            ]),
+        ];
+
+        $batchUpdateRequest = new BatchUpdateSpreadsheetRequest(['requests' => $requests]);
+        $this->sheetsService->spreadsheets->batchUpdate($this->company->google_sheet_id, $batchUpdateRequest);
+    }
+
+    public function upsertRow(array $data, $orderId)
+    {
+        $sheetName = $this->company->sheet_name ?? 'Sheet1';
+        $syncedFields = array_keys(self::AVAILABLE_FIELDS);
+        
+        // Find ID column index
+        $idIndex = array_search('id', $syncedFields);
+        $idColumn = $this->indexToLetter($idIndex + 1);
+
+        // Fetch existing IDs
+        $range = $sheetName . "!{$idColumn}:{$idColumn}";
+        $response = $this->sheetsService->spreadsheets_values->get($this->company->google_sheet_id, $range);
+        $values = $response->getValues();
+
+        $rowIndex = -1;
+        if (!empty($values)) {
+            foreach ($values as $index => $row) {
+                // Determine if row matches ID (trimming whitespace and handling potential numeric/string differences)
+                if (isset($row[0]) && trim((string)$row[0]) === trim((string)$orderId)) {
+                    $rowIndex = $index + 1;
+                    break;
+                }
+            }
+        }
+
+        // Prepare row data including image
+        $rowValues = [];
+        foreach ($syncedFields as $field) {
+            $rowValues[] = $data[$field] ?? '';
+        }
+
+        if ($rowIndex !== -1) {
+            // Update
+            $updateRange = $sheetName . "!A{$rowIndex}";
+            $body = new ValueRange(['values' => [$rowValues]]);
+            $this->sheetsService->spreadsheets_values->update(
+                $this->company->google_sheet_id,
+                $updateRange,
+                $body,
+                ['valueInputOption' => 'USER_ENTERED'] // Changed to USER_ENTERED for better formula/image support if needed
+            );
+        } else {
+            // Append
+            $appendRange = $sheetName . "!A:ZZ";
+            $body = new ValueRange(['values' => [$rowValues]]);
+            $this->sheetsService->spreadsheets_values->append(
+                $this->company->google_sheet_id,
+                $appendRange,
+                $body,
+                ['valueInputOption' => 'USER_ENTERED']
+            );
+        }
+    }
+
+    protected function getSheetIdByName($sheetName)
+    {
+        $spreadsheet = $this->sheetsService->spreadsheets->get($this->company->google_sheet_id);
+        foreach ($spreadsheet->getSheets() as $sheet) {
+            if ($sheet->getProperties()->getTitle() === $sheetName) {
+                return $sheet->getProperties()->getSheetId();
+            }
+        }
+        return null;
+    }
+
+    protected function indexToLetter($index)
+    {
+        $letter = '';
+        while ($index > 0) {
+            $temp = ($index - 1) % 26;
+            $letter = chr(65 + $temp) . $letter;
+            $index = ($index - $temp - 1) / 26;
+        }
+        return $letter;
+    }
+
+    const AVAILABLE_FIELDS = [
+        'id' => 'Order ID',
+        'created_at' => 'Date',
+        'status' => 'Statut',
+        'product_name' => 'Produit',
+        'quantity' => 'Quantité',
+        'tracking_number' => 'Tracking',
+        'client_name' => 'Client',
+        'address' => 'Adresse',
+        'phone' => 'Téléphone',
+        'product_image' => 'Photo',
+        'weight' => 'Poids (kg)', // Placeholder for future
+        'notes' => 'Notes',
+    ];
+}

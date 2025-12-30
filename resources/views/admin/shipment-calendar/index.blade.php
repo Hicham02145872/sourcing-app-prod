@@ -218,7 +218,7 @@
                     const props = info.event.extendedProps;
                     
                     // Add tooltip
-                    info.el.title = `Order #${props.orderId} - ${props.clientName}\nStatus: ${props.status}`;
+                    info.el.title = `Order #${props.displayId} - ${props.clientName}\nStatus: ${props.status}`;
                     
                     // Add custom styling based on stage completion
                     if (props.isCompleted) {
@@ -281,7 +281,7 @@
                                         <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                                         </svg>
-                                        Détails de l'expédition #${props.orderId}
+                                        Détails de l'expédition #${props.displayId}
                                     </h3>
                                     <button onclick="document.getElementById('shipmentModal').remove()" class="text-slate-400 hover:text-white transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

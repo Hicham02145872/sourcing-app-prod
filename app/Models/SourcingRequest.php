@@ -48,7 +48,7 @@ class SourcingRequest extends Model
     }
 
     /**
-     * Get the custom display ID (always odd).
+     * Get the custom display ID (multiple of 5).
      */
     public function getDisplayIdAttribute(): int
     {

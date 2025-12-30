@@ -276,7 +276,7 @@
                                                     $currentClass = $statusColors[$order->status] ?? 'bg-slate-50 text-slate-700 border-slate-200';
                                                 @endphp
                                                  <select name="status" 
-                                                    onchange="if(confirm('{{ __('Change status of order #:id?', ['id' => $order->id]) }}')) { this.form.submit(); } else { location.reload(); }" 
+                                                    onchange="if(confirm('{{ __('Change status of order #:id?', ['id' => $order->display_id]) }}')) { this.form.submit(); } else { location.reload(); }" 
                                                     class="block w-full text-center px-2 py-1 text-[11px] font-bold rounded border uppercase tracking-wide cursor-pointer focus:ring-1 focus:ring-offset-1 focus:ring-slate-400 {{ $currentClass }}">
                                                     @foreach (App\Models\SourcingOrder::STATUSES as $status)
                                                         <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }} class="bg-white text-slate-700">
@@ -311,7 +311,7 @@
                                                 
                                                 <!-- Sync -->
                                                 <button type="button" 
-                                                    onclick="syncToGoogleSheet({{ $order->id }})"
+                                                    onclick="syncToGoogleSheet({{ $order->display_id }})"
                                                     class="sync-btn p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors group"
                                                     title="{{ __('Sync to Google Sheet') }}">
                                                     <svg class="w-4 h-4 group-[.loading]:animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>

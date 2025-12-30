@@ -55,9 +55,12 @@ trait NotificationFilterTrait
             }
         }
 
-        // Load all entities assigned to this admin (eager loading to avoid N+1)
+        // Load all entities assigned to this admin (or unassigned for requests)
         $assignedRequests = SourcingRequest::whereIn('id', array_unique($sourcingRequestIds))
-            ->where('assigned_to_admin_id', $user->id)
+            ->where(function ($query) use ($user) {
+                $query->where('assigned_to_admin_id', $user->id)
+                      ->orWhereNull('assigned_to_admin_id');
+            })
             ->pluck('id')
             ->toArray();
 

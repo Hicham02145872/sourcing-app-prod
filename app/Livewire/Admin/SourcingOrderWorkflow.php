@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Events\SourcingOrderStatusChanged;
+use App\Models\ShippingCompany;
 use App\Models\SourcingOrder;
 use App\Models\User;
 use Livewire\Component;
@@ -17,12 +18,15 @@ class SourcingOrderWorkflow extends Component
 
     public ?string $tracking_carrier;
 
+    public ?int $shipping_company_id;
+
     public function mount(SourcingOrder $sourcingOrder)
     {
         $this->sourcingOrder = $sourcingOrder;
         $this->status = $sourcingOrder->status;
         $this->tracking_number = $sourcingOrder->tracking_number;
         $this->tracking_carrier = $sourcingOrder->tracking_carrier;
+        $this->shipping_company_id = $sourcingOrder->shipping_company_id;
     }
 
     public function updateStatus()
@@ -88,10 +92,29 @@ class SourcingOrderWorkflow extends Component
         $this->dispatch('show-success-toast', message: __($adminId ? 'Order assigned successfully.' : 'Order unassigned.'));
     }
 
+    public function assignShippingCompany($companyId)
+    {
+        if (! auth()->user()->isSuperAdmin() && $this->sourcingOrder->assigned_to_admin_id !== auth()->id()) {
+            $this->dispatch('show-error-toast', message: __('You are not authorized to assign shipping companies.'));
+
+            return;
+        }
+
+        $this->sourcingOrder->update([
+            'shipping_company_id' => $companyId ?: null,
+        ]);
+
+        $this->sourcingOrder->refresh();
+        $this->shipping_company_id = $this->sourcingOrder->shipping_company_id;
+
+        $this->dispatch('show-success-toast', message: __($companyId ? 'Shipping company assigned successfully.' : 'Shipping company unassigned.'));
+    }
+
     public function render()
     {
         return view('livewire.admin.sourcing-order-workflow', [
             'admins' => User::where('role', 'admin')->orderBy('name')->get(),
+            'shippingCompanies' => ShippingCompany::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 }

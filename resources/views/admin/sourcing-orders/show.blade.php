@@ -45,7 +45,7 @@
                     <!-- Global Actions -->
                     <div class="flex items-center gap-2">
                          <button type="button" 
-                            onclick="syncToGoogleSheet({{ $sourcingOrder->id }})"
+                            onclick="syncToGoogleSheet({{ $sourcingOrder->display_id }})"
                             class="sync-btn inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-medium rounded transition-colors shadow-sm group">
                             <svg class="w-3.5 h-3.5 text-green-600 group-[.loading]:animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             <span class="sync-text">{{ __('Sync Sheet') }}</span>

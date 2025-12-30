@@ -156,8 +156,12 @@ class SourcingOrderController extends Controller
     /**
      * Manually sync a sourcing order to Google Sheets
      */
-    public function syncToGoogleSheet(SourcingOrder $sourcingOrder): JsonResponse
+    public function syncToGoogleSheet($orderId): JsonResponse
     {
+        $sourcingOrder = SourcingOrder::where('id', $orderId)
+            ->orWhereRaw('id * 5 = ?', [$orderId])
+            ->firstOrFail();
+
         $this->authorize('update', $sourcingOrder);
 
         try {

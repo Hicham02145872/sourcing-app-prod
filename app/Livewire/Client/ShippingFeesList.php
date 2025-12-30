@@ -33,16 +33,15 @@ class ShippingFeesList extends Component
                     ->orWhereNotNull('train_fee');
             });
 
-        if (!empty($this->search)) {
+        if (! empty($this->search)) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('code', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('code', 'like', '%'.$this->search.'%');
             });
         }
 
-        $countries = $query->get(); // Using get() for now as the previous view didn't seem to have pagination, but I'll check.
-        // Wait, the previous view iterated over $countries. The controller used ->get().
-        
+        $countries = $query->paginate(12);
+
         return view('livewire.client.shipping-fees-list', [
             'countries' => $countries,
         ]);

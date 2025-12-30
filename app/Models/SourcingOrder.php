@@ -53,6 +53,7 @@ class SourcingOrder extends Model
         'cost_adjustment_notes',
         'assigned_to_admin_id',
         'refund_amount',
+        'shipping_company_id',
     ];
 
     /**
@@ -96,6 +97,11 @@ class SourcingOrder extends Model
     public function assignedAdmin()
     {
         return $this->belongsTo(User::class, 'assigned_to_admin_id');
+    }
+
+    public function shippingCompany()
+    {
+        return $this->belongsTo(ShippingCompany::class);
     }
 
     public function canTransitionTo(string $newStatus): bool
@@ -167,13 +173,10 @@ class SourcingOrder extends Model
         return $this->hasMany(RefundRequest::class);
     }
 
-    /**
-     * Prepare data for Google Sheet sync
-     */
     public function toGoogleSheetArray(): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->display_id,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'status' => $this->status,
             'client_name' => $this->user->name,
@@ -186,14 +189,32 @@ class SourcingOrder extends Model
             'tracking_number' => $this->tracking_number,
             'admin_assigned' => $this->assignedAdmin?->name ?? 'N/A',
             'net_profit' => $this->net_profit_or_loss,
+            'product_image' => $this->quotation->sourcingRequest->product_image ? asset('storage/' . $this->quotation->sourcingRequest->product_image) : '',
         ];
     }
 
     /**
-     * Get the custom display ID (always odd).
+     * Get the custom display ID (multiple of 5).
      */
     public function getDisplayIdAttribute(): int
     {
         return $this->id * 5;
+    }
+    public function toShippingCompanySheetArray(): array
+    {
+        return [
+            'id' => $this->display_id,
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'status' => $this->status,
+            'product_name' => $this->quotation->sourcingRequest->product_name,
+            'quantity' => $this->quotation->sourcingRequest->destinations->sum('quantity'),
+            'tracking_number' => $this->tracking_number,
+            'client_name' => $this->user->name,
+            'address' => $this->quotation->sourcingRequest->address ?? 'N/A', // Using address from sourcing request
+            'phone' => $this->quotation->sourcingRequest->phone_number ?? 'N/A',
+            'product_image' => $this->quotation->sourcingRequest->product_image ? '=IMAGE("' . asset('storage/' . $this->quotation->sourcingRequest->product_image) . '")' : '',
+            'weight' => '', // Placeholder
+            'notes' => '', // Placeholder
+        ];
     }
 }

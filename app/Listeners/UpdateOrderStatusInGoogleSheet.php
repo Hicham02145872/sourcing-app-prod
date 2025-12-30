@@ -3,8 +3,10 @@
 namespace App\Listeners;
 
 use App\Events\SourcingOrderStatusChanged;
+use App\Services\GoogleSheetService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 
 class UpdateOrderStatusInGoogleSheet implements ShouldQueue
 {
@@ -48,17 +50,17 @@ class UpdateOrderStatusInGoogleSheet implements ShouldQueue
     public function handle(SourcingOrderStatusChanged $event): void
     {
         $order = $event->sourcingOrder;
-
-        // Optionally check if this order was ever synced to avoid unnecessary API calls
-        // Use a cache key or check if a sync log exists for creation
-        // For now, we will attempt update and the service handles "not found" gracefully
+        $order->load(['user', 'quotation.sourcingRequest', 'assignedAdmin', 'shippingCompany']);
 
         try {
-            $order->load(['user', 'quotation.sourcingRequest', 'assignedAdmin']);
-            $googleSheetService = new \App\Services\GoogleSheetService;
-            $googleSheetService->upsertRow($order->toGoogleSheetArray(), $order->id);
+            // Always sync to global sheet from this listener
+            Log::info("Syncing order #{$order->id} to global Google Sheet.");
+
+            $googleSheetService = new GoogleSheetService();
+            $googleSheetService->upsertRow($order->toGoogleSheetArray(), $order->display_id, $order->id);
+
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to update Order #{$order->id} in Google Sheet on status change: ".$e->getMessage());
+            Log::error("Failed to update Order #{$order->id} in Google Sheet on status change: ".$e->getMessage());
             throw $e; // Retry
         }
     }

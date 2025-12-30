@@ -206,6 +206,7 @@
                                                 @endif
                                             </div>
                                             <div class="min-w-0">
+                                                <div class="text-sm font-mono font-medium text-orange-600">#{{ $request->display_id }}</div>
                                                 <div class="text-sm font-medium text-slate-900 truncate max-w-[180px]" title="{{ $request->product_name }}">{{ $request->product_name }}</div>
                                                 <div class="text-xs text-slate-500">{{ $request->category?->name ?? __('Unclassified') }}</div>
                                             </div>

@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CountryController;
-use App\Http\Controllers\Admin\GoogleSheetSettingsController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SocialMediaLinkController;
@@ -76,18 +75,18 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::get('/social-media-links', [SocialMediaLinkController::class, 'edit'])->name('social-media-links.edit');
     Route::put('/social-media-links', [SocialMediaLinkController::class, 'update'])->name('social-media-links.update');
 
-        // Google Sheets Management (Super Admin & Admin)
-        Route::prefix('google-sheets')->name('google-sheets.')->group(function () {
-            Route::get('/settings', [App\Http\Controllers\Admin\GoogleSheetController::class, 'index'])->name('settings');
-            Route::post('/upload-credentials', [App\Http\Controllers\Admin\GoogleSheetController::class, 'uploadCredentials'])->name('upload-credentials');
-            Route::post('/test-connection', [App\Http\Controllers\Admin\GoogleSheetController::class, 'testConnection'])->name('test-connection');
-            Route::post('/create-sheet', [App\Http\Controllers\Admin\GoogleSheetController::class, 'createSheet'])->name('create-sheet');
-            Route::post('/sync-all', [App\Http\Controllers\Admin\GoogleSheetController::class, 'syncAll'])->name('sync-all');
-            Route::post('/install-headers', [App\Http\Controllers\Admin\GoogleSheetController::class, 'installHeaders'])->name('install-headers');
-            Route::post('/update-settings', [App\Http\Controllers\Admin\GoogleSheetController::class, 'updateSettings'])->name('update-settings');
-            Route::post('/clear-logs', [App\Http\Controllers\Admin\GoogleSheetController::class, 'clearLogs'])->name('clear-logs');
-            Route::get('/logs', [App\Http\Controllers\Admin\GoogleSheetController::class, 'logs'])->name('logs');
-        });
+    // Google Sheets Management (Super Admin & Admin)
+    Route::prefix('google-sheets')->name('google-sheets.')->group(function () {
+        Route::get('/settings', [App\Http\Controllers\Admin\GoogleSheetController::class, 'index'])->name('settings');
+        Route::post('/upload-credentials', [App\Http\Controllers\Admin\GoogleSheetController::class, 'uploadCredentials'])->name('upload-credentials');
+        Route::post('/test-connection', [App\Http\Controllers\Admin\GoogleSheetController::class, 'testConnection'])->name('test-connection');
+        Route::post('/create-sheet', [App\Http\Controllers\Admin\GoogleSheetController::class, 'createSheet'])->name('create-sheet');
+        Route::post('/sync-all', [App\Http\Controllers\Admin\GoogleSheetController::class, 'syncAll'])->name('sync-all');
+        Route::post('/install-headers', [App\Http\Controllers\Admin\GoogleSheetController::class, 'installHeaders'])->name('install-headers');
+        Route::post('/update-settings', [App\Http\Controllers\Admin\GoogleSheetController::class, 'updateSettings'])->name('update-settings');
+        Route::post('/clear-logs', [App\Http\Controllers\Admin\GoogleSheetController::class, 'clearLogs'])->name('clear-logs');
+        Route::get('/logs', [App\Http\Controllers\Admin\GoogleSheetController::class, 'logs'])->name('logs');
+    });
 
     // Sales Margin Report
     Route::get('/reports/sales-margin', [ReportController::class, 'salesMarginReport'])->name('reports.sales-margin');
@@ -109,15 +108,17 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
         Route::get('/super-admin/admins/{admin}/edit', [App\Http\Controllers\Admin\SuperAdminController::class, 'editAdmin'])->name('super-admin.edit-admin');
         Route::put('/super-admin/admins/{admin}', [App\Http\Controllers\Admin\SuperAdminController::class, 'updateAdmin'])->name('super-admin.update-admin');
         Route::delete('/super-admin/admins/{admin}', [App\Http\Controllers\Admin\SuperAdminController::class, 'destroyAdmin'])->name('super-admin.destroy-admin');
-        
+
         // Shipment Timeline Calendar (Super Admin Only)
         Route::get('/shipment-calendar', [App\Http\Controllers\Admin\ShipmentCalendarController::class, 'index'])->name('shipment-calendar.index');
         Route::get('/shipment-calendar/events', [App\Http\Controllers\Admin\ShipmentCalendarController::class, 'getEvents'])->name('shipment-calendar.events');
 
         // Shipping Fees (Super Admin Only)
         Route::resource('shipping-fees', App\Http\Controllers\Admin\ShippingFeeController::class)
-            ->only(['index', 'edit', 'update'])
-            ->parameters(['shipping-fees' => 'country']);
+            ->only(['index']);
+
+        // Shipping Companies Management (Super Admin Only)
+        Route::get('/shipping-companies', \App\Livewire\Admin\ShippingCompanyManager::class)->name('shipping-companies.index');
     });
 });
 

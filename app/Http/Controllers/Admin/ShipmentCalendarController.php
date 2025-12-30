@@ -43,17 +43,17 @@ class ShipmentCalendarController extends Controller
     {
         $events = [];
         $baseDate = $order->created_at;
-        
+
         // Get product information
         $productName = $order->quotation->sourcingRequest->product_name ?? 'N/A';
         $productImage = $order->quotation->sourcingRequest->product_image ?? null;
         $sourcingLocation = $order->quotation->sourcingRequest->sourcing_location ?? 'China';
-        
+
         // Determine if sourcing from Dubai/UAE or China
-        $isDubaiSource = stripos($sourcingLocation, 'dubai') !== false || 
+        $isDubaiSource = stripos($sourcingLocation, 'dubai') !== false ||
                          stripos($sourcingLocation, 'uae') !== false ||
                          stripos($sourcingLocation, 'emirates') !== false;
-        
+
         if ($isDubaiSource) {
             // Dubai/UAE Timeline: 1-7 working days
             $stages = [
@@ -63,7 +63,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 0,
                     'duration' => 2, // Preparation: 2 days
                     'color' => '#f97316', // Orange
-                    'type' => 'departure'
+                    'type' => 'departure',
                 ],
                 [
                     'title' => '🚚 Transit local',
@@ -71,7 +71,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 2,
                     'duration' => 2, // Local transit: 2 days
                     'color' => '#06b6d4', // Cyan
-                    'type' => 'transit'
+                    'type' => 'transit',
                 ],
                 [
                     'title' => '🏛️ Dédouanement',
@@ -79,7 +79,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 4,
                     'duration' => 2, // Customs: 2 days
                     'color' => '#8b5cf6', // Purple
-                    'type' => 'customs'
+                    'type' => 'customs',
                 ],
                 [
                     'title' => '🎯 Livraison finale',
@@ -87,7 +87,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 6,
                     'duration' => 1, // Final delivery: 1 day
                     'color' => '#10b981', // Green
-                    'type' => 'delivery'
+                    'type' => 'delivery',
                 ],
             ];
         } else {
@@ -99,7 +99,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 0,
                     'duration' => 3, // Preparation: 3 days
                     'color' => '#f97316', // Orange
-                    'type' => 'departure'
+                    'type' => 'departure',
                 ],
                 [
                     'title' => '🚢 Transit Chine → EAU',
@@ -107,7 +107,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 3,
                     'duration' => 12, // Sea/Air freight: 12 days
                     'color' => '#0ea5e9', // Sky blue
-                    'type' => 'transit'
+                    'type' => 'transit',
                 ],
                 [
                     'title' => '✈️ Arrivée EAU',
@@ -115,7 +115,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 15,
                     'duration' => 1, // Arrival processing: 1 day
                     'color' => '#3b82f6', // Blue
-                    'type' => 'arrival'
+                    'type' => 'arrival',
                 ],
                 [
                     'title' => '🏛️ Dédouanement EAU',
@@ -123,7 +123,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 16,
                     'duration' => 2, // Customs clearance: 2 days
                     'color' => '#8b5cf6', // Purple
-                    'type' => 'customs'
+                    'type' => 'customs',
                 ],
                 [
                     'title' => '🚚 Transit vers destination',
@@ -131,7 +131,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 18,
                     'duration' => 3, // Local transit: 3 days
                     'color' => '#06b6d4', // Cyan
-                    'type' => 'transit'
+                    'type' => 'transit',
                 ],
                 [
                     'title' => '🏛️ Dédouanement final',
@@ -139,7 +139,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 21,
                     'duration' => 2, // Final customs: 2 days
                     'color' => '#8b5cf6', // Purple
-                    'type' => 'customs'
+                    'type' => 'customs',
                 ],
                 [
                     'title' => '🎯 Livraison finale',
@@ -147,7 +147,7 @@ class ShipmentCalendarController extends Controller
                     'days_offset' => 23,
                     'duration' => 2, // Final delivery: 2 days
                     'color' => '#10b981', // Green
-                    'type' => 'delivery'
+                    'type' => 'delivery',
                 ],
             ];
         }
@@ -161,15 +161,16 @@ class ShipmentCalendarController extends Controller
             $isCurrent = $order->status === $stage['status'];
 
             $events[] = [
-                'id' => $order->id . '-' . $stage['status'],
-                'title' => $stage['title'] . ' - ' . $productName,
+                'id' => $order->id.'-'.$stage['status'],
+                'title' => $stage['title'].' - '.$productName,
                 'start' => $startDate->format('Y-m-d'),
                 'end' => $endDate->format('Y-m-d'),
-                'backgroundColor' => $isCompleted ? $stage['color'] : ($isCurrent ? $stage['color'] : $stage['color'] . '40'),
+                'backgroundColor' => $isCompleted ? $stage['color'] : ($isCurrent ? $stage['color'] : $stage['color'].'40'),
                 'borderColor' => $stage['color'],
                 'textColor' => $isCompleted || $isCurrent ? '#ffffff' : '#64748b',
                 'extendedProps' => [
                     'orderId' => $order->id,
+                    'displayId' => $order->display_id,
                     'clientName' => $order->user->name ?? 'N/A',
                     'status' => $order->status,
                     'trackingNumber' => $order->tracking_number ?? 'N/A',
@@ -178,11 +179,11 @@ class ShipmentCalendarController extends Controller
                     'isCompleted' => $isCompleted,
                     'isCurrent' => $isCurrent,
                     'productName' => $productName,
-                    'productImage' => $productImage ? asset('storage/' . $productImage) : null,
+                    'productImage' => $productImage ? asset('storage/'.$productImage) : null,
                     'sourcingLocation' => $sourcingLocation,
                 ],
                 'classNames' => [
-                    $isCompleted ? 'completed-stage' : ($isCurrent ? 'current-stage' : 'upcoming-stage')
+                    $isCompleted ? 'completed-stage' : ($isCurrent ? 'current-stage' : 'upcoming-stage'),
                 ],
             ];
         }

@@ -25,16 +25,21 @@ class GoogleSheetService
 
     protected $sheetId;
 
-    public function __construct()
+    public function __construct(?string $spreadsheetId = null, ?string $sheetName = null)
     {
-        $setting = GoogleSheetSetting::first();
-        if (! $setting || ! $setting->sheet_id) {
-            Log::error('Google Sheet settings are not configured in the database.');
-            throw new \Exception('Google Sheet settings are not configured.');
+        // Use provided values or fallback to global settings
+        if ($spreadsheetId === null) {
+            $setting = GoogleSheetSetting::first();
+            if (! $setting || ! $setting->sheet_id) {
+                Log::error('Google Sheet settings are not configured in the database.');
+                throw new \Exception('Google Sheet settings are not configured.');
+            }
+            $this->spreadsheetId = $setting->sheet_id;
+            $this->sheetName = $sheetName ?? $setting->sheet_name ?? 'sourcing';
+        } else {
+            $this->spreadsheetId = $spreadsheetId;
+            $this->sheetName = $sheetName ?? 'sourcing';
         }
-
-        $this->spreadsheetId = $setting->sheet_id;
-        $this->sheetName = $setting->sheet_name ?? 'sourcing';
 
         $this->client = new Client;
         $this->client->setApplicationName('Sourcing App Google Sheets Integration');
@@ -130,7 +135,7 @@ class GoogleSheetService
 
             return [
                 'success' => false,
-                'message' => __("Could not find sheet ID for sheet name: :name. Please check your sheet name configuration.", ['name' => $this->sheetName]),
+                'message' => __('Could not find sheet ID for sheet name: :name. Please check your sheet name configuration.', ['name' => $this->sheetName]),
             ];
         }
 
@@ -353,6 +358,7 @@ class GoogleSheetService
         'tracking_number' => 'Numéro Suivi',
         'admin_assigned' => 'Admin Assigné',
         'net_profit' => 'Profit Net',
+        'product_image' => 'Image Produit',
     ];
 
     /**
@@ -484,17 +490,17 @@ class GoogleSheetService
     /**
      * Upsert a row in the Google Sheet (Update if exists, Append if not).
      */
-    public function upsertRow(array $data, int $orderId)
+    public function upsertRow(array $data, int $sheetDisplayId, ?int $internalId = null)
     {
         try {
             $setting = GoogleSheetSetting::first();
             $syncedFields = $setting->synced_fields ?? array_keys(self::AVAILABLE_FIELDS);
 
-            // Find index of 'id' field
+            // Find index of 'id' field to match Row in Sheet
             $idIndex = array_search('id', $syncedFields);
             if ($idIndex === false) {
                 // If ID is not synced, we can't find the row to update, so just append
-                return $this->appendRow($data, $orderId);
+                return $this->appendRow($data, $internalId);
             }
 
             // Convert idIndex to column letter
@@ -508,7 +514,8 @@ class GoogleSheetService
             $rowIndex = -1;
             if (! empty($values)) {
                 foreach ($values as $index => $row) {
-                    if (isset($row[0]) && (string) $row[0] === (string) $orderId) {
+                    // Match based on Display ID (e.g. 55)
+                    if (isset($row[0]) && (string) $row[0] === (string) $sheetDisplayId) {
                         $rowIndex = $index + 1; // 1-based index
                         break;
                     }
@@ -533,17 +540,19 @@ class GoogleSheetService
                     $params
                 );
 
-                Log::info("Order #{$orderId} updated in Google Sheet at row {$rowIndex}.");
-                GoogleSheetSyncLog::logSuccess($orderId, $data);
+                Log::info("Order #{$sheetDisplayId} (Internal #{$internalId}) updated in Google Sheet at row {$rowIndex}.");
+                if ($internalId) {
+                     GoogleSheetSyncLog::logSuccess($internalId, $data);
+                }
 
                 return true;
             } else {
                 // APPEND NEW ROW
-                return $this->appendRow($data, $orderId);
+                return $this->appendRow($data, $internalId);
             }
 
         } catch (\Exception $e) {
-            Log::error("Failed to upsert row for Order #{$orderId}: ".$e->getMessage());
+            Log::error("Failed to upsert row for Order Display #{$sheetDisplayId}: ".$e->getMessage());
             throw $e;
         }
     }

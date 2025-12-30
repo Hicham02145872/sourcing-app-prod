@@ -16,7 +16,7 @@
 
                         <div>
                             <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
-                                {{ __('Request #') }}{{ $sourcingRequest->id }}
+                                {{ __('Request #') }}{{ $sourcingRequest->display_id }}
                                 @php
                                     $statusColors = [
                                         'pending' => 'bg-amber-50 text-amber-700 border-amber-200',
@@ -339,3 +339,4 @@
         </div>
     </div>
 </x-app-layout>
+
