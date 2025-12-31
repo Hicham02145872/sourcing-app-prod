@@ -116,7 +116,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
 
         // Shipping Fees (Super Admin Only)
         Route::resource('shipping-fees', App\Http\Controllers\Admin\ShippingFeeController::class)
-            ->only(['index']);
+            ->only(['index', 'edit']);
 
         // Shipping Companies Management (Super Admin Only)
         Route::get('/shipping-companies', [App\Http\Controllers\Admin\ShippingCompanyController::class, 'index'])->name('shipping-companies.index');
