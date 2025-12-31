@@ -37,7 +37,16 @@ class QuotationPolicy
      */
     public function update(User $user, Quotation $quotation): bool
     {
-        return $user->isAdmin() || ($user->isClient() && $quotation->sourcingRequest->user_id === $user->id);
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($user->isAdmin()) {
+            // Admin can update if assigned to them OR unassigned
+            return $quotation->assigned_to_admin_id === $user->id || is_null($quotation->assigned_to_admin_id);
+        }
+
+        return $user->isClient() && $quotation->sourcingRequest->user_id === $user->id;
     }
 
     /**

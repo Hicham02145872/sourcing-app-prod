@@ -17,8 +17,8 @@
                     </div>
                     <div class="h-0.5 flex-1 mx-4 bg-[#EBEBEB] dark:bg-slate-700"></div>
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-[#EBEBEB] dark:bg-slate-700 text-slate-500 rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                        <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ __('Contact Info') }}</span>
+                        <div class="w-8 h-8 bg-[#EBEBEB] dark:bg-slate-700 text-slate-500 rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                        <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ __('Destinations') }}</span>
                     </div>
                 </div>
             </div>
@@ -60,6 +60,21 @@
                                     <x-input-error :messages="$errors->get('product_name')" class="mt-2" />
                                 </div>
 
+                                <!-- Product URL -->
+                                <div>
+                                    <label for="product_url" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                        {{ __('Product Link (Alibaba/Amazon/etc)') }} <span class="text-red-500">*</span>
+                                    </label>
+                                    <x-text-input id="product_url" 
+                                                  class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
+                                                  type="url" 
+                                                  name="product_url" 
+                                                  :value="old('product_url')" 
+                                                  required 
+                                                  placeholder="https://..." />
+                                    <x-input-error :messages="$errors->get('product_url')" class="mt-2" />
+                                </div>
+
                                 <!-- Category & Location Grid -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
@@ -97,7 +112,7 @@
 
                             <!-- Right: Product Image (1 column) -->
                             <div class="sm:col-span-1 flex flex-col items-center">
-                                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 text-center w-full">
+                                <label for="product_image" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 text-center w-full">
                                     {{ __('Photo') }}
                                 </label>
                                 <div class="relative w-32 h-32 bg-slate-50 dark:bg-slate-700 rounded-lg overflow-hidden border-2 border-dashed border-[#EBEBEB] dark:border-slate-600 group hover:border-[#EF7722] transition-all cursor-pointer shadow-sm">
@@ -113,9 +128,9 @@
                                         <span class="text-xs font-medium text-center">{{ __('Upload') }}</span>
                                     </div>
                                     <label for="product_image" class="absolute inset-0 cursor-pointer"></label>
-                                    <input id="product_image" type="file" class="sr-only" name="product_image" accept="image/*" />
+                                    <input id="product_image" type="file" class="sr-only" name="product_image" accept="image/*" required />
                                 </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">{{ __('Max 5MB') }}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">{{ __('Max 5MB') }} <span class="text-red-500">*</span></p>
                             </div>
                         </div>
 
@@ -145,6 +160,7 @@
                                     </div>
                                 </label>
                             </div>
+                            <x-input-error :messages="$errors->get('shipping_method')" class="mt-2" />
                         </div>
 
                         <!-- Additional Notes -->
@@ -219,6 +235,18 @@
                                     </div>
                                 </div>
 
+                                <div class="mt-3">
+                                    <label for="destinations_0_address" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
+                                        {{ __('Delivery Address') }}
+                                    </label>
+                                    <textarea id="destinations_0_address" 
+                                              name="destinations[0][address]" 
+                                              rows="2" 
+                                              required
+                                              class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] resize-none shadow-sm dark:bg-slate-800 dark:text-white text-sm" 
+                                              placeholder="{{ __('Full address for this destination') }}">{{ old('destinations.0.address') }}</textarea>
+                                </div>
+
                                 <button type="button" 
                                         @click="removeDestination($event)"
                                         class="remove-destination w-full sm:w-auto px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-300 dark:border-red-700/30 rounded-lg transition-all text-sm font-medium flex items-center justify-center gap-2">
@@ -241,58 +269,6 @@
                     </button>
                 </div>
 
-                <!-- Step 3: Contact Info -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-[#EBEBEB] dark:border-slate-700 p-6 sm:p-8 mb-6">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
-                        <span class="w-8 h-8 bg-[#EF7722] text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
-                        {{ __('Your Information') }}
-                    </h3>
-
-                    <input type="hidden" id="phone_number" name="phone_number" value="{{ old('phone_number', auth()->user()->phone) }}" />
-
-                    <div class="space-y-4">
-                        <!-- Address Section -->
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-                                {{ __('Delivery Address') }}
-                            </label>
-                            <div class="flex flex-col sm:flex-row gap-3 p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600 mb-3">
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="radio" id="address_manual" name="address_option" value="manual" class="form-radio h-4 w-4 text-[#EF7722] focus:ring-[#EF7722]" checked>
-                                    <span class="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('Enter manually') }}</span>
-                                </label>
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="radio" id="address_geolocation" name="address_option" value="geolocation" class="form-radio h-4 w-4 text-[#EF7722] focus:ring-[#EF7722]">
-                                    <span class="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('Use my location') }}</span>
-                                </label>
-                            </div>
-
-                            <!-- Manual Address -->
-                            <div id="manual-address-container">
-                                <textarea id="address" 
-                                          rows="2" 
-                                          class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] resize-none shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
-                                          name="address" 
-                                          placeholder="{{ __('Full address including street, city, and postal code') }}">{{ old('address') }}</textarea>
-                            </div>
-
-                            <!-- Geolocation -->
-                            <div id="geolocation-container" style="display: none;">
-                                <button type="button" 
-                                        @click="getGeolocation"
-                                        class="w-full py-2.5 bg-[#EF7722] hover:bg-[#FAA533] text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                    </svg>
-                                    {{ __('Get My Location') }}
-                                </button>
-                                <p id="location-feedback" class="mt-3 text-sm font-medium text-center"></p>
-                                <input type="hidden" name="latitude" id="latitude">
-                                <input type="hidden" name="longitude" id="longitude">
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Submit Buttons -->
                 <div class="flex flex-col-reverse sm:flex-row gap-3 justify-end">
@@ -317,21 +293,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/js/tom-select.complete.min.js"></script>
     <script>
         document.addEventListener('alpine:init', () => {
-            const addressOptions = document.querySelectorAll('input[name="address_option"]');
-            const manualAddressContainer = document.getElementById('manual-address-container');
-            const geolocationContainer = document.getElementById('geolocation-container');
-
-            addressOptions.forEach(option => {
-                option.addEventListener('change', () => {
-                    if (option.value === 'manual') {
-                        manualAddressContainer.style.display = 'block';
-                        geolocationContainer.style.display = 'none';
-                    } else {
-                        manualAddressContainer.style.display = 'none';
-                        geolocationContainer.style.display = 'block';
-                    }
-                });
-            });
 
             const input = document.getElementById('product_image');
             const preview = document.getElementById('product_image_preview');
@@ -422,6 +383,12 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label for="destinations_${newIndex}_address" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">{{ __('Delivery Address') }}</label>
+                                <textarea id="destinations_${newIndex}_address" name="destinations[${newIndex}][address]" rows="2" required class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] resize-none shadow-sm dark:bg-slate-800 dark:text-white text-sm" placeholder="{{ __('Full address for this destination') }}"></textarea>
                             </div>
                             <button type="button" @click="removeDestination($event)" class="remove-destination w-full sm:w-auto px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-300 dark:border-red-700/30 rounded-lg transition-all text-sm font-medium flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -510,44 +477,34 @@
                                     const inputEl = document.querySelector(`[name="${field}"]`);
                                     if (inputEl) {
                                         inputEl.classList.add('border-red-500');
+                                    } else {
+                                        // Try to find array inputs (e.g. destinations.0.address -> destinations[0][address])
+                                        const arrayName = field.replace(/\.(\d+)\./, '[$1][');
+                                        const arrayInput = document.querySelector(`[name="${arrayName}"]`) || document.querySelector(`[name="${arrayName}]"]`);
+                                        if (arrayInput) {
+                                            arrayInput.classList.add('border-red-500');
+                                        } else {
+                                            console.warn(`Could not find input for error field: ${field}`);
+                                        }
                                     }
                                 }
+                                console.log('Validation errors:', data.errors);
                             }
+                        } else {
+                            // Handle other errors (500, 403, etc.)
+                            console.error('Server Error:', response.status, data);
+                            let errorMessage = data.message || '{{ __("An unexpected error occurred. Please try again.") }}';
+                            if (data.error) {
+                                errorMessage += ' (' + data.error + ')';
+                            }
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { detail: errorMessage }));
                         }
                     } catch (error) {
+                        console.error('Form submission error:', error);
                         window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __("A network error occurred.") }}' }));
                     }
                 },
 
-                getGeolocation() {
-                    const form = document.querySelector('form');
-                    const locationFeedback = document.getElementById('location-feedback');
-                    const latitudeInput = document.getElementById('latitude');
-                    const longitudeInput = document.getElementById('longitude');
-
-                    locationFeedback.textContent = form.dataset.translationGettingLocation;
-                    locationFeedback.className = 'mt-3 text-sm font-medium text-blue-600 dark:text-blue-400 text-center';
-
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                                latitudeInput.value = position.coords.latitude;
-                                longitudeInput.value = position.coords.longitude;
-                                locationFeedback.textContent = form.dataset.translationLocationCaptured;
-                                locationFeedback.className = 'mt-3 text-sm font-medium text-green-600 dark:text-green-400 text-center';
-                            },
-                            (error) => {
-                                latitudeInput.value = '';
-                                longitudeInput.value = '';
-                                locationFeedback.textContent = form.dataset.translationLocationError;
-                                locationFeedback.className = 'mt-3 text-sm font-medium text-red-600 dark:text-red-400 text-center';
-                            }
-                        );
-                    } else {
-                        locationFeedback.textContent = form.dataset.translationGeolocationUnsupported;
-                        locationFeedback.className = 'mt-3 text-sm font-medium text-red-600 dark:text-red-400 text-center';
-                    }
-                }
             }));
 
             document.querySelectorAll('.tom-select-country').forEach(el => {

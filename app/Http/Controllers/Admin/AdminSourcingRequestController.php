@@ -125,9 +125,30 @@ class AdminSourcingRequestController extends Controller
         }
 
         // Filter by search term
-        if ($request->has('search')) {
-            $query->where('product_name', 'like', '%'.$request->search.'%');
-        }
+    if ($request->has('search')) {
+        $searchTerm = $request->search;
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('product_name', 'like', '%'.$searchTerm.'%')
+              ->orWhere('id', 'like', '%'.$searchTerm.'%')
+              ->orWhere('note', 'like', '%'.$searchTerm.'%')
+              ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                  $userQuery->where('name', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('email', 'like', '%'.$searchTerm.'%');
+              })
+              ->orWhereHas('destinations', function ($destQuery) use ($searchTerm) {
+                  $destQuery->where('address', 'like', '%'.$searchTerm.'%')
+                            ->orWhereHas('country', function ($countryQuery) use ($searchTerm) {
+                                $countryQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            })
+                            ->orWhereHas('service', function ($serviceQuery) use ($searchTerm) {
+                                $serviceQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            });
+              })
+              ->orWhereHas('assignedAdmin', function ($adminQuery) use ($searchTerm) {
+                  $adminQuery->where('name', 'like', '%'.$searchTerm.'%');
+              });
+        });
+    }
 
         // Filter by admin (Super Admin only)
         if (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
@@ -138,21 +159,23 @@ class AdminSourcingRequestController extends Controller
             }
         }
 
-        // AUTO-ASSIGNMENT SECURITY FILTER
-        // If not Super Admin, show only:
-        // 1. My assigned requests
-        // 2. Unassigned requests
-        // 3. (Optional) You might want to allow viewing others' requests but read-only,
-        //    but the requirement says "Avoid two admins working on same file".
-        //    Let's stick to the plan: Hide others' work to prevent collision.
-        if (! auth()->user()->isSuperAdmin()) {
-            $query->where(function ($q) {
-                $q->where('assigned_to_admin_id', auth()->id())
-                    ->orWhereNull('assigned_to_admin_id');
-            });
-        }
+        // AUTO-ASSIGNMENT SECURITY FILTER REMOVED
+    // Admins can now see all requests, but standard admins are restricted to "read-only"
+    // on requests assigned to others via Policy/Gate checks.
 
-        $sourcingRequests = $query->latest()->paginate(10);
+    // Sort: My Assignments -> Unassigned -> Others, then by Created At
+    if (auth()->check()) {
+        $userId = auth()->id();
+        $query->orderByRaw("CASE 
+            WHEN assigned_to_admin_id = ? THEN 1 
+            WHEN assigned_to_admin_id IS NULL THEN 2 
+            ELSE 3 
+        END", [$userId]);
+    }
+    
+    $query->latest();
+
+    $sourcingRequests = $query->paginate(10);
         $admins = \App\Models\User::where('role', 'admin')->get(); // For manual assignment dropdown
 
         return view('admin.sourcing-requests.index', compact('sourcingRequests', 'admins'));
@@ -165,15 +188,10 @@ class AdminSourcingRequestController extends Controller
     {
         $currentUser = auth()->user();
 
-        // 1. Auto-Claim Logic REMOVED
+        // 1. Auto-Claim Logic REMOVED - Admin Visibility Logic Updated
         if ($sourcingRequest->assigned_to_admin_id !== $currentUser->id && !is_null($sourcingRequest->assigned_to_admin_id)) {
-            // Super Admin can see everything
-            if ($currentUser->isSuperAdmin()) {
-                session()->flash('warning', 'Attention: Ce dossier est assigné à un autre administrateur ('.($sourcingRequest->assignedAdmin->name ?? 'Inconnu').').');
-            } else {
-                // Regular admin is blocked
-                abort(403, 'Ce dossier est verrouillé par un autre administrateur.');
-            }
+            // Warn if viewing another admin's assignment, but do not block
+             session()->flash('warning', 'Note: Ce dossier est assigné à un autre administrateur ('.($sourcingRequest->assignedAdmin->name ?? 'Inconnu').'). Mode lecture seule.');
         }
 
         $sourcingRequest->load('category', 'user', 'destinations.country', 'destinations.service', 'assignedAdmin');

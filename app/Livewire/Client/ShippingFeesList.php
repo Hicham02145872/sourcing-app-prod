@@ -12,9 +12,33 @@ class ShippingFeesList extends Component
 
     public $search = '';
 
+    public $selectedCategory = null;
+
+    public $selectedCountry = null;
+
     protected $queryString = [
         'search' => ['except' => ''],
+        'selectedCategory' => ['except' => null],
     ];
+
+    public function selectCategory($category)
+    {
+        if ($this->selectedCategory === $category) {
+            $this->selectedCategory = null;
+        } else {
+            $this->selectedCategory = $category;
+        }
+    }
+
+    public function selectCountry($countryId)
+    {
+        $this->selectedCountry = Country::with(['shippingFee.items'])->find($countryId);
+    }
+
+    public function closeCountryDetails()
+    {
+        $this->selectedCountry = null;
+    }
 
     public function updatingSearch()
     {
@@ -23,15 +47,8 @@ class ShippingFeesList extends Component
 
     public function render()
     {
-        $query = Country::with('shippingFee')
-            ->whereHas('shippingFee', function ($q) {
-                $q->whereNotNull('air_normal_fee')
-                    ->orWhereNotNull('air_brand_fee')
-                    ->orWhereNotNull('air_battery_fee')
-                    ->orWhereNotNull('air_liquid_fee')
-                    ->orWhereNotNull('sea_fee')
-                    ->orWhereNotNull('train_fee');
-            });
+        $query = Country::with(['shippingFee.items'])
+            ->whereHas('shippingFee');
 
         if (! empty($this->search)) {
             $query->where(function ($q) {

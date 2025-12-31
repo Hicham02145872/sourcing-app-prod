@@ -29,12 +29,15 @@ class SourcingOrderController extends Controller
         $this->authorize('viewAny', SourcingOrder::class);
         $query = SourcingOrder::with('user', 'quotation.sourcingRequest', 'assignedAdmin')->orderBy('id', 'desc');
 
-        // Scope visibility: Regular admins only see their assigned orders (or unassigned)
-        if (! auth()->user()->isSuperAdmin()) {
-            $query->where(function ($q) {
-                $q->where('assigned_to_admin_id', auth()->id())
-                    ->orWhereNull('assigned_to_admin_id');
-            });
+        // Scope visibility: Regular admins now see ALL orders (read-only for others)
+        // Sorting handles priority display
+        if (auth()->check()) {
+            $userId = auth()->id();
+            $query->orderByRaw("CASE 
+                WHEN assigned_to_admin_id = ? THEN 1 
+                WHEN assigned_to_admin_id IS NULL THEN 2 
+                ELSE 3 
+            END", [$userId]);
         }
 
         // Filter by status
@@ -43,17 +46,29 @@ class SourcingOrderController extends Controller
         }
 
         // Filter by search term
-        if ($search = $request->query('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('id', 'like', '%'.$search.'%')
-                    ->orWhereHas('user', function ($userQuery) use ($search) {
-                        $userQuery->where('name', 'like', '%'.$search.'%');
-                    })
-                    ->orWhereHas('quotation.sourcingRequest', function ($srQuery) use ($search) {
-                        $srQuery->where('product_name', 'like', '%'.$search.'%');
-                    });
-            });
-        }
+    if ($search = $request->query('search')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('id', 'like', '%'.$search.'%')
+                ->orWhereHas('user', function ($userQuery) use ($search) {
+                    $userQuery->where('name', 'like', '%'.$search.'%')
+                              ->orWhere('email', 'like', '%'.$search.'%');
+                })
+                ->orWhereHas('quotation.sourcingRequest', function ($srQuery) use ($search) {
+                    $srQuery->where('product_name', 'like', '%'.$search.'%')
+                            ->orWhere('id', 'like', '%'.$search.'%')
+                            ->orWhere('note', 'like', '%'.$search.'%')
+                            ->orWhereHas('destinations', function ($destQuery) use ($search) {
+                                $destQuery->where('address', 'like', '%'.$search.'%')
+                                          ->orWhereHas('country', function ($countryQuery) use ($search) {
+                                              $countryQuery->where('name', 'like', '%'.$search.'%');
+                                          });
+                            });
+                })
+                ->orWhereHas('assignedAdmin', function ($adminQuery) use ($search) {
+                    $adminQuery->where('name', 'like', '%'.$search.'%');
+                });
+        });
+    }
 
         // Filter by admin (Super Admin only)
         if (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {

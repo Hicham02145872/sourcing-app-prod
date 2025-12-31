@@ -40,7 +40,15 @@ class SourcingOrderPolicy
      */
     public function update(User $user, SourcingOrder $sourcingOrder): bool
     {
-        return $user->isAdmin() || $user->isSuperAdmin();
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($user->isAdmin()) {
+            return $sourcingOrder->assigned_to_admin_id === $user->id || is_null($sourcingOrder->assigned_to_admin_id);
+        }
+
+        return false;
     }
 
     /**

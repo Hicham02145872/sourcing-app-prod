@@ -23,20 +23,17 @@ class StoreSourcingRequestRequest extends FormRequest
     {
         return [
             'product_name' => 'required|string|max:255',
-            'product_url' => 'nullable|url|max:255',
-            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'product_url' => 'required|url|max:255',
+            'product_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'category_id' => 'required|exists:categories,id',
             'note' => 'nullable|string',
-            'phone_number' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'shipping_method' => 'nullable|in:air,sea',
+            'shipping_method' => 'required|in:air,sea',
             'sourcing_location' => 'required|in:china,dubai',
             'destinations' => 'required|array|min:1',
             'destinations.*.country_id' => 'required|exists:countries,id',
             'destinations.*.service_id' => 'required|exists:services,id',
             'destinations.*.quantity' => 'required|integer|min:1',
+            'destinations.*.address' => 'required|string|max:255',
         ];
     }
 }

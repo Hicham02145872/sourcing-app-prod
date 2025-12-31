@@ -38,6 +38,7 @@ class Quotation extends Model
         'negotiation_notes',
         'actual_sourcing_location',
         'sourcing_note',
+        'real_product_image',
     ];
 
     protected $casts = [
@@ -65,6 +66,11 @@ class Quotation extends Model
     public function order()
     {
         return $this->hasOne(SourcingOrder::class);
+    }
+
+    public function media()
+    {
+        return $this->hasMany(QuotationMedia::class)->orderBy('sort_order');
     }
 
     /**

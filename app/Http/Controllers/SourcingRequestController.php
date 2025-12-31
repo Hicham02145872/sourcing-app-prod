@@ -131,10 +131,7 @@ class SourcingRequestController extends Controller
                 'product_image' => $validated['product_image'] ?? null,
                 'category_id' => $validated['category_id'],
                 'note' => $validated['note'] ?? null,
-                'phone_number' => $validated['phone_number'] ?? null,
-                'address' => $validated['address'] ?? null,
-                'latitude' => $validated['latitude'] ?? null,
-                'longitude' => $validated['longitude'] ?? null,
+                'phone_number' => $request->user()->phone,
                 'shipping_method' => $validated['shipping_method'] ?? null,
                 'sourcing_location' => $validated['sourcing_location'],
             ]);

@@ -36,7 +36,7 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-            <form method="POST" action="{{ route('admin.quotations.store') }}">
+            <form method="POST" action="{{ route('admin.quotations.store') }}" enctype="multipart/form-data">
                 @csrf
                 
                 <!-- Section 1: Selected Request Summary -->
@@ -136,6 +136,43 @@
                                     </svg>
                                     {{ __('This note will be visible to the client to help them understand the change.') }}
                                 </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Subsection: Real Quality Image -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
+                                <svg class="w-4 h-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">{{ __('Real Product Quality Image') }}</h4>
+                                <span class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded animate-pulse">{{ __('Action Required') }}</span>
+                            </div>
+
+                            <div class="p-4 bg-red-50/50 border border-red-100 rounded-lg">
+                                <div class="flex flex-col md:flex-row items-center gap-6">
+                                    <div class="flex-1 w-full">
+                                        <label for="media_files" class="block text-[10px] font-bold text-red-600 uppercase mb-2">
+                                            {{ __('Upload Product Photos & Videos') }}
+                                        </label>
+                                        <div class="relative group">
+                                            <input type="file" name="media_files[]" id="media_files" accept="image/*,video/*" multiple
+                                                class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 transition-all cursor-pointer bg-white border border-red-200 p-2 rounded-md">
+                                        </div>
+                                        <p class="mt-2 text-[10px] text-red-500/80 font-medium italic">
+                                            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            {{ __('Upload photos and videos to help the client verify the actual product quality. Drag & drop supported.') }}
+                                        </p>
+                                    </div>
+                                    <div id="image-preview-container" class="hidden">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">{{ __('Preview') }}</p>
+                                        <div class="h-24 w-24 rounded-lg border-2 border-red-200 border-dashed overflow-hidden bg-white shadow-sm">
+                                            <img id="image-preview" src="#" alt="Preview" class="h-full w-full object-cover">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -475,14 +512,100 @@
         // Toggle sourcing note visibility
         document.getElementById('actual_sourcing_location').addEventListener('change', function() {
             const container = document.getElementById('sourcing_note_container');
-            const requestedLocation = "{{ $sourcingRequest->sourcing_location }}";
+            const requestedLocation = "{{ strtolower($sourcingRequest->sourcing_location) }}";
+            const selectedLocation = this.value.toLowerCase();
             
-            if (this.value !== requestedLocation) {
+            if (selectedLocation !== requestedLocation) {
                 container.classList.remove('hidden');
             } else {
                 container.classList.add('hidden');
             }
         });
+
+        // Image Preview Logic
+        const imageInput = document.getElementById('real_product_image');
+        const previewContainer = document.getElementById('image-preview-container');
+        const previewImage = document.getElementById('image-preview');
+
+        if (imageInput) {
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.classList.add('hidden');
+                }
+            });
+        }
+
+        // Alpine.js Media Uploader Component
+        function mediaUploader() {
+            return {
+                isDragging: false,
+                previews: [],
+                files: [],
+                
+                handleFiles(fileList) {
+                    const dt = new DataTransfer();
+                    const existingFiles = this.$refs.mediaInput.files;
+                    
+                    // Add existing files
+                    for (let i = 0; i < existingFiles.length; i++) {
+                        dt.items.add(existingFiles[i]);
+                    }
+                    
+                    // Add new files
+                    for (let i = 0; i < fileList.length; i++) {
+                        const file = fileList[i];
+                        if (file.size > 52428800) { // 50MB
+                            alert(`${file.name} is too large. Maximum size is 50MB.`);
+                            continue;
+                        }
+                        
+                        dt.items.add(file);
+                        this.files.push(file);
+                        
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.previews.push({
+                                url: e.target.result,
+                                name: file.name,
+                                type: file.type.startsWith('video') ? 'video' : 'image'
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                    
+                    // Update input files
+                    this.$refs.mediaInput.files = dt.files;
+                },
+                
+                handleDrop(e) {
+                    this.isDragging = false;
+                    this.handleFiles(e.dataTransfer.files);
+                },
+                
+                removeFile(index) {
+                    const dt = new DataTransfer();
+                    const files = this.$refs.mediaInput.files;
+                    
+                    for (let i = 0; i < files.length; i++) {
+                        if (i !== index) {
+                            dt.items.add(files[i]);
+                        }
+                    }
+                    
+                    this.$refs.mediaInput.files = dt.files;
+                    this.files.splice(index, 1);
+                    this.previews.splice(index, 1);
+                }
+            };
+        }
     </script>
     @endpush
 </x-app-layout>

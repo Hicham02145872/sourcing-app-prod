@@ -395,77 +395,7 @@
                         </div>
                     </div>
 
-                    <!-- 5. Inspection Media (Admin Upload) -->
-                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden mt-6">
-                         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-slate-900">{{ __('Inspection Photos & Videos (Admin)') }}</h3>
-                        </div>
-                        <div class="p-6">
-                            <form action="{{ route('admin.sourcing-orders.media.store', $sourcingOrder) }}" method="POST" enctype="multipart/form-data" class="mb-6">
-                                @csrf
-                                <div class="mb-4">
-                                    <label class="block mb-2 text-sm font-medium text-slate-700">{{ __('Upload Zone (Drag-and-Drop)') }}</label>
-                                    
-                                    <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:border-indigo-400 relative group">
-                                        <input type="file" name="files[]" multiple accept="image/*,video/*" id="file-input" 
-                                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
-                                               onchange="handleFiles(this.files)">
-                                        
-                                        <div class="space-y-3 pointer-events-none relative z-0">
-                                            <div class="flex justify-center">
-                                                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-full group-hover:scale-110 transition-transform duration-300">
-                                                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div class="text-sm text-slate-600">
-                                                <span class="font-bold text-indigo-600">{{ __('Click to select') }}</span> {{ __('or drag your files here') }}
-                                            </div>
-                                            <p class="text-xs text-slate-500">{{ __('Images (JPG, PNG) and Videos (MP4, MOV)') }}</p>
-                                            <p class="text-[10px] text-slate-400">{{ __('Max 100MB per file') }}</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Selected Files Count -->
-                                    <div id="file-count" class="mt-2 text-xs font-semibold text-indigo-600 hidden"></div>
-                                </div>
 
-                                <div class="flex justify-end mb-4">
-                                    <button type="submit" id="submit-btn" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                                        {{ __('Send files') }}
-                                    </button>
-                                </div>
-                                <div id="upload-preview" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 hidden"></div>
-                            </form>
-
-                            @if($sourcingOrder->media->count() > 0)
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                    @foreach($sourcingOrder->media as $media)
-                                        <div id="media-item-{{ $media->id }}" class="relative group rounded-lg overflow-hidden border border-slate-200 bg-slate-50 aspect-square">
-                                            @if($media->file_type === 'video')
-                                                <video src="{{ asset('storage/' . $media->file_path) }}" class="w-full h-full object-cover"></video>
-                                                <div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors pointer-events-none">
-                                                    <svg class="w-8 h-8 text-white opacity-80" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                                </div>
-                                            @else
-                                                <img src="{{ asset('storage/' . $media->file_path) }}" class="w-full h-full object-cover">
-                                            @endif
-                                            
-                                            <button type="button" 
-                                                    onclick="deleteMedia(this, '{{ $media->id }}')" 
-                                                    class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-sm transition-all duration-200 z-10"
-                                                    title="{{ __('Delete') }}">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                            </button>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <p class="text-sm text-slate-500 italic text-center py-4">{{ __('No media added yet.') }}</p>
-                            @endif
-                        </div>
-                    </div>
 
                 </div>
 

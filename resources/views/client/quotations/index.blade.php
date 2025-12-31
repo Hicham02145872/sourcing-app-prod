@@ -106,66 +106,75 @@
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 overflow-hidden">
                     <div class="divide-y divide-[#EBEBEB] dark:divide-slate-700">
                         @foreach ($sourcingRequests as $request)
-                            <div class="group p-6 hover:bg-[#EF7722]/5 dark:hover:bg-[#EF7722]/10 transition-colors duration-150">
-                                <div class="flex flex-col lg:flex-row lg:items-center gap-6">
-                                    {{-- Request Info --}}
-                                    <div class="flex items-start gap-4 flex-1 min-w-0">
-                                        {{-- Product Image --}}
-                                        <div class="flex-shrink-0">
-                                            <div class="w-16 h-16 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border-2 border-[#EBEBEB] dark:border-slate-600 overflow-hidden shadow-sm">
-                                                @if ($request->product_image)
-                                                    <img src="{{ asset('storage/' . $request->product_image) }}"
-                                                         alt="{{ $request->product_name }}"
-                                                         class="w-full h-full object-cover">
-                                                @else
-                                                    <div class="w-full h-full flex items-center justify-center bg-[#EF7722]/10 dark:bg-[#EF7722]/20">
-                                                        <span class="text-lg font-bold text-[#EF7722]">
-                                                            {{ mb_substr($request->product_name, 0, 1) }}
-                                                        </span>
+                                    <div class="group p-6 hover:bg-[#EF7722]/5 dark:hover:bg-[#EF7722]/10 transition-colors duration-150 {{ $request->quotation ? 'bg-red-50/30 dark:bg-red-900/10 border-l-4 border-red-500 shadow-inner' : '' }}">
+                                        <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+                                            {{-- Request Info --}}
+                                            <div class="flex items-start gap-4 flex-1 min-w-0">
+                                                {{-- Product Image --}}
+                                                <div class="flex-shrink-0 relative">
+                                                    <div class="w-16 h-16 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border-2 border-[#EBEBEB] dark:border-slate-600 overflow-hidden shadow-sm">
+                                                        @if ($request->product_image)
+                                                            <img src="{{ asset('storage/' . $request->product_image) }}"
+                                                                 alt="{{ $request->product_name }}"
+                                                                 class="w-full h-full object-cover">
+                                                        @else
+                                                            <div class="w-full h-full flex items-center justify-center bg-[#EF7722]/10 dark:bg-[#EF7722]/20">
+                                                                <span class="text-lg font-bold text-[#EF7722]">
+                                                                    {{ mb_substr($request->product_name, 0, 1) }}
+                                                                </span>
+                                                            </div>
+                                                        @endif
                                                     </div>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        {{-- Request Details --}}
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="flex items-center gap-2 mb-0.5">
-                                                        <span class="text-xs font-bold text-[#EF7722]">#{{ $request->quotation ? $request->quotation->display_id : $request->display_id }}</span>
-                                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#EF7722] transition-colors truncate">
-                                                            {{ $request->product_name }}
-                                                        </h3>
-                                                    </div>
-                                                    <div class="flex items-center gap-2 mt-1.5">
-                                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#EF7722]/10 text-[#EF7722]">
-                                                            {{ $request->category?->name }}
-                                                        </span>
-                                                        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                                                            {{ $request->created_at->diffForHumans() }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                
-                                                {{-- Status Badge --}}
-                                                <div class="flex items-center gap-2">
-                                                    @if ($request->quotation)
-                                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold" style="background-color: #0BA6DF22; color: #0BA6DF;">
-                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                            </svg>
-                                                            {{ __('Ready to Accept') }}
-                                                        </span>
-                                                    @else
-                                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold" style="background-color: #FAA53322; color: #FAA533;">
-                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                            </svg>
-                                                            {{ __('Under Review') }}
+                                                    @if($request->quotation)
+                                                        <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                                                         </span>
                                                     @endif
                                                 </div>
-                                            </div>
+
+                                                {{-- Request Details --}}
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                                                        <div class="flex-1 min-w-0">
+                                                            <div class="flex items-center gap-2 mb-0.5">
+                                                                <span class="text-xs font-bold text-[#EF7722]">#{{ $request->quotation ? $request->quotation->display_id : $request->display_id }}</span>
+                                                                @if($request->quotation)
+                                                                    <span class="px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded uppercase tracking-widest animate-pulse">{{ __('Action Required') }}</span>
+                                                                @endif
+                                                                <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#EF7722] transition-colors truncate">
+                                                                    {{ $request->product_name }}
+                                                                </h3>
+                                                            </div>
+                                                            <div class="flex items-center gap-2 mt-1.5">
+                                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#EF7722]/10 text-[#EF7722]">
+                                                                    {{ $request->category?->name }}
+                                                                </span>
+                                                                <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                                                    {{ $request->created_at->diffForHumans() }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {{-- Status Badge --}}
+                                                        <div class="flex items-center gap-2">
+                                                            @if ($request->quotation)
+                                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-black shadow-sm" style="background-color: #ef4444; color: #ffffff;">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                                                    </svg>
+                                                                    <span class="uppercase tracking-widest">{{ __('Ready to Accept') }}</span>
+                                                                </span>
+                                                            @else
+                                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold" style="background-color: #FAA53322; color: #FAA533;">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                    </svg>
+                                                                    {{ __('Under Review') }}
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
 
                                             {{-- Metadata --}}
                                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">

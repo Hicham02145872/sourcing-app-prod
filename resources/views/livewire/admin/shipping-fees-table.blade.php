@@ -44,12 +44,7 @@
                     <thead class="bg-slate-50">
                         <tr>
                             <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Country') }}</th>
-                            <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Air (Normal)') }}</th>
-                            <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Air (Brand)') }}</th>
-                            <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Air (Battery)') }}</th>
-                            <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Air (Liquid)') }}</th>
-                            <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Sea') }}</th>
-                            <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Train') }}</th>
+                            <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Transportation Status') }}</th>
                             <th scope="col" class="px-6 py-4 text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
@@ -66,42 +61,59 @@
                                             @endif
                                         </div>
                                         <div class="flex flex-col">
-                                            <span class="text-xs font-bold text-slate-800">{{ $country->name }}</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-xs font-bold text-slate-800">{{ $country->name }}</span>
+                                                @if($country->shippingFee && $country->shippingFee->items->whereNotNull('price_16_49')->count() > 0)
+                                                    <span class="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" title="{{ __('Detailed tiered rates active') }}"></span>
+                                                @endif
+                                            </div>
                                             <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{{ $country->code }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 
-                                {{-- Rate Columns --}}
-                                @php
-                                    $fee = $country->shippingFee;
-                                    $rates = [
-                                        $fee?->air_normal_fee,
-                                        $fee?->air_brand_fee,
-                                        $fee?->air_battery_fee,
-                                        $fee?->air_liquid_fee,
-                                        $fee?->sea_fee,
-                                        $fee?->train_fee
-                                    ];
-                                @endphp
+                                {{-- Transportation Status Column --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        @php
+                                            $airCount = $country->shippingFee?->items->where('transport_type', 'air')->whereNotNull('price_16_49')->count() ?? 0;
+                                            $seaCount = $country->shippingFee?->items->where('transport_type', 'sea')->whereNotNull('price_16_49')->count() ?? 0;
+                                            $trainCount = $country->shippingFee?->items->where('transport_type', 'train')->whereNotNull('price_16_49')->count() ?? 0;
+                                        @endphp
 
-                                @foreach($rates as $rate)
-                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-slate-600">
-                                        @if($rate)
-                                            <span class="text-[10px] text-slate-400 mr-0.5">$</span>{{ number_format($rate, 2) }}
-                                        @else
-                                            <span class="text-slate-300 font-normal">-</span>
+                                        @if($airCount > 0)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-orange-600 border border-orange-100 rounded text-[9px] font-bold uppercase tracking-tighter" title="{{ __('Air Tiered Rates') }}">
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                                {{ $airCount }}
+                                            </span>
                                         @endif
-                                    </td>
-                                @endforeach
+                                        @if($seaCount > 0)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-100 rounded text-[9px] font-bold uppercase tracking-tighter" title="{{ __('Sea Tiered Rates') }}">
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M22 17l-10-5-10 5L12 22l10-5z"/><path d="M12 12l10-5-10-5-10 5 10 5z"/><path d="M2 12l10 5 10-5"/></svg>
+                                                {{ $seaCount }}
+                                            </span>
+                                        @endif
+                                        @if($trainCount > 0)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-600 border border-green-100 rounded text-[9px] font-bold uppercase tracking-tighter" title="{{ __('Train Tiered Rates') }}">
+                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="15" x="3" y="4" rx="2"/><path d="M7 11h10"/><path d="M7 15h10"/><path d="M12 4v1"/><path d="M9 19l-2 2"/><path d="M15 19l2 2"/></svg>
+                                                {{ $trainCount }}
+                                            </span>
+                                        @endif
+                                        @if($airCount == 0 && $seaCount == 0 && $trainCount == 0)
+                                            <span class="text-[9px] text-slate-300 font-bold uppercase tracking-widest italic">{{ __('No rates configured') }}</span>
+                                        @endif
+                                    </div>
+                                </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap text-right">
-                                    <button wire:click="editCountry({{ $country->id }})" 
-                                            class="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all group-hover:scale-110">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                    <a href="{{ route('admin.shipping-fees.edit', $country->id) }}" 
+                                       wire:navigate
+                                       class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 text-slate-600 hover:bg-orange-50 hover:text-orange-600 border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all group-hover:shadow-sm">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
-                                    </button>
+                                        {{ __('Edit') }}
+                                    </a>
                                 </td>
                             </tr>
                         @empty
@@ -128,125 +140,5 @@
             @endif
         </div>
     </div>
-
-    {{-- Enterprise Style Modal --}}
-    <div x-data="{ open: @entangle('showEditModal') }" 
-         x-show="open" 
-         x-cloak
-         class="fixed inset-0 z-[60] overflow-y-auto" 
-         aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        
-        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            {{-- Overlay --}}
-            <div x-show="open" 
-                 x-transition:enter="ease-out duration-300"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="ease-in duration-200"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
-                 @click="open = false"></div>
-
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            
-            <div x-show="open"
-                 x-transition:enter="ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave="ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border border-slate-200">
-                
-                {{-- Modal Header --}}
-                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-tight">{{ __('Edit Rates') }}: <span class="text-orange-600">{{ $selectedCountry?->name }}</span></h3>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{{ __('Pricing Precision Update') }}</p>
-                        </div>
-                    </div>
-                    <button @click="open = false" class="text-slate-400 hover:text-slate-600 transition-colors p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                {{-- Modal Body --}}
-                <div class="p-6">
-                    <form wire:submit.prevent="save" class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            {{-- Field Group: Air --}}
-                            <div class="col-span-2">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 block pb-1 mb-3">{{ __('Air Freight ($/kg)') }}</span>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">{{ __('Normal') }}</label>
-                                <input wire:model="air_normal_fee" type="number" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">{{ __('Brand') }}</label>
-                                <input wire:model="air_brand_fee" type="number" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">{{ __('Battery') }}</label>
-                                <input wire:model="air_battery_fee" type="number" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">{{ __('Liquid') }}</label>
-                                <input wire:model="air_liquid_fee" type="number" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                            </div>
-
-                            {{-- Field Group: Bulk --}}
-                            <div class="col-span-2 pt-2">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 block pb-1 mb-3">{{ __('Bulk & Surface') }}</span>
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">{{ __('Sea ($/CBM)') }}</label>
-                                <input wire:model="sea_fee" type="number" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">{{ __('Train ($/kg)') }}</label>
-                                <input wire:model="train_fee" type="number" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all">
-                            </div>
-                        </div>
-
-                        {{-- Footer Actions --}}
-                        <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
-                            <button type="button" @click="open = false" class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">
-                                {{ __('Cancel') }}
-                            </button>
-                            <button type="submit" class="px-6 py-2 bg-slate-900 hover:bg-orange-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-sm shadow-slate-200 transition-all flex items-center gap-2">
-                                <span wire:loading wire:target="save">
-                                    <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                </span>
-                                {{ __('Validate Update') }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
 </div>
 

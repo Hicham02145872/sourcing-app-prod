@@ -41,26 +41,26 @@
         </button>
     </div>
 
-    <!-- Label Content -->
-    <div class="label-container bg-white p-6 shadow-xl relative" style="width: 100%; max-width: 500px;">
-        
-        <!-- Logo Section -->
-        <div class="text-center mb-6">
-            <img src="{{ asset('images/logo.png') }}" alt="FSB Logo" class="h-20 mx-auto mb-2 object-contain"> 
-            <!-- Fallback/Additional Text if needed to match "FSB FAST SOURCING BROTHERS" exactly if logo implies it -->
-        </div>
+        @foreach($sourcingOrder->quotation->sourcingRequest->destinations as $index => $destination)
+            <!-- Label Content -->
+            <div class="label-container bg-white p-6 shadow-xl relative mb-8" style="width: 100%; max-width: 500px; page-break-after: always;">
+                
+                <!-- Logo Section -->
+                <div class="text-center mb-6">
+                    <img src="{{ asset('images/logo.png') }}" alt="FSB Logo" class="h-20 mx-auto mb-2 object-contain"> 
+                </div>
 
-        <!-- Info Table -->
-        <div class="border-2 border-black">
-            <!-- Country -->
-            <div class="flex border-b-2 border-black">
-                <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
-                    Country
-                </div>
-                <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
-                    {{ $sourcingOrder->quotation->sourcingRequest->destinations->first()->country->name ?? 'N/A' }}
-                </div>
-            </div>
+                <!-- Info Table -->
+                <div class="border-2 border-black">
+                    <!-- Country -->
+                    <div class="flex border-b-2 border-black">
+                        <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
+                            Country
+                        </div>
+                        <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
+                            {{ $destination->country->name ?? 'N/A' }}
+                        </div>
+                    </div>
 
             <!-- Seller Name -->
             <div class="flex border-b-2 border-black">
@@ -68,7 +68,7 @@
                     Seller Name
                 </div>
                 <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
-                    {{ config('app.name', 'Fast Sourcing Brothers') }}
+                    {{ $sourcingOrder->user->name }}
                 </div>
             </div>
 
@@ -97,32 +97,41 @@
                 <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
                     Quantity
                 </div>
-                <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
-                    {{ $sourcingOrder->quotation->sourcingRequest->destinations->sum('quantity') }}
-                </div>
-            </div>
+                    <!-- Quantity -->
+                    <div class="flex border-b-2 border-black">
+                        <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
+                            Quantity
+                        </div>
+                        <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
+                            {{ $destination->quantity }}
+                        </div>
+                    </div>
 
-            <!-- Recipient Address -->
-            <div class="flex">
-                <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
-                    Recipient Address
+                    <!-- Recipient Address -->
+                    <div class="flex">
+                        <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
+                            Recipient Address
+                        </div>
+                        <div class="w-2/3 p-3 font-semibold text-lg flex flex-col justify-center gap-2 break-words">
+                            <div class="mb-1">
+                                <span class="font-bold text-gray-700">{{ $destination->service->name ?? 'Service' }}:</span>
+                                <span>{{ $destination->address ?? 'N/A' }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="w-2/3 p-3 font-semibold text-lg flex items-center break-words">
-                    {{ $sourcingOrder->quotation->sourcingRequest->address ?? 'N/A' }}
+
+                <!-- Footer -->
+                <div class="text-center mt-6">
+                    <p class="text-lg font-bold mb-1">For support or questions</p>
+                    <a href="https://wa.me/212646522071" target="_blank" class="flex items-center justify-center gap-2 text-xl font-bold text-green-600 hover:text-green-700 transition-colors">
+                        <span>Contact Us</span>
+                        <span>+212 646-522071</span>
+                    </a>
                 </div>
-            </div>
-        </div>
 
-        <!-- Footer -->
-        <div class="text-center mt-6">
-            <p class="text-lg font-bold mb-1">For support or questions</p>
-            <div class="flex items-center justify-center gap-2 text-xl font-bold text-green-600">
-                <i class="fab fa-whatsapp"></i>
-                <span>+212 646-522071</span>
             </div>
-        </div>
-
-    </div>
+        @endforeach
 
     <script>
         // Auto print if opened in new window/tab? Optional. 

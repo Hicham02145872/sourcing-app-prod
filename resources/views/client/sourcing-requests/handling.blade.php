@@ -184,24 +184,37 @@
                                 </thead>
                                 <tbody class="bg-white dark:bg-slate-800 divide-y divide-[#EBEBEB] dark:divide-slate-700">
                                     @foreach ($sourcingRequests as $request)
-                                        <tr class="hover:bg-[#EF7722]/5 dark:hover:bg-[#EF7722]/10 transition-colors duration-150">
+                                        <tr class="hover:bg-[#EF7722]/5 dark:hover:bg-[#EF7722]/10 transition-colors duration-150 {{ $request->status === 'quoted' ? 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-red-500' : '' }}">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center gap-3">
-                                                    <div class="w-10 h-10 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600 overflow-hidden flex-shrink-0">
-                                                        @if ($request->product_image)
-                                                            <img src="{{ asset('storage/' . $request->product_image) }}"
-                                                                 alt="{{ $request->product_name }}"
-                                                                 class="w-full h-full object-cover">
-                                                        @else
-                                                            <div class="w-full h-full flex items-center justify-center bg-[#EF7722]/10 dark:bg-[#EF7722]/20">
-                                                                <span class="text-sm font-bold text-[#EF7722]">
-                                                                    {{ mb_substr($request->product_name, 0, 1) }}
-                                                                </span>
-                                                            </div>
+                                                    <div class="relative">
+                                                        <div class="w-10 h-10 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600 overflow-hidden flex-shrink-0">
+                                                            @if ($request->product_image)
+                                                                <img src="{{ asset('storage/' . $request->product_image) }}"
+                                                                     alt="{{ $request->product_name }}"
+                                                                     class="w-full h-full object-cover">
+                                                            @else
+                                                                <div class="w-full h-full flex items-center justify-center bg-[#EF7722]/10 dark:bg-[#EF7722]/20">
+                                                                    <span class="text-sm font-bold text-[#EF7722]">
+                                                                        {{ mb_substr($request->product_name, 0, 1) }}
+                                                                    </span>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                        @if($request->status === 'quoted')
+                                                            <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                                            </span>
                                                         @endif
                                                     </div>
                                                     <div>
-                                                        <div class="text-xs font-semibold text-[#EF7722] mb-0.5">#{{ $request->display_id }}</div>
+                                                        <div class="flex items-center gap-2">
+                                                            <div class="text-xs font-semibold text-[#EF7722] mb-0.5">#{{ $request->display_id }}</div>
+                                                            @if($request->status === 'quoted')
+                                                                <span class="px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-black rounded uppercase tracking-tighter animate-pulse">{{ __('New') }}</span>
+                                                            @endif
+                                                        </div>
                                                         <div class="text-sm font-bold text-slate-900 dark:text-white">{{ $request->category?->name }}</div>
                                                     </div>
                                                 </div>

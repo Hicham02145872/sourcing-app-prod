@@ -18,8 +18,13 @@ class ShippingFee extends Model
         'unit',
     ];
 
-    public function country()
+    public function country(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Country::class);
+    }
+
+    public function items(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ShippingFeeItem::class);
     }
 }

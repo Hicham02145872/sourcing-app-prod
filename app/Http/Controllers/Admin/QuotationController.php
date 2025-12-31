@@ -20,10 +20,10 @@ class QuotationController extends Controller
 
         $baseQuery = Quotation::query();
 
-        // Filter for non-Super Admins: only show quotations assigned to them
-        if (! Auth::user()->isSuperAdmin()) {
-            $baseQuery->where('assigned_to_admin_id', Auth::id());
-        }
+        // Filter for non-Super Admins: REMOVED to allow full visibility (read-only)
+    // if (! Auth::user()->isSuperAdmin()) {
+    //    $baseQuery->where('assigned_to_admin_id', Auth::id());
+    // }
 
         $totalQuotations = $baseQuery->count();
         $pendingQuotations = (clone $baseQuery)->where('status', 'pending')->count();
@@ -32,32 +32,58 @@ class QuotationController extends Controller
 
         $query = Quotation::with('sourcingRequest.user');
 
-        // Filter for non-Super Admins
-        if (! Auth::user()->isSuperAdmin()) {
-            $query->where('assigned_to_admin_id', Auth::id());
-        }
+        // Filter for non-Super Admins: REMOVED to allow full visibility
+    // if (! Auth::user()->isSuperAdmin()) {
+    //    $query->where('assigned_to_admin_id', Auth::id());
+    // }
 
         // Search
-        if ($request->has('search') && $request->search) {
-            $query->whereHas('sourcingRequest', function ($q) use ($request) {
-                $q->where('product_name', 'like', '%'.$request->search.'%')
-                    ->orWhereHas('user', function ($userQuery) use ($request) {
-                        $userQuery->where('name', 'like', '%'.$request->search.'%');
-                    });
+    if ($request->has('search') && $request->search) {
+        $searchTerm = $request->search;
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('id', 'like', '%'.$searchTerm.'%')
+              ->orWhereHas('sourcingRequest', function ($srQuery) use ($searchTerm) {
+                $srQuery->where('product_name', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('id', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('note', 'like', '%'.$searchTerm.'%')
+                        ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                            $userQuery->where('name', 'like', '%'.$searchTerm.'%')
+                                      ->orWhere('email', 'like', '%'.$searchTerm.'%');
+                        })
+                        ->orWhereHas('destinations', function ($destQuery) use ($searchTerm) {
+                            $destQuery->where('address', 'like', '%'.$searchTerm.'%')
+                                      ->orWhereHas('country', function ($countryQuery) use ($searchTerm) {
+                                          $countryQuery->where('name', 'like', '%'.$searchTerm.'%');
+                                      });
+                        });
+            })
+            ->orWhereHas('assignedAdmin', function ($adminQuery) use ($searchTerm) {
+                $adminQuery->where('name', 'like', '%'.$searchTerm.'%');
             });
-        }
+        });
+    }
 
         // Filter by status
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
         }
 
-        // Sorting
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortDirection = $request->get('sort_direction', 'desc');
-        $query->orderBy($sortBy, $sortDirection);
+        // Sort: My Assignments -> Unassigned -> Others, then by Created At
+    if (Auth::check()) {
+        $userId = Auth::id();
+        $query->orderByRaw("CASE 
+            WHEN assigned_to_admin_id = ? THEN 1 
+            WHEN assigned_to_admin_id IS NULL THEN 2 
+            ELSE 3 
+        END", [$userId]);
+    }
 
-        $quotations = $query->paginate(10);
+    // Sorting from request
+    $sortBy = $request->get('sort_by', 'created_at');
+    $sortDirection = $request->get('sort_direction', 'desc');
+    $query->orderBy($sortBy, $sortDirection);
+
+    $quotations = $query->paginate(10);
 
         return view('admin.quotations.index', compact(
             'quotations',
@@ -111,6 +137,8 @@ class QuotationController extends Controller
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
+            'real_product_image' => 'nullable|image|max:10240',
+            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200',
         ]);
 
         // Get the sourcing request and load its destinations
@@ -146,6 +174,11 @@ class QuotationController extends Controller
             'estimated_total_product_cost' => $estimatedProductCostTotal,
         ]);
 
+        $realProductImagePath = null;
+        if ($request->hasFile('real_product_image')) {
+            $realProductImagePath = $request->file('real_product_image')->store('quotations/real_images', 'public');
+        }
+
         $quotation = Quotation::create([
             'sourcing_request_id' => $validated['sourcing_request_id'],
             'assigned_to_admin_id' => $sourcingRequest->assigned_to_admin_id, // Inherit assignment from request
@@ -163,8 +196,24 @@ class QuotationController extends Controller
             'estimated_shipping_cost' => $validated['estimated_shipping_cost'] ?? null,
             'estimated_other_costs' => $validated['estimated_other_costs'] ?? null,
             'sourcing_note' => $validated['sourcing_note'] ?? null,
+            'real_product_image' => $realProductImagePath,
             // estimated_net_profit will be calculated by QuotationObserver
         ]);
+
+        // Handle multiple media files
+        if ($request->hasFile('media_files')) {
+            $sortOrder = 0;
+            foreach ($request->file('media_files') as $file) {
+                $path = $file->store('quotations/media', 'public');
+                $fileType = str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image';
+                
+                $quotation->media()->create([
+                    'file_path' => $path,
+                    'file_type' => $fileType,
+                    'sort_order' => $sortOrder++,
+                ]);
+            }
+        }
 
         event(new \App\Events\QuotationCreated($quotation));
 
@@ -219,6 +268,10 @@ class QuotationController extends Controller
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
+            'real_product_image' => 'nullable|image|max:10240',
+            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200',
+            'delete_media' => 'nullable|array',
+            'delete_media.*' => 'exists:quotation_media,id',
         ]);
 
         $sourcingRequest = $quotation->sourcingRequest;
@@ -231,6 +284,15 @@ class QuotationController extends Controller
         $estimatedProductCostTotal = null;
         if (isset($validated['estimated_product_cost'])) {
             $estimatedProductCostTotal = $validated['estimated_product_cost'] * $totalQuantity;
+        }
+
+        $realProductImagePath = $quotation->real_product_image;
+        if ($request->hasFile('real_product_image')) {
+            // Delete old image if exists
+            if ($realProductImagePath && \Illuminate\Support\Facades\Storage::disk('public')->exists($realProductImagePath)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($realProductImagePath);
+            }
+            $realProductImagePath = $request->file('real_product_image')->store('quotations/real_images', 'public');
         }
 
         $quotation->update([
@@ -248,11 +310,40 @@ class QuotationController extends Controller
             'estimated_shipping_cost' => $validated['estimated_shipping_cost'] ?? null,
             'estimated_other_costs' => $validated['estimated_other_costs'] ?? null,
             'sourcing_note' => $validated['sourcing_note'] ?? null,
+            'real_product_image' => $realProductImagePath,
         ]);
 
         // Notify client if sourcing location changed and is different from requested
         if ($quotation->wasChanged('actual_sourcing_location') && $quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location) {
             $sourcingRequest->user->notify(new \App\Notifications\AlternativeSourcingNotification($quotation));
+        }
+
+        // Handle media deletion
+        if ($request->has('delete_media')) {
+            foreach ($request->delete_media as $mediaId) {
+                $media = $quotation->media()->find($mediaId);
+                if ($media) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($media->file_path);
+                    $media->delete();
+                }
+            }
+        }
+
+        // Handle new media files
+        if ($request->hasFile('media_files')) {
+            $maxSortOrder = $quotation->media()->max('sort_order') ?? -1;
+            $sortOrder = $maxSortOrder + 1;
+            
+            foreach ($request->file('media_files') as $file) {
+                $path = $file->store('quotations/media', 'public');
+                $fileType = str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image';
+                
+                $quotation->media()->create([
+                    'file_path' => $path,
+                    'file_type' => $fileType,
+                    'sort_order' => $sortOrder++,
+                ]);
+            }
         }
 
         // If the request was negotiating, transition it back to quoted

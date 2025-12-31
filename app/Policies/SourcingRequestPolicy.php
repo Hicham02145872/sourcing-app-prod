@@ -20,7 +20,7 @@ class SourcingRequestPolicy
      */
     public function view(User $user, SourcingRequest $sourcingRequest): bool
     {
-        return $user->id === $sourcingRequest->user_id || $user->isAdmin();
+        return $user->isAdmin() || $user->id === $sourcingRequest->user_id;
     }
 
     /**
@@ -36,6 +36,15 @@ class SourcingRequestPolicy
      */
     public function update(User $user, SourcingRequest $sourcingRequest): bool
     {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($user->isAdmin()) {
+            // Admin can update if assigned to them OR unassigned
+            return $sourcingRequest->assigned_to_admin_id === $user->id || is_null($sourcingRequest->assigned_to_admin_id);
+        }
+
         return $user->id === $sourcingRequest->user_id && $sourcingRequest->status === 'pending';
     }
 
@@ -44,6 +53,15 @@ class SourcingRequestPolicy
      */
     public function delete(User $user, SourcingRequest $sourcingRequest): bool
     {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($user->isAdmin()) {
+             // Admin can only delete if assigned to them (and maybe unassigned logic if desired, keeping strict for now)
+             return $sourcingRequest->assigned_to_admin_id === $user->id;
+        }
+
         return $user->id === $sourcingRequest->user_id && 
                in_array($sourcingRequest->status, ['pending', 'cancelled', 'rejected']);
     }

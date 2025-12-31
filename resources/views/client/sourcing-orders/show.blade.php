@@ -215,42 +215,7 @@
                         </div>
                     </div>
 
-                    {{-- Quality Control Media --}}
-                    @if($sourcingOrder->media->count() > 0)
-                        <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden transform transition-all hover:shadow-md">
-                            <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Quality Control Media') }}</h3>
-                                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Photos and videos from product inspection') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-6">
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                    @foreach($sourcingOrder->media as $media)
-                                        <div class="relative group rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 aspect-square cursor-pointer transform transition-transform hover:scale-[1.02]" onclick="openMediaModal('{{ asset('storage/' . $media->file_path) }}', '{{ $media->file_type }}')">
-                                            @if($media->file_type === 'video')
-                                                <video src="{{ asset('storage/' . $media->file_path) }}" class="w-full h-full object-cover"></video>
-                                                <div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
-                                                    <svg class="w-12 h-12 text-white opacity-90 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                                </div>
-                                                <span class="absolute bottom-2 right-2 px-2 py-1 bg-black/70 text-white text-[10px] font-bold rounded uppercase tracking-wider">Video</span>
-                                            @else
-                                                <img src="{{ asset('storage/' . $media->file_path) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    @endif
+
 
                     {{-- Quotation Details --}}
                     <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">

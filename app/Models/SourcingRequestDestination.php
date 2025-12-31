@@ -14,6 +14,7 @@ class SourcingRequestDestination extends Model
         'country_id',
         'service_id',
         'quantity',
+        'address',
     ];
 
     public function sourcingRequest()

@@ -133,8 +133,8 @@
                                                     <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
                                                     </svg>
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 uppercase border border-blue-200 dark:border-blue-800">
-                                                        {{ $sourcingRequest->quotation->actual_sourcing_location }}
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 uppercase border border-red-200 dark:border-red-800 animate-pulse">
+                                                        {{ __('Alternative Sourcing: ') }} {{ $sourcingRequest->quotation->actual_sourcing_location }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -220,98 +220,174 @@
                         </div>
                     </div>
 
-                    {{-- Quotation Section --}}
+                    {{-- Simplified Quotation Section --}}
                     @if ($sourcingRequest->quotation)
                         <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 overflow-hidden">
-                            {{-- Card Header --}}
-                            <div class="px-6 py-4 border-b border-[#EBEBEB] dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-2 h-2 bg-[#EF7722] rounded-full animate-pulse"></div>
-                                        <div>
-                                            <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ __('Price Quote') }}</h3>
-                                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">{{ __('Detailed pricing and cost breakdown') }}</p>
-                                        </div>
+                            {{-- Header --}}
+                            <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700 flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-[#EF7722]/10 dark:bg-[#EF7722]/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/>
+                                        </svg>
                                     </div>
-                                    @if($sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location)
-                                        <div class="flex items-center gap-2 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-full">
-                                            <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                            </svg>
-                                            <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-tight">
-                                                {{ __('Alternative Sourcing: ') }} {{ $sourcingRequest->quotation->actual_sourcing_location }}
-                                            </span>
-                                        </div>
-                                        @if($sourcingRequest->quotation->sourcing_note)
-                                            <div class="mt-2 p-3 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/50 rounded-lg">
-                                                <p class="text-xs text-amber-800 dark:text-amber-300 italic">
-                                                    <span class="font-bold not-italic mr-1">{{ __('Note:') }}</span>
-                                                    {{ $sourcingRequest->quotation->sourcing_note }}
-                                                </p>
-                                            </div>
-                                        @endif
-                                    @endif
+                                    <div>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Official Quotation') }}</h3>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400">#{{ strtoupper(substr($sourcingRequest->quotation->id, -8)) }}</p>
+                                    </div>
                                 </div>
+
+                                @if($sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location)
+                                    <div class="flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white rounded-full shadow-lg animate-pulse">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                        </span>
+                                        <span class="text-xs font-black uppercase tracking-tighter">
+                                            {{ __('Alternative Hub') }}
+                                        </span>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="p-6">
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                                    <div class="p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">
-                                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">{{ __('Unit Price') }}</p>
-                                        <p class="text-base font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->unit_price, 2) }}</p>
+                                {{-- Financial Parameters Grid --}}
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                    <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Price') }}</p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->unit_price, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->currency }}</span></p>
                                     </div>
-                                    <div class="p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">
-                                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">{{ __('Commission') }}</p>
-                                        <p class="text-base font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->commission_service, 2) }}</p>
+                                    <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Commission') }}</p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->commission_service, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->currency }}</span></p>
                                     </div>
-                                    <div class="p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">
-                                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">{{ __('Unit Weight') }}</p>
-                                        <p class="text-base font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->unit_weight, 2) }} <span class="text-xs font-medium text-slate-500">{{ $sourcingRequest->quotation->weight_unit ?? 'g' }}</span></p>
+                                    <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Weight') }}</p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->weight_unit ?? 'g' }}</span></p>
                                     </div>
-                                    <div class="p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">
-                                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">{{ __('Delivery') }}</p>
-                                        <p class="text-base font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->delivery_cost_china, 2) }}</p>
+                                    <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Local Delivery') }}</p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->delivery_cost_china, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->currency }}</span></p>
                                     </div>
                                 </div>
 
-                                {{-- Grand Total --}}
-                                <div class="p-4 sm:p-6 bg-gradient-to-r from-[#EF7722] to-[#FAA533] rounded-xl text-white shadow-lg">
-                                    <p class="text-sm font-semibold opacity-90 mb-1">{{ __('Grand Total') }}</p>
-                                    <p class="text-3xl sm:text-4xl font-bold">{{ number_format($sourcingRequest->quotation->amount, 2) }}</p>
-                                    <p class="text-sm opacity-90 mt-1">{{ $sourcingRequest->quotation->currency }}</p>
-                                </div>
+                                {{-- Product Media Gallery --}}
+                                @if($sourcingRequest->quotation->media->count() > 0)
+                                    <div class="mb-6 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-[#EBEBEB] dark:border-slate-700">
+                                        <h4 class="text-base font-bold text-slate-900 dark:text-white mb-4">{{ __('Product Quality Verification') }}</h4>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            @foreach($sourcingRequest->quotation->media as $media)
+                                                <div class="relative group rounded-lg overflow-hidden bg-white dark:bg-slate-800 shadow-md hover:shadow-xl transition-shadow">
+                                                    @if($media->isImage())
+                                                        {{-- Image Display --}}
+                                                        <div class="aspect-square">
+                                                            <img src="{{ asset('storage/' . $media->file_path) }}" 
+                                                                 alt="Product verification {{ $loop->iteration }}" 
+                                                                 class="w-full h-full object-cover cursor-pointer"
+                                                                 onclick="openMediaModal('{{ asset('storage/' . $media->file_path) }}', 'image')">
+                                                        </div>
+                                                    @elseif($media->isVideo())
+                                                        {{-- Video Display --}}
+                                                        <div class="aspect-square bg-black relative">
+                                                            <video src="{{ asset('storage/' . $media->file_path) }}" 
+                                                                   class="w-full h-full object-cover"
+                                                                   controls
+                                                                   preload="metadata">
+                                                                Your browser does not support the video tag.
+                                                            </video>
+                                                            <div class="absolute top-2 left-2 px-2 py-1 bg-black/70 text-white text-xs rounded">
+                                                                {{ __('VIDEO') }}
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                    
+                                                    {{-- Media counter badge --}}
+                                                    <div class="absolute bottom-2 right-2 px-2 py-1 bg-orange-600 text-white text-xs font-bold rounded shadow-lg">
+                                                        {{ $loop->iteration }} / {{ $sourcingRequest->quotation->media->count() }}
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        
+                                        <p class="mt-4 text-xs text-slate-500 dark:text-slate-400 italic">
+                                            {{ __('Click on images to view full size. Videos can be played inline.') }}
+                                        </p>
+                                    </div>
+                                @elseif($sourcingRequest->quotation->real_product_image)
+                                    {{-- Fallback for old single image --}}
+                                    <div class="mb-6 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-[#EBEBEB] dark:border-slate-700">
+                                        <div class="flex flex-col md:flex-row items-center gap-6">
+                                            <div class="flex-1">
+                                                <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ __('Physical Product Verification') }}</h4>
+                                                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                                                    {{ __('Our inspectors have verified that the product matches your requirements. See the actual unit below.') }}
+                                                </p>
+                                            </div>
+                                            <div class="w-full md:w-32 aspect-square rounded-lg overflow-hidden border-2 border-white dark:border-slate-700 shadow-sm">
+                                                <img src="{{ asset('storage/' . $sourcingRequest->quotation->real_product_image) }}" 
+                                                     alt="Verified Product" 
+                                                     class="w-full h-full object-cover transition-transform hover:scale-110 cursor-pointer"
+                                                     onclick="window.open(this.src, '_blank')">
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
-                                {{-- Action Buttons --}}
-                                @if($sourcingRequest->quotation->order === null && !in_array($sourcingRequest->quotation->status, ['negotiating', 'rejected', 'accepted']))
-                                    <div class="mt-6 flex flex-col sm:flex-row gap-3" x-data="{ showNegotiateModal: false }">
-                                        <form action="{{ route('client.quotations.accept', $sourcingRequest->quotation) }}" method="POST" class="flex-1">
-                                            @csrf
-                                            <button type="submit" class="w-full py-3 px-4 bg-[#EF7722] hover:bg-[#FAA533] text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                                {{ __('Accept & Order') }}
-                                            </button>
-                                        </form>
-
-                                        <button type="button" 
-                                                @click="showNegotiateModal = true"
-                                                class="flex-1 py-3 px-4 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-[#EBEBEB] dark:border-slate-600 font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2">
-                                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                {{-- Grand Total Bar --}}
+                                <div class="p-6 bg-gradient-to-r from-[#EF7722] to-[#FAA533] rounded-lg shadow-lg mb-8">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                        <div>
+                                            <p class="text-sm font-bold text-white uppercase tracking-wider mb-1">{{ __('Total Investment') }}</p>
+                                            <p class="text-3xl sm:text-4xl font-extrabold text-white">{{ number_format($sourcingRequest->quotation->amount, 2) }} <span class="text-xl font-bold text-white/90">{{ $sourcingRequest->quotation->currency }}</span></p>
+                                        </div>
+                                        <div class="hidden sm:block">
+                                            <svg class="w-12 h-12 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
-                                            {{ __('Negotiate') }}
-                                        </button>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                        <form action="{{ route('client.quotations.reject', $sourcingRequest->quotation) }}" method="POST" class="flex-1" onsubmit="return confirm('{{ __('Are you sure you want to definitively reject this quotation? This action cannot be undone.') }}');">
-                                            @csrf
-                                            <button type="submit" class="w-full py-3 px-4 bg-white dark:bg-slate-700 text-red-600 dark:text-red-400 border border-[#EBEBEB] dark:border-slate-600 font-semibold rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all flex items-center justify-center gap-2">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                {{-- Hub Note --}}
+                                @if($sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location && $sourcingRequest->quotation->sourcing_note)
+                                    <div class="mb-8 p-4 bg-orange-50 dark:bg-orange-900/10 border-l-4 border-orange-500 rounded-r-lg">
+                                        <p class="text-xs font-bold text-orange-800 dark:text-orange-400 uppercase mb-1">{{ __('Sourcing Note') }}</p>
+                                        <p class="text-sm text-slate-700 dark:text-slate-300 italic">{{ $sourcingRequest->quotation->sourcing_note }}</p>
+                                    </div>
+                                @endif
+
+                                {{-- Decision Center --}}
+                                @if($sourcingRequest->quotation->order === null && !in_array($sourcingRequest->quotation->status, ['negotiating', 'rejected', 'accepted']))
+                                    <div x-data="{ showNegotiateModal: false }">
+                                        <div class="flex flex-col sm:flex-row gap-3">
+                                            <form action="{{ route('client.quotations.accept', $sourcingRequest->quotation) }}" method="POST" class="flex-[2]">
+                                                @csrf
+                                                <button type="submit" class="w-full h-14 bg-[#EF7722] hover:bg-[#FAA533] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    {{ __('Authorize & Initialize Order') }}
+                                                </button>
+                                            </form>
+
+                                            <button type="button" @click="showNegotiateModal = true" class="flex-1 h-14 bg-white dark:bg-slate-700 text-slate-700 dark:text-white border-2 border-[#EBEBEB] dark:border-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                                                 </svg>
-                                                {{ __('Definitive Rejection') }}
+                                                {{ __('Negotiate') }}
                                             </button>
-                                        </form>
+
+                                            <form action="{{ route('client.quotations.reject', $sourcingRequest->quotation) }}" method="POST" class="flex-1" onsubmit="return confirm('{{ __('Confirm permanent rejection of this quote?') }}');">
+                                                @csrf
+                                                <button type="submit" class="w-full h-14 bg-white dark:bg-slate-700 text-red-500 border-2 border-[#EBEBEB] dark:border-slate-600 font-bold rounded-xl hover:bg-red-50 transition-all flex items-center justify-center gap-2">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                    {{ __('Decline') }}
+                                                </button>
+                                            </form>
+                                        </div>
 
                                         {{-- Negotiation Modal --}}
                                         <div x-show="showNegotiateModal" 
@@ -323,47 +399,32 @@
                                              x-transition:leave="transition ease-in duration-200"
                                              x-transition:leave-start="opacity-100"
                                              x-transition:leave-end="opacity-0">
-                                            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                                                <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="showNegotiateModal = false">
-                                                    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-                                                </div>
+                                            <div class="flex items-center justify-center min-h-screen px-4">
+                                                <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showNegotiateModal = false"></div>
 
-                                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                                                <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-200 dark:border-slate-700">
+                                                <div class="relative bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl border border-[#EBEBEB] dark:border-slate-700">
                                                     <form action="{{ route('client.quotations.negotiate', $sourcingRequest->quotation) }}" method="POST">
                                                         @csrf
-                                                        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                                                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Request Changes / Negotiate') }}</h3>
-                                                            <button type="button" @click="showNegotiateModal = false" class="text-slate-400 hover:text-slate-500 transition-colors">
+                                                        <div class="px-6 py-4 border-b border-[#EBEBEB] dark:border-slate-700 flex items-center justify-between">
+                                                            <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('Negotiation Request') }}</h3>
+                                                            <button type="button" @click="showNegotiateModal = false" class="text-slate-400 hover:text-slate-600">
                                                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                             </button>
                                                         </div>
-
                                                         <div class="p-6">
-                                                            <div class="space-y-4">
-                                                                <div>
-                                                                    <label for="negotiation_notes" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
-                                                                        {{ __('Reason for Negotiation') }}
-                                                                    </label>
-                                                                    <textarea name="negotiation_notes" 
-                                                                              id="negotiation_notes" 
-                                                                              rows="4" 
-                                                                              required
-                                                                              placeholder="{{ __('Example: The price is too high for my budget, I would like a discount of 5% or more information about shipping times...') }}"
-                                                                              class="w-full px-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-slate-50 dark:bg-slate-700 dark:text-white transition-all"></textarea>
-                                                                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                                                                        {{ __('Your request will be sent to the administrator assigned to your order.') }}
-                                                                    </p>
-                                                                </div>
+                                                            <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                                                <p class="text-sm text-blue-800 dark:text-blue-300">
+                                                                    {{ __('Please specify your target terms or budgetary constraints below. Our team will review it promptly.') }}
+                                                                </p>
                                                             </div>
+                                                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ __('Your Feedback') }}</label>
+                                                            <textarea name="negotiation_notes" rows="4" required class="w-full px-4 py-3 text-sm border-2 border-[#EBEBEB] dark:border-slate-700 rounded-xl focus:border-[#EF7722] dark:bg-slate-900 dark:text-white transition-all resize-none" placeholder="{{ __('Example: Seeking a volume discount for 500+ units...') }}"></textarea>
                                                         </div>
-
-                                                        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-3">
-                                                            <button type="button" @click="showNegotiateModal = false" class="flex-1 py-2 px-4 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm">
+                                                        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-[#EBEBEB] dark:border-slate-700 flex gap-3">
+                                                            <button type="button" @click="showNegotiateModal = false" class="flex-1 py-3 px-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-[#EBEBEB] dark:border-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all">
                                                                 {{ __('Cancel') }}
                                                             </button>
-                                                            <button type="submit" class="flex-1 py-2 px-4 bg-[#EF7722] hover:bg-[#FAA533] text-white font-bold rounded-lg transition-all shadow-sm hover:shadow text-sm">
+                                                            <button type="submit" class="flex-[1.5] py-3 px-4 bg-[#EF7722] hover:bg-[#FAA533] text-white font-bold rounded-xl shadow-md transition-all">
                                                                 {{ __('Submit Request') }}
                                                             </button>
                                                         </div>
@@ -373,13 +434,13 @@
                                         </div>
                                     </div>
                                 @elseif($sourcingRequest->quotation->status === 'negotiating')
-                                    <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-lg">
                                         <div class="flex items-center gap-3">
                                             <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                             <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
-                                                {{ __('Negotiation in progress. We are reviewing your request.') }}
+                                                {{ __('Negotiation in progress. Our team is reviewing your feedback.') }}
                                             </p>
                                         </div>
                                         @if($sourcingRequest->quotation->negotiation_notes)
@@ -486,4 +547,35 @@
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
     </style>
+
+    {{-- Image Modal for Full Size Viewing --}}
+    <div id="mediaModal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onclick="closeMediaModal()">
+        <div class="relative max-w-7xl w-full h-full flex items-center justify-center">
+            <button onclick="closeMediaModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <img id="modalImage" src="" alt="Full size" class="max-w-full max-h-full object-contain" onclick="event.stopPropagation()">
+        </div>
+    </div>
+
+    <script>
+        function openMediaModal(src, type) {
+            if (type === 'image') {
+                document.getElementById('modalImage').src = src;
+                document.getElementById('mediaModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeMediaModal() {
+            document.getElementById('mediaModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeMediaModal();
+        });
+    </script>
 </x-app-layout>
