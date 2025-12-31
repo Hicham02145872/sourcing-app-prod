@@ -31,16 +31,6 @@
             {{-- Actions --}}
             <div class="flex items-center gap-3">
                 @if(auth()->check() && auth()->user()->role === 'client')
-                    {{-- Delivery Time Text --}}
-                    <div class="md:flex items-center">
-                        <p class="text-sm text-gray-600 dark:text-gray-300 font-medium whitespace-nowrap">
-                            {{ __('Estimated delivery-time between 15 - 20 working days (China) and 1 - 7 working days (Dubai)') }}
-                        </p>
-                    </div>
-
-                    {{-- Espace entre le texte et les icônes sociales --}}
-                    <div class="hidden md:block w-8"></div>
-
                     {{-- Social Media Icons --}}
                     @if ($socialMediaLinks->facebook_url || $socialMediaLinks->instagram_url || $socialMediaLinks->linkedin_url || $socialMediaLinks->twitter_url || $socialMediaLinks->youtube_url)
                     <div class="flex items-center gap-1">
