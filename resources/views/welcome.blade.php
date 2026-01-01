@@ -2,6 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
+    <link rel="canonical" href="https://www.fastsourcingbrothers.com/">
     <meta name="google-site-verification" content="ISX4oQbk-jf2HH1RX6gRkyfvgFYdlT4QyQYdLFcqMdY" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
