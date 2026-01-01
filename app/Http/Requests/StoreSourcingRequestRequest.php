@@ -46,6 +46,7 @@ class StoreSourcingRequestRequest extends FormRequest
     {
         return [
             'note.required' => __('Please provide special requirements or details for your request.'),
+            'shipping_method.required' => __('Please select a preferred shipping method.'),
         ];
     }
 }

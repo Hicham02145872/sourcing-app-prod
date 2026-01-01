@@ -31,7 +31,7 @@ class UpdateSourcingRequestRequest extends FormRequest
             'address' => 'nullable|string|max:255',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'shipping_method' => 'nullable|in:air,sea',
+            'shipping_method' => 'required|in:air,sea',
             'sourcing_location' => 'required|in:china,dubai',
             'destinations' => 'required|array|min:1',
             'destinations.*.country_id' => 'required|exists:countries,id',
@@ -49,6 +49,7 @@ class UpdateSourcingRequestRequest extends FormRequest
     {
         return [
             'note.required' => __('Please provide special requirements or details for your request.'),
+            'shipping_method.required' => __('Please select a preferred shipping method.'),
         ];
     }
 }

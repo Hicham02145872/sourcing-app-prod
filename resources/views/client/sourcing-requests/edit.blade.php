@@ -126,7 +126,7 @@
                             </label>
                             <div class="grid grid-cols-2 gap-3">
                                 <label class="relative flex items-center p-3 border-2 border-[#EBEBEB] dark:border-slate-600 rounded-lg cursor-pointer hover:border-[#EF7722] dark:hover:border-[#EF7722] transition-all has-[:checked]:border-[#EF7722] has-[:checked]:bg-[#EF7722]/5 has-[:checked]:shadow-sm">
-                                    <input type="radio" id="shipping_method_air" name="shipping_method" value="air" class="sr-only" {{ old('shipping_method', $sourcingRequest->shipping_method) == 'air' ? 'checked' : '' }}>
+                                    <input type="radio" id="shipping_method_air" name="shipping_method" value="air" class="sr-only" {{ old('shipping_method', $sourcingRequest->shipping_method) == 'air' ? 'checked' : '' }} required>
                                     <div class="flex items-center gap-2 w-full">
                                         <svg class="w-5 h-5 text-[#EF7722] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
@@ -136,15 +136,15 @@
                                 </label>
 
                                 <label class="relative flex items-center p-3 border-2 border-[#EBEBEB] dark:border-slate-600 rounded-lg cursor-pointer hover:border-[#EF7722] dark:hover:border-[#EF7722] transition-all has-[:checked]:border-[#EF7722] has-[:checked]:bg-[#EF7722]/5 has-[:checked]:shadow-sm">
-                                    <input type="radio" id="shipping_method_sea" name="shipping_method" value="sea" class="sr-only" {{ old('shipping_method', $sourcingRequest->shipping_method) == 'sea' ? 'checked' : '' }}>
+                                    <input type="radio" id="shipping_method_sea" name="shipping_method" value="sea" class="sr-only" {{ old('shipping_method', $sourcingRequest->shipping_method) == 'sea' ? 'checked' : '' }} required>
                                     <div class="flex items-center gap-2 w-full">
                                         <svg class="w-5 h-5 text-[#EF7722] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8 4-8-4m16 0l-8-4m8 4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                         </svg>
                                         <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('Sea (Economy)') }}</span>
                                     </div>
-                                </label>
                             </div>
+                            <x-input-error :messages="$errors->get('shipping_method')" class="mt-2" />
                         </div>
 
                         <!-- Additional Notes -->

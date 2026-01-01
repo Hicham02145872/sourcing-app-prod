@@ -436,4 +436,12 @@ class SourcingOrderController extends Controller
 
         return $pdf->download('sourcing_orders_'.date('Y-m-d_His').'.pdf');
     }
+    public function destroy(SourcingOrder $sourcingOrder): RedirectResponse
+    {
+        $this->authorize('delete', $sourcingOrder);
+
+        $sourcingOrder->delete();
+
+        return redirect()->route('admin.sourcing-orders.index')->with('success', __('Order deleted successfully.'));
+    }
 }

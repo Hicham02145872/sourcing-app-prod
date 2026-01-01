@@ -4,10 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class SourcingRequest extends Model
 {
     use HasFactory;
+
+    protected static function booted()
+    {
+        static::deleting(function ($sourcingRequest) {
+            if ($sourcingRequest->product_image) {
+                Storage::disk('public')->delete($sourcingRequest->product_image);
+            }
+        });
+    }
 
     public const STATUSES = [
         'pending',

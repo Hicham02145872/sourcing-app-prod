@@ -298,4 +298,12 @@ class AdminSourcingRequestController extends Controller
 
         return redirect()->route('admin.sourcing-requests.index')->with('success', 'Dossier libéré.');
     }
+    public function destroy(SourcingRequest $sourcingRequest): RedirectResponse
+    {
+        $this->authorize('delete', $sourcingRequest);
+
+        $sourcingRequest->delete();
+
+        return redirect()->route('admin.sourcing-requests.index')->with('success', __('Request deleted successfully.'));
+    }
 }

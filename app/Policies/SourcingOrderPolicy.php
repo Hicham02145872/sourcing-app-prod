@@ -72,4 +72,20 @@ class SourcingOrderPolicy
     {
         return $sourcingOrder->user_id === $user->id;
     }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, SourcingOrder $sourcingOrder): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($user->isAdmin()) {
+            return $sourcingOrder->assigned_to_admin_id === $user->id;
+        }
+
+        return false;
+    }
 }

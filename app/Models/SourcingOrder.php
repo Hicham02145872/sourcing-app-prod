@@ -4,10 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class SourcingOrder extends Model
 {
     use HasFactory;
+
+    protected static function booted()
+    {
+        static::deleting(function ($sourcingOrder) {
+            if ($sourcingOrder->proof_of_payment_path) {
+                Storage::disk('public')->delete($sourcingOrder->proof_of_payment_path);
+            }
+            if ($sourcingOrder->refund_proof_path) {
+                Storage::disk('public')->delete($sourcingOrder->refund_proof_path);
+            }
+            // Delete associated media records (which will trigger their own deleting events for physical files)
+            $sourcingOrder->media()->each(function ($media) {
+                $media->delete();
+            });
+        });
+    }
 
     public const STATUSES = [
         'pending_payment',
