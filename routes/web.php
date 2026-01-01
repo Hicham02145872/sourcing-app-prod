@@ -51,6 +51,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::get('sourcing-orders/{sourcingOrder}/shipping-label', [App\Http\Controllers\Admin\SourcingOrderController::class, 'showShippingLabel'])->name('sourcing-orders.shipping-label');
     Route::patch('sourcing-orders/{sourcingOrder}/tracking', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateTracking'])->name('sourcing-orders.update-tracking'); // Added tracking route
     Route::post('sourcing-orders/{sourcingOrder}/media', [App\Http\Controllers\Admin\SourcingOrderController::class, 'uploadMedia'])->name('sourcing-orders.media.store');
+    Route::delete('sourcing-orders/{sourcingOrder}', [App\Http\Controllers\Admin\SourcingOrderController::class, 'destroy'])->name('sourcing-orders.destroy');
     Route::delete('media/{media}', [App\Http\Controllers\Admin\SourcingOrderController::class, 'deleteMedia'])->name('media.destroy');
     // Sourcing Requests Management
     Route::resource('sourcing-requests', App\Http\Controllers\Admin\AdminSourcingRequestController::class);
