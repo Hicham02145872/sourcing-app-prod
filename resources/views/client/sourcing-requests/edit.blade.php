@@ -115,7 +115,7 @@
                                     <label for="product_image" class="absolute inset-0 cursor-pointer"></label>
                                     <input id="product_image" type="file" class="sr-only" name="product_image" accept="image/*" />
                                 </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">{{ __('Max 5MB') }}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">{{ __('Max 15MB') }}</p>
                             </div>
                         </div>
 
@@ -343,6 +343,19 @@
                 input.onchange = (e) => {
                     const file = e.target.files[0];
                     if (file) {
+                        // 15MB = 15 * 1024 * 1024 bytes = 15728640 bytes
+                        if (file.size > 15728640) {
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                                detail: '{{ __("File size exceeds 15MB. Please choose a smaller file.") }}' 
+                            }));
+                            input.value = '';
+                            preview.style.opacity = '0';
+                            if (placeholder) {
+                                placeholder.style.display = 'flex';
+                            }
+                            return;
+                        }
+
                         const reader = new FileReader();
                         reader.onload = ev => {
                             preview.src = ev.target.result;

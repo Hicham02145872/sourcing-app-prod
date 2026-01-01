@@ -59,7 +59,7 @@ class SourcingOrderController extends Controller
         $this->authorize('uploadProofOfPayment', $sourcingOrder);
         
         $request->validate([
-            'proof_of_payment' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240', // 10MB limit as fallback
+            'proof_of_payment' => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
         ]);
 
         Log::debug('uploadProofOfPayment method called', ['method' => $request->method(), 'request' => $request->all()]);

@@ -163,7 +163,7 @@
                                             <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
-                                            {{ __('Upload photos and videos to help the client verify the actual product quality. Drag & drop supported.') }}
+                                            {{ __('Upload photos and videos to help the client verify the actual product quality. Max size: 15MB per file. Drag & drop supported.') }}
                                         </p>
                                     </div>
                                     <div id="image-preview-container" class="hidden">
@@ -531,6 +531,15 @@
             imageInput.addEventListener('change', function() {
                 const file = this.files[0];
                 if (file) {
+                    // 15MB size check
+                    if (file.size > 15728640) {
+                        window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                            detail: '{{ __("File size exceeds 15MB. Please choose a smaller file.") }}' 
+                        }));
+                        imageInput.value = '';
+                        previewContainer.classList.add('hidden');
+                        return;
+                    }
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         previewImage.src = e.target.result;
@@ -562,8 +571,10 @@
                     // Add new files
                     for (let i = 0; i < fileList.length; i++) {
                         const file = fileList[i];
-                        if (file.size > 52428800) { // 50MB
-                            alert(`${file.name} is too large. Maximum size is 50MB.`);
+                        if (file.size > 15728640) { // 15MB
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                                detail: `${file.name} {{ __('is too large. Maximum size is 15MB.') }}` 
+                            }));
                             continue;
                         }
                         

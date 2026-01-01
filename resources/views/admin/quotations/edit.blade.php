@@ -164,7 +164,7 @@
                                             <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
-                                            {{ __('Upload additional photos and videos. Existing media can be managed below. Drag & drop supported.') }}
+                                            {{ __('Upload additional photos and videos. Existing media can be managed below. Max size: 15MB per file. Drag & drop supported.') }}
                                         </p>
                                     </div>
                                     <div id="image-preview-container" class="{{ $quotation->real_product_image ? '' : 'hidden' }}">
@@ -523,26 +523,38 @@
             }
         });
 
-        // Image Preview Logic
-        const imageInput = document.getElementById('real_product_image');
+        // Image Preview Logic & Size Validation
+        const mediaInput = document.getElementById('media_files');
         const previewContainer = document.getElementById('image-preview-container');
         const previewImage = document.getElementById('image-preview');
 
-        if (imageInput) {
-            imageInput.addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewImage.src = e.target.result;
-                        previewContainer.classList.remove('hidden');
+        if (mediaInput) {
+            mediaInput.addEventListener('change', function() {
+                const files = this.files;
+                if (files.length > 0) {
+                    for (let i = 0; i < files.length; i++) {
+                        if (files[i].size > 15728640) { // 15MB
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                                detail: `${files[i].name} {{ __('is too large. Maximum size is 15MB.') }}` 
+                            }));
+                            this.value = '';
+                            if (previewContainer && !previewImage.src.includes('storage/')) {
+                                previewContainer.classList.add('hidden');
+                            }
+                            return;
+                        }
                     }
-                    reader.readAsDataURL(file);
-                } else {
-                    // If no file, but there's an existing image, we keep it visible
-                    @if(!$quotation->real_product_image)
-                        previewContainer.classList.add('hidden');
-                    @endif
+
+                    // Optional: Preview the first image if it's an image
+                    const firstFile = files[0];
+                    if (firstFile && firstFile.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImage.src = e.target.result;
+                            previewContainer.classList.remove('hidden');
+                        }
+                        reader.readAsAsDataURL(firstFile);
+                    }
                 }
             });
         }

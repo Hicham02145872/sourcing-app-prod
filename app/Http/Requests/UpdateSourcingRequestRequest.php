@@ -24,7 +24,7 @@ class UpdateSourcingRequestRequest extends FormRequest
         return [
             'product_name' => 'required|string|max:255',
             'product_url' => 'nullable|url|max:255',
-            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:15360',
             'category_id' => 'required|exists:categories,id',
             'note' => 'required|string',
             'phone_number' => 'nullable|string|max:255',

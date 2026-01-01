@@ -15,6 +15,8 @@ class ShippingFeeItem extends Model
         'transport_type',
         'item_style',
         'price_per_kg',
+        'estimation_days',
+        'estimation_unit',
     ];
 
     public function shippingFee(): BelongsTo

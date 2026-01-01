@@ -137,9 +137,6 @@
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-widest min-w-[200px]">
                                     {{ __('DESTINATION') }}
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-center text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-widest whitespace-nowrap">
-                                    {{ __('DELAY') }}
-                                </th>
                                 @foreach($itemStyles as $style)
                                     <th scope="col" class="px-4 py-4 text-center text-[10px] font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-widest max-w-[120px] whitespace-normal">
                                         {{ $style }}
@@ -159,19 +156,6 @@
                                         </div>
                                     </td>
                                     
-                                    <td class="px-6 py-4 text-center">
-                                        @php
-                                            $methodTime = match($selectedCategory) {
-                                                'air' => $country->shippingFee->air_arrival_time,
-                                                'sea' => $country->shippingFee->sea_arrival_time,
-                                                'train' => $country->shippingFee->train_arrival_time,
-                                                default => null
-                                            };
-                                        @endphp
-                                        <div class="inline-block text-[10px] font-black text-orange-600 dark:text-[#EF7722] bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded shadow-sm whitespace-nowrap">
-                                            {{ $methodTime ?? '-' }}
-                                        </div>
-                                    </td>
 
                                     @foreach($itemStyles as $style)
                                         <td class="px-4 py-4 text-center">
@@ -183,7 +167,12 @@
                                             @if($item && $item->price_per_kg)
                                                 <div class="inline-flex flex-col items-center">
                                                     <span class="text-[11px] font-black text-slate-900 dark:text-white">{{ number_format($item->price_per_kg, 2) }}</span>
-                                                    <span class="text-[8px] font-bold text-slate-400 uppercase">{{ $country->shippingFee->currency ?? 'USD' }}</span>
+                                                    <span class="text-[8px] font-bold text-slate-400 uppercase">{{ $country->shippingFee->currency ?? 'USD' }} / {{ strtoupper($country->shippingFee->unit ?? 'KG') }}</span>
+                                                    @if($item->estimation_days)
+                                                        <span class="mt-1 text-[8px] font-black text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded shadow-sm">
+                                                            {{ $item->estimation_days }} {{ __($item->estimation_unit ?? 'days') }}
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             @else
                                                 <span class="text-slate-300 dark:text-slate-600">-</span>
@@ -349,25 +338,13 @@
                                     </div>
                                     <div class="flex-1">
                                         <h4 class="font-bold text-slate-800 dark:text-slate-200 uppercase text-sm">{{ ucfirst($type) }} {{ __('Freight') }}</h4>
-                                        @php
-                                            $methodTime = match($type) {
-                                                'air' => $selectedCountry->shippingFee->air_arrival_time,
-                                                'sea' => $selectedCountry->shippingFee->sea_arrival_time,
-                                                'train' => $selectedCountry->shippingFee->train_arrival_time,
-                                                default => null
-                                            };
-                                        @endphp
-                                        <div class="mt-1">
-                                            <span class="text-[10px] font-black text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2 py-0.5 rounded">
-                                                {{ __('Estimated Arrival:') }} {{ $methodTime ?? '-' }}
-                                            </span>
-                                        </div>
                                     </div>
                                 </div>
                                 <table class="min-w-full divide-y divide-[#EBEBEB] dark:divide-slate-700">
                                     <thead class="bg-white dark:bg-slate-800">
                                         <tr>
                                             <th class="px-4 py-3 text-left text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">{{ __('Item Style') }}</th>
+                                            <th class="px-4 py-3 text-center text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">{{ __('Delay') }}</th>
                                             <th class="px-4 py-3 text-center text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">{{ __('Price / ') }}{{ strtoupper($selectedCountry->shippingFee->unit ?? 'KG') }}</th>
                                         </tr>
                                     </thead>
@@ -375,6 +352,15 @@
                                         @foreach($items as $item)
                                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                                                 <td class="px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-300">{{ $item->item_style }}</td>
+                                                <td class="px-4 py-3 text-center">
+                                                    @if($item->estimation_days)
+                                                        <span class="text-[10px] font-black text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2 py-0.5 rounded">
+                                                            {{ $item->estimation_days }} {{ __($item->estimation_unit ?? 'days') }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-slate-300 dark:text-slate-600">-</span>
+                                                    @endif
+                                                </td>
                                                 <td class="px-4 py-3 text-center">
                                                     <div class="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
                                                         <span class="text-[9px] font-bold text-slate-400">{{ $selectedCountry->shippingFee->currency ?? 'USD' }}</span>

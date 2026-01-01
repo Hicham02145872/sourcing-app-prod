@@ -24,7 +24,7 @@ class StoreSourcingRequestRequest extends FormRequest
         return [
             'product_name' => 'required|string|max:255',
             'product_url' => 'required|url', // Removed max:255
-            'product_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:12288', // Increased to 12MB
+            'product_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:15360', // Increased to 15MB
             'category_id' => 'required|exists:categories,id',
             'note' => 'required|string', // Changed to required
             'shipping_method' => 'required|in:air,sea',

@@ -53,6 +53,8 @@ class ShippingFeeEdit extends Component
                             'id' => $item->id,
                             'item_style' => $item->item_style,
                             'price_per_kg' => $item->price_per_kg,
+                            'estimation_days' => $item->estimation_days,
+                            'estimation_unit' => $item->estimation_unit ?? 'days',
                         ];
                         $found = true;
                         break;
@@ -63,6 +65,8 @@ class ShippingFeeEdit extends Component
                         'id' => $item->id,
                         'item_style' => $item->item_style,
                         'price_per_kg' => $item->price_per_kg,
+                        'estimation_days' => $item->estimation_days,
+                        'estimation_unit' => $item->estimation_unit ?? 'days',
                     ];
                 }
             }
@@ -88,6 +92,8 @@ class ShippingFeeEdit extends Component
                 $this->itemsData[$type][] = [
                     'item_style' => $defaultStyles[$i] ?? 'Style '.($i + 1),
                     'price_per_kg' => null,
+                    'estimation_days' => null,
+                    'estimation_unit' => 'days',
                 ];
             }
         }
@@ -117,6 +123,8 @@ class ShippingFeeEdit extends Component
                         ['transport_type' => $type, 'item_style' => $itemRow['item_style']],
                         [
                             'price_per_kg' => $itemRow['price_per_kg'],
+                            'estimation_days' => $itemRow['estimation_days'],
+                            'estimation_unit' => $itemRow['estimation_unit'] ?? 'days',
                         ]
                     );
                 }

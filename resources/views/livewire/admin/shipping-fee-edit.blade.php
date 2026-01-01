@@ -32,31 +32,14 @@
                     <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Unit') }}</span>
                         <div class="flex items-center gap-2">
-                            <select wire:model="unit" class="text-sm font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right lowercase">
-                                <option value="kg">kg</option>
-                                <option value="colis">colis</option>
+                            <select wire:model="unit" class="text-sm font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right uppercase">
+                                <option value="kg">KG</option>
+                                <option value="CBM">CBM</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-6 space-y-4">
-                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">{{ __('Method Delays') }}</h4>
-                    <div class="space-y-2">
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">{{ __('Air Delay') }}</label>
-                            <input wire:model="air_arrival_time" type="text" class="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-100 rounded-lg py-2 px-3 focus:ring-2 focus:ring-orange-200 outline-none transition-all" placeholder="e.g. 7-9">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">{{ __('Sea Delay') }}</label>
-                            <input wire:model="sea_arrival_time" type="text" class="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-100 rounded-lg py-2 px-3 focus:ring-2 focus:ring-blue-200 outline-none transition-all" placeholder="e.g. 30-45">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">{{ __('Train Delay') }}</label>
-                            <input wire:model="train_arrival_time" type="text" class="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-100 rounded-lg py-2 px-3 focus:ring-2 focus:ring-green-200 outline-none transition-all" placeholder="e.g. 15-20">
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {{-- Configuration Info --}}
@@ -114,7 +97,8 @@
                         <thead class="bg-slate-50">
                             <tr>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Item Style / Category') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100/30">{{ __('Price per') }} {{ $unit }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100/30">{{ __('Price per') }} {{ strtoupper($unit) }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Estimated Delay') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50 bg-white">
@@ -133,6 +117,15 @@
                                         <div class="flex items-center justify-center gap-2">
                                             <span class="text-xs font-bold text-slate-400">{{ $currency }}</span>
                                             <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg" type="number" step="0.01" class="w-32 text-center text-sm font-bold text-slate-600 bg-white border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-slate-300 focus:border-slate-300 outline-none transition-all">
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <input wire:model="itemsData.{{ $type }}.{{ $index }}.estimation_days" type="text" class="w-24 text-center text-sm font-bold text-slate-600 bg-slate-50 border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-orange-200 outline-none transition-all" placeholder="e.g. 7-9">
+                                            <select wire:model="itemsData.{{ $type }}.{{ $index }}.estimation_unit" class="text-xs font-bold text-slate-500 bg-transparent border-none focus:ring-0 p-0">
+                                                <option value="days">{{ __('Days') }}</option>
+                                                <option value="months">{{ __('Months') }}</option>
+                                            </select>
                                         </div>
                                     </td>
                                 </tr>

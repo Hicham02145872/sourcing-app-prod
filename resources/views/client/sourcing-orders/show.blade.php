@@ -379,7 +379,7 @@
                                                           cursor-pointer p-2"
                                                    required/>
                                             <p class="mt-2 text-xs text-slate-500 dark:text-slate-400 italic">
-                                                {{ __('Accepted formats: PDF, JPG, PNG. Large images will be auto-optimized.') }}
+                                                {{ __('Accepted formats: PDF, JPG, PNG. Max 15MB. Large images will be auto-optimized.') }}
                                             </p>
                                         </div>
                                         <button type="submit" id="submit-proof-btn"
@@ -614,6 +614,13 @@
                 const btn = document.getElementById('submit-proof-btn');
                 const btnText = document.getElementById('btn-text');
                 const btnLoading = document.getElementById('btn-loading');
+
+                if (file && file.size > 15728640) { // 15MB
+                    window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                        detail: '{{ __("File size exceeds 15MB. Please choose a smaller file.") }}' 
+                    }));
+                    return;
+                }
 
                 if (!file || !file.type.startsWith('image/')) {
                     // Not an image or no file, proceed normally (e.g. PDF)
