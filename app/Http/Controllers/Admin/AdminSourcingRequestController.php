@@ -167,8 +167,8 @@ class AdminSourcingRequestController extends Controller
     if (auth()->check()) {
         $userId = auth()->id();
         $query->orderByRaw("CASE 
-            WHEN assigned_to_admin_id = ? THEN 1 
-            WHEN assigned_to_admin_id IS NULL THEN 2 
+            WHEN assigned_to_admin_id IS NULL THEN 1 
+            WHEN assigned_to_admin_id = ? THEN 2 
             ELSE 3 
         END", [$userId]);
     }
