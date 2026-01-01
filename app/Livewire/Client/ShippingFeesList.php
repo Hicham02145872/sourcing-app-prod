@@ -59,8 +59,37 @@ class ShippingFeesList extends Component
 
         $countries = $query->paginate(12);
 
+        $itemStyles = [];
+        if ($this->selectedCategory) {
+            $defaultOrder = [
+                'Electr & Magnet (No Brand)',
+                'Electr & Magnet (With Brand)',
+                'General Cargo (No Brand)',
+                'General Cargo (With Brand)',
+                'Power Bank, Battery, Cosmetic',
+                'Screens, Electr & Mag (No Brand)',
+                'Screens, Electr & Mag (With Brand)',
+                'Health Care Products',
+            ];
+
+            $fetchedStyles = \App\Models\ShippingFeeItem::where('transport_type', $this->selectedCategory)
+                ->whereHas('shippingFee', function ($q) {
+                    $q->whereHas('country');
+                })
+                ->distinct()
+                ->pluck('item_style')
+                ->toArray();
+
+            // Sort fetched styles based on defaultOrder, keep others at the end
+            $itemStyles = collect($fetchedStyles)->sortBy(function ($style) use ($defaultOrder) {
+                $index = array_search($style, $defaultOrder);
+                return $index === false ? 999 : $index;
+            })->values()->toArray();
+        }
+
         return view('livewire.client.shipping-fees-list', [
             'countries' => $countries,
+            'itemStyles' => $itemStyles,
         ]);
     }
 }

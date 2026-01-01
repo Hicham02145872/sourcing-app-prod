@@ -9,10 +9,18 @@ use Livewire\Component;
 class ShippingFeeEdit extends Component
 {
     public Country $country;
+
     public ?ShippingFee $shippingFee = null;
 
     public $currency = 'USD';
+
     public $unit = 'kg';
+
+    public $air_arrival_time = '7-9';
+
+    public $sea_arrival_time = '30-45';
+
+    public $train_arrival_time = '15-20';
 
     public array $itemsData = [
         'air' => [],
@@ -33,6 +41,10 @@ class ShippingFeeEdit extends Component
             $this->currency = $fee->currency ?? 'USD';
             $this->unit = $fee->unit ?? 'kg';
 
+            $this->air_arrival_time = $fee->air_arrival_time ?? '7-9';
+            $this->sea_arrival_time = $fee->sea_arrival_time ?? '30-45';
+            $this->train_arrival_time = $fee->train_arrival_time ?? '15-20';
+
             foreach ($fee->items as $item) {
                 $found = false;
                 foreach ($this->itemsData[$item->transport_type] as $key => $existing) {
@@ -40,11 +52,7 @@ class ShippingFeeEdit extends Component
                         $this->itemsData[$item->transport_type][$key] = [
                             'id' => $item->id,
                             'item_style' => $item->item_style,
-                            'price_16_49' => $item->price_16_49,
-                            'price_50_99' => $item->price_50_99,
-                            'price_100_499' => $item->price_100_499,
-                            'price_plus_500' => $item->price_plus_500,
-                            'estimation_days' => $item->estimation_days,
+                            'price_per_kg' => $item->price_per_kg,
                         ];
                         $found = true;
                         break;
@@ -54,11 +62,7 @@ class ShippingFeeEdit extends Component
                     $this->itemsData[$item->transport_type][] = [
                         'id' => $item->id,
                         'item_style' => $item->item_style,
-                        'price_16_49' => $item->price_16_49,
-                        'price_50_99' => $item->price_50_99,
-                        'price_100_499' => $item->price_100_499,
-                        'price_plus_500' => $item->price_plus_500,
-                        'estimation_days' => $item->estimation_days,
+                        'price_per_kg' => $item->price_per_kg,
                     ];
                 }
             }
@@ -83,11 +87,7 @@ class ShippingFeeEdit extends Component
             for ($i = 0; $i < 8; $i++) {
                 $this->itemsData[$type][] = [
                     'item_style' => $defaultStyles[$i] ?? 'Style '.($i + 1),
-                    'price_16_49' => null,
-                    'price_50_99' => null,
-                    'price_100_499' => null,
-                    'price_plus_500' => null,
-                    'estimation_days' => '7-9',
+                    'price_per_kg' => null,
                 ];
             }
         }
@@ -99,6 +99,9 @@ class ShippingFeeEdit extends Component
             'country_id' => $this->country->id,
             'currency' => $this->currency,
             'unit' => $this->unit,
+            'air_arrival_time' => $this->air_arrival_time,
+            'sea_arrival_time' => $this->sea_arrival_time,
+            'train_arrival_time' => $this->train_arrival_time,
         ];
 
         $fee = \App\Models\ShippingFee::updateOrCreate(
@@ -113,11 +116,7 @@ class ShippingFeeEdit extends Component
                     $fee->items()->updateOrCreate(
                         ['transport_type' => $type, 'item_style' => $itemRow['item_style']],
                         [
-                            'price_16_49' => $itemRow['price_16_49'],
-                            'price_50_99' => $itemRow['price_50_99'],
-                            'price_100_499' => $itemRow['price_100_499'],
-                            'price_plus_500' => $itemRow['price_plus_500'],
-                            'estimation_days' => $itemRow['estimation_days'],
+                            'price_per_kg' => $itemRow['price_per_kg'],
                         ]
                     );
                 }
@@ -126,7 +125,7 @@ class ShippingFeeEdit extends Component
 
         $this->dispatch('show-success-toast', message: __('Shipping fees updated successfully.'));
         session()->flash('status', __('Shipping fees for :country updated successfully.', ['country' => $this->country->name]));
-        
+
         $this->redirect(route('admin.shipping-fees.index'), navigate: true);
     }
 

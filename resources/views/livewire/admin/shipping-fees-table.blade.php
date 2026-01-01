@@ -63,8 +63,8 @@
                                         <div class="flex flex-col">
                                             <div class="flex items-center gap-1.5">
                                                 <span class="text-xs font-bold text-slate-800">{{ $country->name }}</span>
-                                                @if($country->shippingFee && $country->shippingFee->items->whereNotNull('price_16_49')->count() > 0)
-                                                    <span class="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" title="{{ __('Detailed tiered rates active') }}"></span>
+                                                @if($country->shippingFee && $country->shippingFee->items->whereNotNull('price_per_kg')->count() > 0)
+                                                    <span class="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" title="{{ __('Rates active') }}"></span>
                                                 @endif
                                             </div>
                                             <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{{ $country->code }}</span>
@@ -76,9 +76,9 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-2">
                                         @php
-                                            $airCount = $country->shippingFee?->items->where('transport_type', 'air')->whereNotNull('price_16_49')->count() ?? 0;
-                                            $seaCount = $country->shippingFee?->items->where('transport_type', 'sea')->whereNotNull('price_16_49')->count() ?? 0;
-                                            $trainCount = $country->shippingFee?->items->where('transport_type', 'train')->whereNotNull('price_16_49')->count() ?? 0;
+                                            $airCount = $country->shippingFee?->items->where('transport_type', 'air')->whereNotNull('price_per_kg')->count() ?? 0;
+                                            $seaCount = $country->shippingFee?->items->where('transport_type', 'sea')->whereNotNull('price_per_kg')->count() ?? 0;
+                                            $trainCount = $country->shippingFee?->items->where('transport_type', 'train')->whereNotNull('price_per_kg')->count() ?? 0;
                                         @endphp
 
                                         @if($airCount > 0)

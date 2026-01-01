@@ -130,12 +130,14 @@
                                                     {{ $sourcingRequest->sourcing_location }}
                                                 </p>
                                                 @if($sourcingRequest->quotation && $sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location)
-                                                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
-                                                    </svg>
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 uppercase border border-red-200 dark:border-red-800 animate-pulse">
-                                                        {{ __('Alternative Sourcing: ') }} {{ $sourcingRequest->quotation->actual_sourcing_location }}
-                                                    </span>
+                                                    <div class="w-full mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center gap-2 animate-pulse">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                        </svg>
+                                                        <span class="font-bold uppercase tracking-wide">
+                                                            {{ __('Alternative Sourcing: ') }} {{ $sourcingRequest->quotation->actual_sourcing_location }}
+                                                        </span>
+                                                    </div>
                                                 @endif
                                             </div>
                                         </div>
@@ -349,11 +351,20 @@
                                     </div>
                                 </div>
 
-                                {{-- Hub Note --}}
+                                {{-- Hub Note Banner --}}
                                 @if($sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location && $sourcingRequest->quotation->sourcing_note)
-                                    <div class="mb-8 p-4 bg-orange-50 dark:bg-orange-900/10 border-l-4 border-orange-500 rounded-r-lg">
-                                        <p class="text-xs font-bold text-orange-800 dark:text-orange-400 uppercase mb-1">{{ __('Sourcing Note') }}</p>
-                                        <p class="text-sm text-slate-700 dark:text-slate-300 italic">{{ $sourcingRequest->quotation->sourcing_note }}</p>
+                                    <div class="mb-8 p-4 bg-red-50 dark:bg-red-900/10 border-l-4 border-red-500 rounded-r-lg shadow-sm">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-6 h-6 text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            </svg>
+                                            <div>
+                                                <p class="text-sm font-bold text-red-800 dark:text-red-400 uppercase mb-1">{{ __('Important Admin Note') }}</p>
+                                                <p class="text-base text-red-700 dark:text-red-300 italic font-medium">
+                                                    "{{ $sourcingRequest->quotation->sourcing_note }}"
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 @endif
 

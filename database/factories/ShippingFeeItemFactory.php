@@ -16,11 +16,7 @@ class ShippingFeeItemFactory extends Factory
             'shipping_fee_id' => ShippingFee::factory(),
             'transport_type' => $this->faker->randomElement(['air', 'sea', 'train']),
             'item_style' => $this->faker->word,
-            'price_16_49' => $this->faker->randomFloat(2, 5, 50),
-            'price_50_99' => $this->faker->randomFloat(2, 5, 50),
-            'price_100_499' => $this->faker->randomFloat(2, 5, 50),
-            'price_plus_500' => $this->faker->randomFloat(2, 5, 50),
-            'estimation_days' => '7-10 days',
+            'price_per_kg' => $this->faker->randomFloat(2, 5, 50),
         ];
     }
 }

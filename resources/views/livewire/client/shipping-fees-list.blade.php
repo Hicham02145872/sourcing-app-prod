@@ -130,83 +130,82 @@
 
         <div class="overflow-x-auto">
             @if($selectedCategory)
-                <table class="min-w-full divide-y divide-[#EBEBEB] dark:divide-slate-700">
-                    <thead class="bg-[#EBEBEB] dark:bg-slate-900/50">
-                        <tr>
-                            <th scope="col" class="px-4 py-3 text-left text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                {{ __('Destination') }} / {{ __('Item Style') }}
-                            </th>
-                            <th scope="col" class="px-4 py-3 text-center text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                16-49 KG
-                            </th>
-                            <th scope="col" class="px-4 py-3 text-center text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                50-99 KG
-                            </th>
-                            <th scope="col" class="px-4 py-3 text-center text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                100-499 KG
-                            </th>
-                            <th scope="col" class="px-4 py-3 text-center text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                500+ KG
-                            </th>
-                            <th scope="col" class="px-4 py-3 text-center text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                {{ __('Arrive') }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-slate-800 divide-y divide-[#EBEBEB] dark:divide-slate-700" wire:loading.class="opacity-50">
-                        @forelse($countries as $country)
-                            {{-- Country Header Row --}}
-                            <tr class="bg-slate-50 dark:bg-slate-900/30">
-                                <td colspan="6" class="px-4 py-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="fi fi-{{ strtolower($country->code) }} text-sm rounded-sm"></span>
-                                        <button wire:click="selectCountry({{ $country->id }})" class="text-xs font-bold text-slate-900 dark:text-white uppercase hover:text-[#EF7722] transition-colors underline decoration-dotted underline-offset-2">
-                                            {{ $country->name }} <span class="text-[10px] text-slate-400 font-normal no-underline ml-1">({{ __('View All') }})</span>
-                                        </button>
-                                    </div>
-                                </td>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-[#EBEBEB] dark:divide-slate-700">
+                        <thead class="bg-slate-100 dark:bg-slate-900 shadow-sm transition-all border-b-2 border-[#EF7722]/20">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-widest min-w-[200px]">
+                                    {{ __('DESTINATION') }}
+                                </th>
+                                <th scope="col" class="px-6 py-4 text-center text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-widest whitespace-nowrap">
+                                    {{ __('DELAY') }}
+                                </th>
+                                @foreach($itemStyles as $style)
+                                    <th scope="col" class="px-4 py-4 text-center text-[10px] font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-widest max-w-[120px] whitespace-normal">
+                                        {{ $style }}
+                                    </th>
+                                @endforeach
                             </tr>
-                            {{-- Item Detail Rows --}}
-                            @php
-                                $items = $country->shippingFee?->items->where('transport_type', $selectedCategory) ?? [];
-                            @endphp
-                            @forelse($items as $item)
+                        </thead>
+                        <tbody class="bg-white dark:bg-slate-800 divide-y divide-[#EBEBEB] dark:divide-slate-700" wire:loading.class="opacity-50">
+                            @forelse($countries as $country)
                                 <tr class="hover:bg-[#EF7722]/5 dark:hover:bg-[#EF7722]/10 transition-colors duration-150">
-                                    <td class="px-4 py-2 whitespace-nowrap">
-                                        <div class="text-[10px] font-medium text-slate-600 dark:text-slate-400 indent-4">{{ $item->item_style }}</div>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center gap-3">
+                                            <span class="fi fi-{{ strtolower($country->code) }} text-sm rounded-sm shadow-sm"></span>
+                                            <button wire:click="selectCountry({{ $country->id }})" class="text-xs font-black text-slate-900 dark:text-white uppercase hover:text-[#EF7722] transition-colors border-b border-dotted border-slate-300">
+                                                {{ $country->name }}
+                                            </button>
+                                        </div>
                                     </td>
-                                    <td class="px-4 py-2 text-center">
-                                        <div class="text-xs font-bold text-slate-900 dark:text-white">{{ $item->price_16_49 ? number_format($item->price_16_49, 2) : '-' }}</div>
+                                    
+                                    <td class="px-6 py-4 text-center">
+                                        @php
+                                            $methodTime = match($selectedCategory) {
+                                                'air' => $country->shippingFee->air_arrival_time,
+                                                'sea' => $country->shippingFee->sea_arrival_time,
+                                                'train' => $country->shippingFee->train_arrival_time,
+                                                default => null
+                                            };
+                                        @endphp
+                                        <div class="inline-block text-[10px] font-black text-orange-600 dark:text-[#EF7722] bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded shadow-sm whitespace-nowrap">
+                                            {{ $methodTime ?? '-' }}
+                                        </div>
                                     </td>
-                                    <td class="px-4 py-2 text-center">
-                                        <div class="text-xs font-bold text-slate-900 dark:text-white">{{ $item->price_50_99 ? number_format($item->price_50_99, 2) : '-' }}</div>
-                                    </td>
-                                    <td class="px-4 py-2 text-center">
-                                        <div class="text-xs font-bold text-slate-900 dark:text-white">{{ $item->price_100_499 ? number_format($item->price_100_499, 2) : '-' }}</div>
-                                    </td>
-                                    <td class="px-4 py-2 text-center">
-                                        <div class="text-xs font-bold text-slate-900 dark:text-white">{{ $item->price_plus_500 ? number_format($item->price_plus_500, 2) : '-' }}</div>
-                                    </td>
-                                    <td class="px-4 py-2 text-center">
-                                        <div class="text-[10px] font-bold text-amber-600 dark:text-amber-400">{{ $item->estimation_days ?? '-' }}</div>
-                                    </td>
+
+                                    @foreach($itemStyles as $style)
+                                        <td class="px-4 py-4 text-center">
+                                            @php
+                                                $item = $country->shippingFee?->items
+                                                    ->where('transport_type', $selectedCategory)
+                                                    ->firstWhere('item_style', $style);
+                                            @endphp
+                                            @if($item && $item->price_per_kg)
+                                                <div class="inline-flex flex-col items-center">
+                                                    <span class="text-[11px] font-black text-slate-900 dark:text-white">{{ number_format($item->price_per_kg, 2) }}</span>
+                                                    <span class="text-[8px] font-bold text-slate-400 uppercase">{{ $country->shippingFee->currency ?? 'USD' }}</span>
+                                                </div>
+                                            @else
+                                                <span class="text-slate-300 dark:text-slate-600">-</span>
+                                            @endif
+                                        </td>
+                                    @endforeach
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-4 py-4 text-center text-slate-400 text-[10px] italic">
-                                        {{ __('No detailed rates available for this category in :country.', ['country' => $country->name]) }}
+                                    <td colspan="{{ count($itemStyles) + 2 }}" class="px-6 py-12 text-center text-slate-500">
+                                        <div class="flex flex-col items-center gap-2">
+                                            <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <p class="text-xs font-bold uppercase tracking-widest">{{ __('No rates indexed for this selection.') }}</p>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-12 text-center text-slate-500">
-                                    {{ __('No rates indexed for this selection.') }}
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             @else
                 <table class="min-w-full divide-y divide-[#EBEBEB] dark:divide-slate-700">
                     <thead class="bg-[#EBEBEB] dark:bg-slate-900/50">
@@ -348,28 +347,40 @@
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="15" x="3" y="4" rx="2"/><path d="M7 11h10"/><path d="M7 15h10"/><path d="M12 4v1"/><path d="M9 19l-2 2"/><path d="M15 19l2 2"/></svg>
                                         @endif
                                     </div>
-                                    <h4 class="font-bold text-slate-800 dark:text-slate-200 uppercase text-sm">{{ ucfirst($type) }} {{ __('Freight') }}</h4>
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-slate-800 dark:text-slate-200 uppercase text-sm">{{ ucfirst($type) }} {{ __('Freight') }}</h4>
+                                        @php
+                                            $methodTime = match($type) {
+                                                'air' => $selectedCountry->shippingFee->air_arrival_time,
+                                                'sea' => $selectedCountry->shippingFee->sea_arrival_time,
+                                                'train' => $selectedCountry->shippingFee->train_arrival_time,
+                                                default => null
+                                            };
+                                        @endphp
+                                        <div class="mt-1">
+                                            <span class="text-[10px] font-black text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2 py-0.5 rounded">
+                                                {{ __('Estimated Arrival:') }} {{ $methodTime ?? '-' }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <table class="min-w-full divide-y divide-[#EBEBEB] dark:divide-slate-700">
                                     <thead class="bg-white dark:bg-slate-800">
                                         <tr>
-                                            <th class="px-4 py-2 text-left text-[10px] font-bold text-slate-500 uppercase">{{ __('Item Style') }}</th>
-                                            <th class="px-4 py-2 text-center text-[10px] font-bold text-slate-500 uppercase">16-49 KG</th>
-                                            <th class="px-4 py-2 text-center text-[10px] font-bold text-slate-500 uppercase">50-99 KG</th>
-                                            <th class="px-4 py-2 text-center text-[10px] font-bold text-slate-500 uppercase">100-499 KG</th>
-                                            <th class="px-4 py-2 text-center text-[10px] font-bold text-slate-500 uppercase">500+ KG</th>
-                                            <th class="px-4 py-2 text-center text-[10px] font-bold text-slate-500 uppercase">{{ __('Est. Days') }}</th>
+                                            <th class="px-4 py-3 text-left text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">{{ __('Item Style') }}</th>
+                                            <th class="px-4 py-3 text-center text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">{{ __('Price / ') }}{{ strtoupper($selectedCountry->shippingFee->unit ?? 'KG') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-[#EBEBEB] dark:divide-slate-700 bg-white dark:bg-slate-800">
                                         @foreach($items as $item)
-                                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                                                <td class="px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300">{{ $item->item_style }}</td>
-                                                <td class="px-4 py-2 text-center text-xs font-bold text-slate-900 dark:text-white">{{ $item->price_16_49 ? number_format($item->price_16_49, 2) : '-' }}</td>
-                                                <td class="px-4 py-2 text-center text-xs font-bold text-slate-900 dark:text-white">{{ $item->price_50_99 ? number_format($item->price_50_99, 2) : '-' }}</td>
-                                                <td class="px-4 py-2 text-center text-xs font-bold text-slate-900 dark:text-white">{{ $item->price_100_499 ? number_format($item->price_100_499, 2) : '-' }}</td>
-                                                <td class="px-4 py-2 text-center text-xs font-bold text-slate-900 dark:text-white">{{ $item->price_plus_500 ? number_format($item->price_plus_500, 2) : '-' }}</td>
-                                                <td class="px-4 py-2 text-center text-[10px] font-bold text-amber-600 dark:text-amber-400">{{ $item->estimation_days ?? '-' }}</td>
+                                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                                <td class="px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-300">{{ $item->item_style }}</td>
+                                                <td class="px-4 py-3 text-center">
+                                                    <div class="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
+                                                        <span class="text-[9px] font-bold text-slate-400">{{ $selectedCountry->shippingFee->currency ?? 'USD' }}</span>
+                                                        <span class="text-xs font-black text-slate-900 dark:text-white">{{ $item->price_per_kg ? number_format($item->price_per_kg, 2) : '-' }}</span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>

@@ -23,10 +23,10 @@ class StoreSourcingRequestRequest extends FormRequest
     {
         return [
             'product_name' => 'required|string|max:255',
-            'product_url' => 'required|url|max:255',
-            'product_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'product_url' => 'required|url', // Removed max:255
+            'product_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:12288', // Increased to 12MB
             'category_id' => 'required|exists:categories,id',
-            'note' => 'nullable|string',
+            'note' => 'required|string', // Changed to required
             'shipping_method' => 'required|in:air,sea',
             'sourcing_location' => 'required|in:china,dubai',
             'destinations' => 'required|array|min:1',

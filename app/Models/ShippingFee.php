@@ -2,18 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ShippingFee extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'country_id',
-        'sea_fee',
-        'train_fee',
-        'air_normal_fee',
-        'air_brand_fee',
-        'air_battery_fee',
-        'air_liquid_fee',
+        'air_arrival_time',
+        'sea_arrival_time',
+        'train_arrival_time',
         'currency',
         'unit',
     ];
