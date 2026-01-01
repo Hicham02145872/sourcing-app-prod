@@ -150,13 +150,15 @@
                         <!-- Additional Notes -->
                         <div>
                             <label for="note" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                {{ __('Any special requirements?') }}
+                                {{ __('Any special requirements?') }} <span class="text-red-500">*</span>
                             </label>
                             <textarea id="note" 
                                       rows="2" 
                                       class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] resize-none shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
                                       name="note" 
+                                      required
                                       placeholder="{{ __('Colors, sizes, materials, quality requirements...') }}">{{ old('note', $sourcingRequest->note) }}</textarea>
+                            <x-input-error :messages="$errors->get('note')" class="mt-2" />
                         </div>
                     </div>
                 </div>

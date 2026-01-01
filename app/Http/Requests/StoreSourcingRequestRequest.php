@@ -36,4 +36,16 @@ class StoreSourcingRequestRequest extends FormRequest
             'destinations.*.address' => 'required|string|max:255',
         ];
     }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'note.required' => __('Please provide special requirements or details for your request.'),
+        ];
+    }
 }

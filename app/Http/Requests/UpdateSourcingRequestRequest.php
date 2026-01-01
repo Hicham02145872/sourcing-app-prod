@@ -26,7 +26,7 @@ class UpdateSourcingRequestRequest extends FormRequest
             'product_url' => 'nullable|url|max:255',
             'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
             'category_id' => 'required|exists:categories,id',
-            'note' => 'nullable|string',
+            'note' => 'required|string',
             'phone_number' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
             'latitude' => 'nullable|numeric',
@@ -37,6 +37,18 @@ class UpdateSourcingRequestRequest extends FormRequest
             'destinations.*.country_id' => 'required|exists:countries,id',
             'destinations.*.service_id' => 'required|exists:services,id',
             'destinations.*.quantity' => 'required|integer|min:1',
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'note.required' => __('Please provide special requirements or details for your request.'),
         ];
     }
 }
