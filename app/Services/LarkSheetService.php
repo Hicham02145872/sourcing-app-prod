@@ -506,7 +506,8 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
         $address = $destination ? ($destination->address . ($destination->country ? ' (' . $destination->country->name . ')' : '')) : ($sr->address ?? 'N/A');
         
-        $imageUrl = $sr->product_image ? '=IMAGE("' . asset('storage/' . $sr->product_image) . '", 1)' : '';
+        $url = asset('storage/' . $sr->product_image);
+        $imageUrl = $sr->product_image ? '=HYPERLINK("' . $url . '", IMAGE("' . $url . '", 1))' : '';
 
         return [
             (string) ($order->id * 5), // display_id
