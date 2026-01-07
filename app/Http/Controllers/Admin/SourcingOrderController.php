@@ -436,6 +436,37 @@ class SourcingOrderController extends Controller
 
         return $pdf->download('sourcing_orders_'.date('Y-m-d_His').'.pdf');
     }
+    public function duplicateLast(): RedirectResponse
+    {
+        $this->authorize('viewAny', SourcingOrder::class);
+
+        $lastOrder = SourcingOrder::latest()->first();
+
+        if (!$lastOrder) {
+            return back()->with('error', 'No orders found to duplicate.');
+        }
+
+        // Duplicate the order
+        $newOrder = $lastOrder->replicate();
+        
+        // Reset some fields for a clean test order
+        $newOrder->status = 'paid'; // Set to paid so user can move it to shipment_preparing
+        $newOrder->tracking_number = null;
+        $newOrder->tracking_carrier = null;
+        $newOrder->proof_of_payment_path = $lastOrder->proof_of_payment_path; // Keep payment proof if it exists for realism
+        $newOrder->sheet_synced_at = null;
+        $newOrder->sheet_sync_error = null;
+        $newOrder->net_profit_or_loss = $lastOrder->net_profit_or_loss;
+
+        $newOrder->save();
+
+        Log::info("Order #{$lastOrder->id} duplicated to new Order #{$newOrder->id} for testing.", [
+            'admin_id' => auth()->id()
+        ]);
+
+        return redirect()->route('admin.sourcing-orders.index')->with('success', "Order duplicated successfully! New Order Internal ID: {$newOrder->id} (Display ID: {$newOrder->display_id})");
+    }
+
     public function destroy(SourcingOrder $sourcingOrder): RedirectResponse
     {
         $this->authorize('delete', $sourcingOrder);

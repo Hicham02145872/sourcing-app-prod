@@ -15,6 +15,10 @@ class ShippingCompany extends Model
         'google_sheet_id',
         'sheet_name',
         'is_active',
+        'lark_app_id',
+        'lark_app_secret',
+        'lark_base_token',
+        'lark_table_id',
     ];
 
     protected $casts = [

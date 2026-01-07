@@ -15,24 +15,47 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
-                    <th scope="col" class="py-3 px-6">{{ __('Name') }}</th>
-                    <th scope="col" class="py-3 px-6">{{ __('Google Sheet ID') }}</th>
-                    <th scope="col" class="py-3 px-6">{{ __('Sheet Name') }}</th>
+                    <th scope="col" class="py-3 px-6">{{ __('Company') }}</th>
+                    <th scope="col" class="py-3 px-6">{{ __('Platform') }}</th>
+                    <th scope="col" class="py-3 px-6">{{ __('Integration Detail') }}</th>
                     <th scope="col" class="py-3 px-6">{{ __('Status') }}</th>
                     <th scope="col" class="py-3 px-6 text-right">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody wire:loading.class="opacity-50 transition-opacity">
                 @forelse($companies as $company)
+                @php $type = $this->getIntegrationType($company); @endphp
                 <tr class="bg-white border-b hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-600">
-                    <td class="py-4 px-6 font-medium text-gray-900 dark:text-white">
-                        {{ $company->name }}
-                    </td>
-                    <td class="py-4 px-6 font-mono text-xs">
-                        {{ $company->google_sheet_id ?? '-' }}
+                    <td class="py-4 px-6">
+                        <div class="font-medium text-gray-900 dark:text-white">{{ $company->name }}</div>
                     </td>
                     <td class="py-4 px-6">
-                        {{ $company->sheet_name ?? 'sourcing' }}
+                        @if($type === 'lark')
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                                <span class="w-2 h-2 mr-1.5 bg-orange-500 rounded-full"></span>
+                                LarkSuite
+                            </span>
+                        @elseif($type === 'google')
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                <span class="w-2 h-2 mr-1.5 bg-blue-500 rounded-full"></span>
+                                Google Sheets
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                {{ __('None') }}
+                            </span>
+                        @endif
+                    </td>
+                    <td class="py-4 px-6 font-mono text-[10px] max-w-[200px] truncate">
+                        @if($type === 'lark')
+                            <span title="{{ $company->lark_base_token }}">ID: {{ Str::limit($company->lark_base_token, 15) }}</span>
+                            <div class="text-[9px] text-gray-400">{{ $company->lark_table_id ?: 'Sheet1' }}</div>
+                        @elseif($type === 'google')
+                            <span title="{{ $company->google_sheet_id }}">ID: {{ Str::limit($company->google_sheet_id, 15) }}</span>
+                            <div class="text-[9px] text-gray-400">{{ $company->sheet_name ?: 'sourcing' }}</div>
+                        @else
+                            -
+                        @endif
                     </td>
                     <td class="py-4 px-6">
                         <button wire:click="toggleActive({{ $company->id }})" 
@@ -40,32 +63,53 @@
                             {{ $company->is_active ? __('Active') : __('Inactive') }}
                         </button>
                     </td>
-                    <td class="py-4 px-6 text-right">
-                        @if($company->google_sheet_id)
-                        <button wire:click="installHeaders({{ $company->id }})" 
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg transition-all transform hover:scale-105 shadow-sm mr-2"
-                                title="{{ __('Install Headers in Google Sheet') }}">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                            </svg>
-                            {{ __('Headers') }}
-                        </button>
-                        @endif
-                        <button wire:click="openEditModal({{ $company->id }})"  
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-orange-600 text-white text-[11px] font-bold rounded-lg transition-all transform hover:scale-105 shadow-sm mr-2">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            {{ __('Edit') }}
-                        </button>
-                        <button wire:click="delete({{ $company->id }})" 
-                                wire:confirm="{{ __('Are you sure you want to delete this company?') }}"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold rounded-lg transition-all transform hover:scale-105 shadow-sm">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                            {{ __('Delete') }}
-                        </button>
+                    <td class="py-4 px-6 text-right whitespace-nowrap">
+                        <div class="flex justify-end gap-1">
+                            <button wire:click="testConnection({{ $company->id }})" 
+                                    class="p-1.5 bg-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white rounded-lg transition-all"
+                                    title="{{ __('Test Connection') }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                            </button>
+
+                            @if($type === 'google')
+                            <button wire:click="installHeaders({{ $company->id }})" 
+                                    class="p-1.5 bg-blue-100 text-blue-700 hover:bg-blue-600 hover:text-white rounded-lg transition-all"
+                                    title="{{ __('Install Headers') }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                </svg>
+                            </button>
+                            @endif
+
+                            @if($type === 'lark')
+                            <button wire:click="installLarkHeaders({{ $company->id }})" 
+                                    class="p-1.5 bg-orange-100 text-orange-700 hover:bg-orange-600 hover:text-white rounded-lg transition-all"
+                                    title="{{ __('Install Headers') }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                </svg>
+                            </button>
+                            @endif
+
+                            <button wire:click="openEditModal({{ $company->id }})"  
+                                    class="p-1.5 bg-gray-100 text-gray-700 hover:bg-slate-900 hover:text-white rounded-lg transition-all"
+                                    title="{{ __('Edit') }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                            
+                            <button wire:click="delete({{ $company->id }})" 
+                                    wire:confirm="{{ __('Are you sure you want to delete this company?') }}"
+                                    class="p-1.5 bg-red-100 text-red-700 hover:bg-red-600 hover:text-white rounded-lg transition-all"
+                                    title="{{ __('Delete') }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 @empty
@@ -158,23 +202,71 @@
                                 @error('name') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
                             </div>
 
-                            <!-- Google Sheet ID -->
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Google Sheet ID') }}</label>
-                                <input wire:model="google_sheet_id" type="text" 
-                                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg text-sm font-mono transition-all"
-                                       placeholder="{{ __('e.g., 1ABC...XYZ') }}">
-                                <p class="mt-1 text-xs text-slate-400">{{ __('Found in the URL: docs.google.com/spreadsheets/d/{SHEET_ID}/...') }}</p>
-                                @error('google_sheet_id') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                            <!-- Integration Type Switcher -->
+                            <div class="bg-slate-100 p-1 rounded-xl flex gap-1 mb-4">
+                                <button type="button" @click="$wire.set('activeIntegration', 'lark')" 
+                                        :class="$wire.activeIntegration === 'lark' ? 'bg-white shadow-sm text-orange-600' : 'text-slate-500 hover:text-slate-700'"
+                                        class="flex-1 py-2 text-xs font-bold rounded-lg transition-all uppercase tracking-wider">
+                                    LarkSuite
+                                </button>
+                                <button type="button" @click="$wire.set('activeIntegration', 'google')" 
+                                        :class="$wire.activeIntegration === 'google' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'"
+                                        class="flex-1 py-2 text-xs font-bold rounded-lg transition-all uppercase tracking-wider">
+                                    Google Sheets
+                                </button>
                             </div>
 
-                            <!-- Sheet Name -->
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Sheet Name (Tab)') }}</label>
-                                <input wire:model="sheet_name" type="text" 
-                                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg text-sm transition-all"
-                                       placeholder="sourcing">
-                                @error('sheet_name') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                            <div x-show="$wire.activeIntegration === 'google'" x-transition class="space-y-4">
+                                <!-- Google Sheet ID -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Google Sheet ID') }}</label>
+                                    <input wire:model="google_sheet_id" type="text" 
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg text-sm font-mono transition-all"
+                                           placeholder="{{ __('e.g., 1ABC...XYZ') }}">
+                                    <p class="mt-1 text-xs text-slate-400">{{ __('Found in the URL: docs.google.com/spreadsheets/d/{SHEET_ID}/...') }}</p>
+                                    @error('google_sheet_id') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                                </div>
+
+                                <!-- Sheet Name -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Sheet Name (Tab)') }}</label>
+                                    <input wire:model="sheet_name" type="text" 
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg text-sm transition-all"
+                                           placeholder="sourcing">
+                                    @error('sheet_name') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+
+                            <div x-show="$wire.activeIntegration === 'lark'" x-transition class="space-y-4">
+                                <!-- Lark App ID & Secret are now pre-filled and hidden -->
+
+                                <!-- Lark Base Token -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Lark Spreadsheet Token') }}</label>
+                                    <input wire:model="lark_base_token" type="text" 
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg text-sm font-mono transition-all"
+                                           placeholder="{{ __('e.g., shtcn... or QKhMw...') }}">
+                                    @error('lark_base_token') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                                </div>
+
+                                <!-- Lark Table ID -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Lark Sheet Title') }}</label>
+                                    <input wire:model="lark_table_id" type="text" 
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg text-sm transition-all"
+                                           placeholder="{{ __('e.g., Sheet1') }}">
+                                    @error('lark_table_id') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                                </div>
+
+                                <div class="mt-2 text-right">
+                                    <button type="button" wire:click="testLarkConnection"
+                                            class="text-xs text-orange-600 hover:text-orange-700 font-bold hover:underline inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                        </svg>
+                                        {{ __('Test Lark Connection') }}
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Active Toggle -->

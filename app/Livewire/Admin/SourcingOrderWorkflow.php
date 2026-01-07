@@ -6,6 +6,7 @@ use App\Events\SourcingOrderStatusChanged;
 use App\Models\ShippingCompany;
 use App\Models\SourcingOrder;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class SourcingOrderWorkflow extends Component

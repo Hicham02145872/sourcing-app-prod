@@ -13,7 +13,7 @@ use Google\Service\Sheets\ValueRange;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class GoogleSheetService
+class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
 {
     protected $client;
 
@@ -29,9 +29,9 @@ class GoogleSheetService
     {
         // Use provided values or fallback to global settings
         if ($spreadsheetId === null) {
-            $setting = GoogleSheetSetting::first();
+            $setting = \App\Models\GoogleSheetSetting::first();
             if (! $setting || ! $setting->sheet_id) {
-                Log::error('Google Sheet settings are not configured in the database.');
+                \Log::error('Google Sheet settings are not configured in the database.');
                 throw new \Exception('Google Sheet settings are not configured.');
             }
             $this->spreadsheetId = $setting->sheet_id;
@@ -41,20 +41,127 @@ class GoogleSheetService
             $this->sheetName = $sheetName ?? 'sourcing';
         }
 
-        $this->client = new Client;
+        $this->client = new \Google\Client();
         $this->client->setApplicationName('Sourcing App Google Sheets Integration');
-        $this->client->setScopes([Sheets::SPREADSHEETS]);
+        $this->client->setScopes([\Google\Service\Sheets::SPREADSHEETS]);
         $this->client->setAccessType('offline');
 
         $credentialsPath = storage_path(config('services.google.credentials_path'));
         if (! file_exists($credentialsPath)) {
-            Log::error('Google Sheets API credentials file not found at: '.$credentialsPath);
+            \Log::error('Google Sheets API credentials file not found at: '.$credentialsPath);
             throw new \Exception('Google Sheets API credentials file not found.');
         }
         $this->client->setAuthConfig($credentialsPath);
 
-        $this->sheetsService = new Sheets($this->client);
+        $this->sheetsService = new \Google\Service\Sheets($this->client);
         $this->sheetId = $this->getSheetIdByName($this->sheetName);
+    }
+
+    /**
+     * Test the connection to the integration.
+     */
+    public function testConnection(array $config): array
+    {
+        return self::staticTestConnection($config['google_sheet_id'] ?? null);
+    }
+
+    /**
+     * Sync a single order to the sheet.
+     */
+    public function syncOrder(\App\Models\SourcingOrder $order, \App\Models\ShippingCompany $company): bool
+    {
+        $this->spreadsheetId = $company->google_sheet_id;
+        $this->sheetName = $company->sheet_name ?: 'sourcing';
+        $this->sheetId = $this->getSheetIdByName($this->sheetName);
+
+        if (!$this->spreadsheetId) return false;
+
+        $data = $this->mapOrderToData($order);
+        try {
+            return $this->upsertRow($data, $order->id * 5, $order->id);
+        } catch (\Exception $e) {
+            \Log::error("Google Sheet Sync Failed for Order #{$order->id}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update the status of an existing order row.
+     */
+    public function updateOrderStatus(\App\Models\SourcingOrder $order, string $newStatus): bool
+    {
+        $company = $order->shippingCompany;
+        if (!$company || !$company->google_sheet_id) return false;
+
+        $this->spreadsheetId = $company->google_sheet_id;
+        $this->sheetName = $company->sheet_name ?: 'sourcing';
+        
+        try {
+            // Internal logic uses displayId for matching
+            return $this->originalUpdateOrderStatus($order->id * 5, $newStatus);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Batch Sync (To be implemented fully if needed).
+     */
+    public function batchSync(array $orders, \App\Models\ShippingCompany $company): array
+    {
+        $this->spreadsheetId = $company->google_sheet_id;
+        $this->sheetName = $company->sheet_name ?: 'sourcing';
+        
+        $allData = [];
+        foreach ($orders as $order) {
+            $allData[] = $this->mapOrderToData($order);
+        }
+
+        try {
+            $stats = $this->batchUpsertRows($allData);
+            return ['success' => true, 'synced' => ($stats['updated'] + $stats['appended'])];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Helper to map order to data array.
+     */
+    protected function mapOrderToData(\App\Models\SourcingOrder $order): array
+    {
+        return [
+            'id' => $order->id * 5,
+            'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+            'status' => $order->status,
+            'client_name' => $order->user->name,
+            'client_email' => $order->user->email,
+            'product_name' => $order->quotation->sourcingRequest->product_name ?? 'N/A',
+            'quantity' => $order->quotation->sourcingRequest->quantity ?? 0,
+            'total_amount' => $order->total_amount,
+            // ... add other fields as per AVAILABLE_FIELDS ...
+        ];
+    }
+
+    /**
+     * Ensure headers and formatting.
+     */
+    public function ensureHeaders(\App\Models\ShippingCompany $company): array
+    {
+        $this->spreadsheetId = $company->google_sheet_id;
+        $this->sheetName = $company->sheet_name ?: 'sourcing';
+        $this->sheetId = $this->getSheetIdByName($this->sheetName);
+
+        if (!$this->spreadsheetId || !$this->sheetId) {
+             return ['success' => false, 'message' => 'Config missing'];
+        }
+
+        return $this->runEnsureHeaders();
+    }
+
+    protected function runEnsureHeaders(): array
+    {
+        return $this->originalEnsureHeaders();
     }
 
     protected function getSheetIdByName(string $sheetName): ?int
@@ -128,7 +235,7 @@ class GoogleSheetService
         }
     }
 
-    public function ensureHeaders(): array
+    protected function originalEnsureHeaders(): array
     {
         if ($this->sheetId === null) {
             Log::error("Could not find sheet ID for sheet name: {$this->sheetName}. Cannot style headers.");
@@ -697,9 +804,9 @@ class GoogleSheetService
     }
 
     /**
-     * Update order status in Google Sheet.
+     * Internal logic: Update order status in Google Sheet.
      */
-    public function updateOrderStatus(int $orderId, string $newStatus)
+    protected function executeUpdateOrderStatus(int $orderId, string $newStatus)
     {
         try {
             $setting = GoogleSheetSetting::first();
@@ -777,18 +884,20 @@ class GoogleSheetService
      * Test the connection to Google Sheets API.
      * Returns an array with 'success', 'message', and optionally 'details'.
      */
-    public static function testConnection(): array
+    public static function staticTestConnection(?string $spreadsheetId = null): array
     {
         try {
-            $setting = GoogleSheetSetting::first();
-
-            // Check if settings exist
-            if (! $setting || ! $setting->sheet_id) {
-                return [
-                    'success' => false,
-                    'message' => 'Les paramètres Google Sheet ne sont pas configurés dans la base de données.',
-                    'details' => null,
-                ];
+            if ($spreadsheetId === null) {
+                $setting = GoogleSheetSetting::first();
+                // Check if settings exist
+                if (! $setting || ! $setting->sheet_id) {
+                    return [
+                        'success' => false,
+                        'message' => 'Les paramètres Google Sheet ne sont pas configurés dans la base de données.',
+                        'details' => null,
+                    ];
+                }
+                $spreadsheetId = $setting->sheet_id;
             }
 
             // Check if credentials file exists
@@ -811,7 +920,7 @@ class GoogleSheetService
             $sheetsService = new Sheets($client);
 
             // Try to get spreadsheet info
-            $spreadsheet = $sheetsService->spreadsheets->get($setting->sheet_id);
+            $spreadsheet = $sheetsService->spreadsheets->get($spreadsheetId);
             $title = $spreadsheet->getProperties()->getTitle();
 
             // Get sheet names
@@ -820,16 +929,18 @@ class GoogleSheetService
                 $sheetNames[] = $sheet->getProperties()->getTitle();
             }
 
-            // Check if the configured sheet name exists
-            $configuredSheetExists = in_array($setting->sheet_name, $sheetNames);
+            // Check if the configured sheet name exists (if using settings)
+            $setting = GoogleSheetSetting::first();
+            $configuredSheetName = $setting ? $setting->sheet_name : 'sourcing';
+            $configuredSheetExists = in_array($configuredSheetName, $sheetNames);
 
             return [
                 'success' => true,
                 'message' => 'Connexion réussie à Google Sheets !',
                 'details' => [
                     'spreadsheet_title' => $title,
-                    'spreadsheet_id' => $setting->sheet_id,
-                    'configured_sheet' => $setting->sheet_name,
+                    'spreadsheet_id' => $spreadsheetId,
+                    'configured_sheet' => $configuredSheetName,
                     'sheet_exists' => $configuredSheetExists,
                     'available_sheets' => $sheetNames,
                 ],

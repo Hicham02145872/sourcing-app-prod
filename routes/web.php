@@ -40,6 +40,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::resource('countries', CountryController::class);
     Route::resource('payment-methods', App\Http\Controllers\Admin\PaymentMethodController::class);
     Route::get('sourcing-orders/export-pdf', [App\Http\Controllers\Admin\SourcingOrderController::class, 'exportPdf'])->name('sourcing-orders.export-pdf');
+    Route::post('sourcing-orders/duplicate-last', [App\Http\Controllers\Admin\SourcingOrderController::class, 'duplicateLast'])->name('sourcing-orders.duplicate-last');
     Route::get('sourcing-orders', [App\Http\Controllers\Admin\SourcingOrderController::class, 'index'])->name('sourcing-orders.index');
     Route::get('sourcing-orders/{sourcingOrder}', [App\Http\Controllers\Admin\SourcingOrderController::class, 'show'])->name('sourcing-orders.show');
     Route::get('sourcing-orders/{sourcingOrder}/download-proof-of-payment', [App\Http\Controllers\Admin\SourcingOrderController::class, 'downloadProofOfPayment'])->name('sourcing-orders.download-proof-of-payment');
