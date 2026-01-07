@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\ShippingCompany;
 use App\Models\SourcingOrder;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
@@ -33,12 +33,12 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
         $token = $this->getAccessToken($appId, $appSecret);
 
-        if (!$token) {
+        if (! $token) {
             return ['success' => false, 'message' => 'Authentication failed.'];
         }
 
         $realToken = $this->resolveRealToken($baseToken, $token);
-        
+
         $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$realToken}/metainfo";
         $response = Http::withToken($token)->get($url);
 
@@ -55,16 +55,20 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
     public function ensureHeaders(ShippingCompany $company): array
     {
         $token = $this->getAccessToken($company->lark_app_id, $company->lark_app_secret);
-        if (!$token) return ['success' => false, 'message' => 'Auth failed'];
+        if (! $token) {
+            return ['success' => false, 'message' => 'Auth failed'];
+        }
 
         $realToken = $this->resolveRealToken($company->lark_base_token, $token);
         $targetSheetTitle = $company->lark_table_id ?: 'Sheet1';
         $sheetId = $this->resolveSheetId($realToken, $token, $targetSheetTitle);
 
-        if (!$sheetId) return ['success' => false, 'message' => 'Sheet not found'];
+        if (! $sheetId) {
+            return ['success' => false, 'message' => 'Sheet not found'];
+        }
 
         $this->checkAndInstallHeaders($sheetId, $realToken, $token);
-        
+
         // Add Advanced V2 Features
         $this->addStatusDataValidation($realToken, $token, $sheetId);
         $this->addStatusConditionalFormatting($realToken, $token, $sheetId);
@@ -80,7 +84,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
     {
         // Status is at index 2 (Column C)
         $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/values_dropdown";
-        
+
         $payload = [
             'range' => "{$sheetId}!C2:C1000",
             'dropdown' => [
@@ -98,12 +102,14 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
     protected function addStatusConditionalFormatting(string $spreadsheetToken, string $accessToken, string $sheetId): void
     {
         $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/condition_formats";
-        
+
         // We need to fetch existing if we want to be clean, but for now we just overwrite/append
         $formats = [];
         foreach (self::STATUS_COLORS as $status => $color) {
-            if ($status === 'DEFAULT') continue;
-            
+            if ($status === 'DEFAULT') {
+                continue;
+            }
+
             $formats[] = [
                 'ranges' => ["{$sheetId}!C2:C1000"],
                 'rule_type' => 'containsText',
@@ -115,14 +121,14 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
             ];
         }
 
-        $payload = ['sheet_condition_formats' => [['sheet_id' => $sheetId, 'condition_format' => $formats[0]]]]; 
+        $payload = ['sheet_condition_formats' => [['sheet_id' => $sheetId, 'condition_format' => $formats[0]]]];
         // Lark API for multiple conditional formats is usually one by one or a batch update if supported.
         // Actually the documentation says we can send an array.
-        
+
         foreach ($formats as $format) {
             Http::withToken($accessToken)->post($url, [
                 'sheet_id' => $sheetId,
-                'condition_format' => $format
+                'condition_format' => $format,
             ]);
         }
     }
@@ -133,7 +139,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
     protected function styleHeaders(string $spreadsheetToken, string $accessToken, string $sheetId): void
     {
         $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/styles";
-        
+
         $payload = [
             'range' => "{$sheetId}!A1:K1",
             'style' => [
@@ -157,10 +163,14 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
     public function updateOrderStatus(SourcingOrder $order, string $newStatus): bool
     {
         $company = $order->shippingCompany;
-        if (!$company) return false;
+        if (! $company) {
+            return false;
+        }
 
         $token = $this->getAccessToken($company->lark_app_id, $company->lark_app_secret);
-        if (!$token) return false;
+        if (! $token) {
+            return false;
+        }
 
         $realToken = $this->resolveRealToken($company->lark_base_token, $token);
         $targetSheetTitle = $company->lark_table_id ?: 'Sheet1';
@@ -168,15 +178,15 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
         // Find the row. We use Order ID (Column A)
         // Order ID in sheet is (int) ($order->id * 5)
-        $displayId = (string)($order->id * 5);
-        
-        $urlFetch = "{$this->baseUrl}/sheets/v2/spreadsheets/{$realToken}/values/" . urlencode("{$sheetId}!A:A");
+        $displayId = (string) ($order->id * 5);
+
+        $urlFetch = "{$this->baseUrl}/sheets/v2/spreadsheets/{$realToken}/values/".urlencode("{$sheetId}!A:A");
         $response = Http::withToken($token)->get($urlFetch);
-        
+
         if ($response->successful()) {
             $values = $response->json()['data']['valueRange']['values'] ?? [];
             foreach ($values as $index => $row) {
-                if (isset($row[0]) && (string)$row[0] === $displayId) {
+                if (isset($row[0]) && (string) $row[0] === $displayId) {
                     $rowIndex = $index + 1;
                     $urlUpdate = "{$this->baseUrl}/sheets/v2/spreadsheets/{$realToken}/values";
                     $payload = [
@@ -186,6 +196,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
                         ],
                     ];
                     Http::withToken($token)->put($urlUpdate, $payload);
+
                     return true;
                 }
             }
@@ -200,7 +211,9 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
     public function batchSync(array $orders, ShippingCompany $company): array
     {
         $token = $this->getAccessToken($company->lark_app_id, $company->lark_app_secret);
-        if (!$token) return ['success' => false, 'message' => 'Auth failed'];
+        if (! $token) {
+            return ['success' => false, 'message' => 'Auth failed'];
+        }
 
         $realToken = $this->resolveRealToken($company->lark_base_token, $token);
         $targetSheetTitle = $company->lark_table_id ?: 'Sheet1';
@@ -210,7 +223,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         foreach ($orders as $order) {
             $order->load(['user', 'quotation.sourcingRequest.destinations.country']);
             $destinations = $order->quotation->sourcingRequest->destinations;
-            
+
             if ($destinations->isEmpty()) {
                 $rows[] = $this->mapOrderToRow($order, null);
             } else {
@@ -223,13 +236,13 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$realToken}/values_append";
         $payload = [
             'valueRange' => [
-                'range' => $sheetId, 
-                'values' => $rows, 
+                'range' => $sheetId,
+                'values' => $rows,
             ],
         ];
 
         $response = Http::withToken($token)->post($url, $payload);
-        
+
         if ($response->successful()) {
             return ['success' => true, 'synced' => count($rows)];
         }
@@ -252,7 +265,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
                 return $matches[1];
             }
             if (preg_match('/(wik[a-zA-Z0-9]{15,})/', $tokenOrUrl, $matches)) {
-                $tokenOrUrl = $matches[1]; 
+                $tokenOrUrl = $matches[1];
             }
         }
 
@@ -266,7 +279,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
         // GET /open-apis/wiki/v2/spaces/get_node?token={token}
         $url = "{$this->baseUrl}/wiki/v2/spaces/get_node?token={$tokenOrUrl}";
-        
+
         $response = Http::withToken($accessToken)->get($url);
 
         if ($response->successful()) {
@@ -274,11 +287,12 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
             if (isset($data['code']) && $data['code'] === 0 && isset($data['data']['node']['obj_type']) && $data['data']['node']['obj_type'] === 'sheet') {
                 $sheetToken = $data['data']['node']['obj_token'];
                 Log::info("Resolved Wiki token {$tokenOrUrl} to Sheet token {$sheetToken}");
+
                 return $sheetToken;
             }
-            Log::warning("Wiki resolution success but content not a sheet or error: " . json_encode($data));
+            Log::warning('Wiki resolution success but content not a sheet or error: '.json_encode($data));
         } else {
-             Log::warning("Wiki resolution failed HTTP status: " . $response->status() . " Body: " . $response->body());
+            Log::warning('Wiki resolution failed HTTP status: '.$response->status().' Body: '.$response->body());
         }
 
         // Fallback: return the original string, maybe it's a raw token we didn't recognize pattern for
@@ -300,10 +314,12 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return $data['tenant_access_token'] ?? null;
             }
 
-            Log::error("Failed to get Lark access token: " . $response->body());
+            Log::error('Failed to get Lark access token: '.$response->body());
+
             return null;
         });
     }
@@ -313,27 +329,30 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
      */
     public function syncOrder(SourcingOrder $order, ShippingCompany $company): bool
     {
-        if (!$company->lark_app_id || !$company->lark_app_secret || !$company->lark_base_token) {
+        if (! $company->lark_app_id || ! $company->lark_app_secret || ! $company->lark_base_token) {
             Log::warning("Lark configuration missing for shipping company: {$company->name}");
+
             return false;
         }
 
         $token = $this->getAccessToken($company->lark_app_id, $company->lark_app_secret);
 
-        if (!$token) {
+        if (! $token) {
             Log::error("Could not obtain Lark access token for company: {$company->name}");
+
             return false;
         }
 
         $realToken = $this->resolveRealToken($company->lark_base_token, $token);
-        
+
         // Resolve the actual Sheet ID because Lark V2 requires sheetId (e.g. "19557a") not title ("Sheet1")
         $targetSheetTitle = $company->lark_table_id ?: 'Sheet1';
         $sheetId = $this->resolveSheetId($realToken, $token, $targetSheetTitle);
 
-        if (!$sheetId) {
+        if (! $sheetId) {
             Log::error("Could not find sheet with title '{$targetSheetTitle}' for company {$company->name}");
-             return false;
+
+            return false;
         }
 
         // Auto-install headers if missing
@@ -358,25 +377,25 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
         $payload = [
             'valueRange' => [
-                'range' => $sheetId, 
-                'values' => $rows, 
+                'range' => $sheetId,
+                'values' => $rows,
             ],
         ];
 
-        Log::info("Syncing Order #{$order->id} to Lark (Multiple rows: " . count($rows) . "). Range used (SheetID): {$sheetId}.");
+        Log::info("Syncing Order #{$order->id} to Lark (Multiple rows: ".count($rows)."). Range used (SheetID): {$sheetId}.");
 
         $response = Http::withToken($token)->post($url, $payload);
         $responseData = $response->json();
 
         if ($response->successful() && isset($responseData['code']) && $responseData['code'] === 0) {
             Log::info("Successfully synced order #{$order->id} to Lark Sheet.");
-            
+
             // Adjust row height for the newly added rows to make images visible
             if (isset($responseData['data']['updates']['updatedRange'])) {
                 $range = $responseData['data']['updates']['updatedRange']; // e.g., "sheetId!A2:K2"
                 if (preg_match('/!([A-Z]+)(\d+):([A-Z]+)(\d+)/', $range, $matches)) {
-                    $startRow = (int)$matches[2] - 1; // 0-indexed
-                    $endRow = (int)$matches[4]; // exclusive
+                    $startRow = (int) $matches[2] - 1; // 0-indexed
+                    $endRow = (int) $matches[4]; // exclusive
                     $this->updateDimension($realToken, $token, $sheetId, 'ROWS', $startRow, $endRow, 140);
                 }
             }
@@ -384,7 +403,8 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
             return true;
         }
 
-        Log::error("Failed to sync order #{$order->id} to Lark Sheet. Response: " . $response->body());
+        Log::error("Failed to sync order #{$order->id} to Lark Sheet. Response: ".$response->body());
+
         return false;
     }
 
@@ -396,7 +416,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
     {
         $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/metainfo";
         $response = Http::withToken($accessToken)->get($url);
-        
+
         if ($response->successful()) {
             $data = $response->json();
             if (isset($data['code']) && $data['code'] === 0 && isset($data['data']['sheets'])) {
@@ -405,11 +425,12 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
                         return $sheet['sheetId'];
                     }
                 }
-                if (!empty($data['data']['sheets'])) {
+                if (! empty($data['data']['sheets'])) {
                     return $data['data']['sheets'][0]['sheetId'];
                 }
             }
         }
+
         return null;
     }
 
@@ -418,7 +439,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
      */
     protected function checkAndInstallHeaders(string $sheetId, string $spreadsheetToken, string $accessToken): void
     {
-        $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/values/" . urlencode("{$sheetId}!A1:Z1");
+        $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/values/".urlencode("{$sheetId}!A1:Z1");
         $response = Http::withToken($accessToken)->get($url);
 
         $isEmpty = true;
@@ -426,7 +447,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
             $data = $response->json();
             if (isset($data['code']) && $data['code'] === 0) {
                 $values = $data['data']['valueRange']['values'] ?? [];
-                if (!empty($values) && isset($values[0])) {
+                if (! empty($values) && isset($values[0])) {
                     // Check if the first row actually has any non-null, non-empty content
                     foreach ($values[0] as $cell) {
                         if ($cell !== null && $cell !== '') {
@@ -440,12 +461,12 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
         if ($isEmpty) {
             Log::info("Sheet {$sheetId} is empty. Installing headers using values_update (A1).");
-            
+
             $headers = ['Order ID', 'Date', 'Status', 'Client Name', 'Product Name', 'Quantity', 'Tracking Number', 'Address', 'Phone', 'Image URL', 'Notes'];
 
             // Use values_update to force headers at A1:K1
             $urlUpdate = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/values";
-            
+
             $payload = [
                 'valueRange' => [
                     'range' => "{$sheetId}!A1:K1",
@@ -454,9 +475,9 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
             ];
 
             $postResponse = Http::withToken($accessToken)->put($urlUpdate, $payload);
-            
-            if (!$postResponse->successful() || ($postResponse->json()['code'] ?? -1) !== 0) {
-                Log::error("Failed to install headers. Response: " . $postResponse->body());
+
+            if (! $postResponse->successful() || ($postResponse->json()['code'] ?? -1) !== 0) {
+                Log::error('Failed to install headers. Response: '.$postResponse->body());
             }
         }
 
@@ -488,8 +509,9 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
         $response = Http::withToken($accessToken)->put($url, $payload);
 
-        if (!$response->successful() || ($response->json()['code'] ?? -1) !== 0) {
-            Log::error("Failed to update dimension ({$majorDimension}) for sheet {$sheetId}. Status: " . $response->status() . " Body: " . $response->body());
+        if (! $response->successful() || ($response->json()['code'] ?? -1) !== 0) {
+            Log::error("Failed to update dimension ({$majorDimension}) for sheet {$sheetId}. Status: ".$response->status().' Body: '.$response->body());
+
             return false;
         }
 
@@ -502,12 +524,11 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
     protected function mapOrderToRow(SourcingOrder $order, ?\App\Models\SourcingRequestDestination $destination): array
     {
         $sr = $order->quotation->sourcingRequest;
-        
+
         $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
-        $address = $destination ? ($destination->address . ($destination->country ? ' (' . $destination->country->name . ')' : '')) : ($sr->address ?? 'N/A');
-        
-        $url = asset('storage/' . $sr->product_image);
-        $imageUrl = $sr->product_image ? '=HYPERLINK("' . $url . '", IMAGE("' . $url . '", 1))' : '';
+        $address = $destination ? ($destination->address.($destination->country ? ' ('.$destination->country->name.')' : '')) : ($sr->address ?? 'N/A');
+
+        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 1)' : '';
 
         return [
             (string) ($order->id * 5), // display_id
