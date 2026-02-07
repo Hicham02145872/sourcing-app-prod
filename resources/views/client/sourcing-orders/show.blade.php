@@ -77,20 +77,9 @@
                     
                     {{-- Expédition & Suivi --}}
                     <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden mb-6 relative group">
-                        <!-- Coming Soon Overlay -->
-                        <div class="absolute inset-0 z-10 flex items-center justify-center p-6 bg-white/10 dark:bg-slate-900/10 backdrop-blur-[2px]">
-                            <div class="bg-slate-900/90 text-white px-6 py-3 rounded-xl shadow-2xl flex flex-col items-center gap-2 transform group-hover:scale-105 transition-transform duration-300 border border-white/20">
-                                <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-400">{{ __('Feature Development') }}</span>
-                                <div class="flex items-center gap-3">
-                                    <h4 class="text-xl font-black uppercase italic tracking-tighter">{{ __('Tracking') }}</h4>
-                                    <span class="h-6 w-px bg-white/20"></span>
-                                    <span class="text-lg font-light text-slate-300 italic">{{ __('Soon') }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Content (Blurred) -->
-                        <div class="filter blur-[4px] opacity-40 select-none pointer-events-none">
+                        
+                        <!-- Content -->
+                        <div>
                             <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700 flex justify-between items-center">
                                 <div class="flex items-center gap-3">
                                      <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -101,29 +90,33 @@
                                         <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Track your shipment status') }}</p>
                                     </div>
                                 </div>
+                                @if($sourcingOrder->tracking_number)
+                                    <div class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-mono font-bold text-slate-500 uppercase tracking-tighter">
+                                        ID: FSB{{ str_pad($sourcingOrder->id, 6, '0', STR_PAD_LEFT) }}
+                                    </div>
+                                @endif
                             </div>
                             <div class="p-6">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
                                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Numéro de suivi') }}</p>
-                                        <p class="text-sm italic text-slate-400">Ex: ME49508327</p>
+                                        <p class="text-sm font-mono font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->tracking_number ? $sourcingOrder->fsb_tracking_number : __('En attente...') }}</p>
                                     </div>
                                      <div>
                                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Transporteur') }}</p>
-                                        <p class="text-sm italic text-slate-400">Ex: Faster.ae, DHL...</p>
+                                        <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->tracking_carrier ?: ($sourcingOrder->shippingCompany?->name ?? __('Non assigné')) }}</p>
                                     </div>
                                 </div>
 
+                                @if($sourcingOrder->tracking_number)
                                 <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
-                                    <div class="w-full sm:w-auto px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 text-sm font-bold rounded-lg flex items-center justify-center gap-2">
+                                    <a href="{{ route('client.tracking.index', ['number' => 'FSB' . str_pad($sourcingOrder->id, 6, '0', STR_PAD_LEFT)]) }}" 
+                                       class="w-full sm:w-auto px-6 py-2.5 bg-[#EF7722] hover:bg-[#d66616] text-white text-sm font-bold rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" /></svg>
-                                        {{ __('Deep Tracking') }}
-                                    </div>
-                                    
-                                    <div class="w-full sm:w-auto px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 text-sm font-bold rounded-lg flex items-center justify-center gap-2">
-                                        {{ __('Enregistrer le suivi') }}
-                                    </div>
+                                        {{ __('Suivre mon colis') }}
+                                    </a>
                                 </div>
+                                @endif
                             </div>
                         </div>
                     </div>
