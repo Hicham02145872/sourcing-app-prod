@@ -14,8 +14,8 @@ class SeventeenTrackService implements TrackingServiceInterface
 
     public function __construct()
     {
-        $this->apiKey = config('services.17track.api_key');
-        $this->baseUrl = config('services.17track.base_url');
+        $this->apiKey = config('services.17track.api_key', '');
+        $this->baseUrl = config('services.17track.base_url', 'https://api.17track.net/track/v2.2');
     }
 
     /**
