@@ -41,7 +41,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
             $this->sheetName = $sheetName ?? 'sourcing';
         }
 
-        $this->client = new \Google\Client();
+        $this->client = new \Google\Client;
         $this->client->setApplicationName('Sourcing App Google Sheets Integration');
         $this->client->setScopes([\Google\Service\Sheets::SPREADSHEETS]);
         $this->client->setAccessType('offline');
@@ -74,13 +74,16 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         $this->sheetName = $company->sheet_name ?: 'sourcing';
         $this->sheetId = $this->getSheetIdByName($this->sheetName);
 
-        if (!$this->spreadsheetId) return false;
+        if (! $this->spreadsheetId) {
+            return false;
+        }
 
         $data = $this->mapOrderToData($order);
         try {
             return $this->upsertRow($data, $order->id * 5, $order->id);
         } catch (\Exception $e) {
-            \Log::error("Google Sheet Sync Failed for Order #{$order->id}: " . $e->getMessage());
+            \Log::error("Google Sheet Sync Failed for Order #{$order->id}: ".$e->getMessage());
+
             return false;
         }
     }
@@ -91,11 +94,13 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
     public function updateOrderStatus(\App\Models\SourcingOrder $order, string $newStatus): bool
     {
         $company = $order->shippingCompany;
-        if (!$company || !$company->google_sheet_id) return false;
+        if (! $company || ! $company->google_sheet_id) {
+            return false;
+        }
 
         $this->spreadsheetId = $company->google_sheet_id;
         $this->sheetName = $company->sheet_name ?: 'sourcing';
-        
+
         try {
             // Internal logic uses displayId for matching
             return $this->originalUpdateOrderStatus($order->id * 5, $newStatus);
@@ -111,7 +116,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
     {
         $this->spreadsheetId = $company->google_sheet_id;
         $this->sheetName = $company->sheet_name ?: 'sourcing';
-        
+
         $allData = [];
         foreach ($orders as $order) {
             $allData[] = $this->mapOrderToData($order);
@@ -119,6 +124,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
 
         try {
             $stats = $this->batchUpsertRows($allData);
+
             return ['success' => true, 'synced' => ($stats['updated'] + $stats['appended'])];
         } catch (\Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
@@ -152,8 +158,8 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         $this->sheetName = $company->sheet_name ?: 'sourcing';
         $this->sheetId = $this->getSheetIdByName($this->sheetName);
 
-        if (!$this->spreadsheetId || !$this->sheetId) {
-             return ['success' => false, 'message' => 'Config missing'];
+        if (! $this->spreadsheetId || ! $this->sheetId) {
+            return ['success' => false, 'message' => 'Config missing'];
         }
 
         return $this->runEnsureHeaders();
@@ -649,7 +655,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
 
                 Log::info("Order #{$sheetDisplayId} (Internal #{$internalId}) updated in Google Sheet at row {$rowIndex}.");
                 if ($internalId) {
-                     GoogleSheetSyncLog::logSuccess($internalId, $data);
+                    GoogleSheetSyncLog::logSuccess($internalId, $data);
                 }
 
                 return true;

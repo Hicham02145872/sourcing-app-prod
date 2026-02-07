@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Country;
+use Illuminate\Database\Seeder;
 
 class IsoCountrySeeder extends Seeder
 {
@@ -147,7 +146,7 @@ class IsoCountrySeeder extends Seeder
             ['name' => 'Oman', 'code' => 'OM'],
             ['name' => 'Pakistan', 'code' => 'PK'],
             ['name' => 'Palau', 'code' => 'PW'],
-            ['name' => "Palestine, State of", 'code' => 'PS'],
+            ['name' => 'Palestine, State of', 'code' => 'PS'],
             ['name' => 'Panama', 'code' => 'PA'],
             ['name' => 'Papua New Guinea', 'code' => 'PG'],
             ['name' => 'Paraguay', 'code' => 'PY'],
@@ -164,7 +163,7 @@ class IsoCountrySeeder extends Seeder
             ['name' => 'Saint Vincent and the Grenadines', 'code' => 'VC'],
             ['name' => 'Samoa', 'code' => 'WS'],
             ['name' => 'San Marino', 'code' => 'SM'],
-            ['name' => "Sao Tome and Principe", 'code' => 'ST'],
+            ['name' => 'Sao Tome and Principe', 'code' => 'ST'],
             ['name' => 'Saudi Arabia', 'code' => 'SA'],
             ['name' => 'Senegal', 'code' => 'SN'],
             ['name' => 'Serbia', 'code' => 'RS'],
@@ -186,9 +185,9 @@ class IsoCountrySeeder extends Seeder
             ['name' => 'Syrian Arab Republic', 'code' => 'SY'],
             ['name' => 'Taiwan', 'code' => 'TW'],
             ['name' => 'Tajikistan', 'code' => 'TJ'],
-            ['name' => "Tanzania, United Republic of", 'code' => 'TZ'],
+            ['name' => 'Tanzania, United Republic of', 'code' => 'TZ'],
             ['name' => 'Thailand', 'code' => 'TH'],
-            ['name' => "Timor-Leste", 'code' => 'TL'],
+            ['name' => 'Timor-Leste', 'code' => 'TL'],
             ['name' => 'Togo', 'code' => 'TG'],
             ['name' => 'Tonga', 'code' => 'TO'],
             ['name' => 'Trinidad and Tobago', 'code' => 'TT'],

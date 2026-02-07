@@ -8,35 +8,38 @@ use Google\Service\Sheets;
 use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
 use Google\Service\Sheets\Request;
 use Google\Service\Sheets\ValueRange;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class ShippingCompanySheetService
 {
     protected $client;
+
     protected $sheetsService;
+
     protected $company;
-    
+
     // Configuration constants
     const IMAGE_COLUMN_INDEX = 9; // J column (0-indexed)
+
     const ROW_HEIGHT = 100;
+
     const IMAGE_COLUMN_WIDTH = 100;
 
     public function __construct(ShippingCompany $company)
     {
         $this->company = $company;
 
-        if (!$this->company->google_sheet_id) {
+        if (! $this->company->google_sheet_id) {
             throw new \Exception('Shipping company does not have a Google Sheet ID configured.');
         }
 
-        $this->client = new Client();
+        $this->client = new Client;
         $this->client->setApplicationName('Sourcing App - Shipping Company Integration');
         $this->client->setScopes([Sheets::SPREADSHEETS]);
         $this->client->setAccessType('offline');
 
         $credentialsPath = storage_path(config('services.google.credentials_path'));
-        if (!file_exists($credentialsPath)) {
+        if (! file_exists($credentialsPath)) {
             throw new \Exception('Google Sheets API credentials file not found.');
         }
         $this->client->setAuthConfig($credentialsPath);
@@ -48,22 +51,22 @@ class ShippingCompanySheetService
     {
         try {
             $sheetName = $this->company->sheet_name ?? 'Sheet1';
-            
+
             // Check if headers exist
-            $range = $sheetName . '!A1:Z1';
+            $range = $sheetName.'!A1:Z1';
             $response = $this->sheetsService->spreadsheets_values->get($this->company->google_sheet_id, $range);
             $values = $response->getValues();
 
             if (empty($values)) {
                 $headers = array_values(self::AVAILABLE_FIELDS);
-                
+
                 // Write headers
                 $body = new ValueRange(['values' => [$headers]]);
                 $params = ['valueInputOption' => 'RAW'];
                 $this->sheetsService->spreadsheets_values->update(
-                    $this->company->google_sheet_id, 
-                    $range, 
-                    $body, 
+                    $this->company->google_sheet_id,
+                    $range,
+                    $body,
                     $params
                 );
 
@@ -79,7 +82,8 @@ class ShippingCompanySheetService
             return ['success' => true, 'message' => 'Headers already exist.'];
 
         } catch (\Exception $e) {
-            Log::error('Failed to ensure headers for shipping company: ' . $e->getMessage());
+            Log::error('Failed to ensure headers for shipping company: '.$e->getMessage());
+
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
@@ -128,24 +132,24 @@ class ShippingCompanySheetService
     {
         $sheetName = $this->company->sheet_name ?? 'Sheet1';
         $syncedFields = array_keys(self::AVAILABLE_FIELDS);
-        
+
         // Find ID column index
         $idIndex = array_search('id', $syncedFields);
         $idColumn = $this->indexToLetter($idIndex + 1);
 
         // Fetch existing IDs
-        $range = $sheetName . "!{$idColumn}:{$idColumn}";
+        $range = $sheetName."!{$idColumn}:{$idColumn}";
         try {
             $response = $this->sheetsService->spreadsheets_values->get($this->company->google_sheet_id, $range);
             $values = $response->getValues();
         } catch (\Google\Service\Exception $e) {
-            throw new \Exception("Google API Error reading sheet: " . $e->getMessage());
+            throw new \Exception('Google API Error reading sheet: '.$e->getMessage());
         }
 
         $rowIndex = -1;
-        if (!empty($values)) {
+        if (! empty($values)) {
             foreach ($values as $index => $row) {
-                if (isset($row[0]) && trim((string)$row[0]) === trim((string)$dto->id)) {
+                if (isset($row[0]) && trim((string) $row[0]) === trim((string) $dto->id)) {
                     $rowIndex = $index + 1;
                     break;
                 }
@@ -159,7 +163,7 @@ class ShippingCompanySheetService
 
         if ($rowIndex !== -1) {
             // Update
-            $updateRange = $sheetName . "!A{$rowIndex}";
+            $updateRange = $sheetName."!A{$rowIndex}";
             $body = new ValueRange(['values' => [$rowValues]]);
             $this->sheetsService->spreadsheets_values->update(
                 $this->company->google_sheet_id,
@@ -169,7 +173,7 @@ class ShippingCompanySheetService
             );
         } else {
             // Append
-            $appendRange = $sheetName . "!A:ZZ";
+            $appendRange = $sheetName.'!A:ZZ';
             $body = new ValueRange(['values' => [$rowValues]]);
             $response = $this->sheetsService->spreadsheets_values->append(
                 $this->company->google_sheet_id,
@@ -177,7 +181,7 @@ class ShippingCompanySheetService
                 $body,
                 ['valueInputOption' => 'USER_ENTERED']
             );
-            
+
             // Extract new row index from update range like "Sheet1!A10:Z10"
             $updatedRange = $response->getUpdates()->getUpdatedRange();
             if (preg_match('/!A(\d+):/', $updatedRange, $matches)) {
@@ -194,8 +198,10 @@ class ShippingCompanySheetService
     {
         $sheetName = $this->company->sheet_name ?? 'Sheet1';
         $sheetId = $this->getSheetIdByName($sheetName);
-        
-        if ($sheetId === null) return;
+
+        if ($sheetId === null) {
+            return;
+        }
 
         $requests = [];
 
@@ -217,9 +223,9 @@ class ShippingCompanySheetService
 
         // 2. Resize Image Column (One time check usually, but ensuring it here doesn't hurt or we can move it)
         // Optimally we only do this once during header setup, but let's leave it for now to ensure robustness
-        
+
         // 3. Apply Cancellation Style (Strikethrough + Red Background) or Reset
-        $backgroundColor = $isCanceled 
+        $backgroundColor = $isCanceled
             ? ['red' => 1.0, 'green' => 0.8, 'blue' => 0.8] // Light Red
             : ['red' => 1, 'green' => 1, 'blue' => 1]; // White
 
@@ -258,6 +264,7 @@ class ShippingCompanySheetService
                 return $sheet->getProperties()->getSheetId();
             }
         }
+
         return null;
     }
 
@@ -266,9 +273,10 @@ class ShippingCompanySheetService
         $letter = '';
         while ($index > 0) {
             $temp = ($index - 1) % 26;
-            $letter = chr(65 + $temp) . $letter;
+            $letter = chr(65 + $temp).$letter;
             $index = ($index - $temp - 1) / 26;
         }
+
         return $letter;
     }
 

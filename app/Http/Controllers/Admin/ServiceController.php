@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class ServiceController extends Controller
 {
@@ -18,7 +18,7 @@ class ServiceController extends Controller
         $query = Service::query();
 
         if ($search = $request->query('search')) {
-            $query->where('name', 'like', '%' . $search . '%');
+            $query->where('name', 'like', '%'.$search.'%');
         }
 
         $services = $query->orderBy('created_at', 'desc')->paginate(10);
@@ -62,7 +62,7 @@ class ServiceController extends Controller
     public function update(Request $request, Service $service): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:services,name,' . $service->id,
+            'name' => 'required|string|max:255|unique:services,name,'.$service->id,
         ]);
 
         $service->update($request->all());

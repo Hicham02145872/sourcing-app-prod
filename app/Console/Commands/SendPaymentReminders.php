@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\SourcingOrder;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\PaymentReminderMail;
+use App\Models\SourcingOrder;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
 
 class SendPaymentReminders extends Command
 {
@@ -40,17 +40,18 @@ class SendPaymentReminders extends Command
 
         if ($pendingOrders->isEmpty()) {
             $this->info('No orders require a payment reminder.');
+
             return;
         }
 
-        $this->info($pendingOrders->count() . ' order(s) found. Sending reminders...');
+        $this->info($pendingOrders->count().' order(s) found. Sending reminders...');
 
         foreach ($pendingOrders as $order) {
             try {
                 Mail::to($order->user->email)->send(new PaymentReminderMail($order));
-                $this->info('Reminder sent for order #' . $order->id . ' to ' . $order->user->email);
+                $this->info('Reminder sent for order #'.$order->id.' to '.$order->user->email);
             } catch (\Exception $e) {
-                $this->error('Failed to send reminder for order #' . $order->id . '. Error: ' . $e->getMessage());
+                $this->error('Failed to send reminder for order #'.$order->id.'. Error: '.$e->getMessage());
             }
         }
 

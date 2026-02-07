@@ -17,6 +17,7 @@
                 <tr>
                     <th scope="col" class="py-3 px-6">{{ __('Company') }}</th>
                     <th scope="col" class="py-3 px-6">{{ __('Platform') }}</th>
+                    <th scope="col" class="py-3 px-6">{{ __('Tracking') }}</th>
                     <th scope="col" class="py-3 px-6">{{ __('Integration Detail') }}</th>
                     <th scope="col" class="py-3 px-6">{{ __('Status') }}</th>
                     <th scope="col" class="py-3 px-6 text-right">{{ __('Actions') }}</th>
@@ -44,6 +45,19 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
                                 {{ __('None') }}
                             </span>
+                        @endif
+                    </td>
+                    <td class="py-4 px-6">
+                        @if($company->tracking_provider)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold uppercase tracking-tighter {{ 
+                                $company->tracking_provider == 'faster' ? 'bg-blue-50 text-blue-600' : (
+                                $company->tracking_provider == 'itdida' ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600'
+                                )
+                            }}">
+                                {{ $company->tracking_provider }}
+                            </span>
+                        @else
+                            <span class="text-gray-400 text-xs italic">{{ __('None') }}</span>
                         @endif
                     </td>
                     <td class="py-4 px-6 font-mono text-[10px] max-w-[200px] truncate">
@@ -193,13 +207,25 @@
                     <!-- Modal Body Form -->
                     <div class="px-6 py-6">
                         <form wire:submit.prevent="save" class="space-y-4">
-                            <!-- Name -->
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Company Name') }} *</label>
-                                <input wire:model="name" type="text" 
-                                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg text-sm transition-all"
-                                       placeholder="{{ __('e.g., Faster.ae, DHL Express') }}">
-                                @error('name') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                            <!-- Name & Provider -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Company Name') }} *</label>
+                                    <input wire:model="name" type="text" 
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg text-sm transition-all"
+                                           placeholder="{{ __('e.g., Faster.ae, DHL Express') }}">
+                                    @error('name') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Tracking Provider') }}</label>
+                                    <select wire:model="tracking_provider" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg text-sm transition-all cursor-pointer">
+                                        <option value="">{{ __('None / Generic') }}</option>
+                                        <option value="itdida">Itdida (Selenium)</option>
+                                        <option value="faster">Faster / GCC (API)</option>
+                                        <option value="choicexp">ChoiceXP (Selenium)</option>
+                                    </select>
+                                    @error('tracking_provider') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                                </div>
                             </div>
 
                             <!-- Integration Type Switcher -->

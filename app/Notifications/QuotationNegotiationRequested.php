@@ -12,9 +12,7 @@ class QuotationNegotiationRequested extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public SourcingRequest $sourcingRequest)
-    {
-    }
+    public function __construct(public SourcingRequest $sourcingRequest) {}
 
     public function via($notifiable): array
     {
@@ -30,7 +28,7 @@ class QuotationNegotiationRequested extends Notification implements ShouldQueue
             ->subject(__('Quotation Negotiation Requested: # :requestId', ['requestId' => $this->sourcingRequest->id]))
             ->greeting(__('Hello,'))
             ->line(__('The client has requested a negotiation for the quotation of sourcing request **:productName**.', [
-                'productName' => $this->sourcingRequest->product_name
+                'productName' => $this->sourcingRequest->product_name,
             ]))
             ->line(__('**Negotiation Notes:**'))
             ->line($notes)

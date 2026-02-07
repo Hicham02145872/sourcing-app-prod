@@ -57,7 +57,7 @@ class SourcingOrderController extends Controller
     public function uploadProofOfPayment(Request $request, SourcingOrder $sourcingOrder): RedirectResponse
     {
         $this->authorize('uploadProofOfPayment', $sourcingOrder);
-        
+
         $request->validate([
             'proof_of_payment' => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
         ]);
@@ -143,5 +143,4 @@ class SourcingOrderController extends Controller
 
         return $pdf->stream('sourcing-orders.pdf');
     }
-
 }

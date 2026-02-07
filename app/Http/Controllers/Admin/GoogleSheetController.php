@@ -29,7 +29,7 @@ class GoogleSheetController extends Controller
         // Try to get connection status
         $connectionStatus = null;
         $serviceEmail = null;
-        
+
         if ($credentialsExist) {
             try {
                 $creds = json_decode(Storage::get('secure/credentials.json'), true);

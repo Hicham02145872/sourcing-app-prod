@@ -13,7 +13,7 @@ class Country extends Model
 
     public function getFlagUrlAttribute()
     {
-        return asset('images/flags/' . strtolower($this->code) . '.svg');
+        return asset('images/flags/'.strtolower($this->code).'.svg');
     }
 
     public function sourcingRequestDestinations()

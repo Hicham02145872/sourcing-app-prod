@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
 class TrackingController extends Controller
 {
-    public function __construct(protected \App\Services\SeventeenTrackService $seventeenTrackService) {}
+    public function __construct(
+        protected \App\Services\SeventeenTrackService $seventeenTrackService,
+        protected \App\Services\Tracking\UnifiedTrackingService $unifiedTrackingService
+    ) {}
 
     /**
      * Show the tracking page.
@@ -57,45 +59,75 @@ class TrackingController extends Controller
     }
 
     /**
-     * AJAX Endpoint to fetch tracking data.
+     * AJAX Endpoint to fetch tracking data using unified service.
      */
     public function data(Request $request): JsonResponse
     {
+        \Log::debug('!!! [TRACKING DEBUG] DATA METHOD ENTERED !!!', ['number' => $request->query('number')]);
+        set_time_limit(120);
+        $startTime = microtime(true);
         $trackingNumber = $request->query('number');
 
+        \Log::info('🔍 [TRACKING CONTROLLER] Request received', [
+            'tracking_number' => $trackingNumber,
+            'timestamp' => now()->toDateTimeString(),
+            'ip' => $request->ip(),
+            'method' => $request->method(),
+            'full_url' => $request->fullUrl()
+        ]);
+
         if (! $trackingNumber) {
+            \Log::warning('⚠️ [TRACKING CONTROLLER] Missing tracking number');
             return response()->json(['error' => __('Please provide a tracking number.')], 400);
         }
 
         try {
-            // API Request to Faster.ae
-            $response = Http::timeout(10)->get('https://op-api.faster.ae/service/status-logs/listWithBooking', [
-                'bookingNos' => $trackingNumber,
-                'isOpen' => 1,
+            \Log::info('⏱️ [TRACKING CONTROLLER] Calling UnifiedTrackingService', [
+                'tracking_number' => $trackingNumber,
+                'elapsed_ms' => round((microtime(true) - $startTime) * 1000, 2)
             ]);
 
-            if ($response->successful()) {
-                $responseData = $response->json();
+            $result = $this->unifiedTrackingService->track($trackingNumber);
 
-                // Check if the API returned success code and has data
-                if (isset($responseData['code']) && $responseData['code'] === 0 && ! empty($responseData['data']) && isset($responseData['data'][0]['statusLogs'])) {
+            $elapsedTime = round((microtime(true) - $startTime) * 1000, 2);
 
-                    $logs = $responseData['data'][0]['statusLogs'];
+            if ($result['success']) {
+                $provider = $result['provider'] ?? null;
 
-                    // Sort logs by date descending (latest first) if not already
-                    usort($logs, function ($a, $b) {
-                        return strtotime($b['statusDate']) - strtotime($a['statusDate']);
-                    });
+                \Log::info('✅ [TRACKING CONTROLLER] Request completed successfully', [
+                    'tracking_number' => $trackingNumber,
+                    'provider' => $provider,
+                    'events_count' => count($result['events'] ?? []),
+                    'total_time_ms' => $elapsedTime,
+                    'cached' => $elapsedTime < 100
+                ]);
 
-                    return response()->json(['data' => $logs]);
-                }
-
-                return response()->json(['error' => __('No tracking details found.')], 404);
-            } else {
-                return response()->json(['error' => __('Unable to fetch tracking information.')], 502);
+                // If not in result, we can detect it again or pass it from unified service
+                return response()->json([
+                    'data' => $result['events'],
+                    'current_status' => $result['current_status'],
+                    'tracking_number' => $result['tracking_number'] ?? $trackingNumber,
+                    'provider' => $provider,
+                ]);
             }
+
+            \Log::warning('⚠️ [TRACKING CONTROLLER] Tracking failed', [
+                'tracking_number' => $trackingNumber,
+                'error' => $result['error'] ?? 'No tracking details found',
+                'total_time_ms' => $elapsedTime
+            ]);
+
+            return response()->json(['error' => $result['error'] ?? __('No tracking details found.')], 404);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Tracking API Error: '.$e->getMessage());
+            $elapsedTime = round((microtime(true) - $startTime) * 1000, 2);
+
+            \Log::error('❌ [TRACKING CONTROLLER] Exception occurred', [
+                'tracking_number' => $trackingNumber,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'total_time_ms' => $elapsedTime
+            ]);
 
             return response()->json(['error' => __('An error occurred while connecting to the tracking service.')], 500);
         }

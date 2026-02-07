@@ -4,13 +4,14 @@ namespace App\Listeners;
 
 use App\Events\QuotationCreated;
 use App\Notifications\QuotationCreated as QuotationCreatedNotification;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use Exception;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SendQuotationCreatedNotification
 {
     public $tries = 3;
+
     public $backoff = [60, 300, 900];
 
     /**
@@ -20,32 +21,35 @@ class SendQuotationCreatedNotification
     {
         try {
             $quotation = $event->quotation;
-            
+
             // Validate quotation and relationships
-            if (!$quotation || !$quotation->sourcingRequest) {
+            if (! $quotation || ! $quotation->sourcingRequest) {
                 Log::warning('QuotationCreated: Invalid quotation or missing sourcing request', [
                     'quotation_id' => $quotation->id ?? null,
                 ]);
+
                 return;
             }
 
             $user = $quotation->sourcingRequest->user;
 
-            if (!$user) {
+            if (! $user) {
                 Log::warning('QuotationCreated: User not found for quotation', [
                     'quotation_id' => $quotation->id,
                 ]);
+
                 return;
             }
 
             // Check for duplicate notifications using atomic lock
-            $lockKey = 'quotation_notification:' . $quotation->id;
-            
+            $lockKey = 'quotation_notification:'.$quotation->id;
+
             if (Cache::has($lockKey)) {
                 Log::debug('QuotationCreated notification already sent recently', [
                     'quotation_id' => $quotation->id,
                     'lock_key' => $lockKey,
                 ]);
+
                 return;
             }
 
@@ -53,13 +57,14 @@ class SendQuotationCreatedNotification
             Cache::put($lockKey, true, now()->addSeconds(60));
 
             // Check if user has FCM token
-            if (!$user->fcm_token) {
+            if (! $user->fcm_token) {
                 Log::warning('QuotationCreated: User has no FCM token', [
                     'quotation_id' => $quotation->id,
                     'user_id' => $user->id,
                 ]);
                 // Still send via other channels (Mail, Database)
                 $this->sendNotification($quotation, $user);
+
                 return;
             }
 
@@ -69,7 +74,7 @@ class SendQuotationCreatedNotification
             Log::info('QuotationCreated notification sent successfully', [
                 'quotation_id' => $quotation->id,
                 'user_id' => $user->id,
-                'has_fcm_token' => !empty($user->fcm_token),
+                'has_fcm_token' => ! empty($user->fcm_token),
             ]);
 
         } catch (Exception $e) {

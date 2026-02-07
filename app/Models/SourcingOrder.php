@@ -208,7 +208,7 @@ class SourcingOrder extends Model
             'tracking_number' => $this->tracking_number,
             'admin_assigned' => $this->assignedAdmin?->name ?? 'N/A',
             'net_profit' => $this->net_profit_or_loss,
-            'product_image' => $this->quotation->sourcingRequest->product_image ? asset('storage/' . $this->quotation->sourcingRequest->product_image) : '',
+            'product_image' => $this->quotation->sourcingRequest->product_image ? asset('storage/'.$this->quotation->sourcingRequest->product_image) : '',
         ];
     }
 
@@ -219,6 +219,7 @@ class SourcingOrder extends Model
     {
         return $this->id * 5;
     }
+
     public function toShippingCompanySheetArray(): array
     {
         return [
@@ -231,9 +232,17 @@ class SourcingOrder extends Model
             'client_name' => $this->user->name,
             'address' => $this->quotation->sourcingRequest->address ?? 'N/A', // Using address from sourcing request
             'phone' => $this->quotation->sourcingRequest->phone_number ?? 'N/A',
-            'product_image' => $this->quotation->sourcingRequest->product_image ? '=IMAGE("' . asset('storage/' . $this->quotation->sourcingRequest->product_image) . '")' : '',
+            'product_image' => $this->quotation->sourcingRequest->product_image ? '=IMAGE("'.asset('storage/'.$this->quotation->sourcingRequest->product_image).'")' : '',
             'weight' => '', // Placeholder
             'notes' => '', // Placeholder
         ];
+    }
+
+    /**
+     * Get the FSB tracking number alias.
+     */
+    public function getFsbTrackingNumberAttribute(): string
+    {
+        return 'FSB' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
     }
 }

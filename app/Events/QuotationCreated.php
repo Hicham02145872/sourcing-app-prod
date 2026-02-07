@@ -16,7 +16,6 @@ class QuotationCreated
     /**
      * Create a new event instance.
      *
-     * @param  \App\Models\Quotation  $quotation
      * @return void
      */
     public function __construct(Quotation $quotation)

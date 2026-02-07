@@ -35,6 +35,7 @@ class SourcingRequestCreated extends Notification implements ShouldQueue
         if ($notifiable->fcm_token) {
             $channels[] = 'fcm';
         }
+
         return $channels;
     }
 
@@ -44,12 +45,12 @@ class SourcingRequestCreated extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->subject('New Sourcing Request Created: #' . $this->sourcingRequest->id)
-                    ->greeting('Hello ' . $notifiable->name . ',')
-                    ->line('A new sourcing request has been created by ' . $this->sourcingRequest->user->name . '.')
-                    ->line('Product: ' . $this->sourcingRequest->product_name)
-                    ->action('View Request', route('admin.sourcing-requests.show', $this->sourcingRequest))
-                    ->line('Please review it at your earliest convenience.');
+            ->subject('New Sourcing Request Created: #'.$this->sourcingRequest->id)
+            ->greeting('Hello '.$notifiable->name.',')
+            ->line('A new sourcing request has been created by '.$this->sourcingRequest->user->name.'.')
+            ->line('Product: '.$this->sourcingRequest->product_name)
+            ->action('View Request', route('admin.sourcing-requests.show', $this->sourcingRequest))
+            ->line('Please review it at your earliest convenience.');
     }
 
     /**
@@ -61,8 +62,8 @@ class SourcingRequestCreated extends Notification implements ShouldQueue
     {
         return [
             'sourcing_request_id' => $this->sourcingRequest->id,
-            'title' => 'New Sourcing Request: #' . $this->sourcingRequest->id,
-            'body' => 'A new request for "' . $this->sourcingRequest->product_name . '" has been created.',
+            'title' => 'New Sourcing Request: #'.$this->sourcingRequest->id,
+            'body' => 'A new request for "'.$this->sourcingRequest->product_name.'" has been created.',
             'type' => 'sourcing_request',
         ];
     }
@@ -77,7 +78,7 @@ class SourcingRequestCreated extends Notification implements ShouldQueue
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification(FirebaseNotification::create(
                 'New Sourcing Request',
-                'Request #' . $this->sourcingRequest->id . ' for ' . $this->sourcingRequest->product_name . ' has been created.'
+                'Request #'.$this->sourcingRequest->id.' for '.$this->sourcingRequest->product_name.' has been created.'
             ))
             ->withData([
                 'click_action' => $url,

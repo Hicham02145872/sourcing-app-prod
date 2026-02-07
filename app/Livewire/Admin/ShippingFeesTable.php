@@ -18,7 +18,6 @@ class ShippingFeesTable extends Component
 
     protected $queryString = ['search' => ['except' => '']];
 
-
     public function updatingSearch()
     {
         $this->resetPage();
@@ -28,7 +27,6 @@ class ShippingFeesTable extends Component
     {
         $this->redirect(route('admin.shipping-fees.edit', $countryId), navigate: true);
     }
-
 
     public function render()
     {

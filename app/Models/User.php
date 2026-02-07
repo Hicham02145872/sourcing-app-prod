@@ -89,7 +89,6 @@ class User extends Authenticatable implements MustVerifyEmail
         };
     }
 
-
     /**
      * Check if the user has permission to delete clients.
      */

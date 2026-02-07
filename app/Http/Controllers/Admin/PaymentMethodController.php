@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentMethod;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Storage;
 
 class PaymentMethodController extends Controller
 {
@@ -16,7 +15,7 @@ class PaymentMethodController extends Controller
         $query = PaymentMethod::query();
 
         if ($search = $request->query('search')) {
-            $query->where('name', 'like', '%' . $search . '%');
+            $query->where('name', 'like', '%'.$search.'%');
         }
 
         $paymentMethods = $query->paginate(10);
@@ -61,7 +60,7 @@ class PaymentMethodController extends Controller
         ];
 
         // Remove null values from details array
-        $details = array_filter($details, fn($value) => !is_null($value) && $value !== '');
+        $details = array_filter($details, fn ($value) => ! is_null($value) && $value !== '');
 
         $logoPath = null;
         if ($request->hasFile('logo')) {
@@ -114,7 +113,7 @@ class PaymentMethodController extends Controller
         ];
 
         // Remove null values from details array
-        $details = array_filter($details, fn($value) => !is_null($value) && $value !== '');
+        $details = array_filter($details, fn ($value) => ! is_null($value) && $value !== '');
 
         $logoPath = $paymentMethod->logo_path;
         if ($request->hasFile('logo')) {
@@ -137,6 +136,7 @@ class PaymentMethodController extends Controller
     public function destroy(PaymentMethod $paymentMethod): RedirectResponse
     {
         $paymentMethod->delete();
+
         return redirect()->route('admin.payment-methods.index')->with('status', 'Payment method deleted successfully!');
     }
 }

@@ -2,13 +2,13 @@
 
 namespace App\Mail;
 
+use App\Models\SourcingOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\SourcingOrder;
 
 class PaymentReminderMail extends Mailable implements ShouldQueue
 {
@@ -30,7 +30,7 @@ class PaymentReminderMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Payment Reminder for Your Order #' . $this->sourcingOrder->id,
+            subject: 'Payment Reminder for Your Order #'.$this->sourcingOrder->id,
         );
     }
 

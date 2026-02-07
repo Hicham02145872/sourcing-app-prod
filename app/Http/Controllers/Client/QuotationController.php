@@ -100,7 +100,7 @@ class QuotationController extends Controller
         DB::transaction(function () use ($quotation) {
             // Update the quotation status
             $quotation->update(['status' => 'rejected']);
-            
+
             // Also reject the sourcing request
             $quotation->sourcingRequest->transitionTo('rejected', auth()->user());
         });
@@ -124,7 +124,7 @@ class QuotationController extends Controller
                 'status' => 'negotiating',
                 'negotiation_notes' => $request->negotiation_notes,
             ]);
-            
+
             // Also update the sourcing request status to negotiating
             $quotation->sourcingRequest->transitionTo('negotiating', auth()->user());
         });

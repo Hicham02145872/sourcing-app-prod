@@ -17,11 +17,11 @@ class RoleMiddleware
     {
         // Check if the authenticated user's role matches the required role
         if ($role === 'admin') {
-            if (!$request->user()->isAdmin()) {
+            if (! $request->user()->isAdmin()) {
                 abort(403, 'Unauthorized action.');
             }
         } elseif ($role === 'super_admin') {
-            if (!$request->user()->isSuperAdmin()) {
+            if (! $request->user()->isSuperAdmin()) {
                 abort(403, 'Unauthorized action.');
             }
         } else {
@@ -30,6 +30,7 @@ class RoleMiddleware
                 abort(403, 'Unauthorized action.');
             }
         }
+
         // If the role matches, proceed with the request
         return $next($request);
     }

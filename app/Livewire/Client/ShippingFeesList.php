@@ -83,6 +83,7 @@ class ShippingFeesList extends Component
             // Sort fetched styles based on defaultOrder, keep others at the end
             $itemStyles = collect($fetchedStyles)->sortBy(function ($style) use ($defaultOrder) {
                 $index = array_search($style, $defaultOrder);
+
                 return $index === false ? 999 : $index;
             })->values()->toArray();
         }

@@ -16,7 +16,6 @@ class SourcingOrderStatusChanged
     /**
      * Create a new event instance.
      *
-     * @param  \App\Models\SourcingOrder  $sourcingOrder
      * @return void
      */
     public function __construct(SourcingOrder $sourcingOrder)

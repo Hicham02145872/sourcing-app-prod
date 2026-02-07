@@ -26,6 +26,7 @@ class NotificationController extends Controller
 
         if ($notification) {
             $notification->markAsRead();
+
             return response()->json(['success' => true]);
         }
 

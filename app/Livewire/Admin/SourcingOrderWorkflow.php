@@ -6,6 +6,7 @@ use App\Events\SourcingOrderStatusChanged;
 use App\Models\ShippingCompany;
 use App\Models\SourcingOrder;
 use App\Models\User;
+use App\Services\Tracking\UnifiedTrackingService;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
@@ -20,6 +21,8 @@ class SourcingOrderWorkflow extends Component
     public ?string $tracking_carrier;
 
     public ?int $shipping_company_id;
+
+    public $deepTrackingResult = null;
 
     public function mount(SourcingOrder $sourcingOrder)
     {
@@ -76,6 +79,32 @@ class SourcingOrderWorkflow extends Component
         $this->dispatch('show-success-toast', message: __('Tracking information updated successfully!'));
     }
 
+    public function fetchTrackingStatus(UnifiedTrackingService $trackingService)
+    {
+        set_time_limit(120);
+        if (! $this->tracking_number) {
+            $this->dispatch('show-error-toast', message: __('Veuillez entrer un numéro de suivi.'));
+
+            return;
+        }
+
+        try {
+            $carrier = $this->tracking_carrier ?: ($this->sourcingOrder->shippingCompany?->name ?? null);
+            $result = $trackingService->track($this->tracking_number, $carrier);
+
+            $this->deepTrackingResult = $result;
+
+            if ($result['success']) {
+                $this->dispatch('show-success-toast', message: __('Statut de suivi récupéré avec succès.'));
+            } else {
+                $this->dispatch('show-error-toast', message: __('Erreur: ').($result['error'] ?? 'Inconnue'));
+            }
+        } catch (\Exception $e) {
+            Log::error('Deep Tracking Error: '.$e->getMessage());
+            $this->dispatch('show-error-toast', message: __('Une erreur est survenue lors du tracking.'));
+        }
+    }
+
     public function assignTo($adminId)
     {
         if (! auth()->user()->isSuperAdmin()) {
@@ -101,12 +130,17 @@ class SourcingOrderWorkflow extends Component
             return;
         }
 
+        $company = $companyId ? ShippingCompany::find($companyId) : null;
+
         $this->sourcingOrder->update([
             'shipping_company_id' => $companyId ?: null,
+            'tracking_carrier' => $company ? $company->name : $this->tracking_carrier,
         ]);
 
         $this->sourcingOrder->refresh();
+        $this->sourcingOrder->load('shippingCompany');
         $this->shipping_company_id = $this->sourcingOrder->shipping_company_id;
+        $this->tracking_carrier = $this->sourcingOrder->tracking_carrier;
 
         $this->dispatch('show-success-toast', message: __($companyId ? 'Shipping company assigned successfully.' : 'Shipping company unassigned.'));
     }

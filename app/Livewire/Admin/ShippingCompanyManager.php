@@ -21,12 +21,18 @@ class ShippingCompanyManager extends Component
     public ?string $sheet_name = 'sourcing';
 
     public bool $is_active = true;
+
     public string $activeIntegration = 'lark';
 
     public ?string $lark_app_id = 'cli_a9d1affbbe38de1a';
+
     public ?string $lark_app_secret = '6eUjWpgdf1Pdxkz8y0xyFgTHIqT4xAwh';
+
     public ?string $lark_base_token = null;
+
     public ?string $lark_table_id = null;
+
+    public ?string $tracking_provider = null;
 
     protected function rules(): array
     {
@@ -39,12 +45,13 @@ class ShippingCompanyManager extends Component
             'lark_app_secret' => 'nullable|string|max:255',
             'lark_base_token' => 'nullable|string|max:255',
             'lark_table_id' => 'nullable|string|max:255',
+            'tracking_provider' => 'nullable|string|in:itdida,faster,choicexp',
         ];
     }
 
     public function openCreateModal(): void
     {
-        $this->reset(['editingId', 'name', 'google_sheet_id', 'sheet_name', 'is_active', 'lark_base_token', 'lark_table_id']);
+        $this->reset(['editingId', 'name', 'google_sheet_id', 'sheet_name', 'is_active', 'lark_base_token', 'lark_table_id', 'tracking_provider']);
         $this->lark_app_id = 'cli_a9d1affbbe38de1a';
         $this->lark_app_secret = '6eUjWpgdf1Pdxkz8y0xyFgTHIqT4xAwh';
         $this->is_active = true;
@@ -65,10 +72,11 @@ class ShippingCompanyManager extends Component
         $this->lark_app_secret = $company->lark_app_secret;
         $this->lark_base_token = $company->lark_base_token;
         $this->lark_table_id = $company->lark_table_id;
-        
+        $this->tracking_provider = $company->tracking_provider;
+
         // Default to Google if it has config, otherwise Lark
         $this->activeIntegration = ($company->google_sheet_id) ? 'google' : 'lark';
-        
+
         $this->showModal = true;
     }
 
@@ -85,6 +93,7 @@ class ShippingCompanyManager extends Component
             'lark_app_secret' => $this->lark_app_secret,
             'lark_base_token' => $this->lark_base_token,
             'lark_table_id' => $this->lark_table_id,
+            'tracking_provider' => $this->tracking_provider,
         ];
 
         if ($this->editingId) {
@@ -96,7 +105,7 @@ class ShippingCompanyManager extends Component
         }
 
         $this->showModal = false;
-        $this->reset(['editingId', 'name', 'google_sheet_id', 'sheet_name', 'is_active', 'lark_app_id', 'lark_app_secret', 'lark_base_token', 'lark_table_id']);
+        $this->reset(['editingId', 'name', 'google_sheet_id', 'sheet_name', 'is_active', 'lark_app_id', 'lark_app_secret', 'lark_base_token', 'lark_table_id', 'tracking_provider']);
     }
 
     public function delete(int $id): void
@@ -116,11 +125,12 @@ class ShippingCompanyManager extends Component
     {
         try {
             $company = ShippingCompany::findOrFail($id);
-            $factory = new \App\Services\SheetIntegrationFactory();
+            $factory = new \App\Services\SheetIntegrationFactory;
             $service = $factory->getService($company);
 
-            if (!$service) {
+            if (! $service) {
                 $this->dispatch('show-error-toast', message: __('No integration configured for this company.'));
+
                 return;
             }
 
@@ -132,7 +142,7 @@ class ShippingCompanyManager extends Component
                 $this->dispatch('show-error-toast', message: $result['message']);
             }
         } catch (\Exception $e) {
-            $this->dispatch('show-error-toast', message: __('Error: ') . $e->getMessage());
+            $this->dispatch('show-error-toast', message: __('Error: ').$e->getMessage());
         }
     }
 
@@ -140,24 +150,25 @@ class ShippingCompanyManager extends Component
     {
         try {
             $company = ShippingCompany::findOrFail($id);
-            $factory = new \App\Services\SheetIntegrationFactory();
+            $factory = new \App\Services\SheetIntegrationFactory;
             $service = $factory->getService($company);
 
-            if (!$service) {
+            if (! $service) {
                 $this->dispatch('show-error-toast', message: __('No integration configured for this company.'));
+
                 return;
             }
 
             $config = [];
             if ($company->google_sheet_id) {
-                 // Google service uses staticTestConnection internally or resolves via auth
-                 $config = ['google_sheet_id' => $company->google_sheet_id];
+                // Google service uses staticTestConnection internally or resolves via auth
+                $config = ['google_sheet_id' => $company->google_sheet_id];
             } else {
-                 $config = [
-                     'lark_app_id' => $company->lark_app_id,
-                     'lark_app_secret' => $company->lark_app_secret,
-                     'lark_base_token' => $company->lark_base_token,
-                 ];
+                $config = [
+                    'lark_app_id' => $company->lark_app_id,
+                    'lark_app_secret' => $company->lark_app_secret,
+                    'lark_base_token' => $company->lark_base_token,
+                ];
             }
 
             $result = $service->testConnection($config);
@@ -168,7 +179,7 @@ class ShippingCompanyManager extends Component
                 $this->dispatch('show-error-toast', message: $result['message']);
             }
         } catch (\Exception $e) {
-            $this->dispatch('show-error-toast', message: __('Error: ') . $e->getMessage());
+            $this->dispatch('show-error-toast', message: __('Error: ').$e->getMessage());
         }
     }
 
@@ -181,7 +192,7 @@ class ShippingCompanyManager extends Component
         ]);
 
         try {
-            $service = new \App\Services\LarkSheetService();
+            $service = new \App\Services\LarkSheetService;
             $result = $service->testConnection([
                 'lark_app_id' => $this->lark_app_id,
                 'lark_app_secret' => $this->lark_app_secret,
@@ -194,7 +205,7 @@ class ShippingCompanyManager extends Component
                 $this->dispatch('show-error-toast', message: $result['message']);
             }
         } catch (\Exception $e) {
-            $this->dispatch('show-error-toast', message: __('Error: ') . $e->getMessage());
+            $this->dispatch('show-error-toast', message: __('Error: ').$e->getMessage());
         }
     }
 
@@ -209,7 +220,7 @@ class ShippingCompanyManager extends Component
         if ($company->google_sheet_id) {
             return 'google';
         }
-        
+
         return 'lark';
     }
 

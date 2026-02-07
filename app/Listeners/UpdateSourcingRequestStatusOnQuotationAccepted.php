@@ -3,8 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\QuotationAccepted;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class UpdateSourcingRequestStatusOnQuotationAccepted
 {
@@ -21,7 +19,6 @@ class UpdateSourcingRequestStatusOnQuotationAccepted
     /**
      * Handle the event.
      *
-     * @param  \App\Events\QuotationAccepted  $event
      * @return void
      */
     public function handle(QuotationAccepted $event)

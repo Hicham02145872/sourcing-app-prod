@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\SocialMediaLink; // Import the SocialMediaLink model
+use App\Models\SocialMediaLink;
+use Illuminate\Database\Seeder; // Import the SocialMediaLink model
 
 class SocialMediaLinkSeeder extends Seeder
 {

@@ -2,11 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Models\SourcingOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\SourcingOrder;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
@@ -35,6 +34,7 @@ class ProofOfPaymentRejected extends Notification implements ShouldQueue
         if ($notifiable->fcm_token) {
             $channels[] = 'fcm';
         }
+
         return $channels;
     }
 

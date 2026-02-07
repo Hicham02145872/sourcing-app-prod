@@ -46,7 +46,7 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
-        Log::info('Registered event dispatched for user: ' . $user->id);
+        Log::info('Registered event dispatched for user: '.$user->id);
 
         Auth::login($user);
 

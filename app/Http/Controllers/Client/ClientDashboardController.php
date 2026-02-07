@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Http\Request;
 
 class ClientDashboardController extends Controller
 {
@@ -17,7 +17,7 @@ class ClientDashboardController extends Controller
 
         // Search by product name
         if ($request->has('search') && $request->search) {
-            $query->where('product_name', 'like', '%' . $request->search . '%');
+            $query->where('product_name', 'like', '%'.$request->search.'%');
         }
 
         // Filter by category
@@ -36,14 +36,14 @@ class ClientDashboardController extends Controller
                 $query->where('status', $status);
             }
         }
-        
+
         // Filter by date range
         if ($request->has('start_date') && $request->start_date && $request->has('end_date') && $request->end_date) {
             $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
         }
 
         $sourcingRequests = $query->latest()->paginate(3)->withQueryString();
-        
+
         $totalClientQuotations = $user->quotations()->count();
         $categories = Category::all();
 

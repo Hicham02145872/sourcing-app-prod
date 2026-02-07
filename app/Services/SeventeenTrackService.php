@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Services\Tracking\TrackingServiceInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class SeventeenTrackService
+class SeventeenTrackService implements TrackingServiceInterface
 {
     protected string $apiKey;
 
@@ -13,9 +14,8 @@ class SeventeenTrackService
 
     public function __construct()
     {
-        // For now using the provided key directly, but should ideally come from config/services.php
-        $this->apiKey = '95F2075A936FA19ED4DAF54BE2E6508D';
-        $this->baseUrl = 'https://api.17track.net/track/v2.2';
+        $this->apiKey = config('services.17track.api_key');
+        $this->baseUrl = config('services.17track.base_url');
     }
 
     /**
@@ -177,5 +177,41 @@ class SeventeenTrackService
                 'error' => $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Get tracking info for a specific number (normalized for UnifiedTrackingService).
+     */
+    public function getTrackingInfo(string $trackingNumber): array
+    {
+        $result = $this->getTrackInfo($trackingNumber);
+
+        if (isset($result['code']) && $result['code'] === 0 && ! empty($result['data']['accepted'])) {
+            $data = $result['data']['accepted'][0];
+            $track = $data['track'] ?? null;
+
+            if ($track) {
+                $events = collect($track['z2'] ?? [])->map(function ($event) {
+                    return [
+                        'status' => $event['z'] ?? 'Status Update',
+                        'location' => $event['c'] ?? '',
+                        'statusDate' => $event['a'] ?? '',
+                        'details' => $event['z'] ?? '',
+                    ];
+                })->toArray();
+
+                return [
+                    'success' => true,
+                    'current_status' => $track['z0'] ?? 'In Transit',
+                    'events' => $events,
+                    'provider' => '17Track',
+                ];
+            }
+        }
+
+        return [
+            'success' => false,
+            'error' => $result['error'] ?? 'No tracking details found from 17Track.',
+        ];
     }
 }

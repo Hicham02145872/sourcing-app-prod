@@ -76,20 +76,19 @@
                             <span>{{ __('My Orders') }}</span>
                         </a>
 
-                        <div class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-slate-400 dark:text-slate-500 cursor-not-allowed group relative transition-colors duration-200">
+                        <a href="{{ route('client.tracking.index') }}" 
+                           class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('client.tracking.index') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" />
                             </svg>
                             <span>{{ __('Track Shipment') }}</span>
-                            <span class="ml-auto text-[9px] font-bold bg-amber-50 text-amber-600 border border-amber-100 px-1.5 py-0.5 rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300">{{ __('Coming Soon') }}</span>
-                        </div>
+                        </a>
 
                         <div class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-slate-400 dark:text-slate-500 cursor-not-allowed group relative transition-colors duration-200">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                             </svg>
                             <span>{{ __('Refunds') }}</span>
-                            <span class="ml-auto text-[9px] font-bold bg-amber-50 text-amber-600 border border-amber-100 px-1.5 py-0.5 rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300">{{ __('Coming Soon') }}</span>
                         </div>
 
 
@@ -180,7 +179,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                             </svg>
                             <span>{{ __('Refunds') }}</span>
-                            <span class="ml-auto text-[9px] font-bold bg-amber-50 text-amber-600 border border-amber-100 px-1.5 py-0.5 rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300">{{ __('Coming Soon') }}</span>
                         </div>
 
                         @if(auth()->user()->isSuperAdmin())
@@ -191,6 +189,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 3c-2.25 0-4.125 1.875-4.125 4.125S8.25 11.25 10.5 11.25 14.625 9.375 14.625 7.125 12.75 3 10.5 3Z" />
                             </svg>
                             <span>{{ __('Shipping Fees') }}</span>
+                        </a>
+
+                        <a href="{{ route('admin.tracking.test') }}" 
+                           class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.tracking.test') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{{ __('Test Tracking') }}</span>
                         </a>
                         @endif
                      </div>

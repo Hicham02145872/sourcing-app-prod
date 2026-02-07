@@ -5,8 +5,8 @@ namespace App\Listeners;
 use App\Events\SourcingOrderStatusChanged;
 use App\Notifications\SourcingOrderStatusUpdated as SourcingOrderStatusUpdatedNotification;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SendSourcingOrderStatusUpdatedNotification
 {
@@ -18,13 +18,14 @@ class SendSourcingOrderStatusUpdatedNotification
         $sourcingOrder = $event->sourcingOrder;
         $user = $sourcingOrder->quotation->sourcingRequest->user;
 
-        $lockKey = 'sourcing_order_notification:' . $sourcingOrder->id . ':' . $sourcingOrder->status;
+        $lockKey = 'sourcing_order_notification:'.$sourcingOrder->id.':'.$sourcingOrder->status;
 
         if (Cache::has($lockKey)) {
             Log::debug('SourcingOrderStatusUpdated notification already sent recently', [
                 'sourcing_order_id' => $sourcingOrder->id,
                 'lock_key' => $lockKey,
             ]);
+
             return;
         }
 

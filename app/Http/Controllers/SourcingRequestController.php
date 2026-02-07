@@ -48,7 +48,7 @@ class SourcingRequestController extends Controller
             ->with(['category', 'destinations.country', 'destinations.service'])
             ->latest()
             ->paginate(10);
-        
+
         $categories = Category::all();
 
         return view('client.sourcing-requests.archived', compact('sourcingRequests', 'categories'));

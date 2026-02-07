@@ -24,8 +24,8 @@ class SourcingRequestObserver
             $user = auth()->user();
             if ($user && ($user->role === 'admin' || $user->role === 'super_admin') && ! $sourcingRequest->assigned_to_admin_id) {
                 // Ensure we don't overwrite if already assigned (though logic says ! assigned)
-                 $sourcingRequest->assigned_to_admin_id = $user->id;
-                 $sourcingRequest->assigned_at = now();
+                $sourcingRequest->assigned_to_admin_id = $user->id;
+                $sourcingRequest->assigned_at = now();
             }
         }
     }
@@ -77,5 +77,4 @@ class SourcingRequestObserver
             }
         }
     }
-
 }

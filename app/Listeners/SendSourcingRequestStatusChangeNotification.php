@@ -5,8 +5,8 @@ namespace App\Listeners;
 use App\Events\SourcingRequestStatusChanged;
 use App\Notifications\SourcingRequestStatusUpdated as SourcingRequestStatusUpdatedNotification;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SendSourcingRequestStatusChangeNotification
 {
@@ -27,10 +27,11 @@ class SendSourcingRequestStatusChangeNotification
         $adminUser = $event->user;
 
         // Empêcher les doublons avec un verrou
-        $lockKey = 'sourcing_notification:' . $sourcingRequest->id . ':' . $sourcingRequest->status;
-        
+        $lockKey = 'sourcing_notification:'.$sourcingRequest->id.':'.$sourcingRequest->status;
+
         if (Cache::has($lockKey)) {
             Log::debug('Notification already sent recently', ['sourcing_request_id' => $sourcingRequest->id, 'lock_key' => $lockKey]);
+
             return;
         }
 

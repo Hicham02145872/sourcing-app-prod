@@ -33,11 +33,11 @@ class SourcingOrderController extends Controller
         // Sorting handles priority display
         if (auth()->check()) {
             $userId = auth()->id();
-            $query->orderByRaw("CASE 
+            $query->orderByRaw('CASE 
                 WHEN assigned_to_admin_id = ? THEN 1 
                 WHEN assigned_to_admin_id IS NULL THEN 2 
                 ELSE 3 
-            END", [$userId]);
+            END', [$userId]);
         }
 
         // Filter by status
@@ -46,29 +46,29 @@ class SourcingOrderController extends Controller
         }
 
         // Filter by search term
-    if ($search = $request->query('search')) {
-        $query->where(function ($q) use ($search) {
-            $q->where('id', 'like', '%'.$search.'%')
-                ->orWhereHas('user', function ($userQuery) use ($search) {
-                    $userQuery->where('name', 'like', '%'.$search.'%')
-                              ->orWhere('email', 'like', '%'.$search.'%');
-                })
-                ->orWhereHas('quotation.sourcingRequest', function ($srQuery) use ($search) {
-                    $srQuery->where('product_name', 'like', '%'.$search.'%')
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', '%'.$search.'%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('email', 'like', '%'.$search.'%');
+                    })
+                    ->orWhereHas('quotation.sourcingRequest', function ($srQuery) use ($search) {
+                        $srQuery->where('product_name', 'like', '%'.$search.'%')
                             ->orWhere('id', 'like', '%'.$search.'%')
                             ->orWhere('note', 'like', '%'.$search.'%')
                             ->orWhereHas('destinations', function ($destQuery) use ($search) {
                                 $destQuery->where('address', 'like', '%'.$search.'%')
-                                          ->orWhereHas('country', function ($countryQuery) use ($search) {
-                                              $countryQuery->where('name', 'like', '%'.$search.'%');
-                                          });
+                                    ->orWhereHas('country', function ($countryQuery) use ($search) {
+                                        $countryQuery->where('name', 'like', '%'.$search.'%');
+                                    });
                             });
-                })
-                ->orWhereHas('assignedAdmin', function ($adminQuery) use ($search) {
-                    $adminQuery->where('name', 'like', '%'.$search.'%');
-                });
-        });
-    }
+                    })
+                    ->orWhereHas('assignedAdmin', function ($adminQuery) use ($search) {
+                        $adminQuery->where('name', 'like', '%'.$search.'%');
+                    });
+            });
+        }
 
         // Filter by admin (Super Admin only)
         if (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
@@ -241,7 +241,7 @@ class SourcingOrderController extends Controller
     {
         $this->authorize('update', $sourcingOrder);
 
-        if (!$sourcingOrder->shipping_company_id) {
+        if (! $sourcingOrder->shipping_company_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Aucune compagnie d\'expédition assignée à cette commande.',
@@ -251,7 +251,7 @@ class SourcingOrderController extends Controller
         try {
             $sourcingOrder->load(['shippingCompany', 'user', 'quotation.sourcingRequest']);
 
-            if (!$sourcingOrder->shippingCompany->google_sheet_id) {
+            if (! $sourcingOrder->shippingCompany->google_sheet_id) {
                 return response()->json([
                     'success' => false,
                     'message' => 'La compagnie d\'expédition n\'a pas de Google Sheet configuré.',
@@ -259,7 +259,7 @@ class SourcingOrderController extends Controller
             }
 
             // Rate limit check specific to this action if needed, or rely on service
-            
+
             $service = new \App\Services\ShippingCompanySheetService($sourcingOrder->shippingCompany);
             // $service->ensureHeaders(); // Optional: run only if suspected missing
 
@@ -268,7 +268,7 @@ class SourcingOrderController extends Controller
 
             $sourcingOrder->update([
                 'sheet_synced_at' => now(),
-                'sheet_sync_error' => null
+                'sheet_sync_error' => null,
             ]);
 
             return response()->json([
@@ -277,15 +277,15 @@ class SourcingOrderController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Manual shipping sheet sync failed for Order #{$sourcingOrder->id}: " . $e->getMessage());
-            
+            Log::error("Manual shipping sheet sync failed for Order #{$sourcingOrder->id}: ".$e->getMessage());
+
             $sourcingOrder->update([
-                'sheet_sync_error' => substr($e->getMessage(), 0, 1000)
+                'sheet_sync_error' => substr($e->getMessage(), 0, 1000),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur de synchronisation: ' . $e->getMessage(),
+                'message' => 'Erreur de synchronisation: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -436,19 +436,20 @@ class SourcingOrderController extends Controller
 
         return $pdf->download('sourcing_orders_'.date('Y-m-d_His').'.pdf');
     }
+
     public function duplicateLast(): RedirectResponse
     {
         $this->authorize('viewAny', SourcingOrder::class);
 
         $lastOrder = SourcingOrder::latest()->first();
 
-        if (!$lastOrder) {
+        if (! $lastOrder) {
             return back()->with('error', 'No orders found to duplicate.');
         }
 
         // Duplicate the order
         $newOrder = $lastOrder->replicate();
-        
+
         // Reset some fields for a clean test order
         $newOrder->status = 'paid'; // Set to paid so user can move it to shipment_preparing
         $newOrder->tracking_number = null;
@@ -461,7 +462,7 @@ class SourcingOrderController extends Controller
         $newOrder->save();
 
         Log::info("Order #{$lastOrder->id} duplicated to new Order #{$newOrder->id} for testing.", [
-            'admin_id' => auth()->id()
+            'admin_id' => auth()->id(),
         ]);
 
         return redirect()->route('admin.sourcing-orders.index')->with('success', "Order duplicated successfully! New Order Internal ID: {$newOrder->id} (Display ID: {$newOrder->display_id})");

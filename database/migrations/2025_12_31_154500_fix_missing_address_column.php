@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sourcing_request_destinations', function (Blueprint $table) {
-            if (!Schema::hasColumn('sourcing_request_destinations', 'address')) {
+            if (! Schema::hasColumn('sourcing_request_destinations', 'address')) {
                 $table->string('address')->after('quantity');
             }
         });

@@ -2,17 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\SourcingRequest;
 use App\Models\Quotation;
-use App\Models\SourcingOrder;
+use App\Models\User;
 
 class TimelineService
 {
     /**
      * Generate the timeline for a given user.
      *
-     * @param  \App\Models\User  $user
      * @return \Illuminate\Support\Collection
      */
     public function generateTimeline(User $user)
@@ -20,8 +17,8 @@ class TimelineService
         $timeline = [];
 
         $requests = $user->sourcingRequests()
-                         ->with(['quotation.order.user'])
-                         ->get();
+            ->with(['quotation.order.user'])
+            ->get();
 
         foreach ($requests as $request) {
             // Event: Sourcing Request created
@@ -31,7 +28,7 @@ class TimelineService
                 'title' => __('Sourcing request created'),
                 'description' => __('You created a request for :product.', ['product' => $request->product_name]),
                 'link' => route('client.sourcing-requests.show', $request),
-                'icon' => 'plus-circle'
+                'icon' => 'plus-circle',
             ];
 
             // Add events for terminal statuses of the sourcing request itself
@@ -42,7 +39,7 @@ class TimelineService
                     'title' => __('Sourcing Request Rejected'),
                     'description' => __('Your sourcing request for :product has been rejected.', ['product' => $request->product_name]),
                     'link' => route('client.sourcing-requests.show', $request),
-                    'icon' => 'x-circle'
+                    'icon' => 'x-circle',
                 ];
             } elseif ($request->status === 'cancelled') {
                 $timeline[] = [
@@ -51,7 +48,7 @@ class TimelineService
                     'title' => __('Sourcing Request Cancelled'),
                     'description' => __('Your sourcing request for :product has been cancelled.', ['product' => $request->product_name]),
                     'link' => route('client.sourcing-requests.show', $request),
-                    'icon' => 'ban'
+                    'icon' => 'ban',
                 ];
             } elseif ($request->status === 'completed') {
                 $timeline[] = [
@@ -60,7 +57,7 @@ class TimelineService
                     'title' => __('Sourcing Request Completed'),
                     'description' => __('Your sourcing request for :product has been completed.', ['product' => $request->product_name]),
                     'link' => route('client.sourcing-requests.show', $request),
-                    'icon' => 'check-circle'
+                    'icon' => 'check-circle',
                 ];
             }
 
@@ -77,7 +74,7 @@ class TimelineService
                         'product' => $request->product_name,
                     ]),
                     'link' => route('client.sourcing-requests.show', $request),
-                    'icon' => 'cash'
+                    'icon' => 'cash',
                 ];
 
                 if ($quotation->status === 'accepted') {
@@ -87,7 +84,7 @@ class TimelineService
                         'title' => __('Quotation accepted'),
                         'description' => __('You accepted the quotation for :product.', ['product' => $request->product_name]),
                         'link' => route('client.sourcing-requests.show', $request),
-                        'icon' => 'check-circle'
+                        'icon' => 'check-circle',
                     ];
                 } elseif ($quotation->status === 'rejected') {
                     $timeline[] = [
@@ -96,7 +93,7 @@ class TimelineService
                         'title' => __('Quotation Rejected'),
                         'description' => __('You rejected the quotation for :product.', ['product' => $request->product_name]),
                         'link' => route('client.sourcing-requests.show', $request),
-                        'icon' => 'x-circle'
+                        'icon' => 'x-circle',
                     ];
                 }
 
@@ -109,22 +106,22 @@ class TimelineService
                         'title' => __('Order created'),
                         'description' => __('Your order for :product has been created and is pending payment.', ['product' => $request->product_name]),
                         'link' => route('client.sourcing-orders.show', $order),
-                        'icon' => 'shopping-cart'
+                        'icon' => 'shopping-cart',
                     ];
 
                     // Track status changes by looking at the updated_at timestamp
                     if ($order->status !== 'pending_payment' && $order->updated_at->gt($order->created_at)) {
                         $timeline[] = [
-                           'date' => $order->updated_at,
-                           'type' => 'order_updated',
-                           'title' => __('Order status updated'),
-                           'description' => __('The status of your order for :product is now: :status', [
-                               'product' => $request->product_name,
-                               'status' => __(ucfirst(str_replace('_', ' ', $order->status)))
-                           ]),
-                           'link' => route('client.sourcing-orders.show', $order),
-                           'icon' => 'truck'
-                       ];
+                            'date' => $order->updated_at,
+                            'type' => 'order_updated',
+                            'title' => __('Order status updated'),
+                            'description' => __('The status of your order for :product is now: :status', [
+                                'product' => $request->product_name,
+                                'status' => __(ucfirst(str_replace('_', ' ', $order->status))),
+                            ]),
+                            'link' => route('client.sourcing-orders.show', $order),
+                            'icon' => 'truck',
+                        ];
                     }
                 }
             }

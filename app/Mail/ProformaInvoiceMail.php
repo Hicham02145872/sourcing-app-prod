@@ -2,16 +2,16 @@
 
 namespace App\Mail;
 
+use App\Models\SourcingOrder;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\SourcingOrder;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Support\Facades\Log;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProformaInvoiceMail extends Mailable implements ShouldQueue
 {
@@ -21,11 +21,12 @@ class ProformaInvoiceMail extends Mailable implements ShouldQueue
     // ❌ REMOVED: public $pdf; - Don't store the PDF as a property
 
     public $tries = 3;
+
     public $backoff = [60, 300, 900]; // 1min, 5min, 15min
 
     /**
      * Create a new message instance.
-     * 
+     *
      * ✅ Only accept and store the SourcingOrder model
      */
     public function __construct(SourcingOrder $sourcingOrder)
@@ -39,7 +40,7 @@ class ProformaInvoiceMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pro-forma Invoice for Your Order #' . $this->sourcingOrder->id,
+            subject: 'Pro-forma Invoice for Your Order #'.$this->sourcingOrder->id,
         );
     }
 
@@ -60,33 +61,33 @@ class ProformaInvoiceMail extends Mailable implements ShouldQueue
      * Get the attachments for the message.
      *
      * ✅ Generate PDF HERE, not in the constructor
-     * 
+     *
      * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
     public function attachments(): array
     {
-        Log::debug('ProformaInvoiceMail attachments method called for Sourcing Order #' . $this->sourcingOrder->id);
-        
+        Log::debug('ProformaInvoiceMail attachments method called for Sourcing Order #'.$this->sourcingOrder->id);
+
         // Generate the PDF when attachments are requested (after deserialization)
         $pdf = $this->generateProformaInvoicePDF();
-        
+
         return [
             Attachment::fromData(
-                fn () => $pdf->output(), 
-                'proforma-invoice-' . $this->sourcingOrder->id . '.pdf'
+                fn () => $pdf->output(),
+                'proforma-invoice-'.$this->sourcingOrder->id.'.pdf'
             )->withMime('application/pdf'),
         ];
     }
 
     /**
      * Generate the pro-forma invoice PDF
-     * 
+     *
      * ✅ This method runs AFTER the job is dequeued
      */
     private function generateProformaInvoicePDF()
     {
-        Log::debug('Generating PDF for Sourcing Order #' . $this->sourcingOrder->id);
-        
+        Log::debug('Generating PDF for Sourcing Order #'.$this->sourcingOrder->id);
+
         // Load necessary relationships
         $this->sourcingOrder->load([
             'user',

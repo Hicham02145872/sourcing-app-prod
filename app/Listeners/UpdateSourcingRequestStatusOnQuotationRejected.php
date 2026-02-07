@@ -3,8 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\QuotationRejected;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class UpdateSourcingRequestStatusOnQuotationRejected
 {
@@ -21,7 +19,6 @@ class UpdateSourcingRequestStatusOnQuotationRejected
     /**
      * Handle the event.
      *
-     * @param  \App\Events\QuotationRejected  $event
      * @return void
      */
     public function handle(QuotationRejected $event)

@@ -59,7 +59,7 @@ trait NotificationFilterTrait
         $assignedRequests = SourcingRequest::whereIn('id', array_unique($sourcingRequestIds))
             ->where(function ($query) use ($user) {
                 $query->where('assigned_to_admin_id', $user->id)
-                      ->orWhereNull('assigned_to_admin_id');
+                    ->orWhereNull('assigned_to_admin_id');
             })
             ->pluck('id')
             ->toArray();

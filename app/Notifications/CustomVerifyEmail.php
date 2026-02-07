@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Lang;
 class CustomVerifyEmail extends VerifyEmailBase implements ShouldQueue
 {
     use Queueable;
-    
+
     /**
      * Create a new notification instance.
      */

@@ -58,11 +58,11 @@ class SourcingRequestPolicy
         }
 
         if ($user->isAdmin()) {
-             // Admin can only delete if assigned to them (and maybe unassigned logic if desired, keeping strict for now)
-             return $sourcingRequest->assigned_to_admin_id === $user->id;
+            // Admin can only delete if assigned to them (and maybe unassigned logic if desired, keeping strict for now)
+            return $sourcingRequest->assigned_to_admin_id === $user->id;
         }
 
-        return $user->id === $sourcingRequest->user_id && 
+        return $user->id === $sourcingRequest->user_id &&
                in_array($sourcingRequest->status, ['pending', 'cancelled', 'rejected']);
     }
 

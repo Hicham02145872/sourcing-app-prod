@@ -12,6 +12,7 @@ class SocialMediaLinkController extends Controller
     public function edit()
     {
         $socialMediaLinks = SocialMediaLink::first();
+
         return view('admin.social-media-links.edit', compact('socialMediaLinks'));
     }
 

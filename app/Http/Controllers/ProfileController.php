@@ -14,6 +14,7 @@ class ProfileController extends Controller
     public function __construct(
         protected \App\Services\ImageProcessingService $imageService
     ) {}
+
     /**
      * Display the user's profile form.
      */
@@ -52,7 +53,7 @@ class ProfileController extends Controller
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
-        
+
         $request->user()->save();
 
         if ($request->user()->wasChanged('email')) {
@@ -81,6 +82,7 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         // Regenerate the CSRF token
         $request->session()->regenerateToken();
+
         // Redirect to the homepage after account deletion
         return Redirect::to('/');
     }

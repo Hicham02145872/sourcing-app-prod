@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class CategoryController extends Controller
 {
@@ -18,7 +18,7 @@ class CategoryController extends Controller
         $query = Category::query();
 
         if ($search = $request->query('search')) {
-            $query->where('name', 'like', '%' . $search . '%');
+            $query->where('name', 'like', '%'.$search.'%');
         }
 
         $categories = $query->orderBy('created_at', 'desc')->paginate(10); // Paginate with 10 categories per page
@@ -38,7 +38,6 @@ class CategoryController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request): RedirectResponse
-
     {
         // Validate the incoming request data
         $request->validate([
@@ -46,6 +45,7 @@ class CategoryController extends Controller
         ]);
         // Create a new category
         Category::create($request->all());
+
         // Redirect to the categories index with a success message
         return redirect()->route('admin.categories.index')->with('success', 'Category created successfully.');
     }
@@ -54,7 +54,6 @@ class CategoryController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(Category $category): View
-        
     {   // Pass the category to the edit view
         return view('admin.categories.edit', compact('category'));
     }
@@ -65,10 +64,11 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category): RedirectResponse
     {   // Validate the incoming request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'name' => 'required|string|max:255|unique:categories,name,'.$category->id,
         ]);
         // Update the category with the validated data
         $category->update($request->all());
+
         // Redirect to the categories index with a success message
         return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully.');
     }
@@ -80,6 +80,7 @@ class CategoryController extends Controller
     {
         // Delete the category
         $category->delete();
+
         // Redirect to the categories index with a success message
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully.');
     }

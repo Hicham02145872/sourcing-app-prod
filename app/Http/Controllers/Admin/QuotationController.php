@@ -21,9 +21,9 @@ class QuotationController extends Controller
         $baseQuery = Quotation::query();
 
         // Filter for non-Super Admins: REMOVED to allow full visibility (read-only)
-    // if (! Auth::user()->isSuperAdmin()) {
-    //    $baseQuery->where('assigned_to_admin_id', Auth::id());
-    // }
+        // if (! Auth::user()->isSuperAdmin()) {
+        //    $baseQuery->where('assigned_to_admin_id', Auth::id());
+        // }
 
         $totalQuotations = $baseQuery->count();
         $pendingQuotations = (clone $baseQuery)->where('status', 'pending')->count();
@@ -33,35 +33,35 @@ class QuotationController extends Controller
         $query = Quotation::with('sourcingRequest.user');
 
         // Filter for non-Super Admins: REMOVED to allow full visibility
-    // if (! Auth::user()->isSuperAdmin()) {
-    //    $query->where('assigned_to_admin_id', Auth::id());
-    // }
+        // if (! Auth::user()->isSuperAdmin()) {
+        //    $query->where('assigned_to_admin_id', Auth::id());
+        // }
 
         // Search
-    if ($request->has('search') && $request->search) {
-        $searchTerm = $request->search;
-        $query->where(function ($q) use ($searchTerm) {
-            $q->where('id', 'like', '%'.$searchTerm.'%')
-              ->orWhereHas('sourcingRequest', function ($srQuery) use ($searchTerm) {
-                $srQuery->where('product_name', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('id', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('note', 'like', '%'.$searchTerm.'%')
-                        ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
-                            $userQuery->where('name', 'like', '%'.$searchTerm.'%')
-                                      ->orWhere('email', 'like', '%'.$searchTerm.'%');
-                        })
-                        ->orWhereHas('destinations', function ($destQuery) use ($searchTerm) {
-                            $destQuery->where('address', 'like', '%'.$searchTerm.'%')
-                                      ->orWhereHas('country', function ($countryQuery) use ($searchTerm) {
-                                          $countryQuery->where('name', 'like', '%'.$searchTerm.'%');
-                                      });
-                        });
-            })
-            ->orWhereHas('assignedAdmin', function ($adminQuery) use ($searchTerm) {
-                $adminQuery->where('name', 'like', '%'.$searchTerm.'%');
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('id', 'like', '%'.$searchTerm.'%')
+                    ->orWhereHas('sourcingRequest', function ($srQuery) use ($searchTerm) {
+                        $srQuery->where('product_name', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('id', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('note', 'like', '%'.$searchTerm.'%')
+                            ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                                $userQuery->where('name', 'like', '%'.$searchTerm.'%')
+                                    ->orWhere('email', 'like', '%'.$searchTerm.'%');
+                            })
+                            ->orWhereHas('destinations', function ($destQuery) use ($searchTerm) {
+                                $destQuery->where('address', 'like', '%'.$searchTerm.'%')
+                                    ->orWhereHas('country', function ($countryQuery) use ($searchTerm) {
+                                        $countryQuery->where('name', 'like', '%'.$searchTerm.'%');
+                                    });
+                            });
+                    })
+                    ->orWhereHas('assignedAdmin', function ($adminQuery) use ($searchTerm) {
+                        $adminQuery->where('name', 'like', '%'.$searchTerm.'%');
+                    });
             });
-        });
-    }
+        }
 
         // Filter by status
         if ($request->has('status') && $request->status) {
@@ -69,21 +69,21 @@ class QuotationController extends Controller
         }
 
         // Sort: My Assignments -> Unassigned -> Others, then by Created At
-    if (Auth::check()) {
-        $userId = Auth::id();
-        $query->orderByRaw("CASE 
+        if (Auth::check()) {
+            $userId = Auth::id();
+            $query->orderByRaw('CASE 
             WHEN assigned_to_admin_id = ? THEN 1 
             WHEN assigned_to_admin_id IS NULL THEN 2 
             ELSE 3 
-        END", [$userId]);
-    }
+        END', [$userId]);
+        }
 
-    // Sorting from request
-    $sortBy = $request->get('sort_by', 'created_at');
-    $sortDirection = $request->get('sort_direction', 'desc');
-    $query->orderBy($sortBy, $sortDirection);
+        // Sorting from request
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $query->orderBy($sortBy, $sortDirection);
 
-    $quotations = $query->paginate(10);
+        $quotations = $query->paginate(10);
 
         return view('admin.quotations.index', compact(
             'quotations',
@@ -206,7 +206,7 @@ class QuotationController extends Controller
             foreach ($request->file('media_files') as $file) {
                 $path = $file->store('quotations/media', 'public');
                 $fileType = str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image';
-                
+
                 $quotation->media()->create([
                     'file_path' => $path,
                     'file_type' => $fileType,
@@ -333,11 +333,11 @@ class QuotationController extends Controller
         if ($request->hasFile('media_files')) {
             $maxSortOrder = $quotation->media()->max('sort_order') ?? -1;
             $sortOrder = $maxSortOrder + 1;
-            
+
             foreach ($request->file('media_files') as $file) {
                 $path = $file->store('quotations/media', 'public');
                 $fileType = str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image';
-                
+
                 $quotation->media()->create([
                     'file_path' => $path,
                     'file_type' => $fileType,

@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Country;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class CountryController extends Controller
 {
@@ -18,7 +18,7 @@ class CountryController extends Controller
         $query = Country::query();
 
         if ($search = $request->query('search')) {
-            $query->where('name', 'like', '%' . $search . '%')->orWhere('code', 'like', '%' . $search . '%');
+            $query->where('name', 'like', '%'.$search.'%')->orWhere('code', 'like', '%'.$search.'%');
         }
 
         $countries = $query->orderBy('created_at', 'desc')->paginate(10);
@@ -32,6 +32,7 @@ class CountryController extends Controller
     public function create(): View
     {
         $countries = Country::all();
+
         return view('admin.countries.create', compact('countries'));
     }
 
@@ -179,7 +180,7 @@ class CountryController extends Controller
             ['name' => 'Oman', 'code' => 'OM'],
             ['name' => 'Pakistan', 'code' => 'PK'],
             ['name' => 'Palau', 'code' => 'PW'],
-            ['name' => "Palestine, State of", 'code' => 'PS'],
+            ['name' => 'Palestine, State of', 'code' => 'PS'],
             ['name' => 'Panama', 'code' => 'PA'],
             ['name' => 'Papua New Guinea', 'code' => 'PG'],
             ['name' => 'Paraguay', 'code' => 'PY'],
@@ -196,7 +197,7 @@ class CountryController extends Controller
             ['name' => 'Saint Vincent and the Grenadines', 'code' => 'VC'],
             ['name' => 'Samoa', 'code' => 'WS'],
             ['name' => 'San Marino', 'code' => 'SM'],
-            ['name' => "Sao Tome and Principe", 'code' => 'ST'],
+            ['name' => 'Sao Tome and Principe', 'code' => 'ST'],
             ['name' => 'Saudi Arabia', 'code' => 'SA'],
             ['name' => 'Senegal', 'code' => 'SN'],
             ['name' => 'Serbia', 'code' => 'RS'],
@@ -218,9 +219,9 @@ class CountryController extends Controller
             ['name' => 'Syrian Arab Republic', 'code' => 'SY'],
             ['name' => 'Taiwan', 'code' => 'TW'],
             ['name' => 'Tajikistan', 'code' => 'TJ'],
-            ['name' => "Tanzania, United Republic of", 'code' => 'TZ'],
+            ['name' => 'Tanzania, United Republic of', 'code' => 'TZ'],
             ['name' => 'Thailand', 'code' => 'TH'],
-            ['name' => "Timor-Leste", 'code' => 'TL'],
+            ['name' => 'Timor-Leste', 'code' => 'TL'],
             ['name' => 'Togo', 'code' => 'TG'],
             ['name' => 'Tonga', 'code' => 'TO'],
             ['name' => 'Trinidad and Tobago', 'code' => 'TT'],
@@ -269,8 +270,8 @@ class CountryController extends Controller
     public function update(Request $request, Country $country): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:countries,name,' . $country->id,
-            'code' => 'required|string|max:2|unique:countries,code,' . $country->id,
+            'name' => 'required|string|max:255|unique:countries,name,'.$country->id,
+            'code' => 'required|string|max:2|unique:countries,code,'.$country->id,
         ]);
 
         $country->update($request->all());

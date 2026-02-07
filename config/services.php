@@ -50,4 +50,9 @@ return [
         'credentials_path' => env('GOOGLE_APPLICATION_CREDENTIALS_PATH', 'app/secure/credentials.json'),
     ],
 
+    '17track' => [
+        'api_key' => env('SEVENTEEN_TRACK_API_KEY'),
+        'base_url' => env('SEVENTEEN_TRACK_BASE_URL', 'https://api.17track.net/track/v2.2'),
+    ],
+
 ];

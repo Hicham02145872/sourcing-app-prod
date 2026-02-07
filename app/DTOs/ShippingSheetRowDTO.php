@@ -25,11 +25,11 @@ class ShippingSheetRowDTO
     public static function fromOrder(SourcingOrder $order): self
     {
         $sourcingRequest = $order->quotation->sourcingRequest;
-        
+
         $imageFormula = '';
         if ($sourcingRequest->product_image) {
-            $imageUrl = asset('storage/' . $sourcingRequest->product_image);
-            $imageFormula = '=IMAGE("' . $imageUrl . '")';
+            $imageUrl = asset('storage/'.$sourcingRequest->product_image);
+            $imageFormula = '=IMAGE("'.$imageUrl.'")';
         }
 
         return new self(

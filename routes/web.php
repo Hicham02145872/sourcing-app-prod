@@ -120,6 +120,10 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
         Route::resource('shipping-fees', App\Http\Controllers\Admin\ShippingFeeController::class)
             ->only(['index', 'edit']);
 
+        // Tracking Test
+        Route::get('/tracking/test', [App\Http\Controllers\Admin\TrackingTestController::class, 'index'])->name('tracking.test');
+        Route::post('/tracking/test', [App\Http\Controllers\Admin\TrackingTestController::class, 'test'])->name('tracking.test.run');
+
         // Shipping Companies Management (Super Admin Only)
         Route::get('/shipping-companies', [App\Http\Controllers\Admin\ShippingCompanyController::class, 'index'])->name('shipping-companies.index');
     });
@@ -156,9 +160,9 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
 
     // Tracking
     Route::get('/tracking', [App\Http\Controllers\Client\TrackingController::class, 'index'])->name('tracking.index');
-    Route::get('/tracking/data', [App\Http\Controllers\Client\TrackingController::class, 'data'])->name('tracking.data');
+    Route::middleware('throttle:10,1')->get('/tracking/data', [App\Http\Controllers\Client\TrackingController::class, 'data'])->name('tracking.data');
     Route::get('/tracking/17track', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackIndex'])->name('tracking.17track.index');
-    Route::get('/tracking/1track/data', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackData'])->name('tracking.17track.data');
+    Route::middleware('throttle:10,1')->get('/tracking/1track/data', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackData'])->name('tracking.17track.data');
 
     // Shipping Fees
     Route::get('/shipping-fees', [App\Http\Controllers\Client\ShippingFeeController::class, 'index'])->name('shipping-fees.index');

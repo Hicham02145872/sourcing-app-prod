@@ -12,6 +12,7 @@ class ShippingCompany extends Model
 
     protected $fillable = [
         'name',
+        'tracking_provider',
         'google_sheet_id',
         'sheet_name',
         'is_active',

@@ -35,6 +35,7 @@ class ProofOfPaymentUploaded extends Notification implements ShouldQueue
         if ($notifiable->fcm_token) {
             $channels[] = 'fcm';
         }
+
         return $channels;
     }
 

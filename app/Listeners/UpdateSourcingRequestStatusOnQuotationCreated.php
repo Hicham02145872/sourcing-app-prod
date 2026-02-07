@@ -3,8 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\QuotationCreated;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class UpdateSourcingRequestStatusOnQuotationCreated
 {
@@ -21,7 +19,6 @@ class UpdateSourcingRequestStatusOnQuotationCreated
     /**
      * Handle the event.
      *
-     * @param  \App\Events\QuotationCreated  $event
      * @return void
      */
     public function handle(QuotationCreated $event)

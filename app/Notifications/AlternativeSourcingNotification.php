@@ -12,9 +12,7 @@ class AlternativeSourcingNotification extends Notification implements ShouldQueu
 {
     use Queueable;
 
-    public function __construct(public Quotation $quotation)
-    {
-    }
+    public function __construct(public Quotation $quotation) {}
 
     public function via(object $notifiable): array
     {
@@ -47,9 +45,9 @@ class AlternativeSourcingNotification extends Notification implements ShouldQueu
             'sourcing_note' => $this->quotation->sourcing_note,
             'message' => __('Alternative sourcing location (:location) chosen for :product', [
                 'location' => ucfirst($this->quotation->actual_sourcing_location),
-                'product' => $this->quotation->sourcingRequest->product_name
+                'product' => $this->quotation->sourcingRequest->product_name,
             ]),
-            'type' => 'alternative_sourcing'
+            'type' => 'alternative_sourcing',
         ];
     }
 }

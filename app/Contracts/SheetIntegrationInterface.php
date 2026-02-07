@@ -2,8 +2,8 @@
 
 namespace App\Contracts;
 
-use App\Models\SourcingOrder;
 use App\Models\ShippingCompany;
+use App\Models\SourcingOrder;
 
 interface SheetIntegrationInterface
 {
