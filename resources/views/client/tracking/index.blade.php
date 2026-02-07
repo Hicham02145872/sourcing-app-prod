@@ -309,6 +309,7 @@
 
             async function fetchTrackingData(number) {
                 console.log('🚀 [TRACKING JS] fetchTrackingData started for:', number);
+                let shouldResetUI = true;
                 try {
                     resetUI();
                     
@@ -335,6 +336,18 @@
                     console.log('📡 [TRACKING JS] Response received:', response.status);
 
                     const result = await response.json();
+
+                    if (response.status === 202) { // Pending Status
+                        console.log('⏳ [TRACKING JS] Request Accepted (Pending)');
+                        if (elements.loadingState) elements.loadingState.classList.remove('hidden'); // Keep loading
+                        if (elements.loadingText) elements.loadingText.innerText = result.current_status || "{{ __('Processing request...') }}";
+                        if (elements.loadingSubtext) elements.loadingSubtext.innerText = "{{ __('This may take up to 2 minutes for live carrier data. Please wait...') }}";
+                        
+                        // Poll after 5 seconds
+                        setTimeout(() => fetchTrackingData(number), 5000);
+                        shouldResetUI = false; // Prevent finally block from hiding UI
+                        return; 
+                    }
                     
                     if (!response.ok) {
                         throw new Error(result.error || 'Server error occurred');
@@ -352,11 +365,13 @@
                     if (elements.errorMessage) elements.errorMessage.textContent = error.message;
                     if (elements.errorState) elements.errorState.classList.remove('hidden');
                 } finally {
-                    if (elements.loadingState) elements.loadingState.classList.add('hidden');
-                    stopLoadingMessages();
-                    if (elements.button) {
-                        elements.button.disabled = false;
-                        elements.button.innerHTML = '<span>{{ __("Track Shipment") }}</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>';
+                    if (shouldResetUI) {
+                        if (elements.loadingState) elements.loadingState.classList.add('hidden');
+                        stopLoadingMessages();
+                        if (elements.button) {
+                            elements.button.disabled = false;
+                            elements.button.innerHTML = '<span>{{ __("Track Shipment") }}</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>';
+                        }
                     }
                 }
             }
