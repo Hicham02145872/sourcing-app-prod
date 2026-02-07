@@ -97,7 +97,7 @@ class UnifiedTrackingService
 
         // Only cache if successful
         if ($result['success'] ?? false) {
-            $cacheTtl = config('tracking.cache_ttl', 30);
+            $cacheTtl = (int) config('tracking.cache_ttl', 30);
             $cacheKey = "tracking:{$trackingNumber}";
             Cache::put($cacheKey, $result, now()->addMinutes($cacheTtl));
             Log::info('💾 [UNIFIED SERVICE] Result successfully cached', [
