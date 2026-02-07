@@ -96,6 +96,8 @@ class SourcingOrderWorkflow extends Component
 
             if ($result['success']) {
                 $this->dispatch('show-success-toast', message: __('Statut de suivi récupéré avec succès.'));
+            } elseif (($result['status'] ?? '') === 'pending') {
+                $this->dispatch('show-success-toast', message: __('Actualisation en cours. Veuillez patienter quelques instants...'));
             } else {
                 $this->dispatch('show-error-toast', message: __('Erreur: ').($result['error'] ?? 'Inconnue'));
             }

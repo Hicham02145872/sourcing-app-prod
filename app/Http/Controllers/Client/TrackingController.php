@@ -111,6 +111,18 @@ class TrackingController extends Controller
                 ]);
             }
 
+            // Handle Pending State
+            if (($result['status'] ?? '') === 'pending') {
+                 return response()->json([
+                    'data' => [],
+                    'current_status' => 'Pending Update',
+                    'tracking_number' => $trackingNumber,
+                    'provider' => $result['provider'] ?? null,
+                    'message' => $result['error'], 
+                    'pending' => true
+                 ], 202); 
+            }
+
             \Log::warning('⚠️ [TRACKING CONTROLLER] Tracking failed', [
                 'tracking_number' => $trackingNumber,
                 'error' => $result['error'] ?? 'No tracking details found',
