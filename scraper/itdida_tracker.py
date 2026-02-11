@@ -33,7 +33,7 @@ class OptimizedOrderTrackerSelenium:
             options.add_argument("--remote-debugging-pipe")
 
         options.add_argument("--disable-blink-features=AutomationControlled")
-        options.add_argument("--log-level=3") # Suppress logging
+        options.add_argument("--log-level=3") 
         options.add_argument("--disable-infobars")
         
         # Hide automation flag property
@@ -84,8 +84,8 @@ class OptimizedOrderTrackerSelenium:
             self.driver.get(f"{base_url}?danHao={tracking_number}")
 
             try:
-                # Increased timeout to 20s
-                WebDriverWait(self.driver, 20).until(
+                # Increased timeout to 25s
+                WebDriverWait(self.driver, 25).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "tbody.ui-datatable-data tr"))
                 )
                 
@@ -93,6 +93,10 @@ class OptimizedOrderTrackerSelenium:
                      return {"success": False, "tracking_number": tracking_number, "error": "Numéro introuvable (No records found)"}
 
             except Exception:
+                 # Check if the page at least loaded
+                 if "danHao" not in self.driver.current_url:
+                     return {"success": False, "error": "Erreur de chargement de la page ITDIDA."}
+                 
                  return {
                      "success": False, 
                      "tracking_number": tracking_number, 
@@ -124,7 +128,6 @@ class OptimizedOrderTrackerSelenium:
     def _extract_tracking_data(self) -> List[Dict]:
         events = []
         try:
-            # We try a broader selector if the first fails
             rows = self.driver.find_elements(By.CSS_SELECTOR, "tbody.ui-datatable-data tr")
             if not rows:
                 rows = self.driver.find_elements(By.TAG_NAME, "tr")
@@ -165,11 +168,11 @@ if __name__ == "__main__":
     parser.add_argument('tracking_numbers', nargs='+', help='One or more tracking numbers')
     args = parser.parse_args()
 
-    # We only process the first tracking number for simplicity with Unified Service
     tracker = OptimizedOrderTrackerSelenium(headless=True)
     try:
         if args.tracking_numbers:
             result = tracker.get_order_status(args.tracking_numbers[0])
+            # Ensure we print valid JSON
             print(json.dumps(result, ensure_ascii=False))
         else:
             print(json.dumps({"success": False, "error": "No tracking number provided"}))

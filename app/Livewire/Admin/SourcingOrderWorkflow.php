@@ -14,13 +14,13 @@ class SourcingOrderWorkflow extends Component
 {
     public SourcingOrder $sourcingOrder;
 
-    public string $status;
+    public string $status = '';
 
-    public ?string $tracking_number;
+    public ?string $tracking_number = null;
 
-    public ?string $tracking_carrier;
+    public ?string $tracking_carrier = null;
 
-    public ?int $shipping_company_id;
+    public ?int $shipping_company_id = null;
 
     public $deepTrackingResult = null;
 

@@ -28,14 +28,13 @@ class ItdidaTrackingService extends AbstractSeleniumTrackingService
      */
     protected function parseScriptOutput($decoded): array
     {
-        // The python script returns an array of results, even for a single number.
-        // We need to get the first element.
-        $data = $decoded[0] ?? null;
+        // Handle both array of results and single result object
+        $data = isset($decoded[0]) ? $decoded[0] : $decoded;
 
-        if (! $data) {
+        if (! $data || !is_array($data)) {
             return [
                 'success' => false,
-                'error' => 'Réponse JSON vide ou invalide du script.',
+                'error' => 'Réponse JSON invalide du script.',
             ];
         }
 
