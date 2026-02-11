@@ -35,6 +35,9 @@ abstract class AbstractSeleniumTrackingService implements TrackingServiceInterfa
             'PYTHONIOENCODING' => 'utf-8',
             'CHROME_BINARY_PATH' => config('tracking.chrome_binary_path'),
             'CHROMEDRIVER_PATH' => config('tracking.chromedriver_path'),
+            'WDM_LOCAL' => '1',
+            'WDM_LOG_LEVEL' => '0',
+            'HOME' => storage_path('app/python_home'),
         ];
 
         if (config('tracking.proxy.enabled')) {
