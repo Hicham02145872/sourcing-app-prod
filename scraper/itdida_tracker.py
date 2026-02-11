@@ -11,8 +11,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from typing import List, Dict
 
-# STATUS_MAP and deep_translator REMOVED - Logic moved to PHP Service
-
 class OptimizedOrderTrackerSelenium:
 
     def __init__(self, headless: bool = True):
@@ -20,65 +18,62 @@ class OptimizedOrderTrackerSelenium:
         self.headless = headless
 
     def _init_driver(self):
-        chrome_options = Options()
+        options = Options()
         if self.headless:
-            chrome_options.add_argument("--headless=new")
+            options.add_argument("--headless=new")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--disable-setuid-sandbox")
+            options.add_argument("--remote-debugging-port=9222")
+            options.add_argument("--disable-software-rasterizer")
+            options.add_argument("--disable-extensions")
+            options.add_argument("--ash-no-coredump")
+            options.add_argument("--user-data-dir=/tmp/chrome-user-data-itdida-" + str(time.time()))
+            options.add_argument("--remote-debugging-pipe")
 
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        chrome_options.add_argument("--log-level=3") # Suppress logging
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument("--disable-infobars")
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument("--log-level=3") # Suppress logging
+        options.add_argument("--disable-infobars")
         
+        # Hide automation flag property
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
+
         prefs = {
             "profile.managed_default_content_settings.images": 2, 
             "profile.managed_default_content_settings.stylesheets": 2, 
         }
-        chrome_options.add_experimental_option("prefs", prefs)
-
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        chrome_options.add_experimental_option("useAutomationExtension", False)
+        options.add_experimental_option("prefs", prefs)
 
         # Proxy Configuration
         http_proxy = os.environ.get('HTTP_PROXY') or os.environ.get('http_proxy')
         https_proxy = os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy')
 
         if http_proxy or https_proxy:
-            # Prefer HTTPS proxy, fallback to HTTP
             proxy_url = https_proxy or http_proxy
             if proxy_url:
-                chrome_options.add_argument(f'--proxy-server={proxy_url}')
+                options.add_argument(f'--proxy-server={proxy_url}')
 
         chrome_binary = os.environ.get('CHROME_BINARY_PATH')
-        if chrome_binary:
-            chrome_options.binary_location = chrome_binary
+        if chrome_binary and os.path.exists(chrome_binary):
+            options.binary_location = chrome_binary
 
         # Priority: CHROMEDRIVER_PATH > webdriver-manager > default fallback
         driver_path = os.environ.get('CHROMEDRIVER_PATH')
-        if driver_path:
+        if driver_path and os.path.exists(driver_path):
             service = Service(executable_path=driver_path)
+            self.driver = webdriver.Chrome(service=service, options=options)
         else:
             try:
                 from webdriver_manager.chrome import ChromeDriverManager
-                service = Service(ChromeDriverManager().install())
-            except ImportError:
+                driver_install_path = ChromeDriverManager().install()
+                self.driver = webdriver.Chrome(service=Service(executable_path=driver_install_path), options=options)
+            except Exception:
                 # Generic fallback for Linux (assuming it's in PATH)
-                service = Service(executable_path='chromedriver')
+                self.driver = webdriver.Chrome(options=options)
 
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
-
-        self.driver.execute_cdp_cmd(
-            "Network.setUserAgentOverride",
-            {
-                "userAgent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/120.0.0.0 Safari/537.36"
-                )
-            }
-        )
+        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
     def get_order_status(self, tracking_number: str) -> Dict:
         if self.driver is None:
@@ -89,7 +84,8 @@ class OptimizedOrderTrackerSelenium:
             self.driver.get(f"{base_url}?danHao={tracking_number}")
 
             try:
-                WebDriverWait(self.driver, 15).until(
+                # Increased timeout to 20s
+                WebDriverWait(self.driver, 20).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "tbody.ui-datatable-data tr"))
                 )
                 
@@ -97,11 +93,10 @@ class OptimizedOrderTrackerSelenium:
                      return {"success": False, "tracking_number": tracking_number, "error": "Numéro introuvable (No records found)"}
 
             except Exception:
-                 # Debug screenshot removed for robustness unless needed
                  return {
                      "success": False, 
                      "tracking_number": tracking_number, 
-                     "error": "Timeout waiting for results.",
+                     "error": "Timeout waiting for results (ITDIDA).",
                  }
 
             events = self._extract_tracking_data()
@@ -113,7 +108,6 @@ class OptimizedOrderTrackerSelenium:
                     "error": "Aucune donnée trouvée après extraction.",
                 }
 
-            # PHP will handle translation and current status extraction
             return {
                 "success": True,
                 "tracking_number": tracking_number,
@@ -130,7 +124,10 @@ class OptimizedOrderTrackerSelenium:
     def _extract_tracking_data(self) -> List[Dict]:
         events = []
         try:
+            # We try a broader selector if the first fails
             rows = self.driver.find_elements(By.CSS_SELECTOR, "tbody.ui-datatable-data tr")
+            if not rows:
+                rows = self.driver.find_elements(By.TAG_NAME, "tr")
 
             for row in rows:
                 cells = row.find_elements(By.TAG_NAME, "td")
@@ -143,8 +140,6 @@ class OptimizedOrderTrackerSelenium:
                 location_cn = ""
                 if len(cells) >= 5:
                     location_cn = cells[4].text.strip()
-
-                # Translation Logic REMOVED - Raw data returned
 
                 event = {
                     "location_raw": location_cn,
@@ -170,18 +165,15 @@ if __name__ == "__main__":
     parser.add_argument('tracking_numbers', nargs='+', help='One or more tracking numbers')
     args = parser.parse_args()
 
+    # We only process the first tracking number for simplicity with Unified Service
     tracker = OptimizedOrderTrackerSelenium(headless=True)
-    results = []
-    
     try:
-        for tn in args.tracking_numbers:
-            result = tracker.get_order_status(tn)
-            results.append(result)
-        
-        print(json.dumps(results, ensure_ascii=False))
-
+        if args.tracking_numbers:
+            result = tracker.get_order_status(args.tracking_numbers[0])
+            print(json.dumps(result, ensure_ascii=False))
+        else:
+            print(json.dumps({"success": False, "error": "No tracking number provided"}))
     except Exception as e:
-        error_res = {"success": False, "error": str(e)}
-        print(json.dumps(error_res, ensure_ascii=False))
+        print(json.dumps({"success": False, "error": str(e)}, ensure_ascii=False))
     finally:
         tracker.close()

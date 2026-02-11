@@ -20,6 +20,12 @@ abstract class AbstractSeleniumTrackingService implements TrackingServiceInterfa
     public function __construct()
     {
         $this->pythonPath = config('tracking.python_path', 'python');
+        
+        // Ensure the python home directory exists for selenium cache
+        $pythonHome = storage_path('app/python_home');
+        if (!file_exists($pythonHome)) {
+            mkdir($pythonHome, 0775, true);
+        }
     }
 
     /**

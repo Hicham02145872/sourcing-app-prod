@@ -26,6 +26,8 @@ class ChoiceXPTracker:
             options.add_argument("--disable-software-rasterizer")
             options.add_argument("--disable-extensions")
             options.add_argument("--ash-no-coredump")
+            options.add_argument("--user-data-dir=/tmp/chrome-user-data-" + str(time.time()))
+            options.add_argument("--remote-debugging-pipe")
         
         # Anti-detection options
         options.add_argument("--disable-blink-features=AutomationControlled")
