@@ -2,6 +2,7 @@
     ['label' => 'Dashboard', 'url' => route('client.dashboard')],
     ['label' => 'Track Shipment']
 ]">
+    @featureVisible('tracking')
     <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4">
             
@@ -293,9 +294,19 @@
                 <h3 class="mt-2 text-sm font-medium text-slate-900 dark:text-white">No data found</h3>
                 <p class="mt-1 text-sm text-slate-500">We could not find any shipment history for this tracking number.</p>
             </div>
-
         </div>
     </div>
+    @else
+    <div class="py-20 text-center">
+        <div class="max-w-md mx-auto">
+            <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-amber-50 rounded-full">
+                <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tighter">Feature Coming Soon</h2>
+            <p class="mt-2 text-slate-500 font-medium">We are currently fine-tuning this module. Check back shortly for the final release.</p>
+        </div>
+    </div>
+    @endfeatureVisible
 
     @push('scripts')
     <script>

@@ -80,12 +80,20 @@ class DevDashboard extends Component
 
     // Email Preview
     public $selectedMailable = 'PaymentReminderMail';
+
     public $testMailOrderId = '';
+
     public $emailPreviewHtml = '';
+
     public $testEmailRecipient = '';
+
     public $emailTestResult = null;
+
     public $emailTestError = null;
+
     public $testMailOrders = [];
+
+    public $featureSearch = '';
 
     // Database Explorer
     public $tables = [];
@@ -106,10 +114,15 @@ class DevDashboard extends Component
 
     // New Features
     public $activeSessions = [];
+
     public $availableSeeders = [];
+
     public $healthStatus = [];
+
     public $queueJobs = [];
+
     public $seederLoading = null;
+
     public $trackingStats = [];
 
     public function boot()
@@ -133,6 +146,7 @@ class DevDashboard extends Component
         $this->loadCacheStats();
         $this->loadRecentNotifications();
         $this->loadEmailOrders();
+        $this->loadFeatureFlags();
     }
 
     public function captureServerStats()
@@ -181,6 +195,7 @@ class DevDashboard extends Component
         $this->checkHealth();
         $this->loadQueueJobs();
         $this->loadTrackingStats();
+        $this->loadFeatureFlags();
     }
 
     public function getFilteredTablesProperty()
@@ -259,6 +274,7 @@ class DevDashboard extends Component
             $line = trim($line);
             if (empty($line) || str_starts_with($line, '#')) {
                 $maskedLines[] = $line;
+
                 continue;
             }
 
@@ -334,13 +350,13 @@ class DevDashboard extends Component
 
     public function loadBackups()
     {
-        $this->backups = (new \App\Services\BackupService())->listBackups();
+        $this->backups = (new \App\Services\BackupService)->listBackups();
     }
 
     public function createDatabaseBackup()
     {
         try {
-            (new \App\Services\BackupService())->createDatabaseBackup();
+            (new \App\Services\BackupService)->createDatabaseBackup();
             $this->loadBackups();
             $this->dispatch('show-success-toast', message: 'Database backup created.');
         } catch (\Exception $e) {
@@ -351,7 +367,7 @@ class DevDashboard extends Component
     public function createFilesBackup()
     {
         try {
-            (new \App\Services\BackupService())->createFilesBackup();
+            (new \App\Services\BackupService)->createFilesBackup();
             $this->loadBackups();
             $this->dispatch('show-success-toast', message: 'Files backup created.');
         } catch (\Exception $e) {
@@ -398,7 +414,7 @@ class DevDashboard extends Component
             // Cleanup command string if it starts with 'php artisan'
             $artisanCmd = str_replace('\'php\' \'artisan\' ', '', $command);
             $artisanCmd = trim($artisanCmd, '\'');
-            
+
             \Illuminate\Support\Facades\Artisan::call($artisanCmd);
             $this->dispatch('show-success-toast', message: "Task '{$artisanCmd}' executed.");
         } catch (\Exception $e) {
@@ -440,8 +456,8 @@ class DevDashboard extends Component
         $directory = database_path('seeders');
         $files = File::files($directory);
         $this->availableSeeders = collect($files)
-            ->map(fn($file) => $file->getFilenameWithoutExtension())
-            ->filter(fn($name) => $name !== 'DatabaseSeeder')
+            ->map(fn ($file) => $file->getFilenameWithoutExtension())
+            ->filter(fn ($name) => $name !== 'DatabaseSeeder')
             ->values()
             ->toArray();
     }
@@ -453,7 +469,7 @@ class DevDashboard extends Component
             Artisan::call('db:seed', ['--class' => $seederClass, '--no-interaction' => true]);
             $this->dispatch('show-success-toast', message: "Seeder {$seederClass} executed.");
         } catch (\Exception $e) {
-            $this->dispatch('show-error-toast', message: 'Seeder failed: ' . $e->getMessage());
+            $this->dispatch('show-error-toast', message: 'Seeder failed: '.$e->getMessage());
         }
         $this->seederLoading = null;
         $this->loadData();
@@ -473,7 +489,7 @@ class DevDashboard extends Component
 
         // Redis
         try {
-            if (!class_exists('Redis') && config('database.redis.client') === 'phpredis') {
+            if (! class_exists('Redis') && config('database.redis.client') === 'phpredis') {
                 throw new \Exception('PHP Redis extension not installed');
             }
             $redis = \Illuminate\Support\Facades\Redis::connection();
@@ -501,15 +517,15 @@ class DevDashboard extends Component
         try {
             $apiKey = config('services.17track.key') ?? env('SEVENTEEN_TRACK_API_KEY');
             if ($apiKey) {
-                $client = new \GuzzleHttp\Client();
+                $client = new \GuzzleHttp\Client;
                 $response = $client->get('https://api.17track.net/track/v2.2/getcarrier', [
                     'headers' => ['17token' => $apiKey],
-                    'timeout' => 5
+                    'timeout' => 5,
                 ]);
                 if ($response->getStatusCode() === 200) {
                     $status['17Track API'] = ['ok' => true, 'message' => 'API Responsive'];
                 } else {
-                    $status['17Track API'] = ['ok' => false, 'message' => 'HTTP ' . $response->getStatusCode()];
+                    $status['17Track API'] = ['ok' => false, 'message' => 'HTTP '.$response->getStatusCode()];
                 }
             } else {
                 $status['17Track API'] = ['ok' => false, 'message' => 'API Key missing'];
@@ -529,6 +545,7 @@ class DevDashboard extends Component
             ->map(function ($job) {
                 $payload = json_decode($job->payload, true);
                 $displayName = $payload['displayName'] ?? ($payload['data']['commandName'] ?? 'Unknown');
+
                 return [
                     'id' => $job->id,
                     'queue' => $job->queue,
@@ -547,8 +564,6 @@ class DevDashboard extends Component
         $this->loadQueueJobs();
         $this->dispatch('show-success-toast', message: 'Job removed from queue.');
     }
-
-
 
     public $parsedLogs = [];
 
@@ -688,7 +703,6 @@ class DevDashboard extends Component
         $this->editingCell = null;
     }
 
-
     public function setQuery($sql)
     {
         $this->query = $sql;
@@ -735,8 +749,8 @@ class DevDashboard extends Component
                 $grouped[$provider] = ['success' => 0, 'failed' => 0, 'total' => 0];
             }
 
-            $isSuccess = ($stat->status !== 'Failed' && $stat->status !== 'Numéro introuvable' && $stat->status !== 'Error' && !str_contains(strtolower($stat->status), 'error'));
-            
+            $isSuccess = ($stat->status !== 'Failed' && $stat->status !== 'Numéro introuvable' && $stat->status !== 'Error' && ! str_contains(strtolower($stat->status), 'error'));
+
             if ($isSuccess) {
                 $grouped[$provider]['success'] += $stat->count;
             } else {
@@ -906,20 +920,22 @@ class DevDashboard extends Component
 
         if (empty($this->testMailOrderId)) {
             $this->emailTestError = 'Please select an order for preview';
+
             return;
         }
 
         try {
             $order = SourcingOrder::find($this->testMailOrderId);
-            if (!$order) {
+            if (! $order) {
                 $this->emailTestError = 'Order not found';
+
                 return;
             }
 
             $mailable = null;
             if ($this->selectedMailable === 'PaymentReminderMail') {
                 $mailable = new \App\Mail\PaymentReminderMail($order);
-            } else if ($this->selectedMailable === 'ProformaInvoiceMail') {
+            } elseif ($this->selectedMailable === 'ProformaInvoiceMail') {
                 $mailable = new \App\Mail\ProformaInvoiceMail($order);
             }
 
@@ -938,25 +954,28 @@ class DevDashboard extends Component
 
         if (empty($this->testMailOrderId)) {
             $this->emailTestError = 'Please select an order';
+
             return;
         }
 
         if (empty($this->testEmailRecipient)) {
             $this->emailTestError = 'Please enter a recipient email';
+
             return;
         }
 
         try {
             $order = SourcingOrder::find($this->testMailOrderId);
-            if (!$order) {
+            if (! $order) {
                 $this->emailTestError = 'Order not found';
+
                 return;
             }
 
             $mailable = null;
             if ($this->selectedMailable === 'PaymentReminderMail') {
                 $mailable = new \App\Mail\PaymentReminderMail($order);
-            } else if ($this->selectedMailable === 'ProformaInvoiceMail') {
+            } elseif ($this->selectedMailable === 'ProformaInvoiceMail') {
                 $mailable = new \App\Mail\ProformaInvoiceMail($order);
             }
 
@@ -967,7 +986,7 @@ class DevDashboard extends Component
             }
         } catch (\Exception $e) {
             $this->emailTestError = $e->getMessage();
-            $this->dispatch('show-error-toast', message: 'Error: ' . $e->getMessage());
+            $this->dispatch('show-error-toast', message: 'Error: '.$e->getMessage());
         }
     }
 
@@ -980,6 +999,7 @@ class DevDashboard extends Component
     {
         if (empty($this->queryResult)) {
             $this->dispatch('show-error-toast', message: 'No data to export.');
+
             return;
         }
 
@@ -992,7 +1012,7 @@ class DevDashboard extends Component
 
             $callback = function () {
                 $file = fopen('php://output', 'w');
-                
+
                 // Header row
                 if (count($this->queryResult) > 0) {
                     $firstRow = (array) $this->queryResult[0];
@@ -1003,13 +1023,103 @@ class DevDashboard extends Component
                 foreach ($this->queryResult as $row) {
                     fputcsv($file, (array) $row);
                 }
-                
+
                 fclose($file);
             };
 
             return response()->streamDownload($callback, $filename, $headers);
         } catch (\Exception $e) {
             $this->dispatch('show-error-toast', message: 'Export failed: '.$e->getMessage());
+        }
+    }
+
+    // Feature Flags
+    public $featureFlags = [];
+
+    public $newFeatureKey = '';
+
+    public $newFeatureName = '';
+
+    public function loadFeatureFlags()
+    {
+        $query = \App\Models\FeatureFlag::query();
+
+        if ($this->featureSearch) {
+            $query->where(function ($q) {
+                $q->where('key', 'like', '%'.$this->featureSearch.'%')
+                    ->orWhere('name', 'like', '%'.$this->featureSearch.'%');
+            });
+        }
+
+        $this->featureFlags = $query->get()->toArray();
+    }
+
+    public function updatedFeatureSearch()
+    {
+        $this->loadFeatureFlags();
+    }
+
+    public function toggleFeatureStatus($id, $status)
+    {
+        $flag = \App\Models\FeatureFlag::find($id);
+        if ($flag) {
+            $flag->update(['status' => $status]);
+            app(\App\Services\FeatureFlagService::class)->clearCache($flag->key);
+            $this->loadFeatureFlags();
+            $this->dispatch('show-success-toast', message: "Feature '{$flag->name}' status updated to {$status}.");
+        }
+    }
+
+    public function updateFeatureRoles($id, $roles)
+    {
+        $flag = \App\Models\FeatureFlag::find($id);
+        if ($flag) {
+            $flag->update(['roles' => $roles]);
+            app(\App\Services\FeatureFlagService::class)->clearCache($flag->key);
+            $this->loadFeatureFlags();
+            $this->dispatch('show-success-toast', message: "Feature '{$flag->name}' roles updated.");
+        }
+    }
+
+    public function addFeatureFlag()
+    {
+        $this->validate([
+            'newFeatureKey' => 'required|unique:feature_flags,key',
+            'newFeatureName' => 'required',
+        ]);
+
+        \App\Models\FeatureFlag::create([
+            'key' => $this->newFeatureKey,
+            'name' => $this->newFeatureName,
+            'status' => 'visible',
+            'roles' => [],
+        ]);
+
+        $this->newFeatureKey = '';
+        $this->newFeatureName = '';
+        $this->loadFeatureFlags();
+        $this->dispatch('show-success-toast', message: 'Feature flag added.');
+    }
+
+    public function initializeFeatureFlags()
+    {
+        try {
+            Artisan::call('db:seed', ['--class' => 'FeatureFlagSeeder', '--no-interaction' => true]);
+            $this->loadFeatureFlags();
+            $this->dispatch('show-success-toast', message: 'Feature flags initialized from defaults.');
+        } catch (\Exception $e) {
+            $this->dispatch('show-error-toast', message: 'Initialization failed: '.$e->getMessage());
+        }
+    }
+
+    public function deleteFeatureFlag($id)
+    {
+        $flag = \App\Models\FeatureFlag::find($id);
+        if ($flag) {
+            app(\App\Services\FeatureFlagService::class)->clearCache($flag->key);
+            $flag->delete();
+            $this->loadFeatureFlags();
+            $this->dispatch('show-success-toast', message: 'Feature flag deleted.');
         }
     }
 

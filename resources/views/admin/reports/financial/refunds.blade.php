@@ -2,12 +2,7 @@
     ['label' => __('Dashboard'), 'url' => route('admin.dashboard')],
     ['label' => __('Refund Reports')]
 ]">
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Refund Financial Report') }}
-        </h2>
-    </x-slot>
-
+    @featureVisible('refunds')
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
@@ -113,6 +108,17 @@
             </div>
         </div>
     </div>
+    @else
+    <div class="py-20 text-center">
+        <div class="max-w-md mx-auto">
+            <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-amber-50 rounded-full">
+                <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tighter">Report Unavailable</h2>
+            <p class="mt-2 text-slate-500 font-medium">The financial reporting engine for refunds is currently being synchronized with the new system flags.</p>
+        </div>
+    </div>
+    @endfeatureVisible
 
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

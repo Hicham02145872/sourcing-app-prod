@@ -16,7 +16,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        \Illuminate\Support\Facades\Log::info('AppServiceProvider registered');
+        $this->app->singleton(\App\Services\FeatureFlagService::class, function ($app) {
+            return new \App\Services\FeatureFlagService;
+        });
     }
 
     /**
@@ -81,6 +83,19 @@ class AppServiceProvider extends ServiceProvider
         });
         \Illuminate\Support\Facades\RateLimiter::for('google-sheets', function ($job) {
             return \Illuminate\Cache\RateLimiting\Limit::perMinute(50);
+        });
+
+        // Feature Flag Blade Directives
+        \Illuminate\Support\Facades\Blade::if('feature', function ($key) {
+            return app(\App\Services\FeatureFlagService::class)->isEnabled($key, auth()->user());
+        });
+
+        \Illuminate\Support\Facades\Blade::if('featureVisible', function ($key) {
+            return app(\App\Services\FeatureFlagService::class)->isVisible($key, auth()->user());
+        });
+
+        \Illuminate\Support\Facades\Blade::if('featureComingSoon', function ($key) {
+            return app(\App\Services\FeatureFlagService::class)->isComingSoon($key, auth()->user());
         });
     }
 }

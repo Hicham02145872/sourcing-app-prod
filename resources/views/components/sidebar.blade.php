@@ -76,6 +76,7 @@
                             <span>{{ __('My Orders') }}</span>
                         </a>
 
+                        @featureVisible('tracking')
                         <a href="{{ route('client.tracking.index') }}" 
                            class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('client.tracking.index') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -91,7 +92,9 @@
                             </svg>
                             <span>{{ __('Tracking History') }}</span>
                         </a>
+                        @endfeatureVisible
 
+                        @featureVisible('refunds')
                         <a href="{{ route('client.refund-requests.index') }}" 
                            class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('client.refund-requests.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -99,6 +102,7 @@
                             </svg>
                             <span>{{ __('Refunds') }}</span>
                         </a>
+                        @endfeatureVisible
 
 
                         <a href="{{ route('client.history') }}" 
@@ -183,6 +187,7 @@
                             <span>{{ __('Orders') }}</span>
                         </a>
 
+                        @featureVisible('refunds')
                         <a href="{{ route('admin.refund-requests.index') }}" 
                            class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.refund-requests.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -190,6 +195,7 @@
                             </svg>
                             <span>{{ __('Refunds') }}</span>
                         </a>
+                        @endfeatureVisible
 
                         @if(auth()->user()->isSuperAdmin())
                         <a href="{{ route('admin.shipping-fees.index') }}" 
@@ -201,14 +207,7 @@
                             <span>{{ __('Shipping Fees') }}</span>
                         </a>
 
-                        <a href="{{ route('admin.tracking.test') }}" 
-                           class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.tracking.test') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>{{ __('Test Tracking') }}</span>
-                        </a>
-
+                        @featureVisible('tracking')
                         <a href="{{ route('admin.tracking-logs.index') }}" 
                            class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.tracking-logs.index') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -216,6 +215,7 @@
                             </svg>
                             <span>{{ __('Tracking Logs') }}</span>
                         </a>
+                        @endfeatureVisible
                         @endif
                      </div>
                 </div>
