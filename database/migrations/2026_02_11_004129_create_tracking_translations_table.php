@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('tracking_translations', function (Blueprint $table) {
             $table->id();
+            $table->string('provider');
+            $table->text('source_text');
+            $table->text('translated_text');
+            $table->string('source_hash')->unique();
             $table->timestamps();
         });
     }
