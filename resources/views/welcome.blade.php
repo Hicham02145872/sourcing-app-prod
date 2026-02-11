@@ -236,7 +236,7 @@
         /* Brand Text Styling */
         #splash-brand {
             font-family: 'Style Script', cursive;
-            font-size: 42px;
+            font-size: 56px;
             line-height: 1.2;
             color: #0f172a;
             margin-top: 10px;
@@ -278,7 +278,7 @@
         .progress-container {
             position: absolute;
             bottom: 60px;
-            width: 240px;
+            width: 320px;
             height: 2px;
             background: #f1f5f9;
             border-radius: 4px;
@@ -303,9 +303,10 @@
         /* Animated connection lines */
         .connection-dot {
             position: absolute;
-            width: 4px; height: 4px;
-            background: rgba(239,119,34,0.2);
+            width: 10px; height: 10px;
+            background: rgba(239,119,34,0.25);
             border-radius: 50%;
+            filter: blur(1px);
             animation: orbit 20s linear infinite;
         }
 
@@ -328,7 +329,7 @@
         <div class="splash-content">
             <div class="logo-container">
                 <div class="laser-line"></div>
-                <img src="{{ asset('images/logo1.png') }}" alt="FastSourcingBrothers" class="splash-logo" style="width:280px;height:auto;">
+                <img src="{{ asset('images/logo1.png') }}" alt="FastSourcingBrothers" class="splash-logo" style="width:420px;height:auto;">
             </div>
 
             <div id="splash-brand"></div>
