@@ -58,7 +58,8 @@ class FasterTrackingService implements TrackingServiceInterface
                             'status' => $rawStatus, // Keep raw for reference if needed
                             'status_en' => $this->translationService->translate('Faster', $rawStatus, 'en'),
                             'status_fr' => $this->translationService->translate('Faster', $rawStatus, 'fr'),
-                            'location' => $this->translationService->translate('Faster', $rawLocation, 'fr'),
+                            'location' => $this->translationService->translate('Faster', $rawLocation, 'en'),
+                            'location_fr' => $this->translationService->translate('Faster', $rawLocation, 'fr'),
                         ];
                     }
 
@@ -71,7 +72,8 @@ class FasterTrackingService implements TrackingServiceInterface
                     return [
                         'success' => true,
                         'tracking_number' => $trackingNumber,
-                        'current_status' => $events[0]['status_fr'] ?? 'Unknown',
+                        'current_status' => $events[0]['status_en'] ?? 'Unknown',
+                        'current_status_fr' => $events[0]['status_fr'] ?? 'Inconnu',
                         'events' => $events,
                         'provider' => 'Faster',
                         'time_ms' => $elapsedTime

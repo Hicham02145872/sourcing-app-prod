@@ -1,6 +1,6 @@
 <x-app-layout :breadcrumb="[
-    ['label' => __('Dashboard'), 'url' => route('client.dashboard')],
-    ['label' => __('Track Order')]
+    ['label' => 'Dashboard', 'url' => route('client.dashboard')],
+    ['label' => 'Track Shipment']
 ]">
     <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4">
@@ -8,10 +8,10 @@
             <!-- Header Section -->
             <div class="mb-10 text-center sm:text-left">
                 <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                    {{ __('Track Your Shipment') }}
+                    Track Your Shipment
                 </h2>
                 <p class="mt-3 text-lg text-slate-500 dark:text-slate-400 max-w-2xl">
-                    {{ __('Enter your tracking number below to see real-time status updates and delivery progress.') }}
+                    Enter your tracking number below to see real-time status updates and delivery progress.
                 </p>
             </div>
 
@@ -28,10 +28,10 @@
                                 </div>
                                 <input type="text" id="trackingNumberInput" name="number" value="{{ $initialNumber ?? '' }}" 
                                        class="block w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-[#EF7722] text-slate-900 dark:text-white placeholder-slate-400 font-medium transition-all" 
-                                       placeholder="{{ __('Enter tracking number (e.g. FSB000043)') }}" required autofocus>
+                                       placeholder="Enter tracking number (e.g. FSB000043)" required autofocus>
                             </div>
                             <button type="submit" id="trackButton" class="sm:w-auto px-10 py-4 bg-gradient-to-r from-[#EF7722] to-[#d66616] hover:from-[#d66616] hover:to-[#c45a12] text-white font-bold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 group">
-                                <span>{{ __('Track Shipment') }}</span>
+                                <span>Track Shipment</span>
                                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                                 </svg>
@@ -43,12 +43,12 @@
                     <div id="performanceIndicator" class="hidden mt-8 flex flex-wrap items-center justify-center gap-8 text-xs font-bold text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-700 pt-8">
                         <div class="flex items-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                            <span class="text-slate-400 uppercase tracking-tighter">{{ __('Carrier:') }}</span>
+                            <span class="text-slate-400 uppercase tracking-tighter">Carrier:</span>
                             <span id="providerName" class="text-slate-900 dark:text-slate-200"></span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                            <span class="text-slate-400 uppercase tracking-tighter">{{ __('Latency:') }}</span>
+                            <span class="text-slate-400 uppercase tracking-tighter">Latency:</span>
                             <span id="responseTime" class="text-slate-900 dark:text-slate-200"></span>
                         </div>
                         <div id="cacheStatusBadge" class="flex items-center gap-2">
@@ -77,10 +77,10 @@
                         <div class="space-y-6 w-full">
                             <div>
                                 <h3 id="loadingText" class="text-xl font-black text-slate-900 dark:text-white transition-all duration-300">
-                                    {{ __('Authenticating...') }}
+                                    Authenticating...
                                 </h3>
                                 <p id="loadingSubtext" class="text-sm text-slate-500 font-bold mt-2 uppercase tracking-wide">
-                                    {{ __('Carrier handshaking in progress') }}
+                                    Carrier handshaking in progress
                                 </p>
                             </div>
                             
@@ -144,17 +144,17 @@
                             </svg>
                         </div>
                         <div class="flex-grow">
-                            <h3 class="text-lg font-black text-slate-900 dark:text-white mb-2">{{ __('Tracking Disruption') }}</h3>
+                            <h3 class="text-lg font-black text-slate-900 dark:text-white mb-2">Tracking Disruption</h3>
                             <p id="errorMessage" class="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed"></p>
                             
                             <div class="mt-6 flex flex-wrap gap-4 pt-4 border-t border-slate-100 dark:border-slate-700">
                                 <button onclick="location.reload()" class="text-xs font-black text-[#EF7722] hover:text-[#d66616] uppercase tracking-widest transition-colors flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                    {{ __('Retry') }}
+                                    Retry
                                 </button>
                                 <a href="mailto:support@sourcing-app.com" class="text-xs font-black text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 uppercase tracking-widest transition-colors flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                    {{ __('Support') }}
+                                    Support
                                 </a>
                             </div>
                         </div>
@@ -169,7 +169,7 @@
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                         <div>
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('Shipment ID') }}</span>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Shipment ID</span>
                             <div class="flex items-center gap-2 mt-1">
                                 <h3 id="resultTrackingNumber" class="text-2xl font-black text-slate-900 dark:text-white font-mono"></h3>
                                 <button onclick="copyTracking()" class="p-1 text-slate-400 hover:text-[#EF7722] transition-colors rounded">
@@ -179,7 +179,7 @@
                         </div>
                         
                         <div class="flex flex-col items-end">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('Current Status') }}</span>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Current Status</span>
                             <div id="latestStatusBadge" class="mt-1 px-4 py-1.5 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700">
                                 <span id="latestStatusText">--</span>
                             </div>
@@ -197,28 +197,28 @@
                                 <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-[#EF7722] flex items-center justify-center z-10 shadow-sm">
                                     <svg class="w-5 h-5 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </div>
-                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{{ __('Order') }}</span>
+                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">ORDER</span>
                             </div>
                             <!-- Step 2 -->
                             <div class="flex flex-col items-center">
                                 <div id="step2Dot" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center z-10 shadow-sm">
                                     <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9a1 1 0 01-1-1m3 0V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9a1 1 0 01-1-1m8 1a1 1 0 021 1v1a1 1 0 01-1 1h-1a1 1 0 00-1 1v1a1 1 0 01-1 1h-1a1 1 0 00-1 1v1a1 1 0 01-1 1H9m4-1V8a1 1 0 00-1-1h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 00-.293.707V16m0 0a1 1 0 001 1h6.586a1 1 0 00.707-.293l2.414-2.414a1 1 0 00.293-.707V8.414a1 1 0 00-.293-.707l-2.414-2.414a1 1 0 00-.707-.293H13"/></svg>
                                 </div>
-                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{{ __('In Transit') }}</span>
+                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">IN TRANSIT</span>
                             </div>
                             <!-- Step 3 -->
                             <div class="flex flex-col items-center">
                                 <div id="step3Dot" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center z-10 shadow-sm">
                                     <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                                 </div>
-                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{{ __('Out for Delivery') }}</span>
+                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">OUT FOR DELIVERY</span>
                             </div>
                             <!-- Step 4 -->
                             <div class="flex flex-col items-center">
                                 <div id="step4Dot" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center z-10 shadow-sm">
                                     <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </div>
-                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{{ __('Delivered') }}</span>
+                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">DELIVERED</span>
                             </div>
                         </div>
                     </div>
@@ -229,7 +229,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <p class="text-xs font-bold text-orange-800 dark:text-orange-300 leading-relaxed uppercase tracking-tight">
-                            {{ __('Note: From Dubai to your destination country, status updates are managed manually by our operations team. You will see real-time progress here as your order moves forward.') }}
+                            Note: From Dubai to your destination country, status updates are managed manually by our operations team. You will see real-time progress here as your order moves forward.
                         </p>
                     </div>
                 </div>
@@ -239,18 +239,18 @@
                     <!-- Left Column: Location and Date -->
                     <div class="lg:col-span-1 space-y-6">
                         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-                            <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mb-6 pb-2 border-b border-slate-100 dark:border-slate-700">{{ __('Latest Details') }}</h4>
+                            <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mb-6 pb-2 border-b border-slate-100 dark:border-slate-700">Latest Details</h4>
                             
                             <dl class="space-y-6">
                                 <div>
-                                    <dt class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('Last Location') }}</dt>
+                                    <dt class="text-xs font-bold text-slate-400 uppercase tracking-widest">Last Location</dt>
                                     <dd id="latestLocation" class="mt-1 text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                         <span>--</span>
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('Last Update') }}</dt>
+                                    <dt class="text-xs font-bold text-slate-400 uppercase tracking-widest">Last Update</dt>
                                     <dd id="latestDate" class="mt-1 text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         <span>--</span>
@@ -262,7 +262,7 @@
                         <!-- Map Card -->
                         <div id="mapContainer" class="hidden mt-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
-                                <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">{{ __('Shipment Location') }}</h4>
+                                <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Shipment Location</h4>
                             </div>
                             <div id="map" class="h-64 w-full z-0 relative"></div>
                         </div>
@@ -272,7 +272,7 @@
                     <div class="lg:col-span-2">
                         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 h-full overflow-hidden">
                             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
-                                <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">{{ __('Activity History') }}</h3>
+                                <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Activity History</h3>
                                 <span id="eventCountLabel" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400">0 Events</span>
                             </div>
                             <div class="p-6 sm:p-8">
@@ -290,8 +290,8 @@
                 <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-slate-900 dark:text-white">{{ __('No data found') }}</h3>
-                <p class="mt-1 text-sm text-slate-500">{{ __('We could not find any shipment history for this tracking number.') }}</p>
+                <h3 class="mt-2 text-sm font-medium text-slate-900 dark:text-white">No data found</h3>
+                <p class="mt-1 text-sm text-slate-500">We could not find any shipment history for this tracking number.</p>
             </div>
 
         </div>
@@ -300,21 +300,20 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ [TRACKING JS] DOMContentLoaded fired');
-            
-            // 1. Declare all variables/state first to avoid TDZ
+            // 1. Declare State
             let messageInterval;
+            let abortController = null;
             const messages = [
-                "{{ __('Connecting to carrier network...') }}",
-                "{{ __('Intercepting logistics signals...') }}",
-                "{{ __('Parsing shipment history...') }}",
-                "{{ __('Fetching real-time updates...') }}",
-                "{{ __('Analyzing transit route...') }}",
-                "{{ __('Decrypting tracking data...') }}",
-                "{{ __('Finalizing results...') }}"
+                "Connecting to carrier network...",
+                "Intercepting logistics signals...",
+                "Parsing shipment history...",
+                "Fetching real-time updates...",
+                "Analyzing transit route...",
+                "Decrypting tracking data...",
+                "Finalizing results..."
             ];
 
-            // 2. Cache DOM Elements
+            // 2. DOM Elements
             const elements = {
                 form: document.getElementById('trackingForm'),
                 input: document.getElementById('trackingNumberInput'),
@@ -347,28 +346,8 @@
                 cancelSearch: document.getElementById('cancelSearch')
             };
 
-            console.log('✅ [TRACKING JS] All elements initialized');
-
-            // 3. Helper Functions
-            if (elements.cancelSearch) {
-                elements.cancelSearch.addEventListener('click', () => {
-                    console.log('🛑 [TRACKING JS] Cancel button clicked');
-                    if (abortController) {
-                        abortController.abort();
-                        abortController = null;
-                        resetUI();
-                        if (elements.loadingState) elements.loadingState.classList.add('hidden');
-                        stopLoadingMessages();
-                        if (elements.button) {
-                            elements.button.disabled = false;
-                            elements.button.innerHTML = '<span>{{ __("Track Shipment") }}</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>';
-                        }
-                    }
-                });
-            }
-
+            // 3. UI Helpers
             function resetUI() {
-                console.log('🧹 [TRACKING JS] resetUI()');
                 if (elements.errorState) elements.errorState.classList.add('hidden');
                 if (elements.resultsContainer) elements.resultsContainer.classList.add('hidden');
                 if (elements.emptyState) elements.emptyState.classList.add('hidden');
@@ -376,24 +355,18 @@
             }
 
             function startLoadingMessages() {
-                console.log('📝 [TRACKING JS] startLoadingMessages()');
                 if (!elements.loadingText) return;
                 let i = 0;
                 let progress = 10;
                 if (messageInterval) clearInterval(messageInterval);
-                
-                // Initial jump
                 if (elements.loadingProgress) elements.loadingProgress.style.width = '15%';
 
                 messageInterval = setInterval(() => {
                     i++;
                     elements.loadingText.style.opacity = '0';
-                    
                     setTimeout(() => {
                         elements.loadingText.innerText = messages[i % messages.length];
                         elements.loadingText.style.opacity = '1';
-                        
-                        // Fake progress crawl
                         progress = Math.min(90, progress + (Math.random() * 15));
                         if (elements.loadingProgress) elements.loadingProgress.style.width = `${progress}%`;
                     }, 300);
@@ -401,136 +374,95 @@
             }
 
             function stopLoadingMessages() {
-                console.log('📝 [TRACKING JS] stopLoadingMessages()');
                 if (messageInterval) {
-                    clearInterval(messageInterval);
-                    messageInterval = null;
+                   clearInterval(messageInterval);
+                   messageInterval = null;
                 }
             }
 
-            let abortController = null;
-
-            async function fetchTrackingData(number) {
-                console.log('🚀 [TRACKING JS] fetchTrackingData started for:', number);
-                let shouldResetUI = true;
-                
-                // Abort any existing search
-                if (abortController) {
-                    abortController.abort();
+            function resetStatus() {
+                if (elements.button) {
+                    elements.button.disabled = false;
+                    elements.button.innerHTML = `<span>Track Shipment</span><svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
                 }
+                if (elements.cancelSearch) elements.cancelSearch.classList.add('hidden');
+                if (elements.loadingState) elements.loadingState.classList.add('hidden');
+                stopLoadingMessages();
+            }
+
+            // 4. Core Fetch Logic
+            async function fetchTrackingData(number) {
+                let shouldResetUI = true;
+                if (abortController) abortController.abort();
                 abortController = new AbortController();
 
                 try {
                     resetUI();
-                    
-                    // Stop global spinner
-                    window.dispatchEvent(new CustomEvent('loading-stop'));
-                    
                     if (elements.loadingState) elements.loadingState.classList.remove('hidden');
-                    startLoadingMessages();
-
+                    if (elements.cancelSearch) elements.cancelSearch.classList.remove('hidden');
                     if (elements.button) {
                         elements.button.disabled = true;
-                        elements.button.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> {{ __("Searching...") }}';
+                        elements.button.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Searching...</span>`;
                     }
+                    
+                    startLoadingMessages();
 
                     const url = `{{ route('client.tracking.data') }}?number=${encodeURIComponent(number)}`;
-                    console.log('🚀 [TRACKING JS] Fetching URL:', url);
-                    
                     const startTime = performance.now();
                     const response = await fetch(url, {
                         signal: abortController.signal,
                         headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                     });
                     const responseTime = Math.round(performance.now() - startTime);
-                    
-                    console.log('📡 [TRACKING JS] Response received:', response.status);
-
                     const result = await response.json();
 
-                    if (response.status === 202) { // Pending Status
-                        console.log('⏳ [TRACKING JS] Request Accepted (Pending)');
-                        if (elements.loadingState) elements.loadingState.classList.remove('hidden'); // Keep loading
-                        if (elements.loadingText) elements.loadingText.innerText = result.current_status || "{{ __('Processing request...') }}";
-                        if (elements.loadingSubtext) elements.loadingSubtext.innerText = "{{ __('This may take up to 2 minutes for live carrier data. Please wait...') }}";
-                        
-                        // Poll after 5 seconds
-                        setTimeout(() => {
-                            if (abortController && !abortController.signal.aborted) {
-                                fetchTrackingData(number);
-                            }
-                        }, 5000);
-                        shouldResetUI = false; // Prevent finally block from hiding UI
+                    if (response.status === 202) {
+                        if (elements.loadingText) elements.loadingText.innerText = result.current_status || "Processing request...";
+                        if (elements.loadingSubtext) elements.loadingSubtext.innerText = "This may take up to 2 minutes for live carrier data. Please wait...";
+                        setTimeout(() => { if (!abortController?.signal.aborted) fetchTrackingData(number); }, 5000);
+                        shouldResetUI = false;
                         return; 
                     }
                     
                     if (response.status === 404) {
-                        throw new Error("{{ __('Shipment Record Not Found') }}: " + (result.error || "{{ __('We could not locate this tracking number in any carrier system. Please verify the number or contact your agent.') }}"));
+                        throw new Error(`Shipment Not Found: ${result.error || "We could not locate this number. Please verify or contact support."}`);
                     }
                     
-                    if (!response.ok) {
-                        throw new Error(result.error || '{{ __("A connection error occurred. Please try again in few moments.") }}');
-                    }
+                    if (!response.ok) throw new Error(result.error || 'A connection error occurred.');
 
                     if (result.data && result.data.length > 0) {
                         processTrackingData(result, number, responseTime);
                     } else {
-                        console.warn('⚠️ [TRACKING JS] No data returned');
                         if (elements.emptyState) elements.emptyState.classList.remove('hidden');
                     }
 
                 } catch (error) {
-                    if (error.name === 'AbortError') {
-                        console.log('🛑 [TRACKING JS] Fetch aborted');
-                        return;
-                    }
-                    console.error('❌ [TRACKING JS] ERROR:', error);
-                    
-                    // Show friendly name for technical errors
-                    let displayError = error.message;
-                    if (displayError.includes('Failed to fetch')) {
-                        displayError = "{{ __('Network connection lost. Please check your internet.') }}";
-                    }
-
-                    if (elements.errorMessage) elements.errorMessage.textContent = displayError;
+                    if (error.name === 'AbortError') return;
+                    if (elements.errorMessage) elements.errorMessage.textContent = error.message.includes('Failed to fetch') ? "Network error. Please check your connection." : error.message;
                     if (elements.errorState) elements.errorState.classList.remove('hidden');
-                    
-                    // Specific behavior for 404
-                    if (error.message.includes("{{ __('Shipment Record Not Found') }}")) {
-                         // We could add extra UI here if needed
-                    }
                 } finally {
-                    if (shouldResetUI) {
-                        if (elements.loadingState) elements.loadingState.classList.add('hidden');
-                        stopLoadingMessages();
-                        if (elements.button) {
-                            elements.button.disabled = false;
-                            elements.button.innerHTML = '<span>{{ __("Track Shipment") }}</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>';
-                        }
-                    }
+                    if (shouldResetUI) resetStatus();
                 }
             }
 
             function processTrackingData(result, number, responseTime) {
-                console.log('📊 [TRACKING JS] processTrackingData');
                 const data = result.data;
                 const latest = data[0];
                 
                 if (elements.resultTrackingNumber) elements.resultTrackingNumber.textContent = number;
-                if (elements.latestStatusText) elements.latestStatusText.textContent = result.current_status || getField(latest, ['status_fr', 'status', 'Status']);
+                if (elements.latestStatusText) elements.latestStatusText.textContent = result.current_status || getField(latest, ['status_en', 'status', 'Status']) || 'Status Pending';
                 
                 const location = getField(latest, ['location', 'Location']);
-                if (elements.latestLocation) elements.latestLocation.textContent = location || 'N/A';
+                if (elements.latestLocation) elements.latestLocation.querySelector('span').textContent = location || 'N/A';
                 
-                // Update Map if location exists
                 if (location && location.trim() !== '') {
                     updateMap(location);
-                } else {
+                } else if(document.getElementById('mapContainer')) {
                     document.getElementById('mapContainer').classList.add('hidden');
                 }
 
                 const dateRaw = getField(latest, ['statusDate', 'created_at', 'date', 'Date']);
-                if (elements.latestDate) elements.latestDate.textContent = dateRaw ? formatDate(dateRaw) : 'N/A';
+                if (elements.latestDate) elements.latestDate.querySelector('span').textContent = dateRaw ? formatDate(dateRaw) : 'N/A';
 
                 showPerformanceMetrics(result.provider, responseTime);
 
@@ -548,246 +480,139 @@
                 }
             }
 
-            // Map Variable
+            // Map & Formatting Helpers
             let mapInstance = null;
-
             async function updateMap(locationQuery) {
                 const mapContainer = document.getElementById('mapContainer');
                 if (!mapContainer) return;
-
-                console.log('🗺️ [TRACKING JS] Updating map for:', locationQuery);
-
                 try {
-                    // Geocode the location
-                    // Nominatim requires a user-agent, but browsers send one automatically.
-                    // We add a delay or check to ensure we don't spam.
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1`, {
-                        headers: {
-                            'Accept-Language': 'en'
-                        }
-                    });
-                    
-                    if (!response.ok) throw new Error('Geocoding failed');
-                    
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1`, { headers: { 'Accept-Language': 'en' } });
                     const data = await response.json();
-                    
-                    if (data && data.length > 0) {
-                        const lat = data[0].lat;
-                        const lon = data[0].lon;
-                        
+                    if (data?.length > 0) {
+                        const { lat, lon } = data[0];
                         mapContainer.classList.remove('hidden');
-                        
-                        // Initialize map if needed
                         if (!mapInstance) {
                             mapInstance = L.map('map').setView([lat, lon], 13);
-                            
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            }).addTo(mapInstance);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
                         } else {
                             mapInstance.setView([lat, lon], 13);
-                            // Clear existing markers
-                            mapInstance.eachLayer((layer) => {
-                                if (layer instanceof L.Marker) {
-                                    mapInstance.removeLayer(layer);
-                                }
-                            });
+                            mapInstance.eachLayer(l => l instanceof L.Marker && mapInstance.removeLayer(l));
                         }
-
-                        L.marker([lat, lon]).addTo(mapInstance)
-                            .bindPopup(`<b>${escapeHtml(locationQuery)}</b>`)
-                            .openPopup();
-                            
-                        // Fix for Leaflet rendering in hidden container
-                        setTimeout(() => { mapInstance.invalidateSize(); }, 200);
-                        
+                        L.marker([lat, lon]).addTo(mapInstance).bindPopup(`<b>${escapeHtml(locationQuery)}</b>`).openPopup();
+                        setTimeout(() => mapInstance.invalidateSize(), 200);
                     } else {
-                        console.warn('🗺️ [TRACKING JS] Location not found by geocoder');
                         mapContainer.classList.add('hidden');
                     }
-
-                } catch (error) {
-                    console.error('🗺️ [TRACKING JS] Map error:', error);
-                    mapContainer.classList.add('hidden');
-                }
+                } catch (e) { mapContainer.classList.add('hidden'); }
             }
 
             function showPerformanceMetrics(provider, responseTime) {
                 if (!elements.performanceIndicator) return;
-                
                 const isCached = responseTime < 150;
-
                 if (elements.cacheDot && elements.cacheStatusText) {
-                    elements.cacheDot.className = isCached 
-                        ? 'w-2 h-2 rounded-full mr-2 bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]'
-                        : 'w-2 h-2 rounded-full mr-2 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]';
+                    elements.cacheDot.className = `w-2 h-2 rounded-full mr-2 ${isCached ? 'bg-green-500' : 'bg-blue-500'}`;
                     elements.cacheStatusText.textContent = isCached ? 'System Cache' : 'Live Data';
                 }
-
-                if (elements.responseTime) {
-                    elements.responseTime.textContent = responseTime < 1000 ? `${responseTime}ms` : `${(responseTime / 1000).toFixed(2)}s`;
-                }
-
-                if (provider && elements.providerName) {
-                    elements.providerName.textContent = provider.toUpperCase();
-                }
-
+                if (elements.responseTime) elements.responseTime.textContent = `${responseTime}ms`;
+                if (provider && elements.providerName) elements.providerName.textContent = provider.toUpperCase();
                 elements.performanceIndicator.classList.remove('hidden');
-                elements.performanceIndicator.classList.add('animate-fade-in');
             }
 
             function updateJourneyProgress(data, orderStatus) {
                 if (!elements.journeyProgressBar) return;
-                
-                const autoStatus = (data[0] ? (data[0].current_status || data[0].status_fr || data[0].status || '') : '').toLowerCase();
+                const autoStatus = (data[0] ? (data[0].current_status || data[0].status || '').toLowerCase() : '');
                 let percentage = 0;
-                
-                // 1. Calculate percentage based on AUTOMATED tracking (Selenium/API)
-                // Capped at 50% (In Transit) because carriers only track until Dubai.
                 if (autoStatus) {
-                    percentage = 25; // At least "Order" step if we have any automated data
-                    
-                    if (autoStatus.includes('transit') || autoStatus.includes('shipped') || autoStatus.includes('departed') || 
-                        autoStatus.includes('expéd') || autoStatus.includes('arrivé') || autoStatus.includes('signed') || 
-                        autoStatus.includes('livré') || autoStatus.includes('签收') || autoStatus.includes('reçus')) {
-                        percentage = 50; 
-                    }
+                    percentage = 25;
+                    if (/transit|shipped|departed|expéd|arrivé|signed|livré|签收|reçus/.test(autoStatus)) percentage = 50;
                 }
-
-                // 2. Override with MANUAL Admin Status (Post-Dubai Leg)
-                // This allows the timeline to reach 75% and 100% via Admin intervention.
                 if (orderStatus) {
                     const status = orderStatus.toLowerCase();
-                    
-                    if (status.includes('delivered') || status.includes('completed')) {
-                        percentage = Math.max(percentage, 100);
-                    } else if (status.includes('out_for_delivery') || status.includes('destination_country')) {
-                        percentage = Math.max(percentage, 75);
-                    } else if (status.includes('_uae') || status.includes('_china') || status.includes('transit')) {
-                        percentage = Math.max(percentage, 50);
-                    } else if (status === 'paid' || status === 'shipment_preparing') {
-                        percentage = Math.max(percentage, 25);
-                    }
+                    if (/delivered|completed/.test(status)) percentage = 100;
+                    else if (/out_for_delivery|destination_country/.test(status)) percentage = 75;
+                    else if (/_uae|_china|transit/.test(status)) percentage = Math.max(percentage, 50);
+                    else if (/paid|preparing/.test(status)) percentage = Math.max(percentage, 25);
                 }
-                
-                // If no data at all
                 if (percentage === 0) percentage = 25;
-                
-                // 3. UI Updates based on final percentage
-                if (percentage >= 100) {
-                    markStepFilled(elements.step2Dot);
-                    markStepFilled(elements.step3Dot);
-                    markStepFilled(elements.step4Dot);
-                } else if (percentage >= 75) {
-                    markStepFilled(elements.step2Dot);
-                    markStepFilled(elements.step3Dot);
-                    unmarkStep(elements.step4Dot);
-                } else if (percentage >= 50) {
-                    markStepFilled(elements.step2Dot);
-                    unmarkStep(elements.step3Dot);
-                    unmarkStep(elements.step4Dot);
-                } else {
-                    unmarkStep(elements.step2Dot);
-                    unmarkStep(elements.step3Dot);
-                    unmarkStep(elements.step4Dot);
-                }
+
+                if (percentage >= 100) { markStep(elements.step2Dot); markStep(elements.step3Dot); markStep(elements.step4Dot); }
+                else if (percentage >= 75) { markStep(elements.step2Dot); markStep(elements.step3Dot); unmarkStep(elements.step4Dot); }
+                else if (percentage >= 50) { markStep(elements.step2Dot); unmarkStep(elements.step3Dot); unmarkStep(elements.step4Dot); }
+                else { unmarkStep(elements.step2Dot); unmarkStep(elements.step3Dot); unmarkStep(elements.step4Dot); }
                 
                 elements.journeyProgressBar.style.width = `${percentage}%`;
             }
 
-            function markStepFilled(el) {
+            function markStep(el) {
                 if (!el) return;
                 el.classList.remove('border-slate-200', 'dark:border-slate-700');
-                el.classList.add('border-[#EF7722]', 'bg-white', 'dark:bg-slate-800');
-                el.querySelector('svg').classList.remove('text-slate-300');
-                el.querySelector('svg').classList.add('text-[#EF7722]');
+                el.classList.add('border-[#EF7722]');
+                el.querySelector('svg').classList.replace('text-slate-300', 'text-[#EF7722]');
             }
 
             function unmarkStep(el) {
                 if (!el) return;
                 el.classList.add('border-slate-200', 'dark:border-slate-700');
                 el.classList.remove('border-[#EF7722]');
-                el.querySelector('svg').classList.add('text-slate-300');
-                el.querySelector('svg').classList.remove('text-[#EF7722]');
+                el.querySelector('svg').classList.replace('text-[#EF7722]', 'text-slate-300');
             }
 
             function renderTimelineItem(item, isLatest) {
-                const status = getField(item, ['status_fr', 'status', 'Status']) || 'Status Update';
-                const details = getField(item, ['statusDetails', 'statusDetailsCn', 'details', 'remarks', 'Details', 'Remarks']);
+                const status = getField(item, ['status_en', 'status', 'Status']) || 'Update';
+                const details = getField(item, ['statusDetails', 'details', 'remarks', 'Remarks']);
                 const location = getField(item, ['location', 'Location']);
-                const dateStr = getField(item, ['statusDate', 'created_at', 'date', 'Date']);
+                const dateStr = getField(item, ['date', 'statusDate', 'Date']);
                 
-                const iconBg = isLatest ? 'bg-[#EF7722]' : 'bg-slate-200 dark:bg-slate-700';
-                const ring = isLatest ? 'ring-4 ring-[#EF7722]/20' : '';
-
                 const html = `
                     <div class="relative pl-8 group animate-fade-in">
-                        <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full ${iconBg} ${ring} border-2 border-white dark:border-slate-800 z-10 transition-all duration-300"></div>
+                        <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full ${isLatest ? 'bg-[#EF7722] ring-4 ring-[#EF7722]/20' : 'bg-slate-200 dark:bg-slate-700'} border-2 border-white dark:border-slate-800 z-10 transition-all"></div>
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-2">
                             <div class="flex-grow">
                                 <h4 class="text-sm font-bold ${isLatest ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}">${escapeHtml(status)}</h4>
-                                ${details ? `<p class="text-xs text-slate-500 dark:text-slate-500 mt-1 leading-relaxed">${escapeHtml(details)}</p>` : ''}
-                                ${location ? `
-                                    <div class="flex items-center mt-2 space-x-1.5">
-                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">${escapeHtml(location)}</span>
-                                    </div>
-                                ` : ''}
+                                ${details ? `<p class="text-xs text-slate-500 mt-1">${escapeHtml(details)}</p>` : ''}
+                                ${location ? `<div class="flex items-center mt-2 space-x-1"><svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-[10px] font-bold text-slate-400 uppercase">${escapeHtml(location)}</span></div>` : ''}
                             </div>
                             <div class="sm:text-right flex-shrink-0">
-                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/50 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-800">
-                                    ${dateStr ? formatDate(dateStr) : 'N/A'}
-                                </span>
+                                <span class="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-800">${dateStr ? formatDate(dateStr) : 'N/A'}</span>
                             </div>
                         </div>
                     </div>
                 `;
-                if (elements.timelineContainer) elements.timelineContainer.insertAdjacentHTML('beforeend', html);
+                elements.timelineContainer?.insertAdjacentHTML('beforeend', html);
             }
 
             function getField(obj, keys) {
                 if (!obj) return null;
-                const lowerObj = {};
-                for (let key in obj) {
-                    if (obj.hasOwnProperty(key)) lowerObj[key.toLowerCase()] = obj[key];
-                }
-                
+                const lowerObj = Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
                 for (let key of keys) {
-                    const k = key.toLowerCase();
-                    const val = lowerObj[k];
-                    if (val !== undefined && val !== null && val !== '') return val;
+                    const row = lowerObj[key.toLowerCase()];
+                    if (row) return row;
                 }
                 return null;
             }
 
-            function formatDate(dateString) {
-                if(!dateString) return '';
-                const d = new Date(dateString.replace(/-/g, "/")); 
+            function formatDate(s) {
+                if(!s) return '';
+                const d = new Date(s.replace(/-/g, "/")); 
                 return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
             }
 
-            function escapeHtml(text) {
-                if (!text) return text;
-                return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-            }
+            function escapeHtml(t) { return t?.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
             
-            // 4. Initial Execution & Events
-            if (elements.input && elements.input.value.trim() !== '') {
-                fetchTrackingData(elements.input.value.trim());
-            }
+            // Events
+            elements.form?.addEventListener('submit', (e) => { e.preventDefault(); const n = elements.input.value.trim(); if (n) fetchTrackingData(n); });
+            elements.cancelSearch?.addEventListener('click', () => { abortController?.abort(); resetStatus(); });
+            if (elements.input?.value.trim() !== '') fetchTrackingData(elements.input.value.trim());
 
-            if (elements.form) {
-                elements.form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const number = elements.input.value.trim();
-                    if (number) fetchTrackingData(number);
+            window.copyTracking = () => {
+                const text = elements.resultTrackingNumber?.innerText || '';
+                navigator.clipboard.writeText(text).then(() => {
+                    const btn = document.querySelector('button[onclick="copyTracking()"]');
+                    const old = btn.innerHTML;
+                    btn.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                    setTimeout(() => btn.innerHTML = old, 2000);
                 });
-            }
-
-            window.copyTracking = function() {
-                const text = elements.resultTrackingNumber ? elements.resultTrackingNumber.innerText : '';
-                if(text) { navigator.clipboard.writeText(text); alert("Tracking number copied!"); }
-            }
+            };
         });
     </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>

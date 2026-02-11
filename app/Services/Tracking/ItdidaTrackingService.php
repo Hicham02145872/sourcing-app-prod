@@ -59,9 +59,10 @@ class ItdidaTrackingService extends AbstractSeleniumTrackingService
         // Populate/Translate Current Status from latest event
         $latestEvent = $data['events'][0] ?? null;
         if ($latestEvent) {
-            $data['current_status'] = $latestEvent['status_fr'] ?? $latestEvent['status'] ?? 'Inconnu';
+            $data['current_status'] = $latestEvent['status_en'] ?? $latestEvent['status'] ?? 'Unknown';
+            $data['current_status_fr'] = $latestEvent['status_fr'] ?? $latestEvent['status'] ?? 'Inconnu';
         } elseif (!isset($data['current_status'])) {
-            $data['current_status'] = 'Aucun événement';
+            $data['current_status'] = 'No events';
         }
 
         return $data;
