@@ -17,10 +17,15 @@ class ChoiceXPTracker:
     def _init_driver(self):
         options = webdriver.ChromeOptions()
         if self.headless:
-            options.add_argument("--headless")
+            options.add_argument("--headless=new")
             options.add_argument("--disable-gpu")
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--disable-setuid-sandbox")
+            options.add_argument("--remote-debugging-port=9222")
+            options.add_argument("--disable-software-rasterizer")
+            options.add_argument("--disable-extensions")
+            options.add_argument("--ash-no-coredump")
         
         # Anti-detection options
         options.add_argument("--disable-blink-features=AutomationControlled")
@@ -39,19 +44,21 @@ class ChoiceXPTracker:
                 options.add_argument(f'--proxy-server={proxy_url}')
 
         chrome_binary = os.environ.get('CHROME_BINARY_PATH')
-        if chrome_binary:
+        if chrome_binary and os.path.exists(chrome_binary):
             options.binary_location = chrome_binary
-
+        
         # Priority: CHROMEDRIVER_PATH > webdriver-manager > default fallback
         driver_path = os.environ.get('CHROMEDRIVER_PATH')
-        if driver_path:
+        if driver_path and os.path.exists(driver_path):
             service = Service(executable_path=driver_path)
             self.driver = webdriver.Chrome(service=service, options=options)
         else:
             try:
                 from webdriver_manager.chrome import ChromeDriverManager
-                self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-            except ImportError:
+                driver_install_path = ChromeDriverManager().install()
+                self.driver = webdriver.Chrome(service=Service(executable_path=driver_install_path), options=options)
+            except Exception as e:
+                # Last resort fallback
                 self.driver = webdriver.Chrome(options=options)
         
         # Hide automation flag property
@@ -85,13 +92,10 @@ class ChoiceXPTracker:
                     date = block.find_element(By.CLASS_NAME, "cd-timeline-date").text
                     info = block.find_element(By.CLASS_NAME, "cd-timeline-content").text.strip()
                     
-                    # Simple heuristic: If " at " is present, take what's after. 
-                    # Or specific cities known in logistics.
                     location = ""
                     if " at " in info.lower():
                         parts = info.lower().split(" at ")
                         if len(parts) > 1:
-                            # Take the part after "at", clean up
                             loc_candidate = parts[1].split('.')[0].strip().title()
                             if len(loc_candidate) < 30: # sanity check
                                 location = loc_candidate
@@ -102,8 +106,6 @@ class ChoiceXPTracker:
                             if len(loc_candidate) < 30:
                                 location = loc_candidate
                     
-                    # No translation in python anymore. PHP handles it.
-
                     events.append({
                         "date": date,
                         "status": info,

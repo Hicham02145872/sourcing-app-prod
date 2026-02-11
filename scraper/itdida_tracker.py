@@ -64,9 +64,8 @@ class OptimizedOrderTrackerSelenium:
                 from webdriver_manager.chrome import ChromeDriverManager
                 service = Service(ChromeDriverManager().install())
             except ImportError:
-                # Manual fallback
-                default_path = r"D:\telechargements\chromedriver-win32\chromedriver-win32\chromedriver.exe"
-                service = Service(executable_path=default_path)
+                # Generic fallback for Linux (assuming it's in PATH)
+                service = Service(executable_path='chromedriver')
 
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
 

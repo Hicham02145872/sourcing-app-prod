@@ -26,7 +26,6 @@
                     </li>
                 </ol>
             </nav>
-
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 overflow-hidden mb-8">
                 <div class="px-6 py-6 border-b border-[#EBEBEB] dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
