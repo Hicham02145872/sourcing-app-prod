@@ -3,10 +3,9 @@ import json
 import time
 import argparse
 import os
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from typing import List, Dict
@@ -36,9 +35,9 @@ class OptimizedOrderTrackerSelenium:
         options.add_argument("--log-level=3") 
         options.add_argument("--disable-infobars")
         
-        # Hide automation flag property
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option("useAutomationExtension", False)
+        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 
         prefs = {
             "profile.managed_default_content_settings.images": 2, 
@@ -46,20 +45,10 @@ class OptimizedOrderTrackerSelenium:
         }
         options.add_experimental_option("prefs", prefs)
 
-        # Proxy Configuration
-        http_proxy = os.environ.get('HTTP_PROXY') or os.environ.get('http_proxy')
-        https_proxy = os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy')
-
-        if http_proxy or https_proxy:
-            proxy_url = https_proxy or http_proxy
-            if proxy_url:
-                options.add_argument(f'--proxy-server={proxy_url}')
-
         chrome_binary = os.environ.get('CHROME_BINARY_PATH')
         if chrome_binary and os.path.exists(chrome_binary):
             options.binary_location = chrome_binary
 
-        # Priority: CHROMEDRIVER_PATH > webdriver-manager > default fallback
         driver_path = os.environ.get('CHROMEDRIVER_PATH')
         if driver_path and os.path.exists(driver_path):
             service = Service(executable_path=driver_path)
@@ -70,7 +59,6 @@ class OptimizedOrderTrackerSelenium:
                 driver_install_path = ChromeDriverManager().install()
                 self.driver = webdriver.Chrome(service=Service(executable_path=driver_install_path), options=options)
             except Exception:
-                # Generic fallback for Linux (assuming it's in PATH)
                 self.driver = webdriver.Chrome(options=options)
 
         self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -82,30 +70,109 @@ class OptimizedOrderTrackerSelenium:
         base_url = "https://ydl.itdida.com/query.xhtml"
         try:
             self.driver.get(f"{base_url}?danHao={tracking_number}")
+            
+            # WAF and JS Wait
+            time.sleep(10)
 
-            try:
-                # Increased timeout to 25s
-                WebDriverWait(self.driver, 25).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "tbody.ui-datatable-data tr"))
-                )
-                
-                if "No records found" in self.driver.page_source: 
-                     return {"success": False, "tracking_number": tracking_number, "error": "Numéro introuvable (No records found)"}
+            # 1. Expand all rows to see detailed history
+            togglers = self.driver.find_elements(By.CLASS_NAME, "ui-row-toggler")
+            for t in togglers:
+                try:
+                    self.driver.execute_script("arguments[0].click();", t)
+                    time.sleep(1)
+                except:
+                    pass
 
-            except Exception:
-                 # Check if the page at least loaded
-                 if "danHao" not in self.driver.current_url:
-                     return {"success": False, "error": "Erreur de chargement de la page ITDIDA."}
-                 
-                 return {
-                     "success": False, 
-                     "tracking_number": tracking_number, 
-                     "error": "Timeout waiting for results (ITDIDA).",
-                 }
+            # 2. Extract events from ALL tables
+            tables = self.driver.find_elements(By.TAG_NAME, "table")
+            
+            events = []
+            seen_entries = set()
+            
+            # Pattern for Date/Time: 2025-11-22 23:00:00
+            ts_pattern = re.compile(r'(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})')
 
-            events = self._extract_tracking_data()
+            for table in tables:
+                rows = table.find_elements(By.TAG_NAME, "tr")
+                for row in rows:
+                    text = row.text.strip()
+                    ts_match = ts_pattern.search(text)
+                    
+                    if ts_match:
+                        cells = row.find_elements(By.TAG_NAME, "td")
+                        
+                        full_ts = f"{ts_match.group(1)} {ts_match.group(2)}"
+                        
+                        # Extracting status and location from cell values
+                        if len(cells) >= 3:
+                            # Heuristic for ITDIDA tables:
+                            # Index | Date | Time | Status | Location
+                            # OR
+                            # UserRef | Date | Time | Status | Dept | Qty | City
+                            
+                            row_vals = [c.text.strip() for c in cells if c.text.strip()]
+                            
+                            # Find indices
+                            date_idx = -1
+                            for i, v in enumerate(row_vals):
+                                if ts_match.group(1) in v:
+                                    date_idx = i
+                                    break
+                            
+                            if date_idx != -1:
+                                # Status is usually after Date/Time
+                                # If Time is in the same cell as Date or Status, we skip it
+                                # But let's look at the cells relative to date_idx
+                                
+                                # In the sub-table (history):
+                                # 0: Index, 1: DateTime (merged), 2: Status, 3: Location
+                                # In the main table:
+                                # 1: Ref, 2: Date, 3: Time Status (merged), 4: Dept...
+                                
+                                if len(row_vals) > date_idx + 1:
+                                    potential_status = row_vals[date_idx + 1]
+                                    # If time was in the same cell as status, regex it again
+                                    s_match = re.search(r'\d{2}:\d{2}:\d{2}\s*(.*)', potential_status)
+                                    status = s_match.group(1).strip() if s_match else potential_status
+                                    
+                                    location = row_vals[date_idx + 2] if len(row_vals) > date_idx + 2 else ""
+                                else:
+                                    status = "Inconnu"
+                                    location = ""
+                            else:
+                                status = "Inconnu"
+                                location = ""
+                        else:
+                            status = "Inconnu"
+                            location = ""
+
+                        # If status is just numbers or empty, try another way
+                        if not status or status.isdigit() or status == tracking_number:
+                             # Fallback to splitting the whole text
+                             remaining = text.replace(ts_match.group(0), "").replace(tracking_number, "").strip()
+                             parts = remaining.split()
+                             status = parts[0] if parts else "Inconnu"
+                             location = " ".join(parts[1:]) if len(parts) > 1 else ""
+
+                        # deduplication
+                        entry_key = f"{full_ts}|{status}"
+                        if entry_key not in seen_entries:
+                            events.append({
+                                "date": full_ts,
+                                "status": status,
+                                "location_raw": location,
+                                "reference": tracking_number
+                            })
+                            seen_entries.add(entry_key)
+
+            # Sort events by date (descending)
+            events.sort(key=lambda x: x['date'], reverse=True)
 
             if not events:
+                body_text = self.driver.find_element(By.TAG_NAME, "body").text
+                if "No records found" in body_text or "未找到" in body_text:
+                    return {"success": False, "tracking_number": tracking_number, "error": "Numéro introuvable."}
+                
                 return {
                     "success": False,
                     "tracking_number": tracking_number,
@@ -125,57 +192,22 @@ class OptimizedOrderTrackerSelenium:
                 "error": str(e)
             }
 
-    def _extract_tracking_data(self) -> List[Dict]:
-        events = []
-        try:
-            rows = self.driver.find_elements(By.CSS_SELECTOR, "tbody.ui-datatable-data tr")
-            if not rows:
-                rows = self.driver.find_elements(By.TAG_NAME, "tr")
-
-            for row in rows:
-                cells = row.find_elements(By.TAG_NAME, "td")
-                
-                if len(cells) < 4:
-                    continue
-
-                status_cn = cells[3].text.strip()
-                
-                location_cn = ""
-                if len(cells) >= 5:
-                    location_cn = cells[4].text.strip()
-
-                event = {
-                    "location_raw": location_cn,
-                    "step": cells[0].text.strip(),
-                    "reference": cells[1].text.strip(),
-                    "date": cells[2].text.strip(),
-                    "status": status_cn
-                }
-
-                events.append(event)
-        except Exception:
-            pass
-
-        return events
-
     def close(self):
         if self.driver:
             self.driver.quit()
             self.driver = None
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Track ITDIDA shipment.')
-    parser.add_argument('tracking_numbers', nargs='+', help='One or more tracking numbers')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('tracking_numbers', nargs='+')
     args = parser.parse_args()
-
     tracker = OptimizedOrderTrackerSelenium(headless=True)
     try:
         if args.tracking_numbers:
             result = tracker.get_order_status(args.tracking_numbers[0])
-            # Ensure we print valid JSON
             print(json.dumps(result, ensure_ascii=False))
         else:
-            print(json.dumps({"success": False, "error": "No tracking number provided"}))
+            print(json.dumps({"success": False, "error": "No tracking number"}))
     except Exception as e:
         print(json.dumps({"success": False, "error": str(e)}, ensure_ascii=False))
     finally:
