@@ -28,6 +28,16 @@ class ChoiceXPTracker:
         options.add_experimental_option('useAutomationExtension', False)
         options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 
+        # Proxy Configuration
+        http_proxy = os.environ.get('HTTP_PROXY') or os.environ.get('http_proxy')
+        https_proxy = os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy')
+
+        if http_proxy or https_proxy:
+            # Prefer HTTPS proxy, fallback to HTTP
+            proxy_url = https_proxy or http_proxy
+            if proxy_url:
+                options.add_argument(f'--proxy-server={proxy_url}')
+
         chrome_binary = os.environ.get('CHROME_BINARY_PATH')
         if chrome_binary:
             options.binary_location = chrome_binary
@@ -70,15 +80,34 @@ class ChoiceXPTracker:
             
             blocks = self.driver.find_elements(By.CLASS_NAME, "cd-timeline-block")
             events = []
-            
             for block in blocks:
                 try:
                     date = block.find_element(By.CLASS_NAME, "cd-timeline-date").text
-                    info = block.find_element(By.CLASS_NAME, "cd-timeline-content").text
+                    info = block.find_element(By.CLASS_NAME, "cd-timeline-content").text.strip()
+                    
+                    # Simple heuristic: If " at " is present, take what's after. 
+                    # Or specific cities known in logistics.
+                    location = ""
+                    if " at " in info.lower():
+                        parts = info.lower().split(" at ")
+                        if len(parts) > 1:
+                            # Take the part after "at", clean up
+                            loc_candidate = parts[1].split('.')[0].strip().title()
+                            if len(loc_candidate) < 30: # sanity check
+                                location = loc_candidate
+                    elif " in " in info.lower():
+                         parts = info.lower().split(" in ")
+                         if len(parts) > 1:
+                            loc_candidate = parts[1].split('.')[0].strip().title()
+                            if len(loc_candidate) < 30:
+                                location = loc_candidate
+                    
+                    # No translation in python anymore. PHP handles it.
+
                     events.append({
                         "date": date,
                         "status": info,
-                        "location": "" # ChoiceXP might not separate location
+                        "location": location
                     })
                 except:
                     continue

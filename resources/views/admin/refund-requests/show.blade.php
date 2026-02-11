@@ -104,8 +104,17 @@
                                     <dd class="mt-2 text-sm font-bold text-slate-800">{{ __($refundRequest->reason_category) }}</dd>
                                 </div>
                                 <div>
+                                    <dt class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('Damaged Quantity') }}</dt>
+                                    <dd class="mt-2 text-sm font-bold text-slate-900">
+                                        <span class="text-red-600">{{ $refundRequest->damaged_quantity ?? 0 }}</span>
+                                        <span class="text-slate-400 mx-1">/</span>
+                                        <span class="text-slate-600">{{ $refundRequest->sourcingOrder->quotation->sourcingRequest->countries->sum('pivot.quantity') }}</span>
+                                        <span class="text-[10px] text-slate-400 ml-1 font-medium italic">({{ __('Total Ordered') }})</span>
+                                    </dd>
+                                </div>
+                                <div>
                                     <dt class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('Amount Requested') }}</dt>
-                                    <dd class="mt-2 text-sm font-bold text-slate-900">{{ number_format($refundRequest->amount_requested, 2) }} USD</dd>
+                                    <dd class="mt-2 text-sm font-bold text-slate-900">{{ number_format($refundRequest->amount_requested, 2) }} {{ $refundRequest->sourcingOrder->quotation->currency }}</dd>
                                 </div>
                             </div>
                             <div>
@@ -117,11 +126,91 @@
                         </div>
                     </div>
 
-                    <!-- Evidence Gallery -->
+                    <!-- Product Context Comparison -->
+                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-slate-900">{{ __('3-Way Visual Verification') }}</h3>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ __('Workflow Comparison') }}</span>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- 1. Original Request Image -->
+                                <div class="space-y-3">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">{{ __('Original Wanted') }}</label>
+                                    <div class="relative aspect-square rounded-xl border-2 border-slate-100 bg-slate-50 overflow-hidden group cursor-pointer" onclick="openMediaModal('{{ $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image ? asset('storage/' . $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image) : asset('assets/images/placeholder.png') }}', 'image')">
+                                        <img src="{{ $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image ? asset('storage/' . $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image) : asset('assets/images/placeholder.png') }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                        <div class="absolute inset-x-0 bottom-0 bg-black/60 p-2 opacity-0 group-hover:opacity-100 transition-opacity text-center">
+                                            <span class="text-white text-[9px] font-black uppercase tracking-widest">{{ __('Enlarge Original') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Actual Sourced Image (Quotation) -->
+                                <div class="space-y-3">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">{{ __('Actual Sourced') }}</label>
+                                    @php
+                                        $realImage = $refundRequest->sourcingOrder->quotation->real_product_image;
+                                        // Fallback to first image in media collection if real_product_image is null
+                                        if (!$realImage && $refundRequest->sourcingOrder->quotation->media->count() > 0) {
+                                            $firstImageMedia = $refundRequest->sourcingOrder->quotation->media->where('file_type', 'image')->first();
+                                            $realImage = $firstImageMedia ? $firstImageMedia->file_path : null;
+                                        }
+                                        $realImageUrl = $realImage ? asset('storage/' . $realImage) : null;
+                                    @endphp
+                                    <div class="relative aspect-square rounded-xl border-2 border-slate-100 bg-slate-50 overflow-hidden group cursor-pointer" @if($realImageUrl) onclick="openMediaModal('{{ $realImageUrl }}', 'image')" @endif>
+                                        @if($realImageUrl)
+                                            <img src="{{ $realImageUrl }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                            <div class="absolute inset-x-0 bottom-0 bg-black/60 p-2 opacity-0 group-hover:opacity-100 transition-opacity text-center">
+                                                <span class="text-white text-[9px] font-black uppercase tracking-widest">{{ __('Enlarge Sourced') }}</span>
+                                            </div>
+                                        @else
+                                            <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2">
+                                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span class="text-[9px] font-black uppercase tracking-tighter">{{ __('No Sourced Image') }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- 3. Damage Evidence -->
+                                <div class="space-y-3">
+                                    <label class="text-[10px] font-bold text-red-400 uppercase tracking-wider block text-center">{{ __('Reported Damage') }}</label>
+                                    @php
+                                        $firstEvidence = $refundRequest->evidence_paths[0] ?? null;
+                                        $evidenceUrl = $firstEvidence ? asset('storage/' . $firstEvidence) : null;
+                                        $isVid = $firstEvidence && in_array(strtolower(pathinfo($firstEvidence, PATHINFO_EXTENSION)), ['mp4', 'mov', 'avi', 'webm']);
+                                    @endphp
+                                    <div class="relative aspect-square rounded-xl border-2 border-red-100 bg-red-50/30 overflow-hidden group cursor-pointer" @if($evidenceUrl) onclick="openMediaModal('{{ $evidenceUrl }}', '{{ $isVid ? 'video' : 'image' }}')" @endif>
+                                        @if($evidenceUrl)
+                                            @if($isVid)
+                                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-800 bg-slate-900 border-2 border-red-200">
+                                                    <svg class="w-12 h-12 mb-1 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                    <span class="text-[9px] font-black text-white uppercase tracking-tighter">{{ __('Play Evidence') }}</span>
+                                                </div>
+                                            @else
+                                                <img src="{{ $evidenceUrl }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                            @endif
+                                            <div class="absolute inset-x-0 bottom-0 bg-red-600/80 p-2 opacity-0 group-hover:opacity-100 transition-opacity text-center">
+                                                <span class="text-white text-[9px] font-black uppercase tracking-widest">{{ __('Enlarge Evidence') }}</span>
+                                            </div>
+                                        @else
+                                            <div class="w-full h-full flex flex-col items-center justify-center text-red-200 gap-2">
+                                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                <span class="text-[9px] font-black uppercase tracking-tighter">{{ __('No Evidence Provided') }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Client Evidence Gallery -->
                     @if($refundRequest->evidence_paths && count($refundRequest->evidence_paths) > 0)
                         <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                                <h3 class="text-sm font-bold text-slate-900">{{ __('Supporting Evidence') }} ({{ count($refundRequest->evidence_paths) }})</h3>
+                            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                                <h3 class="text-sm font-bold text-slate-900">{{ __('Client Evidence Portfolio') }}</h3>
+                                <span class="bg-blue-50 text-blue-600 text-[10px] font-black px-2 py-0.5 rounded-full border border-blue-100">{{ count($refundRequest->evidence_paths) }} {{ __('Files') }}</span>
                             </div>
                             <div class="p-6">
                                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -130,15 +219,18 @@
                                             $extension = pathinfo($path, PATHINFO_EXTENSION);
                                             $isVideo = in_array(strtolower($extension), ['mp4', 'mov', 'avi', 'webm']);
                                         @endphp
-                                        <div class="group relative aspect-square rounded-lg border border-slate-100 bg-slate-50 overflow-hidden cursor-pointer hover:border-orange-500 transition-all duration-200" onclick="openMediaModal('{{ asset('storage/' . $path) }}', '{{ $isVideo ? 'video' : 'image' }}')">
+                                        <div class="group relative aspect-square rounded-xl border border-slate-100 bg-slate-50 overflow-hidden cursor-pointer hover:border-orange-500 transition-all duration-200" onclick="openMediaModal('{{ asset('storage/' . $path) }}', '{{ $isVideo ? 'video' : 'image' }}')">
                                             @if($isVideo)
-                                                <div class="w-full h-full flex items-center justify-center text-slate-400">
-                                                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
+                                                    <svg class="w-10 h-10 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                    <span class="text-[9px] font-black uppercase tracking-tighter">{{ __('Play Video') }}</span>
                                                 </div>
                                             @else
-                                                <img src="{{ asset('storage/' . $path) }}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
+                                                <img src="{{ asset('storage/' . $path) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                                             @endif
-                                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
@@ -179,7 +271,29 @@
                             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
                                 <h3 class="text-sm font-bold text-slate-900">{{ __('Processing Resolution') }}</h3>
                             </div>
-                            <form action="{{ route('admin.refund-requests.update-status', $refundRequest) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6" x-data="{ decision: '', amount: '{{ $refundRequest->amount_requested }}' }">
+                            <form action="{{ route('admin.refund-requests.update-status', $refundRequest) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6" 
+                                x-data="{ 
+                                    decision: '', 
+                                    amount: '{{ $refundRequest->amount_requested }}',
+                                    totalOrder: {{ $refundRequest->sourcingOrder->total_amount }},
+                                    totalQty: {{ $refundRequest->sourcingOrder->quotation->sourcingRequest->countries->sum('pivot.quantity') }},
+                                    damagedQty: {{ $refundRequest->damaged_quantity ?? 0 }},
+                                    templates: {
+                                        insufficient: '{{ __('Insufficient evidence provided. Please upload clear photos showing the damage and the shipping label.') }}',
+                                        quality: '{{ __('Quality issues fall under standard manufacturer variance and do not qualify for a full refund based on terms.') }}',
+                                        damaged: '{{ __('Refund approved for the reported damaged items after visual verification.') }}',
+                                        expired: '{{ __('The claim was submitted outside of the allowed 48-hour window after delivery.') }}',
+                                        mismatch: '{{ __('The provided evidence does not match the items delivered in this order.') }}'
+                                    },
+                                    applyTemplate(key) {
+                                        $refs.adminNotes.value = this.templates[key];
+                                    },
+                                    calculateRefund() {
+                                        if (this.totalQty > 0) {
+                                            this.amount = ((this.totalOrder / this.totalQty) * this.damagedQty).toFixed(2);
+                                        }
+                                    }
+                                }">
                                 @csrf
                                 @method('PATCH')
 
@@ -197,23 +311,42 @@
                                     </div>
                                 </div>
 
-                                <div x-show="decision === 'approved'" class="space-y-2" x-transition>
-                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Approved Amount') }} (USD)</label>
-                                    <input type="number" name="amount_approved" x-model="amount" step="0.01" min="0" max="{{ $refundRequest->sourcingOrder->total_amount }}" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded text-lg font-bold focus:ring-orange-500 focus:border-orange-500">
+                                <div x-show="decision === 'approved'" class="space-y-4 p-4 bg-slate-50 border border-slate-200 rounded-xl" x-transition>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Approved Amount') }} ({{ $refundRequest->sourcingOrder->quotation->currency }})</label>
+                                        <button type="button" @click="calculateRefund()" class="text-[10px] font-black text-orange-600 hover:text-orange-700 uppercase tracking-widest flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                            {{ __('Auto-Calc') }}
+                                        </button>
+                                    </div>
+                                    <input type="number" name="amount_approved" x-model="amount" step="0.01" min="0" max="{{ $refundRequest->sourcingOrder->total_amount }}" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-lg font-black text-slate-900 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                                    <p class="text-[9px] text-slate-400 font-bold italic">{{ __('Formula') }}: (Total Order / Total Qty) * Damaged Qty</p>
                                 </div>
 
                                 <div class="space-y-2">
-                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Proof of Refund (If approved)') }}</label>
-                                    <input type="file" name="refund_proof" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-slate-900 file:text-white hover:file:bg-black cursor-pointer border border-slate-200 p-2 rounded bg-slate-50">
+                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Quick Response Template') }}</label>
+                                    <select @change="applyTemplate($event.target.value)" class="w-full text-xs font-bold bg-slate-50 border-slate-200 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+                                        <option value="">{{ __('Select a template...') }}</option>
+                                        <option value="insufficient">{{ __('Insufficient Evidence') }}</option>
+                                        <option value="quality">{{ __('Quality Variance') }}</option>
+                                        <option value="damaged">{{ __('Damaged Verification Success') }}</option>
+                                        <option value="expired">{{ __('Claim Window Expired') }}</option>
+                                        <option value="mismatch">{{ __('Evidence Mismatch') }}</option>
+                                    </select>
                                 </div>
 
                                 <div class="space-y-2">
-                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Internal Comments') }}</label>
-                                    <textarea name="admin_notes" rows="3" class="w-full p-3 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600 focus:ring-orange-500 focus:border-orange-500" placeholder="{{ __('Notes for internal records...') }}"></textarea>
+                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Resolution Notes') }}</label>
+                                    <textarea name="admin_notes" x-ref="adminNotes" rows="4" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 focus:ring-orange-500 focus:border-orange-500 leading-relaxed" placeholder="{{ __('Draft your final response to the client...') }}"></textarea>
                                 </div>
 
-                                <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded transition-all shadow hover:shadow-lg transform active:scale-95 disabled:opacity-50" :disabled="!decision">
-                                    {{ __('Save Resolution') }}
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Proof of Refund') }}</label>
+                                    <input type="file" name="refund_proof" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:bg-slate-900 file:text-white hover:file:bg-black cursor-pointer border border-slate-200 p-2 rounded-lg bg-slate-50">
+                                </div>
+
+                                <button type="submit" class="w-full py-4 bg-slate-900 hover:bg-black text-white text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg hover:shadow-orange-500/20 transform active:scale-95 disabled:opacity-50" :disabled="!decision">
+                                    {{ __('Finalize Resolution') }}
                                 </button>
                             </form>
                         </div>

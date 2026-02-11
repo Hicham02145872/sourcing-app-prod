@@ -37,6 +37,26 @@ abstract class AbstractSeleniumTrackingService implements TrackingServiceInterfa
             'CHROMEDRIVER_PATH' => config('tracking.chromedriver_path'),
         ];
 
+        if (config('tracking.proxy.enabled')) {
+            $httpProxy = config('tracking.proxy.http');
+            $httpsProxy = config('tracking.proxy.https');
+            
+            if ($httpProxy) {
+                $env['HTTP_PROXY'] = $httpProxy;
+                $env['http_proxy'] = $httpProxy;
+            }
+            
+            if ($httpsProxy) {
+                $env['HTTPS_PROXY'] = $httpsProxy;
+                $env['https_proxy'] = $httpsProxy;
+            }
+            
+            if ($noProxy = config('tracking.proxy.no_proxy')) {
+                $env['NO_PROXY'] = $noProxy;
+                $env['no_proxy'] = $noProxy;
+            }
+        }
+
         return array_merge($_SERVER, $env);
     }
 

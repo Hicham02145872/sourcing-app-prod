@@ -125,6 +125,11 @@ class SourcingOrder extends Model
 
     public function canTransitionTo(string $newStatus): bool
     {
+        // Admins can skip statuses and move to any defined status (non-transactional)
+        if (auth()->check() && (auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())) {
+            return in_array($newStatus, self::STATUSES) || $newStatus === 'on_hold';
+        }
+
         $allowedTransitions = [
             'pending_payment' => ['paid', 'shipment_canceled'],
             'paid' => ['shipment_preparing', 'on_hold', 'shipment_canceled'],
@@ -239,10 +244,31 @@ class SourcingOrder extends Model
     }
 
     /**
+     * Get the status as seen by the client (masking in_transit_china).
+     */
+    public function getClientStatusAttribute(): string
+    {
+        // Mask China to UAE leg statuses (external tracking leg)
+        if (in_array($this->status, ['in_transit_china', 'arrival_uae', 'customs_clearance_uae'])) {
+            return 'shipment_preparing';
+        }
+
+        return $this->status;
+    }
+
+    /**
      * Get the FSB tracking number alias.
      */
     public function getFsbTrackingNumberAttribute(): string
     {
-        return 'FSB' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        return 'FSB'.str_pad($this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Get the total quantity of the order.
+     */
+    public function getTotalQuantityAttribute(): int
+    {
+        return $this->quotation->sourcingRequest->destinations->sum('quantity');
     }
 }

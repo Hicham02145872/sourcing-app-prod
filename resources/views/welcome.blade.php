@@ -12,10 +12,10 @@
     <link rel="manifest" href="/site.webmanifest" />
     <title>FastSourcingBrothers - Simplify Your Sourcing Process</title>
     
-    <!-- Font: Inter (Standard Pro moderne) -->
+    <!-- Font: Inter & Style Script & Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Style+Script&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -151,10 +151,247 @@
         .delay-100 { animation-delay: 0.1s; }
         .delay-200 { animation-delay: 0.2s; }
         .delay-300 { animation-delay: 0.3s; }
+
+
+        /* ═══════════ Splash Screen Animations ═══════════ */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            overflow: hidden;
+            transition: opacity 0.8s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        
+        /* Premium Mesh Background */
+        #splash-screen::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(239, 119, 34, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(250, 165, 51, 0.05) 0%, transparent 40%);
+            opacity: 0.8;
+            filter: blur(60px);
+            animation: meshMove 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes meshMove {
+            from { transform: scale(1) translate(0, 0); }
+            to { transform: scale(1.1) translate(2%, 2%); }
+        }
+
+        #splash-screen.splash-hidden { opacity: 0; pointer-events: none; }
+
+        .splash-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
+            text-align: center;
+        }
+
+        /* Logo & Laser Container */
+        .logo-container {
+            position: relative;
+            padding: 20px;
+        }
+
+        .splash-logo {
+            opacity: 0;
+            transform: scale(0.9) translateY(30px);
+            animation: splashLogoReveal 1.2s cubic-bezier(0.7, 0, 0.3, 1) 0.3s forwards;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.05));
+        }
+
+        /* Modern Scanning Laser */
+        .laser-line {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #EF7722, transparent);
+            box-shadow: 0 0 15px rgba(239,119,34,0.8);
+            opacity: 0;
+            z-index: 20;
+            animation: laserScan 2.5s ease-in-out 1s infinite;
+        }
+
+        @keyframes laserScan {
+            0% { top: 10%; opacity: 0; }
+            10%, 90% { opacity: 1; }
+            100% { top: 90%; opacity: 0; }
+        }
+
+        @keyframes splashLogoReveal {
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Brand Text Styling */
+        #splash-brand {
+            font-family: 'Style Script', cursive;
+            font-size: 42px;
+            line-height: 1.2;
+            color: #0f172a;
+            margin-top: 10px;
+        }
+
+        .splash-char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateX(-10px);
+            filter: blur(5px);
+            animation: charReveal 0.6s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+        }
+
+        @keyframes charReveal {
+            to { opacity: 1; transform: translateX(0); filter: blur(0); }
+        }
+
+        /* Tech Status Text */
+        .splash-status-container {
+            margin-top: 15px;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        #splash-status {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #64748b;
+            opacity: 0;
+            animation: fadeIn 0.5s ease 1s forwards;
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* Professional Progress Bar */
+        .progress-container {
+            position: absolute;
+            bottom: 60px;
+            width: 240px;
+            height: 2px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .splash-progress-inner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #EF7722, #FAA533);
+            box-shadow: 0 0 10px rgba(239,119,34,0.4);
+            animation: progressFill 4.5s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+        }
+
+        @keyframes progressFill {
+            0% { width: 0%; }
+            30% { width: 45%; }
+            60% { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        /* Animated connection lines */
+        .connection-dot {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: rgba(239,119,34,0.2);
+            border-radius: 50%;
+            animation: orbit 20s linear infinite;
+        }
+
+        @keyframes orbit {
+            from { transform: rotate(0deg) translateX(150px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 selection:bg-red-100 selection:text-red-900">
     
+    {{-- ═══════════ Splash Screen Overlay ═══════════ --}}
+    <div id="splash-screen">
+        {{-- Connection Dots (Background) --}}
+        <div class="connection-dot" style="top:25%; left:30%; animation-delay: 0s;"></div>
+        <div class="connection-dot" style="top:65%; left:70%; animation-delay: -5s;"></div>
+        <div class="connection-dot" style="top:40%; left:85%; animation-delay: -10s;"></div>
+        <div class="connection-dot" style="top:80%; left:15%; animation-delay: -15s;"></div>
+
+        <div class="splash-content">
+            <div class="logo-container">
+                <div class="laser-line"></div>
+                <img src="{{ asset('images/logo1.png') }}" alt="FastSourcingBrothers" class="splash-logo" style="width:280px;height:auto;">
+            </div>
+
+            <div id="splash-brand"></div>
+
+            <div class="splash-status-container">
+                <div id="splash-status">INITIALIZING GLOBAL NETWORK...</div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="splash-progress-inner"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var brand = document.getElementById('splash-brand');
+            var statusEl = document.getElementById('splash-status');
+            var text = 'FastSourcingBrothers';
+            var statusMessages = [
+                'SECURE SUPPLY CHAIN ACTIVE',
+                'VERIFYING GLOBAL PARTNERS',
+                'OPTIMIZING LANDED COSTS',
+                'SENSING MARKET DYNAMICS',
+                'FASTSOURCING BROTHERS LIVE'
+            ];
+            
+            // Build brand characters
+            for (var i = 0; i < text.length; i++) {
+                var span = document.createElement('span');
+                span.className = 'splash-char';
+                span.textContent = text[i];
+                span.style.animationDelay = (1.2 + i * 0.05) + 's';
+                if (i === 0 || i === 4 || i === 12) {
+                    span.style.color = '#EF7722';
+                }
+                brand.appendChild(span);
+            }
+
+            // Sync status messages
+            var msgIndex = 0;
+            var statusInterval = setInterval(function() {
+                msgIndex = (msgIndex + 1) % statusMessages.length;
+                statusEl.style.opacity = 0;
+                setTimeout(function() {
+                    statusEl.textContent = statusMessages[msgIndex];
+                    statusEl.style.opacity = 1;
+                }, 250);
+            }, 1200);
+
+            // Dismiss
+            setTimeout(function() {
+                var s = document.getElementById('splash-screen');
+                if (s) {
+                    clearInterval(statusInterval);
+                    s.classList.add('splash-hidden');
+                    setTimeout(function() { s.remove(); }, 800);
+                }
+            }, 5500);
+        })();
+    </script>
+    {{-- ═══════════ End Splash Screen ═══════════ --}}
+
     <!-- Three.js Canvas -->
     <canvas id="three-canvas"></canvas>
 

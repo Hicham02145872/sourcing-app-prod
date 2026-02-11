@@ -16,22 +16,22 @@
             </div>
 
             <!-- Search Section (Simplified Enterprise) -->
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden mb-10">
-                <div class="p-6 sm:p-8">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden mb-10 transition-all hover:shadow-2xl hover:shadow-slate-300/50">
+                <div class="p-6 sm:p-10">
                     <form id="trackingForm" class="relative max-w-3xl mx-auto">
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <div class="relative flex-grow">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="relative flex-grow group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none group-focus-within:text-[#EF7722] transition-colors">
+                                    <svg class="h-6 w-6 text-slate-400 group-focus-within:text-[#EF7722]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                     </svg>
                                 </div>
                                 <input type="text" id="trackingNumberInput" name="number" value="{{ $initialNumber ?? '' }}" 
-                                       class="block w-full pl-11 pr-4 py-3.5 border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent sm:text-sm transition-all" 
-                                       placeholder="{{ __('e.g. FSB000043, ME49508327') }}" required autofocus>
+                                       class="block w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-[#EF7722] text-slate-900 dark:text-white placeholder-slate-400 font-medium transition-all" 
+                                       placeholder="{{ __('Enter tracking number (e.g. FSB000043)') }}" required autofocus>
                             </div>
-                            <button type="submit" id="trackButton" class="sm:w-auto px-8 py-3.5 bg-[#EF7722] hover:bg-[#d66616] text-white font-bold rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 group">
-                                <span>{{ __('Track Now') }}</span>
+                            <button type="submit" id="trackButton" class="sm:w-auto px-10 py-4 bg-gradient-to-r from-[#EF7722] to-[#d66616] hover:from-[#d66616] hover:to-[#c45a12] text-white font-bold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 group">
+                                <span>{{ __('Track Shipment') }}</span>
                                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                                 </svg>
@@ -40,60 +40,124 @@
                     </form>
                     
                     <!-- Performance Metrics Display (Simple) -->
-                    <div id="performanceIndicator" class="hidden mt-6 flex flex-wrap items-center justify-center gap-6 text-xs font-medium text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-700 pt-6">
-                        <div class="flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-slate-300 mr-2"></span>
-                            {{ __('Provider:') }} <span id="providerName" class="ml-1 text-slate-900 dark:text-slate-200"></span>
+                    <div id="performanceIndicator" class="hidden mt-8 flex flex-wrap items-center justify-center gap-8 text-xs font-bold text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-700 pt-8">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                            <span class="text-slate-400 uppercase tracking-tighter">{{ __('Carrier:') }}</span>
+                            <span id="providerName" class="text-slate-900 dark:text-slate-200"></span>
                         </div>
-                        <div class="flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-slate-300 mr-2"></span>
-                            {{ __('Response:') }} <span id="responseTime" class="ml-1 text-slate-900 dark:text-slate-200"></span>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                            <span class="text-slate-400 uppercase tracking-tighter">{{ __('Latency:') }}</span>
+                            <span id="responseTime" class="text-slate-900 dark:text-slate-200"></span>
                         </div>
-                        <div id="cacheStatusBadge" class="flex items-center">
-                            <span id="cacheDot" class="w-2 h-2 rounded-full mr-2"></span>
-                            <span id="cacheStatusText"></span>
+                        <div id="cacheStatusBadge" class="flex items-center gap-2">
+                            <span id="cacheDot" class="w-1.5 h-1.5 rounded-full"></span>
+                            <span id="cacheStatusText" class="uppercase tracking-tighter"></span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Loading State (Enterprise Style) -->
-            <div id="loadingState" class="hidden py-16">
-                <div class="max-w-md mx-auto">
+            <div id="loadingState" class="hidden py-12 animate-fade-in">
+                <div class="max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-xl">
                     <div class="flex flex-col items-center text-center">
                         <!-- Professional Spinner -->
-                        <div class="w-16 h-16 relative mb-6">
-                            <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800"></div>
-                            <div class="absolute inset-0 rounded-full border-4 border-[#EF7722] border-t-transparent animate-spin"></div>
+                        <div class="w-20 h-20 relative mb-8">
+                            <div class="absolute inset-0 rounded-full border-[6px] border-slate-100 dark:border-slate-900"></div>
+                            <div class="absolute inset-0 rounded-full border-[6px] border-[#EF7722] border-t-transparent animate-spin"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-[#EF7722] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" />
+                                </svg>
+                            </div>
                         </div>
                         
-                        <div class="space-y-4 w-full">
-                            <h3 id="loadingText" class="text-xl font-bold text-slate-900 dark:text-white transition-all duration-300">
-                                {{ __('Locating Shipment...') }}
-                            </h3>
-                            
-                            <!-- Static Progress Bar (Enterprise Look) -->
-                            <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                <div id="loadingProgress" class="h-full bg-[#EF7722] transition-all duration-500 ease-out" style="width: 10%"></div>
+                        <div class="space-y-6 w-full">
+                            <div>
+                                <h3 id="loadingText" class="text-xl font-black text-slate-900 dark:text-white transition-all duration-300">
+                                    {{ __('Authenticating...') }}
+                                </h3>
+                                <p id="loadingSubtext" class="text-sm text-slate-500 font-bold mt-2 uppercase tracking-wide">
+                                    {{ __('Carrier handshaking in progress') }}
+                                </p>
                             </div>
                             
-                            <p id="loadingSubtext" class="text-sm text-slate-500 font-medium">
-                                {{ __('Connecting to secure logistics database...') }}
-                            </p>
+                            <!-- Static Progress Bar (Enterprise Look) -->
+                            <div class="h-3 w-full bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden shadow-inner">
+                                <div id="loadingProgress" class="h-full bg-gradient-to-r from-[#EF7722] to-orange-400 transition-all duration-500 ease-out rounded-full" style="width: 10%"></div>
+                            </div>
+
+                            <button type="button" id="cancelSearch" class="mt-4 px-6 py-2 text-xs font-black text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                {{ __('Cancel Search') }}
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Error State -->
-            <div id="errorState" class="hidden max-w-2xl mx-auto rounded-lg bg-red-50 dark:bg-red-900/10 p-5 border border-red-200 dark:border-red-800 mb-8">
-                <div class="flex">
-                    <svg class="h-5 w-5 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-bold text-red-800 dark:text-red-200">{{ __('Tracking Error') }}</h3>
-                        <p id="errorMessage" class="mt-1 text-sm text-red-700 dark:text-red-300"></p>
+            <!-- Flash Messages (Enterprise Style) -->
+            @if(session('error') || session('success') || session('status'))
+            <div class="max-w-3xl mx-auto mb-8 animate-fade-in">
+                @if(session('error'))
+                <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl shadow-md">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-bold text-red-800 dark:text-red-200">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                @if(session('success') || session('status'))
+                <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded-r-xl shadow-md">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-bold text-green-800 dark:text-green-200">{{ session('success') ?? session('status') }}</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+            @endif
+
+            <!-- Error State (Enterprise Design) -->
+            <div id="errorState" class="hidden max-w-3xl mx-auto mb-10 overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border-2 border-red-100 dark:border-red-900/30 shadow-xl shadow-red-500/5">
+                <div class="flex flex-col md:flex-row">
+                    <div class="bg-red-500 w-full md:w-2 hidden md:block"></div>
+                    <div class="p-6 md:p-8 flex items-start gap-4">
+                        <div class="bg-red-100 dark:bg-red-900/30 p-3 rounded-xl flex-shrink-0 animate-bounce">
+                            <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-black text-slate-900 dark:text-white mb-2">{{ __('Tracking Disruption') }}</h3>
+                            <p id="errorMessage" class="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed"></p>
+                            
+                            <div class="mt-6 flex flex-wrap gap-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                                <button onclick="location.reload()" class="text-xs font-black text-[#EF7722] hover:text-[#d66616] uppercase tracking-widest transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    {{ __('Retry') }}
+                                </button>
+                                <a href="mailto:support@sourcing-app.com" class="text-xs font-black text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 uppercase tracking-widest transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    {{ __('Support') }}
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -183,6 +247,14 @@
                                 </div>
                             </dl>
                         </div>
+
+                        <!-- Map Card -->
+                        <div id="mapContainer" class="hidden mt-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                                <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">{{ __('Shipment Location') }}</h4>
+                            </div>
+                            <div id="map" class="h-64 w-full z-0 relative"></div>
+                        </div>
                     </div>
 
                     <!-- Right Column: Timeline -->
@@ -260,12 +332,30 @@
                 journeyProgressBar: document.getElementById('journeyProgressBar'),
                 step2Dot: document.getElementById('step2Dot'),
                 step3Dot: document.getElementById('step3Dot'),
-                step4Dot: document.getElementById('step4Dot')
+                step4Dot: document.getElementById('step4Dot'),
+                cancelSearch: document.getElementById('cancelSearch')
             };
 
             console.log('✅ [TRACKING JS] All elements initialized');
 
             // 3. Helper Functions
+            if (elements.cancelSearch) {
+                elements.cancelSearch.addEventListener('click', () => {
+                    console.log('🛑 [TRACKING JS] Cancel button clicked');
+                    if (abortController) {
+                        abortController.abort();
+                        abortController = null;
+                        resetUI();
+                        if (elements.loadingState) elements.loadingState.classList.add('hidden');
+                        stopLoadingMessages();
+                        if (elements.button) {
+                            elements.button.disabled = false;
+                            elements.button.innerHTML = '<span>{{ __("Track Shipment") }}</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>';
+                        }
+                    }
+                });
+            }
+
             function resetUI() {
                 console.log('🧹 [TRACKING JS] resetUI()');
                 if (elements.errorState) elements.errorState.classList.add('hidden');
@@ -307,9 +397,18 @@
                 }
             }
 
+            let abortController = null;
+
             async function fetchTrackingData(number) {
                 console.log('🚀 [TRACKING JS] fetchTrackingData started for:', number);
                 let shouldResetUI = true;
+                
+                // Abort any existing search
+                if (abortController) {
+                    abortController.abort();
+                }
+                abortController = new AbortController();
+
                 try {
                     resetUI();
                     
@@ -321,7 +420,7 @@
 
                     if (elements.button) {
                         elements.button.disabled = true;
-                        elements.button.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Searching...';
+                        elements.button.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> {{ __("Searching...") }}';
                     }
 
                     const url = `{{ route('client.tracking.data') }}?number=${encodeURIComponent(number)}`;
@@ -329,6 +428,7 @@
                     
                     const startTime = performance.now();
                     const response = await fetch(url, {
+                        signal: abortController.signal,
                         headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                     });
                     const responseTime = Math.round(performance.now() - startTime);
@@ -344,13 +444,21 @@
                         if (elements.loadingSubtext) elements.loadingSubtext.innerText = "{{ __('This may take up to 2 minutes for live carrier data. Please wait...') }}";
                         
                         // Poll after 5 seconds
-                        setTimeout(() => fetchTrackingData(number), 5000);
+                        setTimeout(() => {
+                            if (abortController && !abortController.signal.aborted) {
+                                fetchTrackingData(number);
+                            }
+                        }, 5000);
                         shouldResetUI = false; // Prevent finally block from hiding UI
                         return; 
                     }
                     
+                    if (response.status === 404) {
+                        throw new Error("{{ __('Shipment Record Not Found') }}: " + (result.error || "{{ __('We could not locate this tracking number in any carrier system. Please verify the number or contact your agent.') }}"));
+                    }
+                    
                     if (!response.ok) {
-                        throw new Error(result.error || 'Server error occurred');
+                        throw new Error(result.error || '{{ __("A connection error occurred. Please try again in few moments.") }}');
                     }
 
                     if (result.data && result.data.length > 0) {
@@ -361,9 +469,25 @@
                     }
 
                 } catch (error) {
+                    if (error.name === 'AbortError') {
+                        console.log('🛑 [TRACKING JS] Fetch aborted');
+                        return;
+                    }
                     console.error('❌ [TRACKING JS] ERROR:', error);
-                    if (elements.errorMessage) elements.errorMessage.textContent = error.message;
+                    
+                    // Show friendly name for technical errors
+                    let displayError = error.message;
+                    if (displayError.includes('Failed to fetch')) {
+                        displayError = "{{ __('Network connection lost. Please check your internet.') }}";
+                    }
+
+                    if (elements.errorMessage) elements.errorMessage.textContent = displayError;
                     if (elements.errorState) elements.errorState.classList.remove('hidden');
+                    
+                    // Specific behavior for 404
+                    if (error.message.includes("{{ __('Shipment Record Not Found') }}")) {
+                         // We could add extra UI here if needed
+                    }
                 } finally {
                     if (shouldResetUI) {
                         if (elements.loadingState) elements.loadingState.classList.add('hidden');
@@ -383,8 +507,17 @@
                 
                 if (elements.resultTrackingNumber) elements.resultTrackingNumber.textContent = number;
                 if (elements.latestStatusText) elements.latestStatusText.textContent = result.current_status || getField(latest, ['status_fr', 'status', 'Status']);
-                if (elements.latestLocation) elements.latestLocation.textContent = getField(latest, ['location', 'Location']) || 'N/A';
                 
+                const location = getField(latest, ['location', 'Location']);
+                if (elements.latestLocation) elements.latestLocation.textContent = location || 'N/A';
+                
+                // Update Map if location exists
+                if (location && location.trim() !== '') {
+                    updateMap(location);
+                } else {
+                    document.getElementById('mapContainer').classList.add('hidden');
+                }
+
                 const dateRaw = getField(latest, ['statusDate', 'created_at', 'date', 'Date']);
                 if (elements.latestDate) elements.latestDate.textContent = dateRaw ? formatDate(dateRaw) : 'N/A';
 
@@ -401,6 +534,70 @@
                 if (elements.resultsContainer) {
                     elements.resultsContainer.classList.remove('hidden');
                     elements.resultsContainer.classList.add('animate-fade-in');
+                }
+            }
+
+            // Map Variable
+            let mapInstance = null;
+
+            async function updateMap(locationQuery) {
+                const mapContainer = document.getElementById('mapContainer');
+                if (!mapContainer) return;
+
+                console.log('🗺️ [TRACKING JS] Updating map for:', locationQuery);
+
+                try {
+                    // Geocode the location
+                    // Nominatim requires a user-agent, but browsers send one automatically.
+                    // We add a delay or check to ensure we don't spam.
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1`, {
+                        headers: {
+                            'Accept-Language': 'en'
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Geocoding failed');
+                    
+                    const data = await response.json();
+                    
+                    if (data && data.length > 0) {
+                        const lat = data[0].lat;
+                        const lon = data[0].lon;
+                        
+                        mapContainer.classList.remove('hidden');
+                        
+                        // Initialize map if needed
+                        if (!mapInstance) {
+                            mapInstance = L.map('map').setView([lat, lon], 13);
+                            
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            }).addTo(mapInstance);
+                        } else {
+                            mapInstance.setView([lat, lon], 13);
+                            // Clear existing markers
+                            mapInstance.eachLayer((layer) => {
+                                if (layer instanceof L.Marker) {
+                                    mapInstance.removeLayer(layer);
+                                }
+                            });
+                        }
+
+                        L.marker([lat, lon]).addTo(mapInstance)
+                            .bindPopup(`<b>${escapeHtml(locationQuery)}</b>`)
+                            .openPopup();
+                            
+                        // Fix for Leaflet rendering in hidden container
+                        setTimeout(() => { mapInstance.invalidateSize(); }, 200);
+                        
+                    } else {
+                        console.warn('🗺️ [TRACKING JS] Location not found by geocoder');
+                        mapContainer.classList.add('hidden');
+                    }
+
+                } catch (error) {
+                    console.error('🗺️ [TRACKING JS] Map error:', error);
+                    mapContainer.classList.add('hidden');
                 }
             }
 
@@ -553,6 +750,8 @@
             }
         });
     </script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         
@@ -578,6 +777,8 @@
         /* Enterprise Spinner Optimization */
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
+        
+        #map { z-index: 10; }
     </style>
     @endpush
 </x-app-layout>

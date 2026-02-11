@@ -125,4 +125,16 @@ class RefundRequestController extends Controller
         return redirect()->route('admin.refund-requests.index')
             ->with('success', __('Refund request processed successfully.'));
     }
+
+    public function assignToMe(RefundRequest $refundRequest): RedirectResponse
+    {
+        // Check if already assigned
+        if ($refundRequest->assigned_to_admin_id) {
+            return back()->with('error', __('This request is already assigned to an admin.'));
+        }
+
+        $refundRequest->update(['assigned_to_admin_id' => auth()->id()]);
+
+        return back()->with('success', __('Refund request assigned to you.'));
+    }
 }

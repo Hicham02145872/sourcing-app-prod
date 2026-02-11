@@ -17,6 +17,7 @@ class RefundRequest extends Model
         'status',
         'amount_requested',
         'amount_approved',
+        'damaged_quantity',
         'reason_category',
         'reason_description',
         'admin_notes',

@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             SocialMediaLinkSeeder::class,
             SuperAdminSeeder::class,
             GoogleSheetSettingSeeder::class,
+            DevUserSeeder::class,
         ]);
     }
 }

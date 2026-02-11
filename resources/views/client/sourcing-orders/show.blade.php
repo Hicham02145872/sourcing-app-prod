@@ -45,7 +45,7 @@
                     'shipped' => ['color' => '#EF7722', 'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4', 'title' => __('Shipped')],
                     'delivered' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => __('Delivered')],
                 ];
-                $statusData = $statusConfig[$sourcingOrder->status] ?? $statusConfig['pending_payment'];
+                $statusData = $statusConfig[$sourcingOrder->client_status] ?? $statusConfig['pending_payment'];
             @endphp
             
             <div class="mb-6 bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 overflow-hidden">
@@ -59,7 +59,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: {{ $statusData['color'] }}">{{ $statusData['title'] ?? __('Current Status') }}</p>
-                                <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ __(ucfirst(str_replace('_', ' ', $sourcingOrder->status))) }}</p>
+                                <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ __(ucfirst(str_replace('_', ' ', $sourcingOrder->client_status))) }}</p>
                             </div>
                         </div>
                         <div class="text-center sm:text-right bg-white dark:bg-slate-800 rounded-lg px-4 py-3 border border-[#EBEBEB] dark:border-slate-700">
@@ -487,8 +487,8 @@
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
                                     </svg>
-                                    {{ __(ucfirst(str_replace('_', ' ', $sourcingOrder->status))) }}
-                                </span>
+                                    {{ __(ucfirst(str_replace('_', ' ', $sourcingOrder->client_status))) }}
+</span>
                             </div>
 
                             <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
@@ -517,17 +517,16 @@
                                         {{ __('View Refund Status') }}
                                     </a>
                                 </div>
-                            @elseif(in_array($sourcingOrder->status, ['paid', 'delivered', 'order_completed']))
+                            @elseif($sourcingOrder->status === 'delivered')
                                 <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
-                                    <div class="w-full py-2.5 px-4 bg-red-50 text-red-400 dark:bg-red-900/10 dark:text-red-500 border border-red-100 dark:border-red-900/20 text-sm font-bold rounded-lg flex items-center justify-center gap-2 cursor-not-allowed group relative transition-colors duration-200">
+                                    <a href="{{ route('client.refund-requests.create', $sourcingOrder) }}" 
+                                       class="w-full py-2.5 px-4 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 border border-red-200 dark:border-red-900/30 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm">
                                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                                          </svg>
                                          {{ __('Request Refund') }}
-                                         <span class="ml-auto text-[9px] font-bold bg-amber-50 text-amber-600 border border-amber-100 px-1.5 py-0.5 rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300">{{ __('Coming Soon') }}</span>
-                                     </div>
+                                     </a>
                                  </div>
-
                             @endif
 
                             <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
@@ -724,127 +723,7 @@
         }
     </style>
 
-    {{-- Enhanced Refund Request Modal --}}
-    <x-modal name="refund-request-modal" :show="false" focusable>
-        <div class="relative overflow-hidden">
-            <!-- Decorative Background Element -->
-            <div class="absolute -right-8 -top-8 w-32 h-32 bg-red-500/10 rounded-full blur-3xl"></div>
-            
-            <div class="p-8">
-                <!-- Modal Header -->
-                <div class="flex items-center gap-4 mb-10">
-                    <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-200 dark:shadow-none">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ __('Request Refund') }}</h2>
-                        <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 mt-1 leading-relaxed max-w-sm">{{ __('Submit your claim with details and evidence for our support team to review.') }}</p>
-                    </div>
-                </div>
 
-                <form action="{{ route('client.sourcing-orders.refund-request', $sourcingOrder) }}" method="POST" enctype="multipart/form-data" class="space-y-8" x-data="{ type: 'full', fileName: '' }">
-                    @csrf
-                    
-                    <!-- Refund Type Selection -->
-                    <div class="space-y-4">
-                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Refund Type') }}</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <label class="relative flex p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 group" :class="type === 'full' ? 'border-[#EF7722] bg-[#EF7722]/5 shadow-md shadow-[#EF7722]/10 ring-4 ring-[#EF7722]/5' : 'border-[#EBEBEB] dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-[#EF7722]'">
-                                <input type="radio" name="type" value="full" class="hidden" x-model="type">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors" :class="type === 'full' ? 'bg-[#EF7722] text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 group-hover:bg-[#EF7722]/20 group-hover:text-[#EF7722]'">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-black transition-colors" :class="type === 'full' ? 'text-[#EF7722]' : 'text-slate-900 dark:text-white'">{{ __('Full Refund') }}</span>
-                                        <span class="text-[11px] font-medium text-slate-500 mt-0.5">{{ __('Recover 100% of order cost') }}</span>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <label class="relative flex p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 group" :class="type === 'partial' ? 'border-[#EF7722] bg-[#EF7722]/5 shadow-md shadow-[#EF7722]/10 ring-4 ring-[#EF7722]/5' : 'border-[#EBEBEB] dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-[#EF7722]'">
-                                <input type="radio" name="type" value="partial" class="hidden" x-model="type">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors" :class="type === 'partial' ? 'bg-[#EF7722] text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 group-hover:bg-[#EF7722]/20 group-hover:text-[#EF7722]'">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m.599-1c.51-.598.401-1.571 0-2.599M12 16h.01"/></svg>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-black transition-colors" :class="type === 'partial' ? 'text-[#EF7722]' : 'text-slate-900 dark:text-white'">{{ __('Partial Refund') }}</span>
-                                        <span class="text-[11px] font-medium text-slate-500 mt-0.5">{{ __('Specify a custom amount') }}</span>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Amount Input (Conditional) -->
-                    <div x-show="type === 'partial'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-3">
-                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Requested Amount') }} ({{ $sourcingOrder->quotation->currency }})</label>
-                        <div class="relative group">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <span class="text-slate-400 font-bold">$</span>
-                            </div>
-                            <input type="number" name="amount_requested" step="0.01" min="0" max="{{ $sourcingOrder->quotation->amount }}" class="block w-full pl-10 pr-4 py-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-[#EF7722]/10 focus:border-[#EF7722] font-black text-xl text-slate-900 dark:text-white transition-all outline-none" placeholder="0.00">
-                        </div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{{ __('Maximum allowed') }}: <span class="text-[#EF7722]">{{ number_format($sourcingOrder->quotation->amount, 2) }}</span></p>
-                    </div>
-
-                    <!-- Category & Description -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-1 space-y-3">
-                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Category') }}</label>
-                            <select name="reason_category" required class="w-full bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-100 dark:border-slate-800 rounded-2xl py-4 px-4 focus:ring-4 focus:ring-[#EF7722]/10 focus:border-[#EF7722] font-black text-sm text-slate-900 dark:text-white transition-all outline-none appearance-none">
-                                <option value="">{{ __('Reason...') }}</option>
-                                <option value="Damaged Product">{{ __('Damaged Product') }}</option>
-                                <option value="Wrong Item">{{ __('Wrong Item') }}</option>
-                                <option value="Poor Quality">{{ __('Poor Quality') }}</option>
-                                <option value="Shipping Delay">{{ __('Shipping Delay') }}</option>
-                                <option value="Quantity Issue">{{ __('Quantity Issue') }}</option>
-                                <option value="Other">{{ __('Other') }}</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-2 space-y-3">
-                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Details') }}</label>
-                            <textarea name="reason_description" rows="1" required class="w-full bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-100 dark:border-slate-800 rounded-2xl py-4 px-4 focus:ring-4 focus:ring-[#EF7722]/10 focus:border-[#EF7722] font-medium text-sm text-slate-900 dark:text-white transition-all outline-none" placeholder="{{ __('Explain the problem in detail...') }}"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Enhanced File Upload -->
-                    <div class="space-y-4">
-                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest">{{ __('Evidence Portfolio') }}</label>
-                        <div class="relative">
-                            <input type="file" name="evidence[]" multiple accept="image/*,video/*" 
-                                @change="fileName = $event.target.files.length + ' files selected'"
-                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                            <div class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl p-10 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-900/30 transition-all group-hover:border-[#EF7722] group-hover:bg-[#EF7722]/5">
-                                <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                    <svg class="w-8 h-8 text-slate-400 group-hover:text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                                </div>
-                                <p class="text-[13px] font-black text-slate-900 dark:text-white mb-1" x-text="fileName || '{{ __('Drop photos or videos here') }}'"></p>
-                                <p class="text-[11px] font-medium text-slate-400 italic">Maximize claim approval by attaching clear media proof</p>
-                            </div>
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                             <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-[10px] font-black uppercase tracking-wider">{{ __('Max 50MB/file') }}</span>
-                             <span class="px-3 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-full text-[10px] font-black uppercase tracking-wider">{{ __('Multiple Files Allowed') }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Modal Actions -->
-                    <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-6 mt-10 border-t border-slate-100 dark:border-slate-800">
-                        <button type="button" @click="$dispatch('close-modal', 'refund-request-modal')" class="w-full sm:w-auto px-8 py-4 text-[11px] font-black text-slate-400 hover:text-slate-900 dark:hover:text-white uppercase tracking-widest transition-colors">
-                            {{ __('Dismiss') }}
-                        </button>
-                        <button type="submit" class="w-full sm:w-auto px-10 py-4 bg-slate-900 dark:bg-[#EF7722] hover:bg-black dark:hover:bg-[#FAA533] text-white text-[11px] font-black rounded-2xl shadow-xl transition-all duration-300 uppercase tracking-[0.2em] transform hover:-translate-y-1 active:scale-95">
-                            {{ __('Submit Claim') }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </x-modal>
 </x-app-layout>
 
 

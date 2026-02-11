@@ -11,21 +11,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from typing import List, Dict
 
-STATUS_MAP = {
-    "已签收": "Livré",
-    "运输中": "En transit",
-    "已发货": "Expédié",
-    "库房已出库": "Sortie d'entrepôt",
-    "到达": "Arrivé",
-    "派送中": "En cours de livraison",
-    "等待派送": "En attente de livraison",
-    "揽收成功": "Collecté",
-    "包裹准备中": "Préparation en cours",
-    "快件已到达": "Colis arrivé",
-    "快件已发出": "Colis expédié",
-    "清关中": "Dédouanement en cours",
-    "清关完成": "Dédouanement terminé",
-}
+# STATUS_MAP and deep_translator REMOVED - Logic moved to PHP Service
 
 class OptimizedOrderTrackerSelenium:
 
@@ -54,6 +40,16 @@ class OptimizedOrderTrackerSelenium:
 
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option("useAutomationExtension", False)
+
+        # Proxy Configuration
+        http_proxy = os.environ.get('HTTP_PROXY') or os.environ.get('http_proxy')
+        https_proxy = os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy')
+
+        if http_proxy or https_proxy:
+            # Prefer HTTPS proxy, fallback to HTTP
+            proxy_url = https_proxy or http_proxy
+            if proxy_url:
+                chrome_options.add_argument(f'--proxy-server={proxy_url}')
 
         chrome_binary = os.environ.get('CHROME_BINARY_PATH')
         if chrome_binary:
@@ -102,15 +98,11 @@ class OptimizedOrderTrackerSelenium:
                      return {"success": False, "tracking_number": tracking_number, "error": "Numéro introuvable (No records found)"}
 
             except Exception:
-                 timestamp = str(int(time.time()))
-                 screenshot_path = os.path.join("storage", "app", "public", f"debug_{timestamp}.png")
-                 os.makedirs(os.path.dirname(screenshot_path), exist_ok=True)
-                 self.driver.save_screenshot(screenshot_path)
-                     
+                 # Debug screenshot removed for robustness unless needed
                  return {
                      "success": False, 
                      "tracking_number": tracking_number, 
-                     "error": f"Timeout waiting for results. See debug_{timestamp}.png",
+                     "error": "Timeout waiting for results.",
                  }
 
             events = self._extract_tracking_data()
@@ -122,13 +114,10 @@ class OptimizedOrderTrackerSelenium:
                     "error": "Aucune donnée trouvée après extraction.",
                 }
 
-            # Use the translated status for current_status
-            current_status = events[0]["status_fr"] if events else "Inconnu"
-
+            # PHP will handle translation and current status extraction
             return {
                 "success": True,
                 "tracking_number": tracking_number,
-                "current_status": current_status,
                 "events": events
             }
 
@@ -152,16 +141,19 @@ class OptimizedOrderTrackerSelenium:
 
                 status_cn = cells[3].text.strip()
                 
+                location_cn = ""
+                if len(cells) >= 5:
+                    location_cn = cells[4].text.strip()
+
+                # Translation Logic REMOVED - Raw data returned
+
                 event = {
+                    "location_raw": location_cn,
                     "step": cells[0].text.strip(),
                     "reference": cells[1].text.strip(),
                     "date": cells[2].text.strip(),
-                    "status": status_cn,
-                    "status_fr": STATUS_MAP.get(status_cn, status_cn)
+                    "status": status_cn
                 }
-
-                if len(cells) >= 5:
-                    event["sub_transfer_number"] = cells[4].text.strip()
 
                 events.append(event)
         except Exception:

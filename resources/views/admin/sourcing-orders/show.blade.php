@@ -21,6 +21,7 @@
                                     $statusColors = [
                                         'pending_payment' => 'bg-amber-50 text-amber-700 border-amber-200',
                                         'paid' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                        'shipment_preparing' => 'bg-cyan-50 text-cyan-700 border-cyan-200',
                                         'processing' => 'bg-cyan-50 text-cyan-700 border-cyan-200',
                                         'shipped' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                                         'delivered' => 'bg-purple-50 text-purple-700 border-purple-200',
@@ -28,10 +29,13 @@
                                         'cancelled' => 'bg-red-50 text-red-700 border-red-200',
                                         'refunded' => 'bg-pink-50 text-pink-700 border-pink-200',
                                     ];
-                                    $badgeClass = $statusColors[$sourcingOrder->status] ?? 'bg-slate-100 text-slate-600';
+                                    $badgeClass = $statusColors[$sourcingOrder->client_status] ?? 'bg-slate-100 text-slate-600';
                                 @endphp
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border {{ $badgeClass }}">
-                                    {{ ucfirst(str_replace('_', ' ', $sourcingOrder->status)) }}
+                                    {{ ucfirst(str_replace('_', ' ', $sourcingOrder->client_status)) }}
+                                    @if($sourcingOrder->status !== $sourcingOrder->client_status)
+                                        <span class="ml-1 opacity-50 text-[8px]">({{ __('Internal: ') . ucfirst(str_replace('_', ' ', $sourcingOrder->status)) }})</span>
+                                    @endif
                                 </span>
                             </h1>
                             <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">

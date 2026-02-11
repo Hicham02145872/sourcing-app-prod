@@ -77,4 +77,21 @@ return [
 
     'verify_ssl' => env('TRACKING_VERIFY_SSL', true),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Proxy Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure proxy settings for outbound requests.
+    | Useful for avoiding IP bans or accessing geo-restricted content.
+    |
+    */
+
+    'proxy' => [
+        'enabled' => env('TRACKING_PROXY_ENABLED', false),
+        'http' => env('TRACKING_HTTP_PROXY'),
+        'https' => env('TRACKING_HTTPS_PROXY'),
+        'no_proxy' => env('TRACKING_NO_PROXY'),
+    ],
+
 ];

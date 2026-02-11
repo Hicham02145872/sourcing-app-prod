@@ -24,6 +24,10 @@ class RoleMiddleware
             if (! $request->user()->isSuperAdmin()) {
                 abort(403, 'Unauthorized action.');
             }
+        } elseif ($role === 'developer') {
+            if (! $request->user()->isDeveloper()) {
+                abort(403, 'Unauthorized action.');
+            }
         } else {
             if ($request->user()->role !== $role) {
                 // If not, abort with a 403 Forbidden response

@@ -25,6 +25,9 @@ Route::get('/terms-of-service', [PageController::class, 'terms'])->name('terms-o
 Route::get('/support', [PageController::class, 'support'])->name('support');
 
 Route::get('/dashboard', function () {
+    if (auth()->user()->isDeveloper()) {
+        return redirect()->route('admin.dev-dashboard');
+    }
     if (auth()->user()->isAdmin()) {
         return redirect('/admin/dashboard');
     } else {
@@ -65,6 +68,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::get('refund-requests', [App\Http\Controllers\Admin\RefundRequestController::class, 'index'])->name('refund-requests.index');
     Route::get('refund-requests/{refundRequest}', [App\Http\Controllers\Admin\RefundRequestController::class, 'show'])->name('refund-requests.show');
     Route::patch('refund-requests/{refundRequest}/update-status', [App\Http\Controllers\Admin\RefundRequestController::class, 'updateStatus'])->name('refund-requests.update-status');
+    Route::patch('refund-requests/{refundRequest}/assign-to-me', [App\Http\Controllers\Admin\RefundRequestController::class, 'assignToMe'])->name('refund-requests.assign-to-me');
     Route::get('quotations/select-request', [App\Http\Controllers\Admin\QuotationController::class, 'selectRequest'])->name('quotations.select-request');
     Route::get('quotations/create/{sourcingRequest}', [App\Http\Controllers\Admin\QuotationController::class, 'create'])->name('quotations.create');
     Route::post('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'store'])->name('quotations.store');
@@ -126,7 +130,23 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
 
         // Shipping Companies Management (Super Admin Only)
         Route::get('/shipping-companies', [App\Http\Controllers\Admin\ShippingCompanyController::class, 'index'])->name('shipping-companies.index');
+
+        // Tracking Logs
+        Route::get('/tracking-logs', [App\Http\Controllers\Admin\TrackingLogController::class, 'index'])->name('tracking-logs.index');
     });
+});
+
+// Dev Dashboard & Impersonation (Strictly for Developer role)
+Route::middleware(['auth', 'role:developer', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dev-dashboard', \App\Livewire\Admin\DevDashboard::class)->name('dev-dashboard');
+    Route::get('/impersonate/{user}', function (\App\Models\User $user) {
+        // Double security check for impersonation
+        if (auth()->user()->email !== 'hichamaltit@gmail.com') {
+            abort(403);
+        }
+        auth()->login($user);
+        return redirect()->route('dashboard')->with('status', 'Impersonating ' . $user->name);
+    })->name('impersonate');
 });
 
 Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('client.')->group(function () {
@@ -149,6 +169,8 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/sourcing-orders/{sourcingOrder}/receipt', [App\Http\Controllers\Client\SourcingOrderController::class, 'showReceipt'])->name('sourcing-orders.receipt');
     Route::get('/sourcing-orders/{sourcingOrder}/shipping-label', [App\Http\Controllers\Client\SourcingOrderController::class, 'showShippingLabel'])->name('sourcing-orders.shipping-label');
     Route::get('/sourcing-orders/{sourcingOrder}/download-proof-of-payment', [App\Http\Controllers\Client\SourcingOrderController::class, 'downloadProofOfPayment'])->name('sourcing-orders.download-proof-of-payment');
+    Route::get('/refunds', [App\Http\Controllers\Client\RefundRequestController::class, 'index'])->name('refund-requests.index');
+    Route::get('/refund-requests/create/{sourcingOrder}', [App\Http\Controllers\Client\RefundRequestController::class, 'create'])->name('refund-requests.create');
     Route::post('/sourcing-orders/{sourcingOrder}/refund-request', [App\Http\Controllers\Client\RefundRequestController::class, 'store'])->name('sourcing-orders.refund-request');
     Route::get('/refund-requests/{refundRequest}', [App\Http\Controllers\Client\RefundRequestController::class, 'show'])->name('refund-requests.show');
     Route::get('/history', [SourcingRequestController::class, 'history'])->name('history');
@@ -163,6 +185,7 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::middleware('throttle:10,1')->get('/tracking/data', [App\Http\Controllers\Client\TrackingController::class, 'data'])->name('tracking.data');
     Route::get('/tracking/17track', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackIndex'])->name('tracking.17track.index');
     Route::middleware('throttle:10,1')->get('/tracking/1track/data', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackData'])->name('tracking.17track.data');
+    Route::get('/tracking/logs', [App\Http\Controllers\Client\TrackingLogController::class, 'index'])->name('tracking.logs');
 
     // Shipping Fees
     Route::get('/shipping-fees', [App\Http\Controllers\Client\ShippingFeeController::class, 'index'])->name('shipping-fees.index');

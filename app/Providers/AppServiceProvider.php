@@ -24,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Mail\Events\MessageSent::class,
+            \App\Listeners\MailSentListener::class
+        );
+
         \App\Models\SourcingOrder::observe(\App\Observers\SourcingOrderObserver::class);
         \App\Models\Quotation::observe(\App\Observers\QuotationObserver::class);
         \App\Models\SourcingRequest::observe(\App\Observers\SourcingRequestObserver::class);

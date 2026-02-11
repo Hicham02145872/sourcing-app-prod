@@ -59,6 +59,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'super_admin';
     }
 
+    public function isDeveloper(): bool
+    {
+        return $this->role === 'developer';
+    }
+
     public function sourcingOrders()
     {
         return $this->hasMany(SourcingOrder::class);
@@ -84,6 +89,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return match ($this->role) {
             'super_admin' => 'Super Admin',
             'admin' => 'Administrator',
+            'developer' => 'Developer',
             'client' => 'Client',
             default => ucfirst($this->role ?? 'User'),
         };

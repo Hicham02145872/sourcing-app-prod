@@ -12,12 +12,12 @@ class UnifiedTrackingService
     public function __construct(
         protected ItdidaTrackingService $itdidaService,
         protected FasterTrackingService $fasterService,
-        protected ChoiceXPTrackingService $choiceXPService,
-        protected \App\Services\SeventeenTrackService $seventeenTrackService
+        protected ChoiceXPTrackingService $choiceXPService
     ) {}
 
     public function track(string $trackingNumber, ?string $carrier = null): array
     {
+        $trackingNumber = trim($trackingNumber);
         $startTime = microtime(true);
         $cacheKey = "tracking:{$trackingNumber}";
 
@@ -34,6 +34,10 @@ class UnifiedTrackingService
                 'tracking_number' => $trackingNumber,
                 'elapsed_ms' => round((microtime(true) - $startTime) * 1000, 2)
             ]);
+            
+            // Log the cache hit to history
+            $this->logSearch($trackingNumber, $cached);
+            
             return $cached;
         }
 
@@ -55,7 +59,23 @@ class UnifiedTrackingService
         $seleniumProviders = ['itdida', 'faster', 'choicexp', 'gcc'];
 
         if (in_array(strtolower($provider), $seleniumProviders)) {
+            // Check if a job is already pending for this number
+            $pendingKey = "tracking_pending:{$trackingNumber}";
+            if (Cache::has($pendingKey)) {
+                Log::info('⏳ [UNIFIED SERVICE] Job already pending, skipping dispatch', ['tracking_number' => $trackingNumber]);
+                return [
+                    'success' => false,
+                    'status' => 'pending',
+                    'error' => 'Tracking update in progress. Please refresh in a few minutes.',
+                    'provider' => ucfirst($provider),
+                    'tracking_number' => $trackingNumber,
+                ];
+            }
+
             Log::info('⏳ [UNIFIED SERVICE] Detected Selenium provider - dispatching job', ['provider' => $provider]);
+            
+            // Set pending lock for 2 minutes
+            Cache::put($pendingKey, true, now()->addMinutes(2));
 
             // Dispatch Job to run in background (limited to 1 concurrent instance)
             RunSeleniumTrackingJob::dispatch($trackingNumber, $carrier);
@@ -79,6 +99,7 @@ class UnifiedTrackingService
      */
     public function refreshTracking(string $trackingNumber, ?string $carrier = null): array
     {
+        $trackingNumber = trim($trackingNumber);
         Log::info('🚀 [UNIFIED SERVICE] refreshTracking called', ['number' => $trackingNumber]);
         
         $fetchStartTime = microtime(true);
@@ -111,7 +132,47 @@ class UnifiedTrackingService
             ]);
         }
 
+        // Clear pending lock
+        Cache::forget("tracking_pending:{$trackingNumber}");
+
+        // Log the search result to the database
+        $this->logSearch($trackingNumber, $result);
+
         return $result;
+    }
+
+    /**
+     * Log the tracking search result to the database.
+     */
+    protected function logSearch(string $trackingNumber, array $result): void
+    {
+        try {
+            $status = $result['current_status'] ?? ($result['success'] ? 'Success' : 'Failed');
+            $provider = $result['provider'] ?? 'Unknown';
+            
+            // Extract location from the latest event if available
+            $location = '';
+            if (!empty($result['events']) && is_array($result['events'])) {
+                $latestEvent = $result['events'][0] ?? null;
+                $location = $latestEvent['location'] ?? '';
+            }
+
+            \App\Models\TrackingLog::create([
+                'tracking_number' => $trackingNumber,
+                'provider' => $provider,
+                'status' => $status,
+                'location' => $location,
+                'payload' => $result,
+                'user_id' => auth()->id(), // Log the user if authenticated
+                'ip_address' => request()->ip(),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ [UNIFIED SERVICE] Failed to log tracking search', [
+                'error' => $e->getMessage(),
+                'tracking_number' => $trackingNumber
+            ]);
+        }
     }
 
     /**
@@ -119,6 +180,7 @@ class UnifiedTrackingService
      */
     protected function performTracking(string $trackingNumber, ?string $carrier = null): array
     {
+        $trackingNumber = trim($trackingNumber);
         $displayNumber = $trackingNumber;
 
         // Resolve Alias
@@ -187,7 +249,7 @@ class UnifiedTrackingService
                     true, 
                     [
                         'success' => false,
-                        'error' => "Internal tracking number {$trackingNumber} not found.",
+                        'error' => __("Order reference :number was not found in our records.", ['number' => $trackingNumber]),
                     ]
                 ];
             }
@@ -200,7 +262,7 @@ class UnifiedTrackingService
                     true,
                     [
                         'success' => false,
-                        'error' => "No carrier tracking assigned to {$trackingNumber}.",
+                        'error' => __("Tracking information has not yet been assigned to order :number.", ['number' => $trackingNumber]),
                     ]
                 ];
             }
@@ -252,7 +314,7 @@ class UnifiedTrackingService
             'itdida' => $this->itdidaService,
             'faster', 'gcc' => $this->fasterService,
             'choicexp' => $this->choiceXPService,
-            default => $this->seventeenTrackService, // Use 17Track as fallback
+            default => null,
         };
     }
 }

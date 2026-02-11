@@ -637,5 +637,7 @@
             }));
         });
     </script>
+
+
     @livewireScripts
 </body>

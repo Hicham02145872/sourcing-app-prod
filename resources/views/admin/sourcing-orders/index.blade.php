@@ -274,20 +274,22 @@
                                                     $statusColors = [
                                                         'pending_payment' => 'bg-amber-50 text-amber-700 border-amber-200',
                                                         'paid' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                                        'shipment_preparing' => 'bg-cyan-50 text-cyan-700 border-cyan-200',
                                                         'processing' => 'bg-cyan-50 text-cyan-700 border-cyan-200',
                                                         'shipped' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                                                         'delivered' => 'bg-purple-50 text-purple-700 border-purple-200',
                                                         'completed' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                                                         'cancelled' => 'bg-red-50 text-red-700 border-red-200',
                                                     ];
-                                                    $currentClass = $statusColors[$order->status] ?? 'bg-slate-50 text-slate-700 border-slate-200';
+                                                    $currentClass = $statusColors[$order->client_status] ?? 'bg-slate-50 text-slate-700 border-slate-200';
                                                 @endphp
                                                  <select name="status" 
                                                     onchange="if(confirm('{{ __('Change status of order #:id?', ['id' => $order->display_id]) }}')) { this.form.submit(); } else { location.reload(); }" 
                                                     class="block w-full text-center px-2 py-1 text-[11px] font-bold rounded border uppercase tracking-wide cursor-pointer focus:ring-1 focus:ring-offset-1 focus:ring-slate-400 {{ $currentClass }}">
                                                     @foreach (App\Models\SourcingOrder::STATUSES as $status)
                                                         <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }} class="bg-white text-slate-700">
-                                                            {{ ucfirst(str_replace('_', ' ', $status)) }}
+                                                            {{ ucfirst(str_replace('_', ' ', $status)) }} 
+                                                            @if(in_array($status, ['in_transit_china', 'arrival_uae'])) ({{ __('Masked') }}) @endif
                                                         </option>
                                                     @endforeach
                                                 </select>

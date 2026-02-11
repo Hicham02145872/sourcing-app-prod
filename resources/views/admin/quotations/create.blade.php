@@ -151,13 +151,25 @@
 
                             <div class="p-4 bg-red-50/50 border border-red-100 rounded-lg">
                                 <div class="flex flex-col md:flex-row items-center gap-6">
-                                    <div class="flex-1 w-full">
-                                        <label for="media_files" class="block text-[10px] font-bold text-red-600 uppercase mb-2">
-                                            {{ __('Upload Product Photos & Videos') }}
-                                        </label>
-                                        <div class="relative group">
-                                            <input type="file" name="media_files[]" id="media_files" accept="image/*,video/*" multiple
-                                                class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 transition-all cursor-pointer bg-white border border-red-200 p-2 rounded-md">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <div class="space-y-2">
+                                                <label for="real_product_image" class="block text-[10px] font-bold text-red-600 uppercase">
+                                                    {{ __('Featured Product Photo') }} <span class="text-red-400 font-normal">({{ __('Shows on dashboard/refunds') }})</span>
+                                                </label>
+                                                <div class="relative group">
+                                                    <input type="file" name="real_product_image" id="real_product_image" accept="image/*"
+                                                        class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800 transition-all cursor-pointer bg-white border border-slate-200 p-2 rounded-md">
+                                                </div>
+                                            </div>
+                                            <div class="space-y-2">
+                                                <label for="media_files" class="block text-[10px] font-bold text-slate-600 uppercase">
+                                                    {{ __('Additional Photos & Videos') }}
+                                                </label>
+                                                <div class="relative group">
+                                                    <input type="file" name="media_files[]" id="media_files" accept="image/*,video/*" multiple
+                                                        class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition-all cursor-pointer bg-white border border-slate-200 p-2 rounded-md">
+                                                </div>
+                                            </div>
                                         </div>
                                         <p class="mt-2 text-[10px] text-red-500/80 font-medium italic">
                                             <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

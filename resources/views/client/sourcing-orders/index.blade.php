@@ -96,7 +96,7 @@
                                 </div>
                                 <div>
                                     <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('In Transit') }}</p>
-                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrders->whereIn('status', ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'shipment_delayed'])->count() }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingOrders->filter(function($o) { return in_array($o->client_status, ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'shipment_delayed']); })->count() }}</p>
                                 </div>
                             </div>
 
@@ -204,7 +204,7 @@
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
                                                 </svg>
-                                                {{ __(ucfirst(str_replace('_', ' ', $order->status))) }}
+                                                {{ __(ucfirst(str_replace('_', ' ', $order->client_status))) }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">

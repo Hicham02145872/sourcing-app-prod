@@ -10,5 +10,5 @@ return [
     | be automatically approved upon submission. Set to 0 to disable.
     |
     */
-    'auto_approve_limit' => env('REFUND_AUTO_APPROVE_LIMIT', 20.00),
+    'auto_approve_limit' => 0, // Disabled
 ];

@@ -179,7 +179,10 @@
                                         </td>
                                         <td class="px-6 py-4 text-right">
                                             <div class="text-sm font-bold text-slate-900">{{ number_format($request->amount_requested, 2) }}</div>
-                                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{{ __($request->type) }}</div>
+                                            <div class="flex flex-col items-end">
+                                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{{ __($request->type) }}</span>
+                                                <span class="text-[9px] font-black text-red-600/70 uppercase">Qty: {{ $request->damaged_quantity ?? '?' }}</span>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             @php
@@ -208,7 +211,17 @@
                                                 <span class="text-[10px] font-bold text-slate-300 uppercase italic">{{ __('Unassigned') }}</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 text-right">
+                                        <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+                                            @if(!$request->assigned_to_admin_id)
+                                                <form action="{{ route('admin.refund-requests.assign-to-me', $request) }}" method="POST">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors shadow-sm" title="{{ __('Assign to Me') }}">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                                        <span>{{ __('Assign') }}</span>
+                                                    </button>
+                                                </form>
+                                            @endif
                                             <a href="{{ route('admin.refund-requests.show', $request) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-md transition-colors shadow-sm">
                                                 <span>{{ __('Manage') }}</span>
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>

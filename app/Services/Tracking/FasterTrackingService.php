@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\Log;
 
 class FasterTrackingService implements TrackingServiceInterface
 {
+    protected $translationService;
+
+    public function __construct(
+        protected \App\Services\TrackingTranslationService $service
+    ) {
+        $this->translationService = $service;
+    }
+
     public function getTrackingInfo(string $trackingNumber): array
     {
         $startTime = microtime(true);
@@ -40,13 +48,19 @@ class FasterTrackingService implements TrackingServiceInterface
                 if (isset($responseData['code']) && $responseData['code'] === 0 && ! empty($responseData['data']) && isset($responseData['data'][0]['statusLogs'])) {
                     $logs = $responseData['data'][0]['statusLogs'];
 
-                    $events = array_map(function ($log) {
-                        return [
+                    $events = [];
+                    foreach ($logs as $log) {
+                         $rawStatus = $log['status'] ?? $log['statusName'] ?? $log['statusDetails'] ?? 'Unknown';
+                         $rawLocation = $log['location'] ?? $log['statusLocation'] ?? '';
+                         
+                         $events[] = [
                             'date' => $log['statusDate'] ?? $log['createdAt'] ?? date('Y-m-d H:i:s'),
-                            'status' => $log['status'] ?? $log['statusName'] ?? $log['statusDetails'] ?? 'Unknown',
-                            'location' => $log['location'] ?? $log['statusLocation'] ?? '',
+                            'status' => $rawStatus, // Keep raw for reference if needed
+                            'status_en' => $this->translationService->translate('Faster', $rawStatus, 'en'),
+                            'status_fr' => $this->translationService->translate('Faster', $rawStatus, 'fr'),
+                            'location' => $this->translationService->translate('Faster', $rawLocation, 'fr'),
                         ];
-                    }, $logs);
+                    }
 
                     Log::info("📊 [FASTER] Data parsed successfully", [
                         'tracking_number' => $trackingNumber,
@@ -57,7 +71,7 @@ class FasterTrackingService implements TrackingServiceInterface
                     return [
                         'success' => true,
                         'tracking_number' => $trackingNumber,
-                        'current_status' => $events[0]['status'] ?? 'Unknown',
+                        'current_status' => $events[0]['status_fr'] ?? 'Unknown',
                         'events' => $events,
                         'provider' => 'Faster',
                         'time_ms' => $elapsedTime
