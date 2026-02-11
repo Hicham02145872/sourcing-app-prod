@@ -222,6 +222,17 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Dubai Notice -->
+                    <div class="mt-12 p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-xl flex items-start gap-3">
+                        <svg class="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-xs font-bold text-orange-800 dark:text-orange-300 leading-relaxed uppercase tracking-tight">
+                            {{ __('Note: From Dubai to your destination country, status updates are managed manually by our operations team. You will see real-time progress here as your order moves forward.') }}
+                        </p>
+                    </div>
+                </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -529,7 +540,7 @@
                     if (elements.eventCountLabel) elements.eventCountLabel.textContent = `${data.length} Events`;
                 }
 
-                updateJourneyProgress(data);
+                updateJourneyProgress(data, result.order_status);
 
                 if (elements.resultsContainer) {
                     elements.resultsContainer.classList.remove('hidden');
@@ -625,24 +636,53 @@
                 elements.performanceIndicator.classList.add('animate-fade-in');
             }
 
-            function updateJourneyProgress(data) {
+            function updateJourneyProgress(data, orderStatus) {
                 if (!elements.journeyProgressBar) return;
                 
-                const status = (data[0].current_status || data[0].status_fr || data[0].status || '').toLowerCase();
-                let percentage = 25; // Default: Order Placed
+                const autoStatus = (data[0] ? (data[0].current_status || data[0].status_fr || data[0].status || '') : '').toLowerCase();
+                let percentage = 0;
                 
-                if (status.includes('deliv') || status.includes('livré')) {
-                    percentage = 100;
+                // 1. Calculate percentage based on AUTOMATED tracking (Selenium/API)
+                // Capped at 50% (In Transit) because carriers only track until Dubai.
+                if (autoStatus) {
+                    percentage = 25; // At least "Order" step if we have any automated data
+                    
+                    if (autoStatus.includes('transit') || autoStatus.includes('shipped') || autoStatus.includes('departed') || 
+                        autoStatus.includes('expéd') || autoStatus.includes('arrivé') || autoStatus.includes('signed') || 
+                        autoStatus.includes('livré') || autoStatus.includes('签收') || autoStatus.includes('reçus')) {
+                        percentage = 50; 
+                    }
+                }
+
+                // 2. Override with MANUAL Admin Status (Post-Dubai Leg)
+                // This allows the timeline to reach 75% and 100% via Admin intervention.
+                if (orderStatus) {
+                    const status = orderStatus.toLowerCase();
+                    
+                    if (status.includes('delivered') || status.includes('completed')) {
+                        percentage = Math.max(percentage, 100);
+                    } else if (status.includes('out_for_delivery') || status.includes('destination_country')) {
+                        percentage = Math.max(percentage, 75);
+                    } else if (status.includes('_uae') || status.includes('_china') || status.includes('transit')) {
+                        percentage = Math.max(percentage, 50);
+                    } else if (status === 'paid' || status === 'shipment_preparing') {
+                        percentage = Math.max(percentage, 25);
+                    }
+                }
+                
+                // If no data at all
+                if (percentage === 0) percentage = 25;
+                
+                // 3. UI Updates based on final percentage
+                if (percentage >= 100) {
                     markStepFilled(elements.step2Dot);
                     markStepFilled(elements.step3Dot);
                     markStepFilled(elements.step4Dot);
-                } else if (status.includes('out') || status.includes('delivery') || status.includes('cours de livra')) {
-                    percentage = 75;
+                } else if (percentage >= 75) {
                     markStepFilled(elements.step2Dot);
                     markStepFilled(elements.step3Dot);
                     unmarkStep(elements.step4Dot);
-                } else if (status.includes('transit') || status.includes('shipped') || status.includes('departed') || status.includes('expéd') || status.includes('arrivé')) {
-                    percentage = 50;
+                } else if (percentage >= 50) {
                     markStepFilled(elements.step2Dot);
                     unmarkStep(elements.step3Dot);
                     unmarkStep(elements.step4Dot);

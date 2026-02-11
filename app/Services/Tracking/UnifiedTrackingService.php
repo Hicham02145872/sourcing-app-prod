@@ -116,6 +116,20 @@ class UnifiedTrackingService
             'fetch_time_ms' => $fetchTime,
         ]);
 
+        // Attempt to find matching order to attach internal status
+        $order = null;
+        if (str_starts_with(strtoupper($trackingNumber), 'FSB')) {
+            $id = (int) substr($trackingNumber, 3);
+            $order = SourcingOrder::find($id);
+        } else {
+            $order = SourcingOrder::where('tracking_number', $trackingNumber)->first();
+        }
+
+        if ($order) {
+            $result['order_status'] = $order->status;
+            $result['order_id'] = $order->id;
+        }
+
         // Only cache if successful
         if ($result['success'] ?? false) {
             $cacheTtl = (int) config('tracking.cache_ttl', 30);

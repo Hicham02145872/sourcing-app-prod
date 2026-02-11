@@ -108,6 +108,7 @@ class TrackingController extends Controller
                     'current_status' => $result['current_status'] ?? ($result['events'][0]['status_fr'] ?? 'Update Success'),
                     'tracking_number' => $result['tracking_number'] ?? $trackingNumber,
                     'provider' => $provider,
+                    'order_status' => $result['order_status'] ?? null,
                 ]);
             }
 
