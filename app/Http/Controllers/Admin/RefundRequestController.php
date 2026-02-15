@@ -112,11 +112,15 @@ class RefundRequestController extends Controller
         $sourcingOrder = $refundRequest->sourcingOrder;
 
         if ($status === 'approved') {
-            // Update order financial info
+            // Cumulative refund: order.refund_amount = sum of all approved refund requests for this order
+            $totalApproved = $sourcingOrder->refundRequests()
+                ->where('status', 'approved')
+                ->sum('amount_approved');
+
             $sourcingOrder->update([
-                'refund_amount' => $amountApproved,
+                'refund_amount' => $totalApproved,
                 'refund_proof_path' => $refundRequest->refund_proof_path,
-                'status' => ($amountApproved >= $sourcingOrder->total_amount) ? 'refunded' : 'refund_approved',
+                'status' => ($totalApproved >= $sourcingOrder->total_amount) ? 'refunded' : 'refund_approved',
             ]);
         } else {
             $sourcingOrder->update(['status' => 'refund_rejected']);
