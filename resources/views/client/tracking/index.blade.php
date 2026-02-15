@@ -2,7 +2,6 @@
     ['label' => 'Dashboard', 'url' => route('client.dashboard')],
     ['label' => 'Track Shipment']
 ]">
-    @featureVisible('tracking')
     <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4">
             
@@ -296,17 +295,6 @@
             </div>
         </div>
     </div>
-    @else
-    <div class="py-20 text-center">
-        <div class="max-w-md mx-auto">
-            <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-amber-50 rounded-full">
-                <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tighter">Feature Coming Soon</h2>
-            <p class="mt-2 text-slate-500 font-medium">We are currently fine-tuning this module. Check back shortly for the final release.</p>
-        </div>
-    </div>
-    @endfeatureVisible
 
     @push('scripts')
     <script>
@@ -463,8 +451,12 @@
                 if (elements.resultTrackingNumber) elements.resultTrackingNumber.textContent = number;
                 if (elements.latestStatusText) elements.latestStatusText.textContent = result.current_status || getField(latest, ['status_en', 'status', 'Status']) || 'Status Pending';
                 
-                const location = getField(latest, ['location', 'Location']);
-                if (elements.latestLocation) elements.latestLocation.querySelector('span').textContent = location || 'N/A';
+                let location = getField(latest, ['location', 'Location']);
+                if (!location || location.trim() === '') {
+                    const fromText = extractLocationFromText(getField(latest, ['status', 'status_en']) || '');
+                    if (fromText) location = fromText;
+                }
+                if (elements.latestLocation) elements.latestLocation.querySelector('span').textContent = (location && location.trim()) ? location : 'N/A';
                 
                 if (location && location.trim() !== '') {
                     updateMap(location);
@@ -472,8 +464,13 @@
                     document.getElementById('mapContainer').classList.add('hidden');
                 }
 
-                const dateRaw = getField(latest, ['statusDate', 'created_at', 'date', 'Date']);
-                if (elements.latestDate) elements.latestDate.querySelector('span').textContent = dateRaw ? formatDate(dateRaw) : 'N/A';
+                let dateRaw = getField(latest, ['statusDate', 'created_at', 'date', 'Date']);
+                if (!dateRaw || formatDate(dateRaw) === 'Invalid Date') {
+                    const fromText = extractDateFromText(getField(latest, ['status', 'status_en']) || '');
+                    if (fromText) dateRaw = fromText;
+                }
+                const displayDate = dateRaw ? formatDate(dateRaw) : 'N/A';
+                if (elements.latestDate) elements.latestDate.querySelector('span').textContent = (displayDate && displayDate !== 'Invalid Date') ? displayDate : 'N/A';
 
                 showPerformanceMetrics(result.provider, responseTime);
 
@@ -571,8 +568,12 @@
             function renderTimelineItem(item, isLatest) {
                 const status = getField(item, ['status_en', 'status', 'Status']) || 'Update';
                 const details = getField(item, ['statusDetails', 'details', 'remarks', 'Remarks']);
-                const location = getField(item, ['location', 'Location']);
-                const dateStr = getField(item, ['date', 'statusDate', 'Date']);
+                let location = getField(item, ['location', 'Location']);
+                if (!location && status) location = extractLocationFromText(status);
+                let dateStr = getField(item, ['date', 'statusDate', 'Date']);
+                if (!dateStr && status) dateStr = extractDateFromText(status);
+                const displayDate = dateStr ? formatDate(dateStr) : 'N/A';
+                const dateDisplay = (displayDate && displayDate !== 'Invalid Date') ? displayDate : (dateStr || 'N/A');
                 
                 const html = `
                     <div class="relative pl-8 group animate-fade-in">
@@ -584,7 +585,7 @@
                                 ${location ? `<div class="flex items-center mt-2 space-x-1"><svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-[10px] font-bold text-slate-400 uppercase">${escapeHtml(location)}</span></div>` : ''}
                             </div>
                             <div class="sm:text-right flex-shrink-0">
-                                <span class="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-800">${dateStr ? formatDate(dateStr) : 'N/A'}</span>
+                                <span class="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-800">${escapeHtml(dateDisplay)}</span>
                             </div>
                         </div>
                     </div>
@@ -602,9 +603,42 @@
                 return null;
             }
 
+            /** Extract a date string from activity text like "Delivered POME, IT 01/14/2026, 11:03 A.M." */
+            function extractDateFromText(text) {
+                if (!text || typeof text !== 'string') return '';
+                const match = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{4}),\s*(\d{1,2}):(\d{2})\s*([AP])\.?M\.?/i);
+                if (!match) return '';
+                const [, month, day, year, hour, min, ampm] = match;
+                const h = parseInt(hour, 10);
+                const hour12 = ampm.toUpperCase() === 'A' ? (h === 12 ? 0 : h) : (h === 12 ? 12 : h + 12);
+                return `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')} ${hour12.toString().padStart(2,'0')}:${min}`;
+            }
+
+            /** Extract location (e.g. "POME, IT", "Roma, Italy", "Belgium") from activity text before the date. */
+            function extractLocationFromText(text) {
+                if (!text || typeof text !== 'string') return '';
+                const beforeDate = text.replace(/\d{1,2}\/\d{1,2}\/\d{4},?\s*\d{1,2}:\d{2}\s*[AP]\.?M\.?/i, '').trim();
+                const locMatch = beforeDate.match(/\s+([^,]+,\s*[A-Za-z]{2,})$/);
+                if (locMatch) return locMatch[1].trim();
+                const lastWord = beforeDate.match(/\s+([A-Za-z][A-Za-z\s]{1,30})$/);
+                return lastWord ? lastWord[1].trim() : '';
+            }
+
             function formatDate(s) {
-                if(!s) return '';
-                const d = new Date(s.replace(/-/g, "/")); 
+                if (!s) return '';
+                let str = typeof s === 'string' ? s.trim() : String(s);
+                if (!str) return '';
+                if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+                    const d = new Date(str.replace(/-/g, '/'));
+                    if (!isNaN(d.getTime())) return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                }
+                const extracted = extractDateFromText(str);
+                if (extracted) {
+                    const d = new Date(extracted.replace(/-/g, '/'));
+                    if (!isNaN(d.getTime())) return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                }
+                const d = new Date(str.replace(/-/g, '/'));
+                if (isNaN(d.getTime())) return '';
                 return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
             }
 

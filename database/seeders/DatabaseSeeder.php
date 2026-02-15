@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             GoogleSheetSettingSeeder::class,
             DevUserSeeder::class,
+            FeatureFlagSeeder::class,
         ]);
     }
 }

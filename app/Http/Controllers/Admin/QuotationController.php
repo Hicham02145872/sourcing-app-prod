@@ -144,12 +144,8 @@ class QuotationController extends Controller
         // Get the sourcing request and load its destinations
         $sourcingRequest = SourcingRequest::with('destinations')->findOrFail($validated['sourcing_request_id']);
 
-        // Calculate total quantity from all destinations
+        // Calculate total quantity from all destinations (use actual sum; do not force minimum 1)
         $totalQuantity = $sourcingRequest->destinations->sum('quantity');
-
-        // Ensure totalQuantity is at least 1 (or 0 if an empty request should result in 0 total)
-        // Assuming at least one destination with quantity > 0 is required by validation.
-        $totalQuantity = max(1, $totalQuantity);
 
         // Calculate total amount: (unit_price * totalQuantity) + commission + delivery
         $subtotal = $validated['unit_price'] * $totalQuantity;
@@ -276,7 +272,6 @@ class QuotationController extends Controller
 
         $sourcingRequest = $quotation->sourcingRequest;
         $totalQuantity = $sourcingRequest->destinations->sum('quantity');
-        $totalQuantity = max(1, $totalQuantity);
 
         $subtotal = $validated['unit_price'] * $totalQuantity;
         $amount = $subtotal + $validated['commission_service'] + $validated['delivery_cost_china'];

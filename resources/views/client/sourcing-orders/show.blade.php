@@ -75,8 +75,7 @@
                 {{-- Main Content --}}
                 <div class="lg:col-span-2 space-y-6">
                     
-                    {{-- Expédition & Suivi --}}
-                    @feature('tracking')
+                    {{-- Expédition & Suivi (toujours visible pour le client) --}}
                     <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden mb-6 relative group">
                         
                         <!-- Content -->
@@ -98,7 +97,6 @@
                                 @endif
                             </div>
                             <div class="p-6">
-                                @featureVisible('tracking')
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
                                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Numéro de suivi') }}</p>
@@ -119,21 +117,9 @@
                                     </a>
                                 </div>
                                 @endif
-                                @endfeatureVisible
-
-                                @featureComingSoon('tracking')
-                                <div class="py-8 flex flex-col items-center justify-center text-center">
-                                    <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mb-4">
-                                        <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253" /></svg>
-                                    </div>
-                                    <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest">{{ __('Suivi Intelligent bientôt disponible') }}</h4>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">{{ __('Nous finalisons l\'intégration du suivi en temps réel pour vos commandes. Vous serez notifié dès activation.') }}</p>
-                                </div>
-                                @endfeatureComingSoon
                             </div>
                         </div>
                     </div>
-                    @endfeature
 
                     {{-- Product Information --}}
 

@@ -187,14 +187,12 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/notifications-api', [App\Http\Controllers\Client\NotificationController::class, 'index'])->name('notifications.api.index');
     Route::post('/notifications-api/{notification}/mark-as-read', [App\Http\Controllers\Client\NotificationController::class, 'markAsRead'])->name('notifications.api.mark-as-read');
 
-    // Tracking
-    Route::middleware('feature:tracking')->group(function () {
-        Route::get('/tracking', [App\Http\Controllers\Client\TrackingController::class, 'index'])->name('tracking.index');
-        Route::middleware('throttle:10,1')->get('/tracking/data', [App\Http\Controllers\Client\TrackingController::class, 'data'])->name('tracking.data');
-        Route::get('/tracking/17track', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackIndex'])->name('tracking.17track.index');
-        Route::middleware('throttle:10,1')->get('/tracking/1track/data', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackData'])->name('tracking.17track.data');
-        Route::get('/tracking/logs', [App\Http\Controllers\Client\TrackingLogController::class, 'index'])->name('tracking.logs');
-    });
+    // Tracking (toujours accessible pour le client)
+    Route::get('/tracking', [App\Http\Controllers\Client\TrackingController::class, 'index'])->name('tracking.index');
+    Route::middleware('throttle:10,1')->get('/tracking/data', [App\Http\Controllers\Client\TrackingController::class, 'data'])->name('tracking.data');
+    Route::get('/tracking/17track', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackIndex'])->name('tracking.17track.index');
+    Route::middleware('throttle:10,1')->get('/tracking/1track/data', [App\Http\Controllers\Client\TrackingController::class, 'seventeenTrackData'])->name('tracking.17track.data');
+    Route::get('/tracking/logs', [App\Http\Controllers\Client\TrackingLogController::class, 'index'])->name('tracking.logs');
 
     // Shipping Fees
     Route::get('/shipping-fees', [App\Http\Controllers\Client\ShippingFeeController::class, 'index'])->name('shipping-fees.index');

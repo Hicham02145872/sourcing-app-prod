@@ -11,14 +11,15 @@ class TestTrackingRegression extends Command
      *
      * @var string
      */
-    protected $signature = 'tracking:test-regression {--provider=all : The provider to test (itdida, faster, choicexp, all)}';
+    protected $signature = 'tracking:test-regression {--provider=all : The provider to test (itdida, faster, choicexp, ups, all)}';
 
     // ...
 
     public function handle(
         \App\Services\Tracking\ItdidaTrackingService $itdidaService,
         \App\Services\Tracking\FasterTrackingService $fasterService,
-        \App\Services\Tracking\ChoiceXPTrackingService $choiceXPService
+        \App\Services\Tracking\ChoiceXPTrackingService $choiceXPService,
+        \App\Services\Tracking\UPSTrackingService $upsService
     )
     {
         $provider = $this->option('provider');
@@ -28,6 +29,7 @@ class TestTrackingRegression extends Command
             'itdida' => $this->getRecentSuccessfulNumbers('itdida'),
             'faster' => $this->getRecentSuccessfulNumbers('faster'),
             'choicexp' => $this->getRecentSuccessfulNumbers('choicexp'),
+            'ups' => $this->getRecentSuccessfulNumbers('ups'),
         ];
 
         if ($provider !== 'all') {
@@ -45,6 +47,7 @@ class TestTrackingRegression extends Command
                 'itdida' => $itdidaService,
                 'faster' => $fasterService,
                 'choicexp' => $choiceXPService,
+                'ups' => $upsService,
             };
 
             foreach ($numbers as $number) {

@@ -41,8 +41,9 @@ class AdminSourcingRequestController extends Controller
      */
     public function store(StoreAdminSourcingRequest $request): RedirectResponse
     {
+        $sourcingRequest = null;
         try {
-            return DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request, &$sourcingRequest) {
                 // 1. Identify or Create the Client
                 $userId = null;
                 if ($request->client_type === 'existing') {
@@ -100,11 +101,10 @@ class AdminSourcingRequestController extends Controller
                         'quantity' => $destData['quantity'],
                     ]);
                 }
-
-                return redirect()
-                    ->route('admin.sourcing-requests.show', $sourcingRequest)
-                    ->with('success', 'Demande de sourcing créée et assignée avec succès.');
             });
+            return redirect()
+                ->route('admin.sourcing-requests.show', $sourcingRequest)
+                ->with('success', 'Demande de sourcing créée et assignée avec succès.');
         } catch (\Exception $e) {
             return back()
                 ->withInput()

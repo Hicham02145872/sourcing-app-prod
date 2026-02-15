@@ -45,7 +45,7 @@ class ShippingCompanyManager extends Component
             'lark_app_secret' => 'nullable|string|max:255',
             'lark_base_token' => 'nullable|string|max:255',
             'lark_table_id' => 'nullable|string|max:255',
-            'tracking_provider' => 'nullable|string|in:itdida,faster,choicexp',
+            'tracking_provider' => 'nullable|string|in:itdida,faster,choicexp,ups',
         ];
     }
 

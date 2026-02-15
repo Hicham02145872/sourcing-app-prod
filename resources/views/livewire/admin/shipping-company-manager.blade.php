@@ -220,9 +220,10 @@
                                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Tracking Provider') }}</label>
                                     <select wire:model="tracking_provider" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg text-sm transition-all cursor-pointer">
                                         <option value="">{{ __('None / Generic') }}</option>
-                                        <option value="itdida">Itdida (Selenium)</option>
-                                        <option value="faster">Faster / GCC (API)</option>
-                                        <option value="choicexp">ChoiceXP (Selenium)</option>
+                                        <option value="itdida">Itdida</option>
+                                        <option value="choicexp">ChoiceXP</option>
+                                        <option value="ups">UPS</option>
+                                        <option value="faster">Faster / GCC</option>
                                     </select>
                                     @error('tracking_provider') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
                                 </div>

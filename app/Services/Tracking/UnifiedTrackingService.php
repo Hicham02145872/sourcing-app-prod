@@ -12,7 +12,8 @@ class UnifiedTrackingService
     public function __construct(
         protected ItdidaTrackingService $itdidaService,
         protected FasterTrackingService $fasterService,
-        protected ChoiceXPTrackingService $choiceXPService
+        protected ChoiceXPTrackingService $choiceXPService,
+        protected UPSTrackingService $upsService
     ) {}
 
     public function track(string $trackingNumber, ?string $carrier = null): array
@@ -56,7 +57,7 @@ class UnifiedTrackingService
 
         // 4. Check if we should queue (Selenium providers)
         // These providers use browser automation which is resource intensive
-        $seleniumProviders = ['itdida', 'faster', 'choicexp', 'gcc'];
+        $seleniumProviders = ['itdida', 'faster', 'choicexp', 'gcc', 'ups'];
 
         if (in_array(strtolower($provider), $seleniumProviders)) {
             // Check if a job is already pending for this number
@@ -233,6 +234,7 @@ class UnifiedTrackingService
             'itdida' => 'FSB',
             'choicexp' => 'FSB',
             'gcc' => 'FSB',
+            'ups' => 'UPS',
         ];
 
         $response['provider'] = $providerDisplayMap[strtolower($provider)] ?? ucfirst($provider);
@@ -306,11 +308,17 @@ class UnifiedTrackingService
             if (str_contains($carrierLower, 'faster') || str_contains($carrierLower, 'gcc')) {
                 return 'faster';
             }
+            if (str_contains($carrierLower, 'ups')) {
+                return 'ups';
+            }
         }
 
         // Auto-detection by number pattern
         $number = strtoupper($trackingNumber);
 
+        if (str_starts_with($number, '1Z')) {
+            return 'ups';
+        }
         if (str_starts_with($number, 'DBC')) {
             return 'choicexp';
         }
@@ -328,6 +336,7 @@ class UnifiedTrackingService
             'itdida' => $this->itdidaService,
             'faster', 'gcc' => $this->fasterService,
             'choicexp' => $this->choiceXPService,
+            'ups' => $this->upsService,
             default => null,
         };
     }
