@@ -338,6 +338,10 @@ class SourcingOrderController extends Controller
 
         $sourcingOrder->update($validated);
 
+        if (! empty($validated['tracking_number']) && $sourcingOrder->user) {
+            $sourcingOrder->user->notify(new \App\Notifications\TrackingNumberAdded($sourcingOrder));
+        }
+
         return back()->with('status', 'Tracking information updated successfully.');
     }
 

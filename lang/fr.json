@@ -1028,5 +1028,13 @@
     "Try again": "Réessayer",
     "Back to dashboard": "Retour au tableau de bord",
     "Fetching tracking information": "Récupération des informations de suivi",
-    "Track Shipment": "Suivre le colis"
+    "Track Shipment": "Suivre le colis",
+    "Tracking number for your order #:orderId": "Numéro de suivi pour votre commande #:orderId",
+    "A tracking number has been added to your order #:orderId for \":productName\".": "Un numéro de suivi a été ajouté à votre commande #:orderId pour « :productName ».",
+    "Tracking number: :number": "Numéro de suivi : :number",
+    "You can also view your order and track it from your dashboard.": "Vous pouvez aussi voir votre commande et la suivre depuis votre tableau de bord.",
+    "📦 Tracking number for order #:orderId": "📦 Numéro de suivi pour la commande #:orderId",
+    "Your order \":productName\" can now be tracked. Number: :number": "Votre commande « :productName » peut maintenant être suivie. Numéro : :number",
+    "📦 Tracking for order #:orderId": "📦 Suivi pour la commande #:orderId",
+    "Tracking number: :number. Tap to view your order.": "Numéro de suivi : :number. Appuyez pour voir votre commande."
 }

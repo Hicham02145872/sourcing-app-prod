@@ -6,6 +6,7 @@ use App\Events\SourcingOrderStatusChanged;
 use App\Models\ShippingCompany;
 use App\Models\SourcingOrder;
 use App\Models\User;
+use App\Notifications\TrackingNumberAdded;
 use App\Services\Tracking\UnifiedTrackingService;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -75,6 +76,10 @@ class SourcingOrderWorkflow extends Component
         ]);
 
         $this->sourcingOrder->refresh();
+
+        if ($this->sourcingOrder->tracking_number && $this->sourcingOrder->user) {
+            $this->sourcingOrder->user->notify(new TrackingNumberAdded($this->sourcingOrder));
+        }
 
         $this->dispatch('show-success-toast', message: __('Tracking information updated successfully!'));
     }

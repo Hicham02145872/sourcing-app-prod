@@ -919,5 +919,13 @@
     "Try again": "Try again",
     "Back to dashboard": "Back to dashboard",
     "Fetching tracking information": "Fetching tracking information",
-    "Track Shipment": "Track Shipment"
+    "Track Shipment": "Track Shipment",
+    "Tracking number for your order #:orderId": "Tracking number for your order #:orderId",
+    "A tracking number has been added to your order #:orderId for \":productName\".": "A tracking number has been added to your order #:orderId for \":productName\".",
+    "Tracking number: :number": "Tracking number: :number",
+    "You can also view your order and track it from your dashboard.": "You can also view your order and track it from your dashboard.",
+    "📦 Tracking number for order #:orderId": "📦 Tracking number for order #:orderId",
+    "Your order \":productName\" can now be tracked. Number: :number": "Your order \":productName\" can now be tracked. Number: :number",
+    "📦 Tracking for order #:orderId": "📦 Tracking for order #:orderId",
+    "Tracking number: :number. Tap to view your order.": "Tracking number: :number. Tap to view your order."
 }
