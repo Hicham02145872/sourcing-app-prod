@@ -107,9 +107,89 @@
             </div>
 
             @if(isset($deepTrackingResult))
-                <div class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded text-sm">
-                    <h4 class="font-bold mb-2">{{ __('Dernier statut détecté:') }}</h4>
-                    <pre class="text-xs overflow-auto max-h-40 bg-white p-2 border">{{ json_encode($deepTrackingResult, JSON_PRETTY_PRINT) }}</pre>
+                @php
+                    $events = $deepTrackingResult['events'] ?? [];
+                    $latestEvent = $events[0] ?? null;
+                    $lastStatus = $deepTrackingResult['current_status_fr'] ?? $deepTrackingResult['current_status'] ?? $latestEvent['status_fr'] ?? $latestEvent['status_en'] ?? $latestEvent['status'] ?? ($deepTrackingResult['error'] ?? '—');
+                    $lastLocation = $latestEvent['location'] ?? '';
+                @endphp
+                <div class="mt-4" x-data="{}">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button type="button"
+                                @click="$refs.trackingModal.showModal()"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        {{ __('Voir détail du suivi') }}
+                    </button>
+                        @if(!empty($deepTrackingResult['success']))
+                            <span class="text-xs text-slate-500">{{ $deepTrackingResult['provider'] ?? '' }} · {{ $lastStatus }}{{ $lastLocation ? ' · ' . $lastLocation : '' }}</span>
+                        @endif
+                    </div>
+                    <dialog x-ref="trackingModal" class="rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden backdrop:bg-slate-900/50 p-0"
+                        @click="if ($event.target === $refs.trackingModal) $refs.trackingModal.close()">
+                    <div class="bg-white p-0" @click.stop>
+                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                {{ __('Détail du suivi') }}
+                            </h3>
+                            <button type="button" @click="$refs.trackingModal.close()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="p-6 overflow-y-auto max-h-[70vh]">
+                            @if(!empty($deepTrackingResult['success']))
+                                <div class="space-y-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 mb-1">{{ __('Dernier statut') }}</p>
+                                            <p class="text-sm font-semibold text-slate-900">{{ $lastStatus }}</p>
+                                        </div>
+                                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Dernière position') }}</p>
+                                            <p class="text-sm font-semibold text-slate-900">{{ $lastLocation ?: __('N/A') }}</p>
+                                        </div>
+                                    </div>
+                                    @if(!empty($deepTrackingResult['provider']))
+                                        <p class="text-xs text-slate-500">{{ __('Transporteur') }}: <span class="font-semibold text-slate-700">{{ $deepTrackingResult['provider'] }}</span></p>
+                                    @endif
+                                    @if(count($events) > 0)
+                                        <div class="pt-2 border-t border-slate-200">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">{{ __('Historique') }} ({{ count($events) }})</p>
+                                            <ul class="space-y-2">
+                                                @foreach(array_slice($events, 0, 10) as $ev)
+                                                    <li class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-2 px-3 bg-slate-50 rounded-lg text-xs">
+                                                        <span class="font-medium text-slate-800">{{ $ev['status_fr'] ?? $ev['status_en'] ?? $ev['status'] ?? '—' }}</span>
+                                                        @if(!empty($ev['location']))
+                                                            <span class="text-slate-500 flex items-center gap-1">
+                                                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                                                                {{ $ev['location'] }}
+                                                            </span>
+                                                        @endif
+                                                        @if(!empty($ev['date']))
+                                                            <span class="text-slate-400 text-[10px]">{{ $ev['date'] }}</span>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                            @if(count($events) > 10)
+                                                <p class="text-[10px] text-slate-400 mt-2">{{ __('Et :count autres événements', ['count' => count($events) - 10]) }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @else
+                                <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                                    <p class="text-sm font-semibold text-amber-800">{{ __('Suivi non disponible') }}</p>
+                                    <p class="text-xs text-amber-700 mt-1">{{ $deepTrackingResult['error'] ?? __('Aucune donnée.') }}</p>
+                                    @if(($deepTrackingResult['status'] ?? '') === 'pending')
+                                        <p class="text-xs text-amber-600 mt-2">{{ __('Actualisation en cours. Réessayez dans quelques instants.') }}</p>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </dialog>
                 </div>
             @endif
 
