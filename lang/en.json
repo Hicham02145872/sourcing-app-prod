@@ -927,5 +927,9 @@
     "📦 Tracking number for order #:orderId": "📦 Tracking number for order #:orderId",
     "Your order \":productName\" can now be tracked. Number: :number": "Your order \":productName\" can now be tracked. Number: :number",
     "📦 Tracking for order #:orderId": "📦 Tracking for order #:orderId",
-    "Tracking number: :number. Tap to view your order.": "Tracking number: :number. Tap to view your order."
+    "Tracking number: :number. Tap to view your order.": "Tracking number: :number. Tap to view your order.",
+    "Your tracking reference: :number": "Your tracking reference: :number",
+    "Carrier tracking number: :number": "Carrier tracking number: :number",
+    "Your order \":productName\" can now be tracked. Your tracking reference: :number": "Your order \":productName\" can now be tracked. Your tracking reference: :number",
+    "Your tracking reference: :number. Tap to view your order.": "Your tracking reference: :number. Tap to view your order."
 }

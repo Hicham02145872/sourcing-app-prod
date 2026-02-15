@@ -1036,5 +1036,9 @@
     "📦 Tracking number for order #:orderId": "📦 Numéro de suivi pour la commande #:orderId",
     "Your order \":productName\" can now be tracked. Number: :number": "Votre commande « :productName » peut maintenant être suivie. Numéro : :number",
     "📦 Tracking for order #:orderId": "📦 Suivi pour la commande #:orderId",
-    "Tracking number: :number. Tap to view your order.": "Numéro de suivi : :number. Appuyez pour voir votre commande."
+    "Tracking number: :number. Tap to view your order.": "Numéro de suivi : :number. Appuyez pour voir votre commande.",
+    "Your tracking reference: :number": "Votre référence de suivi : :number",
+    "Carrier tracking number: :number": "Numéro transporteur : :number",
+    "Your order \":productName\" can now be tracked. Your tracking reference: :number": "Votre commande « :productName » peut maintenant être suivie. Votre référence de suivi : :number",
+    "Your tracking reference: :number. Tap to view your order.": "Votre référence de suivi : :number. Appuyez pour voir votre commande."
 }
