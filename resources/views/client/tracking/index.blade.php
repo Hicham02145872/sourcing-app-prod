@@ -1,160 +1,129 @@
 <x-app-layout :breadcrumb="[
-    ['label' => 'Dashboard', 'url' => route('client.dashboard')],
-    ['label' => 'Track Shipment']
+    ['label' => __('Dashboard'), 'url' => route('client.dashboard')],
+    ['label' => __('Track Shipment')]
 ]">
-    <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4">
+    <div class="py-8 sm:py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <!-- Header Section -->
-            <div class="mb-10 text-center sm:text-left">
-                <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-                    Track Your Shipment
-                </h2>
-                <p class="mt-3 text-lg text-slate-500 dark:text-slate-400 max-w-2xl">
-                    Enter your tracking number below to see real-time status updates and delivery progress.
+            <!-- Header -->
+            <header class="mb-8 sm:mb-10 text-center">
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    {{ __('Track your shipment') }}
+                </h1>
+                <p class="mt-2 text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+                    {{ __('Enter your tracking number to see status and delivery progress in real time.') }}
                 </p>
-            </div>
+            </header>
 
-            <!-- Search Section (Simplified Enterprise) -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden mb-10 transition-all hover:shadow-2xl hover:shadow-slate-300/50">
-                <div class="p-6 sm:p-10">
-                    <form id="trackingForm" class="relative max-w-3xl mx-auto">
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <div class="relative flex-grow group">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none group-focus-within:text-[#EF7722] transition-colors">
-                                    <svg class="h-6 w-6 text-slate-400 group-focus-within:text-[#EF7722]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            <!-- Search card -->
+            <section class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden mb-8">
+                <div class="p-6 sm:p-8">
+                    <form id="trackingForm" class="max-w-2xl mx-auto">
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                            <div class="relative flex-1">
+                                <label for="trackingNumberInput" class="sr-only">{{ __('Tracking number') }}</label>
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
                                     </svg>
                                 </div>
                                 <input type="text" id="trackingNumberInput" name="number" value="{{ $initialNumber ?? '' }}" 
-                                       class="block w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-[#EF7722] text-slate-900 dark:text-white placeholder-slate-400 font-medium transition-all" 
-                                       placeholder="Enter tracking number (e.g. FSB000043)" required autofocus>
+                                       class="block w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-[#EF7722] focus:border-[#EF7722] transition-all text-base" 
+                                       placeholder="{{ __('e.g. FSB000043 or carrier number') }}" required autofocus
+                                       autocomplete="off">
                             </div>
-                            <button type="submit" id="trackButton" class="sm:w-auto px-10 py-4 bg-gradient-to-r from-[#EF7722] to-[#d66616] hover:from-[#d66616] hover:to-[#c45a12] text-white font-bold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 group">
-                                <span>Track Shipment</span>
-                                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            <button type="submit" id="trackButton" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#EF7722] hover:bg-[#d66616] text-white font-semibold rounded-xl shadow-sm hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-70 disabled:cursor-not-allowed">
+                                <svg id="trackButtonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
+                                <span id="trackButtonText">{{ __('Search') }}</span>
                             </button>
                         </div>
+                        <p class="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center sm:text-left">
+                            {{ __('Use your order ID (FSB...) or the tracking number from your carrier.') }}
+                        </p>
                     </form>
                     
-                    <!-- Performance Metrics Display (Simple) -->
-                    <div id="performanceIndicator" class="hidden mt-8 flex flex-wrap items-center justify-center gap-8 text-xs font-bold text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-700 pt-8">
-                        <div class="flex items-center gap-2">
+                    <div id="performanceIndicator" class="hidden mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 dark:text-slate-400">
+                        <span class="flex items-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                            <span class="text-slate-400 uppercase tracking-tighter">Carrier:</span>
-                            <span id="providerName" class="text-slate-900 dark:text-slate-200"></span>
-                        </div>
-                        <div class="flex items-center gap-2">
+                            <span>{{ __('Carrier') }}:</span>
+                            <strong id="providerName" class="text-slate-700 dark:text-slate-300"></strong>
+                        </span>
+                        <span class="flex items-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                            <span class="text-slate-400 uppercase tracking-tighter">Latency:</span>
-                            <span id="responseTime" class="text-slate-900 dark:text-slate-200"></span>
-                        </div>
-                        <div id="cacheStatusBadge" class="flex items-center gap-2">
+                            <span id="responseTime"></span>
+                        </span>
+                        <span id="cacheStatusBadge" class="flex items-center gap-2">
                             <span id="cacheDot" class="w-1.5 h-1.5 rounded-full"></span>
-                            <span id="cacheStatusText" class="uppercase tracking-tighter"></span>
-                        </div>
+                            <span id="cacheStatusText"></span>
+                        </span>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Loading State (Enterprise Style) -->
-            <div id="loadingState" class="hidden py-12 animate-fade-in">
-                <div class="max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-xl">
+            <!-- Loading -->
+            <div id="loadingState" class="hidden animate-fade-in">
+                <div class="max-w-sm mx-auto bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                     <div class="flex flex-col items-center text-center">
-                        <!-- Professional Spinner -->
-                        <div class="w-20 h-20 relative mb-8">
-                            <div class="absolute inset-0 rounded-full border-[6px] border-slate-100 dark:border-slate-900"></div>
-                            <div class="absolute inset-0 rounded-full border-[6px] border-[#EF7722] border-t-transparent animate-spin"></div>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-[#EF7722] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" />
-                                </svg>
-                            </div>
+                        <div class="w-14 h-14 rounded-full border-4 border-slate-100 dark:border-slate-700 border-t-[#EF7722] animate-spin mb-6" aria-hidden="true"></div>
+                        <h3 id="loadingText" class="text-base font-semibold text-slate-900 dark:text-white">
+                            {{ __('Searching...') }}
+                        </h3>
+                        <p id="loadingSubtext" class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            {{ __('Fetching tracking information') }}
+                        </p>
+                        <div class="mt-6 w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div id="loadingProgress" class="h-full bg-[#EF7722] transition-all duration-500 rounded-full" style="width: 20%"></div>
                         </div>
-                        
-                        <div class="space-y-6 w-full">
-                            <div>
-                                <h3 id="loadingText" class="text-xl font-black text-slate-900 dark:text-white transition-all duration-300">
-                                    Authenticating...
-                                </h3>
-                                <p id="loadingSubtext" class="text-sm text-slate-500 font-bold mt-2 uppercase tracking-wide">
-                                    Carrier handshaking in progress
-                                </p>
-                            </div>
-                            
-                            <!-- Static Progress Bar (Enterprise Look) -->
-                            <div class="h-3 w-full bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden shadow-inner">
-                                <div id="loadingProgress" class="h-full bg-gradient-to-r from-[#EF7722] to-orange-400 transition-all duration-500 ease-out rounded-full" style="width: 10%"></div>
-                            </div>
-
-                            <button type="button" id="cancelSearch" class="mt-4 px-6 py-2 text-xs font-black text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                {{ __('Cancel Search') }}
-                            </button>
-                        </div>
+                        <button type="button" id="cancelSearch" class="mt-6 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            {{ __('Cancel') }}
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Flash Messages (Enterprise Style) -->
             @if(session('error') || session('success') || session('status'))
-            <div class="max-w-3xl mx-auto mb-8 animate-fade-in">
+            <div class="mb-6 animate-fade-in">
                 @if(session('error'))
-                <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl shadow-md">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-bold text-red-800 dark:text-red-200">{{ session('error') }}</p>
-                        </div>
-                    </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 p-4 rounded-xl flex items-start gap-3">
+                    <svg class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-sm text-red-800 dark:text-red-200">{{ session('error') }}</p>
                 </div>
                 @endif
-
                 @if(session('success') || session('status'))
-                <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded-r-xl shadow-md">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-bold text-green-800 dark:text-green-200">{{ session('success') ?? session('status') }}</p>
-                        </div>
-                    </div>
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 p-4 rounded-xl flex items-start gap-3">
+                    <svg class="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-sm text-emerald-800 dark:text-emerald-200">{{ session('success') ?? session('status') }}</p>
                 </div>
                 @endif
             </div>
             @endif
 
-            <!-- Error State (Enterprise Design) -->
-            <div id="errorState" class="hidden max-w-3xl mx-auto mb-10 overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border-2 border-red-100 dark:border-red-900/30 shadow-xl shadow-red-500/5">
-                <div class="flex flex-col md:flex-row">
-                    <div class="bg-red-500 w-full md:w-2 hidden md:block"></div>
-                    <div class="p-6 md:p-8 flex items-start gap-4">
-                        <div class="bg-red-100 dark:bg-red-900/30 p-3 rounded-xl flex-shrink-0 animate-bounce">
-                            <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <!-- Error state -->
+            <div id="errorState" class="hidden mb-8 animate-fade-in">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-red-200 dark:border-red-900/50 p-6 shadow-sm">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                            <svg class="h-5 w-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
                         </div>
-                        <div class="flex-grow">
-                            <h3 class="text-lg font-black text-slate-900 dark:text-white mb-2">Tracking Disruption</h3>
-                            <p id="errorMessage" class="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed"></p>
-                            
-                            <div class="mt-6 flex flex-wrap gap-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-                                <button onclick="location.reload()" class="text-xs font-black text-[#EF7722] hover:text-[#d66616] uppercase tracking-widest transition-colors flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                    Retry
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base font-semibold text-slate-900 dark:text-white">{{ __('Tracking unavailable') }}</h3>
+                            <p id="errorMessage" class="mt-1 text-sm text-slate-600 dark:text-slate-400"></p>
+                            <div class="mt-4 flex flex-wrap gap-3">
+                                <button type="button" onclick="document.getElementById('trackingForm').scrollIntoView({ behavior: 'smooth' }); document.getElementById('trackingNumberInput').focus();" class="inline-flex items-center gap-2 px-4 py-2 bg-[#EF7722] hover:bg-[#d66616] text-white text-sm font-medium rounded-lg transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    {{ __('Try again') }}
                                 </button>
-                                <a href="mailto:support@sourcing-app.com" class="text-xs font-black text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 uppercase tracking-widest transition-colors flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                    Support
+                                <a href="{{ route('client.dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                                    {{ __('Back to dashboard') }}
                                 </a>
                             </div>
                         </div>
@@ -169,19 +138,31 @@
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                         <div>
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Shipment ID</span>
-                            <div class="flex items-center gap-2 mt-1">
-                                <h3 id="resultTrackingNumber" class="text-2xl font-black text-slate-900 dark:text-white font-mono"></h3>
-                                <button onclick="copyTracking()" class="p-1 text-slate-400 hover:text-[#EF7722] transition-colors rounded">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ __('Tracking number') }}</p>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span id="resultTrackingNumber" class="text-lg font-bold text-slate-900 dark:text-white font-mono truncate"></span>
+                                <button type="button" onclick="copyTracking()" class="p-1.5 rounded-lg text-slate-400 hover:text-[#EF7722] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="{{ __('Copy') }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                 </button>
                             </div>
                         </div>
-                        
-                        <div class="flex flex-col items-end">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Current Status</span>
-                            <div id="latestStatusBadge" class="mt-1 px-4 py-1.5 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700">
-                                <span id="latestStatusText">--</span>
+                        <div id="latestStatusBadge" class="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold bg-[#EF7722]/10 text-[#EF7722] border border-[#EF7722]/30">
+                            <span id="latestStatusText">--</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                            <svg class="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('Last location') }}</p>
+                                <p id="latestLocation" class="mt-0.5 text-sm font-semibold text-slate-900 dark:text-white"><span>--</span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                            <svg class="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('Last update') }}</p>
+                                <p id="latestDate" class="mt-0.5 text-sm font-semibold text-slate-900 dark:text-white"><span>--</span></p>
                             </div>
                         </div>
                     </div>
@@ -228,43 +209,19 @@
                         <svg class="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <p class="text-xs font-bold text-orange-800 dark:text-orange-300 leading-relaxed uppercase tracking-tight">
-                            Note: From Dubai to your destination country, status updates are managed manually by our operations team. You will see real-time progress here as your order moves forward.
+                        <p class="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+                            {{ __('From Dubai to your country, status updates may be entered manually by our team. Progress will appear here as your order moves.') }}
                         </p>
                     </div>
                 </div>
-                </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Left Column: Location and Date -->
-                    <div class="lg:col-span-1 space-y-6">
-                        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-                            <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mb-6 pb-2 border-b border-slate-100 dark:border-slate-700">Latest Details</h4>
-                            
-                            <dl class="space-y-6">
-                                <div>
-                                    <dt class="text-xs font-bold text-slate-400 uppercase tracking-widest">Last Location</dt>
-                                    <dd id="latestLocation" class="mt-1 text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                        <span>--</span>
-                                    </dd>
-                                </div>
-                                <div>
-                                    <dt class="text-xs font-bold text-slate-400 uppercase tracking-widest">Last Update</dt>
-                                    <dd id="latestDate" class="mt-1 text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                        <span>--</span>
-                                    </dd>
-                                </div>
-                            </dl>
-                        </div>
-
-                        <!-- Map Card -->
-                        <div id="mapContainer" class="hidden mt-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-                            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
-                                <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Shipment Location</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1">
+                        <div id="mapContainer" class="hidden bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+                            <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                                <h4 class="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('Shipment location') }}</h4>
                             </div>
-                            <div id="map" class="h-64 w-full z-0 relative"></div>
+                            <div id="map" class="h-56 w-full z-0 relative"></div>
                         </div>
                     </div>
 
@@ -272,8 +229,8 @@
                     <div class="lg:col-span-2">
                         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 h-full overflow-hidden">
                             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
-                                <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Activity History</h3>
-                                <span id="eventCountLabel" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400">0 Events</span>
+                                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">{{ __('Activity history') }}</h3>
+                                <span id="eventCountLabel" class="text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400">0 {{ __('events') }}</span>
                             </div>
                             <div class="p-6 sm:p-8">
                                 <div id="timelineContainer" class="relative border-l-2 border-slate-100 dark:border-slate-700 ml-4 space-y-8 pb-10">
@@ -285,13 +242,17 @@
                 </div>
             </div>
             
-            <!-- Empty State -->
-            <div id="emptyState" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700">
-                <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-slate-900 dark:text-white">No data found</h3>
-                <p class="mt-1 text-sm text-slate-500">We could not find any shipment history for this tracking number.</p>
+            <div id="emptyState" class="hidden text-center py-12 px-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div class="w-14 h-14 mx-auto rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                    <svg class="w-7 h-7 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                </div>
+                <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">{{ __('No tracking data') }}</h3>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ __('No shipment history was found for this tracking number. Check the number or try again later.') }}</p>
+                <button type="button" onclick="document.getElementById('trackingNumberInput').focus();" class="mt-6 text-sm font-medium text-[#EF7722] hover:text-[#d66616] transition-colors">
+                    {{ __('Enter another number') }}
+                </button>
             </div>
         </div>
     </div>
@@ -382,7 +343,8 @@
             function resetStatus() {
                 if (elements.button) {
                     elements.button.disabled = false;
-                    elements.button.innerHTML = `<span>Track Shipment</span><svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
+                    const btnText = '{{ __("Search") }}';
+                    elements.button.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><span>' + btnText + '</span>';
                 }
                 if (elements.cancelSearch) elements.cancelSearch.classList.add('hidden');
                 if (elements.loadingState) elements.loadingState.classList.add('hidden');
@@ -401,7 +363,8 @@
                     if (elements.cancelSearch) elements.cancelSearch.classList.remove('hidden');
                     if (elements.button) {
                         elements.button.disabled = true;
-                        elements.button.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Searching...</span>`;
+                        const searchLabel = '{{ __("Searching...") }}';
+                        elements.button.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>' + searchLabel + '</span>';
                     }
                     
                     startLoadingMessages();
@@ -456,7 +419,10 @@
                     const fromText = extractLocationFromText(getField(latest, ['status', 'status_en']) || '');
                     if (fromText) location = fromText;
                 }
-                if (elements.latestLocation) elements.latestLocation.querySelector('span').textContent = (location && location.trim()) ? location : 'N/A';
+                if (elements.latestLocation) {
+                    const span = elements.latestLocation.querySelector('span');
+                    if (span) span.textContent = (location && location.trim()) ? location : '{{ __("N/A") }}';
+                }
                 
                 if (location && location.trim() !== '') {
                     updateMap(location);
@@ -470,14 +436,17 @@
                     if (fromText) dateRaw = fromText;
                 }
                 const displayDate = dateRaw ? formatDate(dateRaw) : 'N/A';
-                if (elements.latestDate) elements.latestDate.querySelector('span').textContent = (displayDate && displayDate !== 'Invalid Date') ? displayDate : 'N/A';
+                if (elements.latestDate) {
+                    const span = elements.latestDate.querySelector('span');
+                    if (span) span.textContent = (displayDate && displayDate !== 'Invalid Date') ? displayDate : '{{ __("N/A") }}';
+                }
 
                 showPerformanceMetrics(result.provider, responseTime);
 
                 if (elements.timelineContainer) {
                     elements.timelineContainer.innerHTML = '';
                     data.forEach((item, index) => renderTimelineItem(item, index === 0));
-                    if (elements.eventCountLabel) elements.eventCountLabel.textContent = `${data.length} Events`;
+                    if (elements.eventCountLabel) elements.eventCountLabel.textContent = data.length + ' ' + (data.length === 1 ? '{{ __("event") }}' : '{{ __("events") }}');
                 }
 
                 updateJourneyProgress(data, result.order_status);
@@ -485,6 +454,7 @@
                 if (elements.resultsContainer) {
                     elements.resultsContainer.classList.remove('hidden');
                     elements.resultsContainer.classList.add('animate-fade-in');
+                    elements.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
 
@@ -521,7 +491,7 @@
                     elements.cacheDot.className = `w-2 h-2 rounded-full mr-2 ${isCached ? 'bg-green-500' : 'bg-blue-500'}`;
                     elements.cacheStatusText.textContent = isCached ? 'System Cache' : 'Live Data';
                 }
-                if (elements.responseTime) elements.responseTime.textContent = `${responseTime}ms`;
+                if (elements.responseTime) elements.responseTime.textContent = responseTime + ' ms';
                 if (provider && elements.providerName) elements.providerName.textContent = provider.toUpperCase();
                 elements.performanceIndicator.classList.remove('hidden');
             }
@@ -566,7 +536,7 @@
             }
 
             function renderTimelineItem(item, isLatest) {
-                const status = getField(item, ['status_en', 'status', 'Status']) || 'Update';
+                const status = getField(item, ['status_fr', 'status_en', 'status', 'Status']) || 'Update';
                 const details = getField(item, ['statusDetails', 'details', 'remarks', 'Remarks']);
                 let location = getField(item, ['location', 'Location']);
                 if (!location && status) location = extractLocationFromText(status);
