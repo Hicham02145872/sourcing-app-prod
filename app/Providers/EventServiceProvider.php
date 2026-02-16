@@ -62,6 +62,9 @@ class EventServiceProvider extends ServiceProvider
         RefundRequestUpdated::class => [
             SendRefundStatusNotification::class,
         ],
+        \Illuminate\Auth\Events\Login::class => [
+            \App\Listeners\TrackUserSession::class,
+        ],
     ];
 
     /**

@@ -300,9 +300,9 @@
                 @endif
 
                 @if(auth()->user()->isSuperAdmin())
-                    {{-- Section: Super Admin --}}
-                    <div>
-                         <div class="px-3 mb-2 mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('System') }}</div>
+                {{-- Section: Super Admin --}}
+                <div>
+                     <div class="px-3 mb-2 mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('System') }}</div>
                          <div class="space-y-1">
                             <a href="{{ route('admin.super-admin.list-admins') }}" 
                                class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.super-admin.list-admins') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
@@ -326,7 +326,7 @@
                                 </svg>
                                 <span>{{ __('Google Sheets') }}</span>
                             </a>
-                            
+
                             <a href="{{ route('admin.shipping-companies.index') }}" 
                                class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.shipping-companies.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                                 <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Services\AuthLogService;
+use App\Services\SuspiciousActivityService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -41,8 +43,14 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        $email = $this->input('email');
+        $ip = $this->ip();
+
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+
+            // Log failed login attempt
+            app(AuthLogService::class)->logLogin(null, false, $email, $ip);
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
@@ -50,6 +58,13 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        // Log successful login
+        $user = Auth::user();
+        app(AuthLogService::class)->logLogin($user, true, $email, $ip);
+
+        // Check for suspicious activity
+        app(SuspiciousActivityService::class)->checkSuspiciousLogin($user, $ip);
     }
 
     /**

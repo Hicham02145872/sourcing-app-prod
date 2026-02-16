@@ -84,6 +84,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(SourcingOrder::class, 'assigned_to_admin_id');
     }
 
+    public function userSessions()
+    {
+        return $this->hasMany(UserSession::class);
+    }
+
     public function getRoleLabel(): string
     {
         return match ($this->role) {

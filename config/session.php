@@ -32,7 +32,7 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => (int) env('SESSION_LIFETIME', 60),
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
@@ -169,7 +169,11 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    // IMPORTANT: ne pas appeler app()->environment() ici, car la config est chargée
+    // avant que le container ne soit totalement initialisé, ce qui provoque
+    // l'erreur \"Target class [env] does not exist\".
+    // On utilise uniquement env(), avec un fallback basé sur APP_ENV.
+    'secure' => env('SESSION_SECURE_COOKIE', env('APP_ENV') === 'production'),
 
     /*
     |--------------------------------------------------------------------------

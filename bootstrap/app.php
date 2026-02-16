@@ -14,10 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'feature' => \App\Http\Middleware\CheckFeatureMiddleware::class,
+            'verified.client' => \App\Http\Middleware\RequireVerifiedEmailForClients::class,
         ]);
 
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\UpdateSessionActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

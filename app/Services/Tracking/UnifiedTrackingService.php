@@ -28,6 +28,22 @@ class UnifiedTrackingService
             'cache_key' => $cacheKey,
         ]);
 
+        // 0. Circuit breaker: numéro temporairement bloqué ?
+        $blockKey = "tracking_blocked:{$trackingNumber}";
+        if (Cache::has($blockKey)) {
+            $blockedUntil = Cache::get($blockKey);
+            Log::warning('⛔ [UNIFIED SERVICE] Tracking blocked by circuit breaker', [
+                'tracking_number' => $trackingNumber,
+                'blocked_until' => $blockedUntil,
+            ]);
+
+            return [
+                'success' => false,
+                'error' => __('Tracking temporarily unavailable for this number. Please try again later.'),
+                'blocked_until' => $blockedUntil,
+            ];
+        }
+
         // 1. Check Cache
         $cached = Cache::get($cacheKey);
         if ($cached) {
@@ -38,7 +54,10 @@ class UnifiedTrackingService
             
             // Log the cache hit to history
             $this->logSearch($trackingNumber, $cached);
-            
+
+            // Marquer explicitement la source comme "cache"
+            $cached['source'] = 'cache';
+
             return $cached;
         }
 
@@ -60,6 +79,33 @@ class UnifiedTrackingService
         $seleniumProviders = ['itdida', 'faster', 'choicexp', 'gcc', 'ups'];
 
         if (in_array(strtolower($provider), $seleniumProviders)) {
+            // Contrôle de la concurrence globale & par provider
+            $globalKey = "selenium_current:global";
+            $providerKey = "selenium_current:{$provider}";
+            $currentGlobal = (int) Cache::get($globalKey, 0);
+            $currentProvider = (int) Cache::get($providerKey, 0);
+            $maxGlobal = (int) config('tracking.selenium_max_concurrent_global', 1);
+            $maxPerProvider = (int) config('tracking.selenium_max_concurrent_per_provider', 1);
+
+            if ($currentGlobal >= $maxGlobal || $currentProvider >= $maxPerProvider) {
+                Log::warning('🚦 [UNIFIED SERVICE] Selenium concurrency limit reached', [
+                    'tracking_number' => $trackingNumber,
+                    'provider' => $provider,
+                    'current_global' => $currentGlobal,
+                    'current_provider' => $currentProvider,
+                    'max_global' => $maxGlobal,
+                    'max_per_provider' => $maxPerProvider,
+                ]);
+
+                return [
+                    'success' => false,
+                    'status' => 'pending',
+                    'error' => __('Tracking system is currently busy. Please try again in a few minutes.'),
+                    'provider' => ucfirst($provider),
+                    'tracking_number' => $trackingNumber,
+                ];
+            }
+
             // Check if a job is already pending for this number
             $pendingKey = "tracking_pending:{$trackingNumber}";
             if (Cache::has($pendingKey)) {
@@ -78,8 +124,8 @@ class UnifiedTrackingService
             // Set pending lock for 2 minutes
             Cache::put($pendingKey, true, now()->addMinutes(2));
 
-            // Dispatch Job to run in background (limited to 1 concurrent instance)
-            RunSeleniumTrackingJob::dispatch($trackingNumber, $carrier);
+            // Dispatch Job to run in background
+            RunSeleniumTrackingJob::dispatch($trackingNumber, $carrier, $provider);
 
             return [
                 'success' => false,
@@ -117,6 +163,10 @@ class UnifiedTrackingService
             'fetch_time_ms' => $fetchTime,
         ]);
 
+        // Ajouter métadonnées de fraîcheur
+        $result['last_updated_at'] = now()->toIso8601String();
+        $result['source'] = 'live';
+
         // Attempt to find matching order to attach internal status
         $order = null;
         if (str_starts_with(strtoupper($trackingNumber), 'FSB')) {
@@ -131,9 +181,55 @@ class UnifiedTrackingService
             $result['order_id'] = $order->id;
         }
 
+        // Circuit breaker: comptabiliser échecs / succès
+        $cbConfig = config('tracking.circuit_breaker', []);
+        $failureThreshold = (int) ($cbConfig['failure_threshold'] ?? 3);
+        $cooldownMinutes = (int) ($cbConfig['cooldown_minutes'] ?? 30);
+        $failureKey = "tracking_failures:{$trackingNumber}";
+        $blockKey = "tracking_blocked:{$trackingNumber}";
+
+        if ($result['success'] ?? false) {
+            // Reset des échecs si succès
+            Cache::forget($failureKey);
+            Cache::forget($blockKey);
+        } else {
+            $failures = (int) Cache::increment($failureKey);
+            Cache::put($failureKey, $failures, now()->addMinutes($cooldownMinutes));
+
+            if ($failures >= $failureThreshold && ! Cache::has($blockKey)) {
+                $blockedUntil = now()->addMinutes($cooldownMinutes);
+                Cache::put($blockKey, $blockedUntil->toIso8601String(), $blockedUntil);
+                Log::warning('⛔ [UNIFIED SERVICE] Circuit breaker activated', [
+                    'tracking_number' => $trackingNumber,
+                    'failures' => $failures,
+                    'blocked_until' => $blockedUntil->toIso8601String(),
+                ]);
+            }
+        }
+
         // Only cache if successful
         if ($result['success'] ?? false) {
-            $cacheTtl = (int) config('tracking.cache_ttl', 30);
+            // Choisir un TTL en fonction du statut
+            $baseTtl = (int) config('tracking.cache_ttl', 30);
+            $status = strtolower((string) ($result['current_status'] ?? ''));
+            $ttlByStatus = config('tracking.cache_ttl_by_status', []);
+
+            $statusKey = null;
+            if (str_contains($status, 'livré') || str_contains($status, 'delivered')) {
+                $statusKey = 'delivered';
+            } elseif (str_contains($status, 'transit') || str_contains($status, 'en transit') || str_contains($status, 'shipped')) {
+                $statusKey = 'in_transit';
+            } elseif (str_contains($status, 'pending')) {
+                $statusKey = 'pending';
+            } elseif (str_contains($status, 'error') || str_contains($status, 'erreur') || str_contains($status, 'not found')) {
+                $statusKey = 'error';
+            }
+
+            $cacheTtl = $baseTtl;
+            if ($statusKey && isset($ttlByStatus[$statusKey])) {
+                $cacheTtl = (int) $ttlByStatus[$statusKey];
+            }
+
             $cacheKey = "tracking:{$trackingNumber}";
             Cache::put($cacheKey, $result, now()->addMinutes($cacheTtl));
             Log::info('💾 [UNIFIED SERVICE] Result successfully cached', [

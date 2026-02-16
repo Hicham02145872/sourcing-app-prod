@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\AuthLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,13 +51,16 @@ class ProfileController extends Controller
             $request->user()->profile_photo_path = $path;
         }
         // If the user is changing their email, reset the email verification status
+        $oldEmail = $request->user()->email;
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
 
         $request->user()->save();
 
+        // Log email change if changed
         if ($request->user()->wasChanged('email')) {
+            app(AuthLogService::class)->logEmailChange($request->user(), $oldEmail);
             $request->user()->sendEmailVerificationNotification();
         }
 

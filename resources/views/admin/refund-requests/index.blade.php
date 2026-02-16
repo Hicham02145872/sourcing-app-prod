@@ -42,7 +42,7 @@
             @endif
 
             <!-- Section 1: KPIs (Summary Cards) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Pending -->
                 <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-amber-300 transition-colors group">
                     <div class="flex justify-between items-start">
@@ -55,6 +55,20 @@
                         </div>
                     </div>
                     <div class="mt-2 text-xs text-amber-600 font-medium">{{ __('Action required') }}</div>
+                </div>
+
+                <!-- Under Review -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-blue-300 transition-colors group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ __('Under Review') }}</p>
+                            <h3 class="mt-1 text-2xl font-bold text-slate-900">{{ number_format($stats['under_review'] ?? 0) }}</h3>
+                        </div>
+                        <div class="p-1.5 bg-blue-50 rounded text-blue-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-blue-600 font-medium">{{ __('Assigned to admin') }}</div>
                 </div>
 
                 <!-- Processed -->
@@ -94,6 +108,7 @@
                         <select name="status" class="w-full text-xs border-slate-200 rounded-md focus:ring-slate-900 focus:border-slate-900">
                             <option value="">{{ __('All Statuses') }}</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+                            <option value="under_review" {{ request('status') == 'under_review' ? 'selected' : '' }}>{{ __('Under Review') }}</option>
                             <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>{{ __('Approved') }}</option>
                             <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
                         </select>
@@ -211,17 +226,7 @@
                                                 <span class="text-[10px] font-bold text-slate-300 uppercase italic">{{ __('Unassigned') }}</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
-                                            @if(!$request->assigned_to_admin_id)
-                                                <form action="{{ route('admin.refund-requests.assign-to-me', $request) }}" method="POST">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors shadow-sm" title="{{ __('Assign to Me') }}">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                                        <span>{{ __('Assign') }}</span>
-                                                    </button>
-                                                </form>
-                                            @endif
+                                        <td class="px-6 py-4 text-right">
                                             <a href="{{ route('admin.refund-requests.show', $request) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-md transition-colors shadow-sm">
                                                 <span>{{ __('Manage') }}</span>
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>

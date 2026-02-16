@@ -52,6 +52,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cache TTL by Status (Minutes)
+    |--------------------------------------------------------------------------
+    |
+    | Permet d'ajuster le TTL en fonction du statut fonctionnel.
+    | Ces valeurs surchargent "cache_ttl" si un mapping est trouvé.
+    |
+    */
+
+    'cache_ttl_by_status' => [
+        // Colis livrés: on peut garder longtemps en cache
+        'delivered' => env('TRACKING_CACHE_TTL_DELIVERED', 60 * 24), // 24h
+        // En transit: on veut des données plus fraîches
+        'in_transit' => env('TRACKING_CACHE_TTL_IN_TRANSIT', 30),    // 30 min
+        // Pending / erreur / non trouvé: TTL très court
+        'pending' => env('TRACKING_CACHE_TTL_PENDING', 5),
+        'error' => env('TRACKING_CACHE_TTL_ERROR', 5),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Rate Limiting
     |--------------------------------------------------------------------------
     |
@@ -61,6 +81,37 @@ return [
     */
 
     'rate_limit' => env('TRACKING_RATE_LIMIT', 10),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Selenium Concurrency Limits
+    |--------------------------------------------------------------------------
+    |
+    | Limite globale et par provider pour les jobs Selenium (scrapers).
+    | Ces compteurs sont gérés via le cache dans RunSeleniumTrackingJob.
+    |
+    */
+
+    'selenium_max_concurrent_global' => env('TRACKING_SELENIUM_MAX_CONCURRENT_GLOBAL', 1),
+
+    'selenium_max_concurrent_per_provider' => env('TRACKING_SELENIUM_MAX_CONCURRENT_PER_PROVIDER', 1),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Circuit Breaker (Failure Memory)
+    |--------------------------------------------------------------------------
+    |
+    | Si un numéro échoue plusieurs fois de suite, on peut le mettre
+    | temporairement en "blocage" pour éviter de spammer les providers.
+    |
+    */
+
+    'circuit_breaker' => [
+        // Nombre d'échecs consécutifs avant blocage
+        'failure_threshold' => env('TRACKING_CB_FAILURE_THRESHOLD', 3),
+        // Durée du blocage en minutes
+        'cooldown_minutes' => env('TRACKING_CB_COOLDOWN_MINUTES', 30),
+    ],
 
     /*
     |--------------------------------------------------------------------------

@@ -352,6 +352,10 @@
             }
 
             // 4. Core Fetch Logic
+            // Compteur de retries pour l'état "pending"
+            let pendingRetries = 0;
+            const maxPendingRetries = 6; // après ~2-3 min, on arrête
+
             async function fetchTrackingData(number) {
                 let shouldResetUI = true;
                 if (abortController) abortController.abort();
@@ -378,12 +382,35 @@
                     const responseTime = Math.round(performance.now() - startTime);
                     const result = await response.json();
 
-                    if (response.status === 202) {
-                        if (elements.loadingText) elements.loadingText.innerText = result.current_status || "Processing request...";
-                        if (elements.loadingSubtext) elements.loadingSubtext.innerText = "This may take up to 2 minutes for live carrier data. Please wait...";
-                        setTimeout(() => { if (!abortController?.signal.aborted) fetchTrackingData(number); }, 5000);
+                    if (response.status === 202 || (result.status && result.status === 'pending')) {
+                        pendingRetries++;
+
+                        if (pendingRetries >= maxPendingRetries) {
+                            // Trop de tentatives: informer l'utilisateur et arrêter le polling
+                            if (elements.errorMessage) {
+                                elements.errorMessage.textContent = result.error || "{{ __('Tracking update is still in progress. Please try again in a few minutes.') }}";
+                            }
+                            if (elements.errorState) elements.errorState.classList.remove('hidden');
+                            return;
+                        }
+
+                        if (elements.loadingText) {
+                            elements.loadingText.innerText = result.current_status || "Processing request...";
+                        }
+                        if (elements.loadingSubtext) {
+                            elements.loadingSubtext.innerText = "{{ __('This may take a couple of minutes for live carrier data. We will retry automatically.') }}";
+                        }
+
+                        // Délai progressif: 15s pour les 2-3 premiers retries, puis 60s
+                        const delay = pendingRetries <= 3 ? 15000 : 60000;
+                        setTimeout(() => {
+                            if (!abortController?.signal.aborted) {
+                                fetchTrackingData(number);
+                            }
+                        }, delay);
+
                         shouldResetUI = false;
-                        return; 
+                        return;
                     }
                     
                     if (response.status === 404) {
@@ -391,6 +418,8 @@
                     }
                     
                     if (!response.ok) throw new Error(result.error || 'A connection error occurred.');
+
+                    pendingRetries = 0;
 
                     if (result.data && result.data.length > 0) {
                         processTrackingData(result, number, responseTime);
@@ -615,9 +644,24 @@
             function escapeHtml(t) { return t?.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
             
             // Events
-            elements.form?.addEventListener('submit', (e) => { e.preventDefault(); const n = elements.input.value.trim(); if (n) fetchTrackingData(n); });
-            elements.cancelSearch?.addEventListener('click', () => { abortController?.abort(); resetStatus(); });
-            if (elements.input?.value.trim() !== '') fetchTrackingData(elements.input.value.trim());
+            elements.form?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const n = elements.input.value.trim();
+                if (n) {
+                    fetchTrackingData(n);
+                }
+            });
+
+            elements.cancelSearch?.addEventListener('click', () => {
+                abortController?.abort();
+                resetStatus();
+            });
+
+            // Important: ne PAS auto-déclencher la recherche au chargement de la page.
+            // Avant, si le champ contenait déjà un numéro (ex: refresh), la requête partait
+            // automatiquement, même si le client ne cliquait pas sur \"Search\".
+            // On désactive donc l'appel auto:
+            // if (elements.input?.value.trim() !== '') fetchTrackingData(elements.input.value.trim());
 
             window.copyTracking = () => {
                 const text = elements.resultTrackingNumber?.innerText || '';

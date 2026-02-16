@@ -13,6 +13,7 @@ class RefundRequestController extends Controller
     public function index(Request $request): View
     {
         $query = RefundRequest::with(['sourcingOrder', 'user', 'assignedAdmin'])
+            ->orderByRaw("CASE status WHEN 'pending' THEN 1 WHEN 'under_review' THEN 2 WHEN 'approved' THEN 3 WHEN 'rejected' THEN 4 ELSE 5 END")
             ->latest();
 
         // Security Filter: Standard admins only see their assigned refunds
@@ -51,6 +52,7 @@ class RefundRequestController extends Controller
 
         $stats = [
             'pending' => (clone $statsBaseQuery)->where('status', 'pending')->count(),
+            'under_review' => (clone $statsBaseQuery)->where('status', 'under_review')->count(),
             'approved' => (clone $statsBaseQuery)->where('status', 'approved')->count(),
             'total_refunded' => (clone $statsBaseQuery)->where('status', 'approved')->sum('amount_approved'),
         ];
@@ -132,13 +134,17 @@ class RefundRequestController extends Controller
 
     public function assignToMe(RefundRequest $refundRequest): RedirectResponse
     {
-        // Check if already assigned
-        if ($refundRequest->assigned_to_admin_id) {
+        // Check if already assigned to another admin
+        if ($refundRequest->assigned_to_admin_id && $refundRequest->assigned_to_admin_id !== auth()->id()) {
             return back()->with('error', __('This request is already assigned to an admin.'));
         }
 
-        $refundRequest->update(['assigned_to_admin_id' => auth()->id()]);
+        // Assign and set status to under_review so it stays assigned to this admin while in review
+        $refundRequest->update([
+            'assigned_to_admin_id' => auth()->id(),
+            'status' => 'under_review',
+        ]);
 
-        return back()->with('success', __('Refund request assigned to you.'));
+        return back()->with('success', __('Refund request assigned to you and marked as under review.'));
     }
 }

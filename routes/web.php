@@ -198,20 +198,20 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/shipping-fees', [App\Http\Controllers\Client\ShippingFeeController::class, 'index'])->name('shipping-fees.index');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified.client'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Route::post('/fcm-token', [App\Http\Controllers\NotificationController::class, 'updateToken'])->name('fcm.token.update');
-    Route::middleware(['auth'])->post('/fcm/token/update', function (Request $request) {
+    Route::post('/fcm/token/update', function (Request $request) {
         $request->user()->update([
             'fcm_token' => $request->input('fcm_token'),
         ]);
 
         return response()->json(['success' => true]);
     })->name('fcm.token.update');
-    Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+
+    Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [App\Http\Controllers\NotificationController::class, 'index'])->name('index');
         Route::post('/{notification}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('read');
         Route::post('/mark-all-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('mark-all-read');

@@ -27,7 +27,8 @@ class RunSeleniumTrackingJob implements ShouldQueue
      */
     public function __construct(
         public string $trackingNumber,
-        public ?string $carrier = null
+        public ?string $carrier = null,
+        public ?string $provider = null
     ) {}
 
     /**
@@ -47,10 +48,40 @@ class RunSeleniumTrackingJob implements ShouldQueue
      */
     public function handle(UnifiedTrackingService $trackingService): void
     {
-        Log::info('Job:RunSeleniumTracking starting', ['number' => $this->trackingNumber]);
-        
-        $trackingService->refreshTracking($this->trackingNumber, $this->carrier);
-        
-        Log::info('Job:RunSeleniumTracking finished', ['number' => $this->trackingNumber]);
+        $start = microtime(true);
+
+        // Incrémenter les compteurs de jobs en cours
+        $provider = $this->provider ?: 'unknown';
+        \Illuminate\Support\Facades\Cache::increment('selenium_current:global');
+        \Illuminate\Support\Facades\Cache::increment("selenium_current:{$provider}");
+
+        Log::info('Job:RunSeleniumTracking starting', [
+            'number' => $this->trackingNumber,
+            'carrier' => $this->carrier,
+            'provider' => $provider,
+        ]);
+
+        try {
+            $trackingService->refreshTracking($this->trackingNumber, $this->carrier);
+        } finally {
+            $elapsed = round((microtime(true) - $start) * 1000, 2);
+
+            // Décrémenter les compteurs (sans descendre en-dessous de 0)
+            $globalKey = 'selenium_current:global';
+            $providerKey = "selenium_current:{$provider}";
+            $g = max(0, (int) \Illuminate\Support\Facades\Cache::decrement($globalKey));
+            $p = max(0, (int) \Illuminate\Support\Facades\Cache::decrement($providerKey));
+            \Illuminate\Support\Facades\Cache::put($globalKey, $g, now()->addMinutes(10));
+            \Illuminate\Support\Facades\Cache::put($providerKey, $p, now()->addMinutes(10));
+
+            Log::info('Job:RunSeleniumTracking finished', [
+                'number' => $this->trackingNumber,
+                'carrier' => $this->carrier,
+                'provider' => $provider,
+                'time_ms' => $elapsed,
+                'concurrent_global_after' => $g,
+                'concurrent_provider_after' => $p,
+            ]);
+        }
     }
 }

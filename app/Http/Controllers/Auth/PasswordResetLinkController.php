@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\AuthLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -35,6 +36,9 @@ class PasswordResetLinkController extends Controller
         $status = Password::sendResetLink(
             $request->only('email')
         );
+
+        // Log password reset request (even if email doesn't exist, for security)
+        app(AuthLogService::class)->logPasswordResetRequest($request->email);
 
         return $status == Password::RESET_LINK_SENT
                     ? back()->with('status', __($status))
