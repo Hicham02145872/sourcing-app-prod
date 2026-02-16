@@ -507,7 +507,6 @@
                                 $lastRefundRequest = $sourcingOrder->refundRequests()->latest()->first();
                             @endphp
 
-                            @feature('refunds')
                             @if($lastRefundRequest)
                                 <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
                                     <a href="{{ route('client.refund-requests.show', $lastRefundRequest) }}" 
@@ -520,7 +519,6 @@
                                 </div>
                             @elseif($sourcingOrder->status === 'delivered')
                                 <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
-                                    @featureVisible('refunds')
                                     <a href="{{ route('client.refund-requests.create', $sourcingOrder) }}" 
                                        class="w-full py-2.5 px-4 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:text-red-400 border border-red-200 dark:border-red-900/30 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm">
                                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -528,15 +526,8 @@
                                          </svg>
                                          {{ __('Request Refund') }}
                                      </a>
-                                     @endfeatureVisible
-                                     @featureComingSoon('refunds')
-                                     <div class="px-4 py-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 text-center">
-                                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">{{ __('Refunds Coming Soon') }}</p>
-                                     </div>
-                                     @endfeatureComingSoon
                                  </div>
                             @endif
-                            @endfeature
 
                             <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700">
                                 <div class="text-center text-xs text-slate-500 dark:text-slate-400 space-y-1">

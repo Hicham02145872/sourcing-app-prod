@@ -697,7 +697,7 @@
                                     <div class="bg-slate-950 p-3 border border-slate-800 text-indigo-300">@@feature('<span class="text-amber-500">key</span>') ... @@endfeature</div>
                                 </div>
                                 <div class="space-y-1">
-                                    <p class="text-slate-500">// Strict visibility (excludes Coming Soon)</p>
+                                    <p class="text-slate-500">// Même logique que @@feature (visible + Coming Soon)</p>
                                     <div class="bg-slate-950 p-3 border border-slate-800 text-indigo-300">@@featureVisible('<span class="text-amber-500">key</span>') ... @@endfeatureVisible</div>
                                 </div>
                             </div>

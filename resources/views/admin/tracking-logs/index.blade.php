@@ -1,5 +1,4 @@
 <x-app-layout>
-    @featureVisible('tracking')
     <div class="min-h-screen bg-slate-50/80 font-sans text-slate-900 pb-12">
         
         <!-- Top Navigation -->
@@ -106,15 +105,4 @@
             </div>
         </div>
     </div>
-    @else
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
-        <div class="text-center">
-            <div class="mb-4 inline-flex items-center justify-center w-20 h-20 bg-amber-50 rounded-full">
-                <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tighter">Feature Coming Soon</h2>
-            <p class="mt-2 text-slate-500 font-medium italic">Tracking Logs module is currently disabled by system flags.</p>
-        </div>
-    </div>
-    @endfeatureVisible
 </x-app-layout>

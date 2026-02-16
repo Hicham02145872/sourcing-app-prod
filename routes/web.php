@@ -64,13 +64,11 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::post('/sourcing-requests/{sourcingRequest}/unassign', [App\Http\Controllers\Admin\AdminSourcingRequestController::class, 'unassign'])->name('sourcing-requests.unassign');
     Route::post('/sourcing-requests/{sourcingRequest}/release', [App\Http\Controllers\Admin\AdminSourcingRequestController::class, 'release'])->name('sourcing-requests.release');
 
-    // Refund Requests Management
-    Route::middleware('feature:refunds')->group(function () {
-        Route::get('refund-requests', [App\Http\Controllers\Admin\RefundRequestController::class, 'index'])->name('refund-requests.index');
-        Route::get('refund-requests/{refundRequest}', [App\Http\Controllers\Admin\RefundRequestController::class, 'show'])->name('refund-requests.show');
-        Route::patch('refund-requests/{refundRequest}/update-status', [App\Http\Controllers\Admin\RefundRequestController::class, 'updateStatus'])->name('refund-requests.update-status');
-        Route::patch('refund-requests/{refundRequest}/assign-to-me', [App\Http\Controllers\Admin\RefundRequestController::class, 'assignToMe'])->name('refund-requests.assign-to-me');
-    });
+    // Refund Requests Management (toujours visible)
+    Route::get('refund-requests', [App\Http\Controllers\Admin\RefundRequestController::class, 'index'])->name('refund-requests.index');
+    Route::get('refund-requests/{refundRequest}', [App\Http\Controllers\Admin\RefundRequestController::class, 'show'])->name('refund-requests.show');
+    Route::patch('refund-requests/{refundRequest}/update-status', [App\Http\Controllers\Admin\RefundRequestController::class, 'updateStatus'])->name('refund-requests.update-status');
+    Route::patch('refund-requests/{refundRequest}/assign-to-me', [App\Http\Controllers\Admin\RefundRequestController::class, 'assignToMe'])->name('refund-requests.assign-to-me');
     Route::get('quotations/select-request', [App\Http\Controllers\Admin\QuotationController::class, 'selectRequest'])->name('quotations.select-request');
     Route::get('quotations/create/{sourcingRequest}', [App\Http\Controllers\Admin\QuotationController::class, 'create'])->name('quotations.create');
     Route::post('quotations', [App\Http\Controllers\Admin\QuotationController::class, 'store'])->name('quotations.store');
@@ -126,17 +124,15 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
         Route::resource('shipping-fees', App\Http\Controllers\Admin\ShippingFeeController::class)
             ->only(['index', 'edit']);
 
-        // Tracking Test
-        Route::middleware('feature:tracking')->group(function () {
-            Route::get('/tracking/test', [App\Http\Controllers\Admin\TrackingTestController::class, 'index'])->name('tracking.test');
-            Route::post('/tracking/test', [App\Http\Controllers\Admin\TrackingTestController::class, 'test'])->name('tracking.test.run');
-        });
+        // Tracking Test (toujours visible)
+        Route::get('/tracking/test', [App\Http\Controllers\Admin\TrackingTestController::class, 'index'])->name('tracking.test');
+        Route::post('/tracking/test', [App\Http\Controllers\Admin\TrackingTestController::class, 'test'])->name('tracking.test.run');
 
         // Shipping Companies Management (Super Admin Only)
         Route::get('/shipping-companies', [App\Http\Controllers\Admin\ShippingCompanyController::class, 'index'])->name('shipping-companies.index');
 
-        // Tracking Logs
-        Route::middleware('feature:tracking')->get('/tracking-logs', [App\Http\Controllers\Admin\TrackingLogController::class, 'index'])->name('tracking-logs.index');
+        // Tracking Logs (toujours visible)
+        Route::get('/tracking-logs', [App\Http\Controllers\Admin\TrackingLogController::class, 'index'])->name('tracking-logs.index');
     });
 });
 
@@ -174,12 +170,11 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     Route::get('/sourcing-orders/{sourcingOrder}/receipt', [App\Http\Controllers\Client\SourcingOrderController::class, 'showReceipt'])->name('sourcing-orders.receipt');
     Route::get('/sourcing-orders/{sourcingOrder}/shipping-label', [App\Http\Controllers\Client\SourcingOrderController::class, 'showShippingLabel'])->name('sourcing-orders.shipping-label');
     Route::get('/sourcing-orders/{sourcingOrder}/download-proof-of-payment', [App\Http\Controllers\Client\SourcingOrderController::class, 'downloadProofOfPayment'])->name('sourcing-orders.download-proof-of-payment');
-    Route::middleware('feature:refunds')->group(function () {
-        Route::get('/refunds', [App\Http\Controllers\Client\RefundRequestController::class, 'index'])->name('refund-requests.index');
-        Route::get('/refund-requests/create/{sourcingOrder}', [App\Http\Controllers\Client\RefundRequestController::class, 'create'])->name('refund-requests.create');
-        Route::post('/sourcing-orders/{sourcingOrder}/refund-request', [App\Http\Controllers\Client\RefundRequestController::class, 'store'])->name('sourcing-orders.refund-request');
-        Route::get('/refund-requests/{refundRequest}', [App\Http\Controllers\Client\RefundRequestController::class, 'show'])->name('refund-requests.show');
-    });
+    // Refunds (toujours visible)
+    Route::get('/refunds', [App\Http\Controllers\Client\RefundRequestController::class, 'index'])->name('refund-requests.index');
+    Route::get('/refund-requests/create/{sourcingOrder}', [App\Http\Controllers\Client\RefundRequestController::class, 'create'])->name('refund-requests.create');
+    Route::post('/sourcing-orders/{sourcingOrder}/refund-request', [App\Http\Controllers\Client\RefundRequestController::class, 'store'])->name('sourcing-orders.refund-request');
+    Route::get('/refund-requests/{refundRequest}', [App\Http\Controllers\Client\RefundRequestController::class, 'show'])->name('refund-requests.show');
     Route::get('/history', [SourcingRequestController::class, 'history'])->name('history');
     Route::get('/history/export', [SourcingRequestController::class, 'exportHistory'])->name('history.export');
 

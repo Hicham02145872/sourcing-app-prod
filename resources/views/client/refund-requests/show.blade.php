@@ -1,5 +1,4 @@
 <x-app-layout>
-    @featureVisible('refunds')
     <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
             
@@ -233,17 +232,6 @@
             </div>
         </div>
     </div>
-    @else
-    <div class="py-20 text-center">
-        <div class="max-w-md mx-auto">
-            <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-amber-50 rounded-full">
-                <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tighter">Claim Access Restricted</h2>
-            <p class="mt-2 text-slate-500 font-medium italic">Our refund investigation portal is currently offline for system maintenance. Your claim status remains unchanged in our backend.</p>
-        </div>
-    </div>
-    @endfeatureVisible
 
     <!-- Media Viewer Modal -->
     <div id="mediaModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/95 backdrop-blur-sm" onclick="closeMediaModal()">

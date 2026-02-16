@@ -90,8 +90,9 @@ class AppServiceProvider extends ServiceProvider
             return app(\App\Services\FeatureFlagService::class)->isEnabled($key, auth()->user());
         });
 
+        // Même logique que @feature : plus de condition stricte (visible + coming_soon affichés)
         \Illuminate\Support\Facades\Blade::if('featureVisible', function ($key) {
-            return app(\App\Services\FeatureFlagService::class)->isVisible($key, auth()->user());
+            return app(\App\Services\FeatureFlagService::class)->isEnabled($key, auth()->user());
         });
 
         \Illuminate\Support\Facades\Blade::if('featureComingSoon', function ($key) {
