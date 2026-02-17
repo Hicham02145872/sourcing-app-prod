@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Imports\ShippingFeesFromAirFreightDDPImport;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ShippingFeeController extends Controller
 {
@@ -15,5 +18,28 @@ class ShippingFeeController extends Controller
     {
         // $shipping_fee is actually the Country model because of the resource naming
         return view('admin.shipping-fees.edit', ['country' => $shipping_fee]);
+    }
+
+    public function importForm()
+    {
+        return view('admin.shipping-fees.import');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240',
+        ]);
+
+        $import = new ShippingFeesFromAirFreightDDPImport;
+        Excel::import($import, $request->file('file'));
+
+        return redirect()
+            ->route('admin.shipping-fees.import')
+            ->with('import_result', [
+                'imported' => $import->getImportedCount(),
+                'skipped' => $import->getSkippedCount(),
+                'errors' => $import->getErrors(),
+            ]);
     }
 }

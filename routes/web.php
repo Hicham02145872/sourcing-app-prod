@@ -123,6 +123,8 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
         // Shipping Fees (Super Admin Only)
         Route::resource('shipping-fees', App\Http\Controllers\Admin\ShippingFeeController::class)
             ->only(['index', 'edit']);
+        Route::get('/shipping-fees/import/excel', [App\Http\Controllers\Admin\ShippingFeeController::class, 'importForm'])->name('shipping-fees.import');
+        Route::post('/shipping-fees/import/excel', [App\Http\Controllers\Admin\ShippingFeeController::class, 'import'])->name('shipping-fees.import.run');
 
         // Tracking Test (toujours visible)
         Route::get('/tracking/test', [App\Http\Controllers\Admin\TrackingTestController::class, 'index'])->name('tracking.test');
