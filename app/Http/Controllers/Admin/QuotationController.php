@@ -5,15 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Quotation;
 use App\Models\SourcingRequest;
+use App\Services\ImageProcessingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Kreait\Firebase\Contract\Messaging;
 
 class QuotationController extends Controller
 {
+    public function __construct(protected ImageProcessingService $imageService) {}
     public function index(Request $request): View
     {
         $this->authorize('viewAny', Quotation::class);
@@ -137,8 +140,8 @@ class QuotationController extends Controller
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
-            'real_product_image' => 'nullable|image|max:15360',
-            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:15360',
+            'real_product_image' => 'nullable|image|max:51200',
+            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200',
         ]);
 
         // Get the sourcing request and load its destinations
@@ -172,7 +175,13 @@ class QuotationController extends Controller
 
         $realProductImagePath = null;
         if ($request->hasFile('real_product_image')) {
-            $realProductImagePath = $request->file('real_product_image')->store('quotations/real_images', 'public');
+            $realProductImagePath = $this->imageService->compressAndStore(
+                $request->file('real_product_image'),
+                'quotations/real_images',
+                'public',
+                1200,
+                80
+            );
         }
 
         $quotation = Quotation::create([
@@ -196,12 +205,16 @@ class QuotationController extends Controller
             // estimated_net_profit will be calculated by QuotationObserver
         ]);
 
-        // Handle multiple media files
+        // Handle multiple media files (compress images, store videos as-is)
         if ($request->hasFile('media_files')) {
             $sortOrder = 0;
             foreach ($request->file('media_files') as $file) {
-                $path = $file->store('quotations/media', 'public');
-                $fileType = str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image';
+                $mime = $file->getMimeType();
+                $isVideo = str_starts_with($mime, 'video/');
+                $path = $isVideo
+                    ? $file->store('quotations/media', 'public')
+                    : $this->imageService->compressAndStore($file, 'quotations/media', 'public', 1200, 80);
+                $fileType = $isVideo ? 'video' : 'image';
 
                 $quotation->media()->create([
                     'file_path' => $path,
@@ -264,7 +277,7 @@ class QuotationController extends Controller
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
-            'real_product_image' => 'nullable|image|max:10240',
+            'real_product_image' => 'nullable|image|max:51200',
             'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200',
             'delete_media' => 'nullable|array',
             'delete_media.*' => 'exists:quotation_media,id',
@@ -283,11 +296,16 @@ class QuotationController extends Controller
 
         $realProductImagePath = $quotation->real_product_image;
         if ($request->hasFile('real_product_image')) {
-            // Delete old image if exists
-            if ($realProductImagePath && \Illuminate\Support\Facades\Storage::disk('public')->exists($realProductImagePath)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($realProductImagePath);
+            if ($realProductImagePath && Storage::disk('public')->exists($realProductImagePath)) {
+                Storage::disk('public')->delete($realProductImagePath);
             }
-            $realProductImagePath = $request->file('real_product_image')->store('quotations/real_images', 'public');
+            $realProductImagePath = $this->imageService->compressAndStore(
+                $request->file('real_product_image'),
+                'quotations/real_images',
+                'public',
+                1200,
+                80
+            );
         }
 
         $quotation->update([
@@ -318,20 +336,24 @@ class QuotationController extends Controller
             foreach ($request->delete_media as $mediaId) {
                 $media = $quotation->media()->find($mediaId);
                 if ($media) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($media->file_path);
+                    Storage::disk('public')->delete($media->file_path);
                     $media->delete();
                 }
             }
         }
 
-        // Handle new media files
+        // Handle new media files (compress images, store videos as-is)
         if ($request->hasFile('media_files')) {
             $maxSortOrder = $quotation->media()->max('sort_order') ?? -1;
             $sortOrder = $maxSortOrder + 1;
 
             foreach ($request->file('media_files') as $file) {
-                $path = $file->store('quotations/media', 'public');
-                $fileType = str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image';
+                $mime = $file->getMimeType();
+                $isVideo = str_starts_with($mime, 'video/');
+                $path = $isVideo
+                    ? $file->store('quotations/media', 'public')
+                    : $this->imageService->compressAndStore($file, 'quotations/media', 'public', 1200, 80);
+                $fileType = $isVideo ? 'video' : 'image';
 
                 $quotation->media()->create([
                     'file_path' => $path,
