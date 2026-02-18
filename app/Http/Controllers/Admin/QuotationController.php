@@ -356,8 +356,7 @@ class QuotationController extends Controller
 
         $quotation->update(['status' => 'rejected']);
 
-        // You might want to dispatch an event here
-        // event(new QuotationRejected($quotation));
+        event(new \App\Events\QuotationRejected($quotation));
 
         return redirect()->route('admin.quotations.show', $quotation)->with('status', 'Quotation rejected successfully!');
     }
