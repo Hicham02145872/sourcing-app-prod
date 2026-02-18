@@ -17,11 +17,11 @@ class SyncOrderToSheet implements ShouldBeUnique, ShouldQueue
     use InteractsWithQueue;
 
     /**
-     * The unique ID of the job.
+     * The unique ID of the job (per event payload; Laravel derives from serialized listener/event).
      */
     public function uniqueId(): string
     {
-        return $this->order->id ?? 'sync-all';
+        return 'sync-order-to-sheet';
     }
 
     public $tries = 3;
@@ -36,7 +36,7 @@ class SyncOrderToSheet implements ShouldBeUnique, ShouldQueue
         if ($event instanceof SourcingOrderStatusChanged) {
             $order = $event->sourcingOrder;
         } elseif ($event instanceof ProofOfPaymentUploadedEvent) {
-            $order = $event->order;
+            $order = $event->sourcingOrder;
         }
 
         if (! $order || ! $order instanceof SourcingOrder) {

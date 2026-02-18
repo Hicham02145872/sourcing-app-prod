@@ -44,8 +44,8 @@ class QuotationController extends Controller
                 // Lock the quotation row to prevent race conditions
                 $q = Quotation::where('id', $quotation->id)->lockForUpdate()->firstOrFail();
 
-                // Check if the quotation has already been processed
-                if ($q->status !== 'pending') { // Assuming 'pending' is the initial state before acceptance
+                // Check if the quotation has already been processed (allow pending, approved, sent)
+                if (! in_array($q->status, ['pending', 'approved', 'sent'], true)) {
                     throw new \Exception('This quotation has already been processed.');
                 }
 
