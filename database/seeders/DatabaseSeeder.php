@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             GoogleSheetSettingSeeder::class,
             DevUserSeeder::class,
             FeatureFlagSeeder::class,
+            AirFreightDDPTableSeeder::class,
         ]);
     }
 }

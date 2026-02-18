@@ -49,7 +49,7 @@
             <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
                     <h3 class="text-sm font-bold text-slate-900 uppercase tracking-tight">{{ __('Importer un fichier Excel') }}</h3>
-                    <p class="text-xs text-slate-500 mt-1">{{ __('Format attendu : type Air Freight DDP (colonnes Pays, Type marchandise, Prix au kg, Délai en jours).') }}</p>
+                    <p class="text-xs text-slate-500 mt-1">{{ __('Air Freight DDP : la première feuille est lue. Ligne d\'en-têtes et cellules fusionnées gérées automatiquement.') }}</p>
                 </div>
                 <form action="{{ route('admin.shipping-fees.import.run') }}" method="post" enctype="multipart/form-data" class="p-6 space-y-6">
                     @csrf
@@ -71,14 +71,14 @@
             </div>
 
             <div class="bg-slate-900 text-slate-300 rounded-lg border border-slate-800 p-6 font-mono text-xs">
-                <p class="text-slate-400 font-bold uppercase tracking-wider mb-2">{{ __('Colonnes reconnues (en-têtes du fichier)') }}</p>
+                <p class="text-slate-400 font-bold uppercase tracking-wider mb-2">{{ __('Colonnes reconnues (détection auto de la ligne d\'en-têtes)') }}</p>
                 <ul class="space-y-1 list-disc list-inside">
-                    <li><strong>Pays</strong> : country, pays, destination, country_name, code</li>
-                    <li><strong>Type marchandise</strong> : item_style, type, category, item_type, style</li>
-                    <li><strong>Prix au kg</strong> : price_per_kg, price, prix, rate, prix_au_kg</li>
-                    <li><strong>Délai (optionnel)</strong> : estimation_days, days, delai, estimation</li>
+                    <li><strong>Type marchandise</strong> : item style, service, goods type, product type</li>
+                    <li><strong>Destination</strong> : destination, country, pays</li>
+                    <li><strong>Prix au kg</strong> : charge weight (KG), Price: $, unit price</li>
+                    <li><strong>Délai (optionnel)</strong> : arrive time, arrival time, transit time, working days</li>
                 </ul>
-                <p class="mt-3 text-slate-500">{{ __('Les pays doivent exister dans l\'app (nom ou code identique). Transport = Air.') }}</p>
+                <p class="mt-3 text-slate-500">{{ __('Cellules fusionnées gérées (report vers le bas). Plusieurs pays dans une cellule (séparés par virgule) créent une ligne par pays. Première feuille du classeur uniquement.') }}</p>
             </div>
         </div>
     </div>
