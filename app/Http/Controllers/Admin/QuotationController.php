@@ -140,8 +140,11 @@ class QuotationController extends Controller
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
-            'real_product_image' => 'nullable|image|max:51200',
-            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200',
+            'real_product_image' => 'nullable|image|max:15360',
+            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:15360',
+        ], [
+            'real_product_image.max' => __('The photo must not exceed 15 MB. Please choose a smaller file.'),
+            'media_files.*.max' => __('Each file must not exceed 15 MB. Please choose smaller files.'),
         ]);
 
         // Get the sourcing request and load its destinations
@@ -277,10 +280,13 @@ class QuotationController extends Controller
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
-            'real_product_image' => 'nullable|image|max:51200',
-            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200',
+            'real_product_image' => 'nullable|image|max:15360',
+            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:15360',
             'delete_media' => 'nullable|array',
             'delete_media.*' => 'exists:quotation_media,id',
+        ], [
+            'real_product_image.max' => __('The photo must not exceed 15 MB. Please choose a smaller file.'),
+            'media_files.*.max' => __('Each file must not exceed 15 MB. Please choose smaller files.'),
         ]);
 
         $sourcingRequest = $quotation->sourcingRequest;

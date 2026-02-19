@@ -36,7 +36,7 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-            <form method="POST" action="{{ route('admin.quotations.update', $quotation) }}" enctype="multipart/form-data">
+            <form id="quotation-edit-form" method="POST" action="{{ route('admin.quotations.update', $quotation) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 
@@ -178,6 +178,9 @@
                                             </svg>
                                             {{ __('Upload additional photos and videos. Existing media can be managed below. Max size: 15MB per file. Drag & drop supported.') }}
                                         </p>
+                                        <div id="quotation-file-size-error" class="mt-3 p-3 rounded-lg bg-red-100 border border-red-300 text-red-800 text-sm {{ $errors->has('real_product_image') || $errors->has('media_files') ? '' : 'hidden' }}" role="alert">
+                                            @if($errors->has('real_product_image')) {{ $errors->first('real_product_image') }} @elseif($errors->has('media_files')) {{ $errors->first('media_files') }} @else {{ __('One or more files exceed 15 MB. Please choose smaller files.') }} @endif
+                                        </div>
                                     </div>
                                     <div id="image-preview-container" class="{{ $quotation->real_product_image ? '' : 'hidden' }}">
                                         <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">{{ __('Preview') }}</p>
@@ -565,7 +568,31 @@
                             previewImage.src = e.target.result;
                             previewContainer.classList.remove('hidden');
                         }
-                        reader.readAsAsDataURL(firstFile);
+                        reader.readAsDataURL(firstFile);
+                    }
+                }
+            });
+        }
+
+        // Prevent submit if any file exceeds 15MB (avoids 413 Entity Too Large)
+        const quotationForm = document.getElementById('quotation-edit-form');
+        if (quotationForm) {
+            quotationForm.addEventListener('submit', function(e) {
+                if (fileSizeErrorEl) fileSizeErrorEl.classList.add('hidden');
+                if (imageInput && imageInput.files.length && imageInput.files[0].size > maxFileSize) {
+                    e.preventDefault();
+                    if (fileSizeErrorEl) { fileSizeErrorEl.classList.remove('hidden'); fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+                    window.dispatchEvent(new CustomEvent('show-error-toast', { detail: fileSizeErrorMsg }));
+                    return false;
+                }
+                if (mediaInput && mediaInput.files.length) {
+                    for (let i = 0; i < mediaInput.files.length; i++) {
+                        if (mediaInput.files[i].size > maxFileSize) {
+                            e.preventDefault();
+                            if (fileSizeErrorEl) { fileSizeErrorEl.classList.remove('hidden'); fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { detail: fileSizeErrorMsg }));
+                            return false;
+                        }
                     }
                 }
             });

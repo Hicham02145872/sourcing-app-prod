@@ -36,7 +36,7 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-            <form method="POST" action="{{ route('admin.quotations.store') }}" enctype="multipart/form-data">
+            <form id="quotation-create-form" method="POST" action="{{ route('admin.quotations.store') }}" enctype="multipart/form-data">
                 @csrf
                 
                 <!-- Section 1: Selected Request Summary -->
@@ -177,6 +177,9 @@
                                             </svg>
                                             {{ __('Upload photos and videos to help the client verify the actual product quality. Max size: 15MB per file. Drag & drop supported.') }}
                                         </p>
+                                        <div id="quotation-file-size-error" class="mt-3 p-3 rounded-lg bg-red-100 border border-red-300 text-red-800 text-sm {{ $errors->has('real_product_image') || $errors->has('media_files') ? '' : 'hidden' }}" role="alert">
+                                            @if($errors->has('real_product_image')) {{ $errors->first('real_product_image') }} @elseif($errors->has('media_files')) {{ $errors->first('media_files') }} @else {{ __('One or more files exceed 15 MB. Please choose smaller files.') }} @endif
+                                        </div>
                                     </div>
                                     <div id="image-preview-container" class="hidden">
                                         <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">{{ __('Preview') }}</p>
@@ -539,15 +542,19 @@
         const previewContainer = document.getElementById('image-preview-container');
         const previewImage = document.getElementById('image-preview');
 
+        const fileSizeErrorEl = document.getElementById('quotation-file-size-error');
+        const maxFileSize = 15728640; // 15MB
+        const fileSizeErrorMsg = '{{ __("One or more files exceed 15 MB. Please choose smaller files.") }}';
+
         if (imageInput) {
             imageInput.addEventListener('change', function() {
+                if (fileSizeErrorEl) fileSizeErrorEl.classList.add('hidden');
                 const file = this.files[0];
                 if (file) {
                     // 15MB size check
-                    if (file.size > 15728640) {
-                        window.dispatchEvent(new CustomEvent('show-error-toast', { 
-                            detail: '{{ __("File size exceeds 15MB. Please choose a smaller file.") }}' 
-                        }));
+                    if (file.size > maxFileSize) {
+                        if (fileSizeErrorEl) { fileSizeErrorEl.classList.remove('hidden'); fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+                        window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __("File size exceeds 15MB. Please choose a smaller file.") }}' }));
                         imageInput.value = '';
                         previewContainer.classList.add('hidden');
                         return;
@@ -560,6 +567,32 @@
                     reader.readAsDataURL(file);
                 } else {
                     previewContainer.classList.add('hidden');
+                }
+            });
+        }
+
+        // Prevent submit if any file exceeds 15MB (avoids 413 Entity Too Large)
+        const quotationForm = document.getElementById('quotation-create-form');
+        if (quotationForm) {
+            quotationForm.addEventListener('submit', function(e) {
+                if (fileSizeErrorEl) fileSizeErrorEl.classList.add('hidden');
+                const mainImg = document.getElementById('real_product_image');
+                if (mainImg && mainImg.files.length && mainImg.files[0].size > maxFileSize) {
+                    e.preventDefault();
+                    if (fileSizeErrorEl) { fileSizeErrorEl.classList.remove('hidden'); fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+                    window.dispatchEvent(new CustomEvent('show-error-toast', { detail: fileSizeErrorMsg }));
+                    return false;
+                }
+                const mediaInput = document.getElementById('media_files');
+                if (mediaInput && mediaInput.files.length) {
+                    for (let i = 0; i < mediaInput.files.length; i++) {
+                        if (mediaInput.files[i].size > maxFileSize) {
+                            e.preventDefault();
+                            if (fileSizeErrorEl) { fileSizeErrorEl.classList.remove('hidden'); fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { detail: fileSizeErrorMsg }));
+                            return false;
+                        }
+                    }
                 }
             });
         }
@@ -581,9 +614,12 @@
                     }
                     
                     // Add new files
+                    if (document.getElementById('quotation-file-size-error')) document.getElementById('quotation-file-size-error').classList.add('hidden');
                     for (let i = 0; i < fileList.length; i++) {
                         const file = fileList[i];
                         if (file.size > 15728640) { // 15MB
+                            const errEl = document.getElementById('quotation-file-size-error');
+                            if (errEl) { errEl.classList.remove('hidden'); errEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
                             window.dispatchEvent(new CustomEvent('show-error-toast', { 
                                 detail: `${file.name} {{ __('is too large. Maximum size is 15MB.') }}` 
                             }));
