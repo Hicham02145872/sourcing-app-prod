@@ -6,6 +6,7 @@ use App\Models\SourcingOrder;
 use App\Services\OrderStatus\AutoUpdateOrderStatusFromTracking;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class AutoUpdateOrderStatusesFromTracking extends Command
 {
@@ -139,8 +140,8 @@ class AutoUpdateOrderStatusesFromTracking extends Command
             ->limit($maxOrders);
 
         // Optionnel : Ne traiter que les commandes qui n'ont pas été vérifiées récemment
-        // (pour éviter de surcharger les APIs de tracking)
-        if ($minIntervalMinutes > 0) {
+        // (nécessite la colonne last_tracking_check_at - ignorer si elle n'existe pas)
+        if ($minIntervalMinutes > 0 && Schema::hasColumn('sourcing_orders', 'last_tracking_check_at')) {
             $query->where(function ($q) use ($minIntervalMinutes) {
                 $q->whereNull('last_tracking_check_at')
                     ->orWhere('last_tracking_check_at', '<', now()->subMinutes($minIntervalMinutes));
