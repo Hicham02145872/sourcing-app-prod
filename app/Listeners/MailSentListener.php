@@ -19,7 +19,22 @@ class MailSentListener
                 File::makeDirectory($directory, 0755, true);
             }
 
-            $message = $event->sent->getOriginalMessage();
+            // In Laravel 11+, MessageSent wraps a Symfony RawMessage/Email.
+            // We need to safely extract HTML or text body depending on the concrete type.
+            $symfonyMessage = $event->sent->getSymfonySentMessage()->getOriginalMessage();
+
+            $bodyHtml = null;
+            $bodyText = null;
+
+            if ($symfonyMessage instanceof \Symfony\Component\Mime\Email) {
+                $bodyHtml = $symfonyMessage->getHtmlBody();
+                $bodyText = $symfonyMessage->getTextBody();
+            } elseif (method_exists($symfonyMessage, 'getBody')) {
+                // Fallback for other message types
+                $bodyText = $symfonyMessage->getBody();
+            }
+
+            $message = $symfonyMessage;
             $id = time().'_'.uniqid();
             
             $data = [
@@ -28,7 +43,7 @@ class MailSentListener
                 'subject' => $message->getSubject(),
                 'to' => collect($message->getTo())->map(fn($t) => $t->getAddress())->implode(', '),
                 'from' => collect($message->getFrom())->map(fn($f) => $f->getAddress())->implode(', '),
-                'body' => $event->sent->getSymfonySentMessage()->getMessage()->getHtmlBody() ?: $event->sent->getSymfonySentMessage()->getMessage()->getTextBody(),
+                'body' => $bodyHtml ?: $bodyText ?: '',
             ];
 
             File::put($directory . '/' . $id . '.json', json_encode($data));

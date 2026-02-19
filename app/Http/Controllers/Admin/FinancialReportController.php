@@ -46,6 +46,20 @@ class FinancialReportController extends Controller
             'net_profit_or_loss'
         );
 
+        // Subtract approved refunds from totals
+        $dailyRefunds = $this->calculateRefundsTotal(Carbon::today(), Carbon::today());
+        $weeklyRefunds = $this->calculateRefundsTotal(Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek());
+        $monthlyRefunds = $this->calculateRefundsTotal(
+            Carbon::now()->startOfMonth(),
+            Carbon::now()->endOfMonth()
+        );
+        $totalRefunds = $this->calculateRefundsTotal(null, null);
+
+        $dailyTotal -= $dailyRefunds;
+        $weeklyTotal -= $weeklyRefunds;
+        $monthlyTotal -= $monthlyRefunds;
+        $totalProfit -= $totalRefunds;
+
         return view('admin.reports.financial.index', compact(
             'orders',
             'period',
@@ -144,5 +158,22 @@ class FinancialReportController extends Controller
         }
 
         return (float) $total;
+    }
+
+    /**
+     * Calculate total approved refunds in MAD for a given period
+     */
+    private function calculateRefundsTotal($startDate = null, $endDate = null): float
+    {
+        $query = \App\Models\RefundRequest::where('status', 'approved')
+            ->with('sourcingOrder.quotation');
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('updated_at', [$startDate, $endDate]);
+        }
+
+        $refunds = $query->get();
+
+        return $this->calculateTotalInMad($refunds, 'amount_approved');
     }
 }

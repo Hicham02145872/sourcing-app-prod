@@ -73,6 +73,8 @@ class SourcingOrder extends Model
         'shipping_company_id',
         'sheet_synced_at',
         'sheet_sync_error',
+        'fsb_tracking_created_at',
+        'real_tracking_assigned_at',
     ];
 
     /**
@@ -89,6 +91,7 @@ class SourcingOrder extends Model
         'initial_estimated_product_cost',
         'initial_estimated_shipping_cost',
         'initial_estimated_other_costs',
+        'real_tracking_assigned_at', // Champ interne uniquement, non exposé au client
     ];
 
     protected $casts = [
@@ -101,6 +104,8 @@ class SourcingOrder extends Model
         'initial_estimated_shipping_cost' => 'decimal:2',
         'initial_estimated_other_costs' => 'decimal:2',
         'refund_amount' => 'decimal:2',
+        'fsb_tracking_created_at' => 'datetime',
+        'real_tracking_assigned_at' => 'datetime',
     ];
 
     public function user()
@@ -270,5 +275,40 @@ class SourcingOrder extends Model
     public function getTotalQuantityAttribute(): int
     {
         return $this->quotation->sourcingRequest->destinations->sum('quantity');
+    }
+
+    /**
+     * Check if a real tracking number has been assigned.
+     */
+    public function hasRealTracking(): bool
+    {
+        return !is_null($this->tracking_number) && !is_null($this->real_tracking_assigned_at);
+    }
+
+    /**
+     * Determine if virtual tracking status should be used.
+     */
+    public function shouldUseVirtualStatus(): bool
+    {
+        // Use virtual status if FSB tracking was created but no real tracking assigned yet
+        return !is_null($this->fsb_tracking_created_at) && !$this->hasRealTracking();
+    }
+
+    /**
+     * Get virtual tracking status based on time elapsed since FSB creation.
+     */
+    public function getVirtualTrackingStatus(): string
+    {
+        if (!$this->fsb_tracking_created_at) {
+            return 'pending_payment';
+        }
+
+        $hoursSinceCreation = now()->diffInHours($this->fsb_tracking_created_at);
+
+        if ($hoursSinceCreation < 24) {
+            return 'shipment_preparing';
+        }
+
+        return 'in_transit_china';
     }
 }

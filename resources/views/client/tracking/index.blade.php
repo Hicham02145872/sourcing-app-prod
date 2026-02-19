@@ -150,6 +150,20 @@
                             <span id="latestStatusText">--</span>
                         </div>
                     </div>
+                    
+                    <!-- Virtual Status Indicator -->
+                    <div id="virtualStatusIndicator" class="hidden mb-6 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-xl flex items-start gap-3">
+                        <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">{{ __('Status estimé') }}</p>
+                            <p id="virtualStatusMessage" class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                                {{ __('Votre numéro de suivi réel sera disponible sous peu. Les mises à jour automatiques commenceront une fois le numéro assigné.') }}
+                            </p>
+                        </div>
+                    </div>
+                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                         <div class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50">
                             <svg class="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
@@ -439,6 +453,18 @@
             function processTrackingData(result, number, responseTime) {
                 const data = result.data;
                 const latest = data[0];
+                
+                // Handle virtual status indicator
+                const virtualIndicator = document.getElementById('virtualStatusIndicator');
+                const virtualMessage = document.getElementById('virtualStatusMessage');
+                if (result.is_virtual) {
+                    if (virtualIndicator) virtualIndicator.classList.remove('hidden');
+                    if (virtualMessage && result.virtual_message) {
+                        virtualMessage.textContent = result.virtual_message;
+                    }
+                } else {
+                    if (virtualIndicator) virtualIndicator.classList.add('hidden');
+                }
                 
                 if (elements.resultTrackingNumber) elements.resultTrackingNumber.textContent = number;
                 if (elements.latestStatusText) elements.latestStatusText.textContent = result.current_status || getField(latest, ['status_en', 'status', 'Status']) || 'Status Pending';

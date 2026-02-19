@@ -176,10 +176,23 @@
                                             <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
-                                            {{ __('Upload additional photos and videos. Existing media can be managed below. Max size: 15MB per file. Drag & drop supported.') }}
+                                            {{ __('Téléchargez des photos et vidéos supplémentaires. Les médias existants peuvent être gérés ci-dessous. Taille maximale : 10 MB par fichier. Glisser-déposer supporté.') }}
                                         </p>
-                                        <div id="quotation-file-size-error" class="mt-3 p-3 rounded-lg bg-red-100 border border-red-300 text-red-800 text-sm {{ $errors->has('real_product_image') || $errors->has('media_files') ? '' : 'hidden' }}" role="alert">
-                                            @if($errors->has('real_product_image')) {{ $errors->first('real_product_image') }} @elseif($errors->has('media_files')) {{ $errors->first('media_files') }} @else {{ __('One or more files exceed 15 MB. Please choose smaller files.') }} @endif
+                                        <div id="quotation-file-size-error" class="mt-3 p-3 rounded-lg bg-red-100 border border-red-300 text-red-800 text-sm font-medium {{ $errors->has('real_product_image') || $errors->has('media_files') ? '' : 'hidden' }}" role="alert">
+                                            <div class="flex items-start gap-2">
+                                                <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <div>
+                                                    @if($errors->has('real_product_image'))
+                                                        <strong>{{ __('Erreur :') }}</strong> {{ $errors->first('real_product_image') }}
+                                                    @elseif($errors->has('media_files'))
+                                                        <strong>{{ __('Erreur :') }}</strong> {{ $errors->first('media_files') }}
+                                                    @else
+                                                        <strong>{{ __('Erreur :') }}</strong> {{ __('Un ou plusieurs fichiers dépassent 10 MB. Veuillez choisir des fichiers plus petits.') }}
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div id="image-preview-container" class="{{ $quotation->real_product_image ? '' : 'hidden' }}">
@@ -539,18 +552,27 @@
         });
 
         // Image Preview Logic & Size Validation
+        const imageInput = document.getElementById('real_product_image');
         const mediaInput = document.getElementById('media_files');
         const previewContainer = document.getElementById('image-preview-container');
         const previewImage = document.getElementById('image-preview');
+        const fileSizeErrorEl = document.getElementById('quotation-file-size-error');
+        const maxFileSize = 10485760; // 10MB (10 * 1024 * 1024)
+        const fileSizeErrorMsg = '{{ __("Un ou plusieurs fichiers dépassent 10 MB. Veuillez choisir des fichiers plus petits.") }}';
 
         if (mediaInput) {
             mediaInput.addEventListener('change', function() {
                 const files = this.files;
                 if (files.length > 0) {
                     for (let i = 0; i < files.length; i++) {
-                        if (files[i].size > 15728640) { // 15MB
+                        if (files[i].size > maxFileSize) { // 10MB
+                            const fileSizeMB = (files[i].size / 1048576).toFixed(2);
+                            if (fileSizeErrorEl) {
+                                fileSizeErrorEl.classList.remove('hidden');
+                                fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
                             window.dispatchEvent(new CustomEvent('show-error-toast', { 
-                                detail: `${files[i].name} {{ __('is too large. Maximum size is 15MB.') }}` 
+                                detail: `{{ __('Le fichier') }} "${files[i].name}" {{ __('est trop volumineux') }} (${fileSizeMB} MB). {{ __('Taille maximale : 10 MB.') }}` 
                             }));
                             this.value = '';
                             if (previewContainer && !previewImage.src.includes('storage/')) {
@@ -574,23 +596,35 @@
             });
         }
 
-        // Prevent submit if any file exceeds 15MB (avoids 413 Entity Too Large)
+        // Prevent submit if any file exceeds 10MB (avoids 413 Entity Too Large)
         const quotationForm = document.getElementById('quotation-edit-form');
         if (quotationForm) {
             quotationForm.addEventListener('submit', function(e) {
                 if (fileSizeErrorEl) fileSizeErrorEl.classList.add('hidden');
                 if (imageInput && imageInput.files.length && imageInput.files[0].size > maxFileSize) {
                     e.preventDefault();
-                    if (fileSizeErrorEl) { fileSizeErrorEl.classList.remove('hidden'); fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-                    window.dispatchEvent(new CustomEvent('show-error-toast', { detail: fileSizeErrorMsg }));
+                    const fileSizeMB = (imageInput.files[0].size / 1048576).toFixed(2);
+                    if (fileSizeErrorEl) { 
+                        fileSizeErrorEl.classList.remove('hidden'); 
+                        fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); 
+                    }
+                    window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                        detail: `{{ __('Le fichier image principal dépasse 10 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir un fichier plus petit.') }}` 
+                    }));
                     return false;
                 }
                 if (mediaInput && mediaInput.files.length) {
                     for (let i = 0; i < mediaInput.files.length; i++) {
                         if (mediaInput.files[i].size > maxFileSize) {
                             e.preventDefault();
-                            if (fileSizeErrorEl) { fileSizeErrorEl.classList.remove('hidden'); fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-                            window.dispatchEvent(new CustomEvent('show-error-toast', { detail: fileSizeErrorMsg }));
+                            const fileSizeMB = (mediaInput.files[i].size / 1048576).toFixed(2);
+                            if (fileSizeErrorEl) { 
+                                fileSizeErrorEl.classList.remove('hidden'); 
+                                fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); 
+                            }
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                                detail: `{{ __('Le fichier') }} "${mediaInput.files[i].name}" {{ __('dépasse 10 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir un fichier plus petit.') }}` 
+                            }));
                             return false;
                         }
                     }

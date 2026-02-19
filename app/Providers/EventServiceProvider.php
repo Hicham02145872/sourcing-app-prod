@@ -12,6 +12,7 @@ use App\Events\SourcingRequestStatusChanged;
 use App\Listeners\SendQuotationAcceptedNotification;
 use App\Listeners\SendQuotationCreatedNotification;
 use App\Listeners\SendQuotationRejectedNotification;
+use App\Listeners\InitializeFsbTracking;
 use App\Listeners\SendRefundStatusNotification;
 use App\Listeners\SendSourcingOrderStatusUpdatedNotification;
 use App\Listeners\SendSourcingRequestStatusChangeNotification;
@@ -50,6 +51,7 @@ class EventServiceProvider extends ServiceProvider
             SendSourcingRequestStatusChangeNotification::class,
         ],
         SourcingOrderStatusChanged::class => [
+            InitializeFsbTracking::class,
             SendSourcingOrderStatusUpdatedNotification::class,
             \App\Listeners\SyncOrderToSheet::class,
         ],

@@ -70,10 +70,22 @@ class SourcingOrderWorkflow extends Component
             return;
         }
 
-        $this->sourcingOrder->update([
+        $updateData = [
             'tracking_number' => $this->tracking_number,
             'tracking_carrier' => $this->tracking_carrier,
-        ]);
+        ];
+
+        // If a real tracking number is being assigned for the first time, record the timestamp
+        if ($this->tracking_number && !$this->sourcingOrder->hasRealTracking()) {
+            $updateData['real_tracking_assigned_at'] = now();
+            Log::info('🎯 [FSB TRACKING] Real tracking number assigned to FSB', [
+                'order_id' => $this->sourcingOrder->id,
+                'fsb_number' => $this->sourcingOrder->fsb_tracking_number,
+                'real_tracking' => $this->tracking_number,
+            ]);
+        }
+
+        $this->sourcingOrder->update($updateData);
 
         $this->sourcingOrder->refresh();
 

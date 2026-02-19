@@ -38,6 +38,30 @@
             
             {{-- Status Banner --}}
             @php
+                $statusLabels = [
+                    'pending_payment' => __('Pending Payment'),
+                    'paid' => __('Paid'),
+                    'shipment_preparing' => __('Shipment Preparing'),
+                    'in_transit_china' => __('In Transit China'),
+                    'arrival_uae' => __('Arrival UAE'),
+                    'customs_clearance_uae' => __('Customs Clearance UAE'),
+                    'in_transit_uae' => __('In Transit UAE'),
+                    'arrival_destination_country' => __('Arrival Destination Country'),
+                    'customs_clearance_destination_country' => __('Customs Clearance Destination Country'),
+                    'out_for_delivery' => __('Out for Delivery'),
+                    'delivered' => __('Delivered'),
+                    'delivery_failed' => __('Delivery Failed'),
+                    'shipment_delayed' => __('Shipment Delayed'),
+                    'shipment_returned' => __('Shipment Returned'),
+                    'shipment_canceled' => __('Shipment Canceled'),
+                    'order_completed' => __('Order Completed'),
+                    'on_hold' => __('On Hold'),
+                    'refunded' => __('Refunded'),
+                    'waiting_for_refund' => __('Waiting for Refund'),
+                    'refund_approved' => __('Refund Approved'),
+                    'refund_rejected' => __('Refund Rejected'),
+                ];
+                
                 $statusConfig = [
                     'pending_payment' => ['color' => '#FAA533', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => __('Payment Required')],
                     'payment_pending_verification' => ['color' => '#0BA6DF', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15', 'title' => __('Verification in Progress')],
@@ -46,6 +70,7 @@
                     'delivered' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => __('Delivered')],
                 ];
                 $statusData = $statusConfig[$sourcingOrder->client_status] ?? $statusConfig['pending_payment'];
+                $statusLabel = $statusLabels[$sourcingOrder->client_status] ?? ucfirst(str_replace('_', ' ', $sourcingOrder->client_status));
             @endphp
             
             <div class="mb-6 bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 overflow-hidden">
@@ -59,7 +84,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: {{ $statusData['color'] }}">{{ $statusData['title'] ?? __('Current Status') }}</p>
-                                <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ __(ucfirst(str_replace('_', ' ', $sourcingOrder->client_status))) }}</p>
+                                <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ $statusLabel }}</p>
                             </div>
                         </div>
                         <div class="text-center sm:text-right bg-white dark:bg-slate-800 rounded-lg px-4 py-3 border border-[#EBEBEB] dark:border-slate-700">
@@ -75,7 +100,7 @@
                 {{-- Main Content --}}
                 <div class="lg:col-span-2 space-y-6">
                     
-                    {{-- Expédition & Suivi (toujours visible pour le client) --}}
+                    {{-- Shipment & Tracking (always visible for client) --}}
                     <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden mb-6 relative group">
                         
                         <!-- Content -->
@@ -86,7 +111,7 @@
                                         <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
                                     </div>
                                     <div>
-                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Expédition & Suivi') }}</h3>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Shipment & Tracking') }}</h3>
                                         <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Track your shipment status') }}</p>
                                     </div>
                                 </div>
@@ -99,21 +124,27 @@
                             <div class="p-6">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
-                                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Numéro de suivi') }}</p>
-                                        <p class="text-sm font-mono font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->tracking_number ? $sourcingOrder->fsb_tracking_number : __('En attente...') }}</p>
+                                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Tracking Number') }}</p>
+                                        <p class="text-sm font-mono font-bold text-slate-900 dark:text-white">
+                                            @if($sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
+                                                {{ $sourcingOrder->fsb_tracking_number }}
+                                            @else
+                                                {{ __('Pending...') }}
+                                            @endif
+                                        </p>
                                     </div>
                                      <div>
-                                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Transporteur') }}</p>
-                                        <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->tracking_carrier ?: ($sourcingOrder->shippingCompany?->name ?? __('Non assigné')) }}</p>
+                                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Shipping Company') }}</p>
+                                        <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->tracking_carrier ?: ($sourcingOrder->shippingCompany?->name ?? __('Not assigned')) }}</p>
                                     </div>
                                 </div>
 
-                                @if($sourcingOrder->tracking_number)
+                                @if($sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
                                 <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
                                     <a href="{{ route('client.tracking.index', ['number' => 'FSB' . str_pad($sourcingOrder->id, 6, '0', STR_PAD_LEFT)]) }}" 
                                        class="w-full sm:w-auto px-6 py-2.5 bg-[#EF7722] hover:bg-[#d66616] text-white text-sm font-bold rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" /></svg>
-                                        {{ __('Suivre mon colis') }}
+                                        {{ __('Track my shipment') }}
                                     </a>
                                 </div>
                                 @endif
@@ -487,7 +518,7 @@
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
                                     </svg>
-                                    {{ __(ucfirst(str_replace('_', ' ', $sourcingOrder->client_status))) }}
+                                    {{ $statusLabel }}
 </span>
                             </div>
 

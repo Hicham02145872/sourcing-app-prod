@@ -410,7 +410,7 @@
                     @if($sourcingOrder->shippingCompany)
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('Shipping & Logistics') }}</h3>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('Shipping Company') }}</h3>
                             <!-- Status Indicator -->
                             @if($sourcingOrder->sheet_sync_error)
                                 <span class="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100" title="{{ $sourcingOrder->sheet_sync_error }}">

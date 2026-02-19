@@ -205,7 +205,7 @@
         .splash-logo {
             opacity: 0;
             transform: scale(0.9) translateY(30px);
-            animation: splashLogoReveal 1.2s cubic-bezier(0.7, 0, 0.3, 1) 0.3s forwards;
+            animation: splashLogoReveal 0.5s cubic-bezier(0.7, 0, 0.3, 1) 0.1s forwards;
             filter: drop-shadow(0 20px 40px rgba(0,0,0,0.05));
         }
 
@@ -220,12 +220,12 @@
             box-shadow: 0 0 15px rgba(239,119,34,0.8);
             opacity: 0;
             z-index: 20;
-            animation: laserScan 2.5s ease-in-out 1s infinite;
+            animation: laserScan 0.5s ease-in-out 0.2s forwards;
         }
 
         @keyframes laserScan {
             0% { top: 10%; opacity: 0; }
-            10%, 90% { opacity: 1; }
+            50% { opacity: 1; }
             100% { top: 90%; opacity: 0; }
         }
 
@@ -269,7 +269,7 @@
             text-transform: uppercase;
             color: #64748b;
             opacity: 0;
-            animation: fadeIn 0.5s ease 1s forwards;
+            animation: fadeIn 0.3s ease 0.2s forwards;
         }
 
         @keyframes fadeIn { to { opacity: 1; } }
@@ -290,13 +290,12 @@
             width: 0%;
             background: linear-gradient(90deg, #EF7722, #FAA533);
             box-shadow: 0 0 10px rgba(239,119,34,0.4);
-            animation: progressFill 4.5s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+            animation: progressFill 0.8s cubic-bezier(0.7, 0, 0.3, 1) forwards;
         }
 
         @keyframes progressFill {
             0% { width: 0%; }
-            30% { width: 45%; }
-            60% { width: 85%; }
+            50% { width: 60%; }
             100% { width: 100%; }
         }
 
@@ -362,7 +361,7 @@
                 var span = document.createElement('span');
                 span.className = 'splash-char';
                 span.textContent = text[i];
-                span.style.animationDelay = (1.2 + i * 0.05) + 's';
+                span.style.animationDelay = (0.3 + i * 0.02) + 's';
                 if (i === 0 || i === 4 || i === 12) {
                     span.style.color = '#EF7722';
                 }
@@ -377,18 +376,18 @@
                 setTimeout(function() {
                     statusEl.textContent = statusMessages[msgIndex];
                     statusEl.style.opacity = 1;
-                }, 250);
-            }, 1200);
+                }, 100);
+            }, 300);
 
-            // Dismiss
+            // Dismiss after 1 second
             setTimeout(function() {
                 var s = document.getElementById('splash-screen');
                 if (s) {
                     clearInterval(statusInterval);
                     s.classList.add('splash-hidden');
-                    setTimeout(function() { s.remove(); }, 800);
+                    setTimeout(function() { s.remove(); }, 300);
                 }
-            }, 5500);
+            }, 1000);
         })();
     </script>
     {{-- ═══════════ End Splash Screen ═══════════ --}}

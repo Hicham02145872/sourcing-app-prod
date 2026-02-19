@@ -4,37 +4,62 @@
         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
             <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                {{ __('Workflow & Statut') }}
+                {{ __('Workflow & Status') }}
             </h3>
-            <span class="text-xs text-slate-500">{{ __('Dernière maj:') }} {{ $sourcingOrder->updated_at->format('d/m/Y H:i') }}</span>
+            <span class="text-xs text-slate-500">{{ __('Last update') }}: {{ $sourcingOrder->updated_at->format('d/m/Y H:i') }}</span>
         </div>
         <div class="p-6">
             <div class="flex flex-col sm:flex-row gap-4 items-end">
                 <div class="w-full sm:flex-1">
-                    <label for="status" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Mettre à jour le statut') }}</label>
+                    <label for="status" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Update Status') }}</label>
                     <select wire:model="status" id="status" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-slate-50">
+                        @php
+                            $statusLabels = [
+                                'pending_payment' => __('Pending Payment'),
+                                'paid' => __('Paid'),
+                                'shipment_preparing' => __('Shipment Preparing'),
+                                'in_transit_china' => __('In Transit China'),
+                                'arrival_uae' => __('Arrival UAE'),
+                                'customs_clearance_uae' => __('Customs Clearance UAE'),
+                                'in_transit_uae' => __('In Transit UAE'),
+                                'arrival_destination_country' => __('Arrival Destination Country'),
+                                'customs_clearance_destination_country' => __('Customs Clearance Destination Country'),
+                                'out_for_delivery' => __('Out for Delivery'),
+                                'delivered' => __('Delivered'),
+                                'delivery_failed' => __('Delivery Failed'),
+                                'shipment_delayed' => __('Shipment Delayed'),
+                                'shipment_returned' => __('Shipment Returned'),
+                                'shipment_canceled' => __('Shipment Canceled'),
+                                'order_completed' => __('Order Completed'),
+                                'on_hold' => __('On Hold'),
+                                'refunded' => __('Refunded'),
+                                'waiting_for_refund' => __('Waiting for Refund'),
+                                'refund_approved' => __('Refund Approved'),
+                                'refund_rejected' => __('Refund Rejected'),
+                            ];
+                        @endphp
                         @foreach (App\Models\SourcingOrder::STATUSES as $statusOption)
                             <option value="{{ $statusOption }}">
-                                {{ ucfirst(str_replace('_', ' ', $statusOption)) }}
+                                {{ $statusLabels[$statusOption] ?? ucfirst(str_replace('_', ' ', $statusOption)) }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
                 <button wire:click="updateStatus" wire:loading.attr="disabled" class="w-full sm:w-auto px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors shadow-sm h-[38px] flex items-center justify-center gap-2">
-                    <span wire:loading.remove wire:target="updateStatus">{{ __('Mettre à jour') }}</span>
-                    <span wire:loading wire:target="updateStatus">{{ __('Action...') }}</span>
+                    <span wire:loading.remove wire:target="updateStatus">{{ __('Update') }}</span>
+                    <span wire:loading wire:target="updateStatus">{{ __('Processing...') }}</span>
                     <svg wire:loading wire:target="updateStatus" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 </button>
             </div>
             
             @if(auth()->user()->isSuperAdmin())
                 <div class="mt-6 pt-6 border-t border-slate-100">
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('Assignation (Super Admin)') }}</label>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('Assignment (Super Admin)') }}</label>
                     <div class="flex items-center gap-3">
                         <div class="flex-1">
                             <select wire:change="assignTo($event.target.value)" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white">
-                                <option value="">{{ __('Non assigné') }}</option>
+                                <option value="">{{ __('Not assigned') }}</option>
                                 @foreach($admins as $admin)
                                     <option value="{{ $admin->id }}" {{ $sourcingOrder->assigned_to_admin_id == $admin->id ? 'selected' : '' }}>
                                         {{ $admin->name }}
@@ -55,11 +80,11 @@
             @if(auth()->user()->isSuperAdmin() || $sourcingOrder->assigned_to_admin_id === auth()->id())
                 <!-- Shipping Company Assignment -->
                 <div class="mt-4 pt-4 border-t border-slate-100">
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('Société de Transport') }}</label>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('Shipping Company') }}</label>
                     <div class="flex items-center gap-3">
                         <div class="flex-1">
                             <select wire:change="assignShippingCompany($event.target.value)" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-orange-500 focus:border-orange-500 bg-white">
-                                <option value="">{{ __('Non assignée') }}</option>
+                                <option value="">{{ __('Not assigned') }}</option>
                                 @foreach($shippingCompanies as $company)
                                     <option value="{{ $company->id }}" {{ $sourcingOrder->shipping_company_id == $company->id ? 'selected' : '' }}>
                                         {{ $company->name }}
@@ -89,7 +114,7 @@
         </div>
         <div class="p-6">
             <div class="mb-4 p-3 bg-blue-50 border border-blue-100 rounded flex justify-between items-center">
-                <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">{{ __('ID Tracking Client (FSB)') }}</span>
+                <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">{{ __('Client Tracking ID (FSB)') }}</span>
                 <span class="font-mono text-sm font-bold text-blue-900 bg-white px-2 py-0.5 rounded border border-blue-200">
                     FSB{{ str_pad($sourcingOrder->id, 6, '0', STR_PAD_LEFT) }}
                 </span>
@@ -97,11 +122,11 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="tracking_number" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Numéro de suivi') }}</label>
+                    <label for="tracking_number" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Tracking Number') }}</label>
                     <input type="text" wire:model.defer="tracking_number" id="tracking_number" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-slate-50" placeholder="Ex: ME49508327">
                 </div>
                 <div>
-                    <label for="tracking_carrier" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Transporteur') }}</label>
+                    <label for="tracking_carrier" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Carrier') }}</label>
                     <input type="text" wire:model.defer="tracking_carrier" id="tracking_carrier" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-slate-50" placeholder="Ex: Faster.ae, DHL...">
                 </div>
             </div>
@@ -119,7 +144,7 @@
                                 @click="$refs.trackingModal.showModal()"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        {{ __('Voir détail du suivi') }}
+                        {{ __('View Tracking Details') }}
                     </button>
                         @if(!empty($deepTrackingResult['success']))
                             <span class="text-xs text-slate-500">{{ $deepTrackingResult['provider'] ?? '' }} · {{ $lastStatus }}{{ $lastLocation ? ' · ' . $lastLocation : '' }}</span>
@@ -131,7 +156,7 @@
                         <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                             <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
                                 <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
-                                {{ __('Détail du suivi') }}
+                                {{ __('Tracking Details') }}
                             </h3>
                             <button type="button" @click="$refs.trackingModal.close()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -142,20 +167,20 @@
                                 <div class="space-y-4">
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
-                                            <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 mb-1">{{ __('Dernier statut') }}</p>
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 mb-1">{{ __('Last Status') }}</p>
                                             <p class="text-sm font-semibold text-slate-900">{{ $lastStatus }}</p>
                                         </div>
                                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Dernière position') }}</p>
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Last Location') }}</p>
                                             <p class="text-sm font-semibold text-slate-900">{{ $lastLocation ?: __('N/A') }}</p>
                                         </div>
                                     </div>
                                     @if(!empty($deepTrackingResult['provider']))
-                                        <p class="text-xs text-slate-500">{{ __('Transporteur') }}: <span class="font-semibold text-slate-700">{{ $deepTrackingResult['provider'] }}</span></p>
+                                        <p class="text-xs text-slate-500">{{ __('Carrier') }}: <span class="font-semibold text-slate-700">{{ $deepTrackingResult['provider'] }}</span></p>
                                     @endif
                                     @if(count($events) > 0)
                                         <div class="pt-2 border-t border-slate-200">
-                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">{{ __('Historique') }} ({{ count($events) }})</p>
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">{{ __('History') }} ({{ count($events) }})</p>
                                             <ul class="space-y-2">
                                                 @foreach(array_slice($events, 0, 10) as $ev)
                                                     <li class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-2 px-3 bg-slate-50 rounded-lg text-xs">
@@ -173,17 +198,17 @@
                                                 @endforeach
                                             </ul>
                                             @if(count($events) > 10)
-                                                <p class="text-[10px] text-slate-400 mt-2">{{ __('Et :count autres événements', ['count' => count($events) - 10]) }}</p>
+                                                <p class="text-[10px] text-slate-400 mt-2">{{ __('And :count more events', ['count' => count($events) - 10]) }}</p>
                                             @endif
                                         </div>
                                     @endif
                                 </div>
                             @else
                                 <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                                    <p class="text-sm font-semibold text-amber-800">{{ __('Suivi non disponible') }}</p>
-                                    <p class="text-xs text-amber-700 mt-1">{{ $deepTrackingResult['error'] ?? __('Aucune donnée.') }}</p>
+                                    <p class="text-sm font-semibold text-amber-800">{{ __('Tracking Unavailable') }}</p>
+                                    <p class="text-xs text-amber-700 mt-1">{{ $deepTrackingResult['error'] ?? __('No data available.') }}</p>
                                     @if(($deepTrackingResult['status'] ?? '') === 'pending')
-                                        <p class="text-xs text-amber-600 mt-2">{{ __('Actualisation en cours. Réessayez dans quelques instants.') }}</p>
+                                        <p class="text-xs text-amber-600 mt-2">{{ __('Refresh in progress. Please try again in a few moments.') }}</p>
                                     @endif
                                 </div>
                             @endif
@@ -201,8 +226,8 @@
                 </button>
 
                 <button type="button" wire:click="updateTracking" wire:loading.attr="disabled" class="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded transition-colors shadow-sm flex items-center gap-2">
-                    <span wire:loading.remove wire:target="updateTracking">{{ __('Enregistrer le suivi') }}</span>
-                    <span wire:loading wire:target="updateTracking">{{ __('Action...') }}</span>
+                    <span wire:loading.remove wire:target="updateTracking">{{ __('Save Tracking') }}</span>
+                    <span wire:loading wire:target="updateTracking">{{ __('Processing...') }}</span>
                     <svg wire:loading wire:target="updateTracking" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 </button>
             </div>

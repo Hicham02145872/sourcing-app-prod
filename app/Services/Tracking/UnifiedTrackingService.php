@@ -4,6 +4,7 @@ namespace App\Services\Tracking;
 
 use App\Jobs\RunSeleniumTrackingJob;
 use App\Models\SourcingOrder;
+use App\Services\Tracking\VirtualTrackingStatusService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +14,8 @@ class UnifiedTrackingService
         protected ItdidaTrackingService $itdidaService,
         protected FasterTrackingService $fasterService,
         protected ChoiceXPTrackingService $choiceXPService,
-        protected UPSTrackingService $upsService
+        protected UPSTrackingService $upsService,
+        protected VirtualTrackingStatusService $virtualTrackingService
     ) {}
 
     public function track(string $trackingNumber, ?string $carrier = null): array
@@ -297,6 +299,12 @@ class UnifiedTrackingService
         // Resolve Alias
         [$realNumber, $realCarrier, $isAlias, $error] = $this->resolveAlias($trackingNumber, $carrier);
 
+        // If error is a virtual tracking response (success => true), return it directly
+        if ($error && isset($error['success']) && $error['success'] === true) {
+            return $error;
+        }
+
+        // If error is a real error (success => false), return it
         if ($error) {
             return $error;
         }
@@ -366,9 +374,26 @@ class UnifiedTrackingService
                 ];
             }
 
+            // Check if we should use virtual tracking status
+            if ($this->virtualTrackingService->shouldUseVirtualStatus($order)) {
+                Log::info('🎭 [UNIFIED SERVICE] Using virtual tracking status for FSB alias', [
+                    'fsb_number' => $trackingNumber,
+                    'order_id' => $id,
+                    'virtual_status' => $this->virtualTrackingService->getVirtualStatus($order)
+                ]);
+                
+                return [
+                    $trackingNumber,
+                    null,
+                    true,
+                    $this->virtualTrackingService->getVirtualTrackingResponse($order)
+                ];
+            }
+
+            // If no real tracking number assigned yet, return error
             if (! $order->tracking_number) {
-                 Log::warning('⚠️ [UNIFIED SERVICE] Order has no tracking number', ['id' => $id]);
-                 return [
+                Log::warning('⚠️ [UNIFIED SERVICE] Order has no tracking number', ['id' => $id]);
+                return [
                     $trackingNumber,
                     $carrier,
                     true,
@@ -378,6 +403,13 @@ class UnifiedTrackingService
                     ]
                 ];
             }
+
+            // Real tracking number is available, use it
+            Log::info('✅ [UNIFIED SERVICE] Using real tracking number for FSB alias', [
+                'fsb_number' => $trackingNumber,
+                'real_number' => $order->tracking_number,
+                'order_id' => $id
+            ]);
 
             return [
                 $order->tracking_number,
