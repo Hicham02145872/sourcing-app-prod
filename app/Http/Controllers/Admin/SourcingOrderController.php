@@ -336,6 +336,14 @@ class SourcingOrderController extends Controller
             'tracking_carrier' => ['nullable', 'string', 'max:255'],
         ]);
 
+        // When assigning a real tracking number, set real_tracking_assigned_at for auto-update eligibility
+        if (! empty($validated['tracking_number']) && ! $sourcingOrder->hasRealTracking()) {
+            $validated['real_tracking_assigned_at'] = now();
+        }
+        if (empty($validated['tracking_number'])) {
+            $validated['real_tracking_assigned_at'] = null;
+        }
+
         $sourcingOrder->update($validated);
 
         if (! empty($validated['tracking_number']) && $sourcingOrder->user) {
