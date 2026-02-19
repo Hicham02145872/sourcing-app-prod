@@ -145,4 +145,16 @@ return [
         'no_proxy' => env('TRACKING_NO_PROXY'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Sync providers for cron (auto-update statuses)
+    |--------------------------------------------------------------------------
+    |
+    | Providers for which the cron may call refreshTracking() when cache is
+    | empty (API-based, fast). Selenium providers (ITDIDA, ChoiceXP, UPS)
+    | are not listed so the cron does not block; they use cache only.
+    |
+    */
+    'sync_providers_for_cron' => ['Faster', 'FSB'],
+
 ];

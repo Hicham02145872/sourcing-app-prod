@@ -67,8 +67,29 @@ class AutoUpdateOrderStatusFromTracking
         }
 
         try {
-            // Récupérer les données de tracking
+            // Récupérer les données de tracking (cache d'abord)
             $trackingResult = $this->trackingService->track($order->tracking_number, $order->tracking_carrier);
+
+            // Si "pending" (job Selenium dispatché): fetch synchrone uniquement pour les providers rapides (API)
+            // Selenium (ITDIDA, ChoiceXP, UPS) prend du temps → on ne bloque pas, on skip et on utilisera le cache plus tard
+            $syncProviders = config('tracking.sync_providers_for_cron', ['Faster', 'FSB']);
+            $provider = $trackingResult['provider'] ?? '';
+            $isPending = ($trackingResult['status'] ?? null) === 'pending' || (empty($trackingResult['success']) && str_contains($trackingResult['error'] ?? '', 'refresh in a few minutes'));
+
+            if ($isPending && in_array($provider, $syncProviders, true)) {
+                Log::info('[AutoUpdateOrderStatus] Pending but provider is sync-safe, fetching now', [
+                    'order_id' => $order->id,
+                    'provider' => $provider,
+                ]);
+                $trackingResult = $this->trackingService->refreshTracking($order->tracking_number, $order->tracking_carrier);
+            } elseif ($isPending) {
+                Log::debug('[AutoUpdateOrderStatus] Skipping sync fetch for slow provider', [
+                    'order_id' => $order->id,
+                    'provider' => $provider,
+                    'message' => 'Uses cache only; data will be available after job or user refresh',
+                ]);
+                return false;
+            }
 
             if (empty($trackingResult['success'])) {
                 Log::warning('[AutoUpdateOrderStatus] Failed to fetch tracking data', [
