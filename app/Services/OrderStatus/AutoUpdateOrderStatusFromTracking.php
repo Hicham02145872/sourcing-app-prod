@@ -130,13 +130,14 @@ class AutoUpdateOrderStatusFromTracking
                 return false;
             }
 
-            // Mettre à jour le statut
+            // Mettre à jour le statut (capturer l'ancien avant modification pour le log)
+            $oldStatus = $order->status;
             $order->status = $detectedStatus;
             $order->save();
 
             Log::info('[AutoUpdateOrderStatus] Order status updated successfully', [
                 'order_id' => $order->id,
-                'old_status' => $order->getOriginal('status'),
+                'old_status' => $oldStatus,
                 'new_status' => $detectedStatus,
                 'tracking_number' => $order->tracking_number,
                 'provider' => $trackingResult['provider'] ?? 'unknown',
