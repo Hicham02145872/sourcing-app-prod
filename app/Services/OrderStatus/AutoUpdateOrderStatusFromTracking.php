@@ -120,8 +120,8 @@ class AutoUpdateOrderStatusFromTracking
                 return false;
             }
 
-            // Vérifier si la transition est autorisée
-            if (!$order->canTransitionTo($detectedStatus)) {
+            // Vérifier si la transition est autorisée (règles assouplies pour le tracking : progression dans la chaîne)
+            if (!$order->canTransitionToFromTracking($detectedStatus)) {
                 Log::warning('[AutoUpdateOrderStatus] Transition not allowed', [
                     'order_id' => $order->id,
                     'current_status' => $order->status,

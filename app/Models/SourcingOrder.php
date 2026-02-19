@@ -160,6 +160,40 @@ class SourcingOrder extends Model
     }
 
     /**
+     * Whether the order can transition to the given status when the update is from tracking (cron).
+     * Allows any "forward" progression in the shipping chain (e.g. shipment_preparing → arrival_uae
+     * when tracking shows the package already in Dubai).
+     */
+    public function canTransitionToFromTracking(string $newStatus): bool
+    {
+        if (! in_array($newStatus, self::STATUSES)) {
+            return false;
+        }
+
+        $shippingChainOrder = [
+            'shipment_preparing' => 1,
+            'in_transit_china' => 2,
+            'arrival_uae' => 3,
+            'customs_clearance_uae' => 4,
+            'in_transit_uae' => 5,
+            'arrival_destination_country' => 6,
+            'customs_clearance_destination_country' => 7,
+            'out_for_delivery' => 8,
+            'delivered' => 9,
+            'order_completed' => 10,
+        ];
+
+        $currentOrder = $shippingChainOrder[$this->status] ?? 0;
+        $newOrder = $shippingChainOrder[$newStatus] ?? 0;
+
+        if ($newOrder === 0) {
+            return false;
+        }
+
+        return $newOrder >= $currentOrder;
+    }
+
+    /**
      * Calculate variance between estimated and actual costs
      */
     public function getCostVariance(): ?array
