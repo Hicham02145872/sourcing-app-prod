@@ -198,4 +198,72 @@ class AutoUpdateOrderStatusFromTracking
 
         return $stats;
     }
+
+    /**
+     * Met à jour le statut d'une commande à partir d'un résultat de tracking déjà récupéré
+     * (ex. depuis le cache ou un appel client). Utilisé côté client pour synchroniser
+     * le statut affiché avec les données de suivi (cron ou cache).
+     *
+     * @param SourcingOrder $order La commande à mettre à jour
+     * @param array $trackingResult Résultat de tracking (success, events, provider, etc.)
+     * @return bool True si le statut a été mis à jour, false sinon
+     */
+    public function updateOrderStatusFromTrackingResult(SourcingOrder $order, array $trackingResult): bool
+    {
+        if (! empty($trackingResult['is_virtual'])) {
+            return false;
+        }
+
+        if (! $order->hasRealTracking()) {
+            return false;
+        }
+
+        if (in_array($order->status, ['on_hold', 'shipment_canceled', 'order_completed'])) {
+            return false;
+        }
+
+        $eligibleStatuses = [
+            'paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae',
+            'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery',
+        ];
+        if (! in_array($order->status, $eligibleStatuses)) {
+            return false;
+        }
+
+        if (empty($trackingResult['success']) || empty($trackingResult['events'])) {
+            return false;
+        }
+
+        try {
+            $detectedStatus = $this->statusMapper->mapTrackingEventsToStatus($trackingResult, $order);
+            if (! $detectedStatus || $detectedStatus === $order->status) {
+                return false;
+            }
+            if (! $order->canTransitionToFromTracking($detectedStatus)) {
+                return false;
+            }
+
+            $oldStatus = $order->status;
+            $order->status = $detectedStatus;
+            $order->save();
+
+            Log::info('[AutoUpdateOrderStatus] Order status updated from client tracking result', [
+                'order_id' => $order->id,
+                'old_status' => $oldStatus,
+                'new_status' => $detectedStatus,
+                'source' => $trackingResult['source'] ?? 'live',
+            ]);
+
+            $order->load('quotation.sourcingRequest', 'user');
+            event(new SourcingOrderStatusChanged($order));
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::warning('[AutoUpdateOrderStatus] Failed to update from tracking result', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
 }

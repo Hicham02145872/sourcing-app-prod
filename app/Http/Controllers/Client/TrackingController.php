@@ -11,7 +11,8 @@ class TrackingController extends Controller
 {
     public function __construct(
         protected \App\Services\SeventeenTrackService $seventeenTrackService,
-        protected \App\Services\Tracking\UnifiedTrackingService $unifiedTrackingService
+        protected \App\Services\Tracking\UnifiedTrackingService $unifiedTrackingService,
+        protected \App\Services\OrderStatus\AutoUpdateOrderStatusFromTracking $autoUpdateOrderStatus
     ) {}
 
     /**
@@ -101,6 +102,15 @@ class TrackingController extends Controller
                     'total_time_ms' => $elapsedTime,
                     'cached' => $elapsedTime < 100
                 ]);
+
+                // Mettre à jour le statut de la commande côté client quand on a du tracking réel (cron ou cache)
+                if (empty($result['is_virtual']) && str_starts_with(strtoupper(trim($trackingNumber)), 'FSB')) {
+                    $orderId = (int) substr(trim($trackingNumber), 3);
+                    $order = \App\Models\SourcingOrder::find($orderId);
+                    if ($order && $order->hasRealTracking()) {
+                        $this->autoUpdateOrderStatus->updateOrderStatusFromTrackingResult($order, $result);
+                    }
+                }
 
                 // If not in result, we can detect it again or pass it from unified service
                 return response()->json([
