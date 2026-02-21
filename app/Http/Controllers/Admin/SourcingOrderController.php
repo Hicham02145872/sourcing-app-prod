@@ -235,7 +235,7 @@ class SourcingOrderController extends Controller
     }
 
     /**
-     * Manually sync a sourcing order to the specialized Shipping Company Sheet
+     * Manually sync a sourcing order to the specialized Shipping Company Sheet (Google or Lark).
      */
     public function manualSyncToShippingCompanySheet(SourcingOrder $sourcingOrder): JsonResponse
     {
@@ -244,27 +244,29 @@ class SourcingOrderController extends Controller
         if (! $sourcingOrder->shipping_company_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Aucune compagnie d\'expédition assignée à cette commande.',
+                'message' => __('No shipping company assigned to this order.'),
+            ], 422);
+        }
+
+        $sourcingOrder->load(['shippingCompany', 'user', 'quotation.sourcingRequest']);
+        $company = $sourcingOrder->shippingCompany;
+
+        $factory = app(\App\Services\SheetIntegrationFactory::class);
+        $service = $factory->getService($company);
+
+        if (! $service) {
+            return response()->json([
+                'success' => false,
+                'message' => __('The shipping company sheet is not configured. Please set up Google Sheet or Lark in Shipping Companies.'),
             ], 422);
         }
 
         try {
-            $sourcingOrder->load(['shippingCompany', 'user', 'quotation.sourcingRequest']);
+            $success = $service->syncOrder($sourcingOrder, $company);
 
-            if (! $sourcingOrder->shippingCompany->google_sheet_id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'La compagnie d\'expédition n\'a pas de Google Sheet configuré.',
-                ], 422);
+            if (! $success) {
+                throw new \RuntimeException('Sync returned false.');
             }
-
-            // Rate limit check specific to this action if needed, or rely on service
-
-            $service = new \App\Services\ShippingCompanySheetService($sourcingOrder->shippingCompany);
-            // $service->ensureHeaders(); // Optional: run only if suspected missing
-
-            $dto = \App\DTOs\ShippingSheetRowDTO::fromOrder($sourcingOrder);
-            $service->upsertRow($dto);
 
             $sourcingOrder->update([
                 'sheet_synced_at' => now(),
@@ -273,19 +275,19 @@ class SourcingOrderController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Synchronisé avec succès vers le Sheet de la compagnie !',
+                'message' => __('Successfully synced to the shipping company sheet.'),
             ]);
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error("Manual shipping sheet sync failed for Order #{$sourcingOrder->id}: ".$e->getMessage());
 
+            $userMessage = \App\Support\SheetSyncErrorHelper::toUserMessage($e);
             $sourcingOrder->update([
-                'sheet_sync_error' => substr($e->getMessage(), 0, 1000),
+                'sheet_sync_error' => $userMessage,
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur de synchronisation: '.$e->getMessage(),
+                'message' => $userMessage,
             ], 500);
         }
     }

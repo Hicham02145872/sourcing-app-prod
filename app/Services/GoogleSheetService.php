@@ -136,6 +136,10 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
      */
     protected function mapOrderToData(\App\Models\SourcingOrder $order): array
     {
+        $carrier = $order->tracking_carrier
+            ?? $order->shippingCompany?->name
+            ?? '';
+
         return [
             'id' => $order->id * 5,
             'created_at' => $order->created_at->format('Y-m-d H:i:s'),
@@ -145,7 +149,8 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
             'product_name' => $order->quotation->sourcingRequest->product_name ?? 'N/A',
             'quantity' => $order->quotation->sourcingRequest->quantity ?? 0,
             'total_amount' => $order->total_amount,
-            // ... add other fields as per AVAILABLE_FIELDS ...
+            'tracking_number' => $order->tracking_number ?? '',
+            'carrier' => $carrier,
         ];
     }
 
@@ -469,6 +474,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         'currency' => 'Devise',
         'shipping_method' => 'Méthode Livraison',
         'tracking_number' => 'Numéro Suivi',
+        'carrier' => 'Transporteur',
         'admin_assigned' => 'Admin Assigné',
         'net_profit' => 'Profit Net',
         'product_image' => 'Image Produit',

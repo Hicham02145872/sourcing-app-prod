@@ -141,7 +141,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/styles";
 
         $payload = [
-            'range' => "{$sheetId}!A1:K1",
+            'range' => "{$sheetId}!A1:L1",
             'style' => [
                 'font' => [
                     'bold' => true,
@@ -462,14 +462,14 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         if ($isEmpty) {
             Log::info("Sheet {$sheetId} is empty. Installing headers using values_update (A1).");
 
-            $headers = ['Order ID', 'Date', 'Status', 'Client Name', 'Product Name', 'Quantity', 'Tracking Number', 'Address', 'Phone', 'Image URL', 'Notes'];
+            $headers = ['Order ID', 'Date', 'Status', 'Client Name', 'Product Name', 'Quantity', 'Tracking Number', 'Transporteur', 'Address', 'Phone', 'Image URL', 'Notes'];
 
-            // Use values_update to force headers at A1:K1
+            // Use values_update to force headers at A1:L1
             $urlUpdate = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/values";
 
             $payload = [
                 'valueRange' => [
-                    'range' => "{$sheetId}!A1:K1",
+                    'range' => "{$sheetId}!A1:L1",
                     'values' => [$headers],
                 ],
             ];
@@ -483,7 +483,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
         // Ensure columns are wide enough for better readability
         // Column range A to K (0 to 11)
-        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 0, 11, 160);
+        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 0, 12, 160);
         // Image column even wider
         $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 9, 10, 180);
     }
@@ -530,6 +530,8 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
         $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 1)' : '';
 
+        $carrier = $order->tracking_carrier ?? $order->shippingCompany?->name ?? '';
+
         return [
             (string) ($order->id * 5), // display_id
             $order->created_at->format('Y-m-d H:i:s'),
@@ -538,6 +540,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
             $sr->product_name,
             (int) $quantity,
             $order->tracking_number ?? '',
+            (string) $carrier,
             (string) $address,
             (string) ($sr->phone_number ?? 'N/A'),
             $imageUrl,

@@ -6,6 +6,7 @@ use App\Events\ProofOfPaymentUploadedEvent;
 use App\Events\SourcingOrderStatusChanged;
 use App\Models\SourcingOrder;
 use App\Services\SheetIntegrationFactory;
+use App\Support\SheetSyncErrorHelper;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -78,12 +79,20 @@ class SyncOrderToSheet implements ShouldBeUnique, ShouldQueue
 
             if ($success) {
                 Log::info("Order #{$order->id} synced successfully to {$company->name} sheet.");
+                SourcingOrder::where('id', $order->id)->update([
+                    'sheet_synced_at' => now(),
+                    'sheet_sync_error' => null,
+                ]);
             } else {
                 throw new \Exception("Sync failed for Order #{$order->id}");
             }
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error("Error syncing Order #{$order->id} to sheet: ".$e->getMessage());
+            $userMessage = SheetSyncErrorHelper::toUserMessage($e);
+            SourcingOrder::where('id', $order->id)->update([
+                'sheet_sync_error' => $userMessage,
+            ]);
             throw $e;
         }
     }
