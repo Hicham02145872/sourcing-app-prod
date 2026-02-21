@@ -48,7 +48,14 @@
                         @endif
                     </td>
                     <td class="py-4 px-6">
-                        @if($company->tracking_provider)
+                        @if(!empty($company->carrier_options))
+                            @php $labels = config('tracking.carrier_labels', []); @endphp
+                            <span class="inline-flex flex-wrap gap-1">
+                                @foreach($company->carrier_options as $key)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700">{{ $labels[$key] ?? $key }}</span>
+                                @endforeach
+                            </span>
+                        @elseif($company->tracking_provider)
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold uppercase tracking-tighter {{ 
                                 $company->tracking_provider == 'faster' ? 'bg-blue-50 text-blue-600' : (
                                 $company->tracking_provider == 'itdida' ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600'
@@ -226,6 +233,19 @@
                                         <option value="faster">Faster / GCC</option>
                                     </select>
                                     @error('tracking_provider') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+
+                            <!-- Carriers (dropdown on order when set) -->
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">{{ __('Carriers') }}</label>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($carrierLabels as $key => $label)
+                                        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer text-sm">
+                                            <input type="checkbox" wire:model="carrier_options_selected" value="{{ $key }}" class="rounded border-slate-300 text-orange-500 focus:ring-orange-500 w-3.5 h-3.5">
+                                            <span>{{ $label }}</span>
+                                        </label>
+                                    @endforeach
                                 </div>
                             </div>
 

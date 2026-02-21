@@ -13,6 +13,7 @@ class ShippingCompany extends Model
     protected $fillable = [
         'name',
         'tracking_provider',
+        'carrier_options',
         'google_sheet_id',
         'sheet_name',
         'is_active',
@@ -24,7 +25,28 @@ class ShippingCompany extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'carrier_options' => 'array',
     ];
+
+    /**
+     * Carrier options with labels for admin dropdown (e.g. [['key' => 'gcc', 'label' => 'GCC'], ...]).
+     */
+    public function getCarrierOptionsWithLabels(): array
+    {
+        $options = $this->carrier_options ?? [];
+        if (empty($options)) {
+            return [];
+        }
+        $labels = config('tracking.carrier_labels', []);
+        $out = [];
+        foreach ($options as $key) {
+            $out[] = [
+                'key' => $key,
+                'label' => $labels[$key] ?? strtoupper($key),
+            ];
+        }
+        return $out;
+    }
 
     /**
      * Sourcing orders assigned to this shipping company.

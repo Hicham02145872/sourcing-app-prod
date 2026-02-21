@@ -157,4 +157,17 @@ return [
     */
     'sync_providers_for_cron' => ['Faster', 'FSB'],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Carrier labels (for admin dropdown when shipping company has child carriers)
+    |--------------------------------------------------------------------------
+    | GCC & Faster = same transporteur. FSB is not a transporteur (internal ref).
+    */
+    'carrier_labels' => [
+        'gcc' => 'GCC / Faster',
+        'ups' => 'UPS',
+        'itdida' => 'Itdida',
+        'choicexp' => 'Choice XP',
+    ],
+
 ];

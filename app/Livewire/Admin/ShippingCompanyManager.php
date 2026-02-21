@@ -34,6 +34,9 @@ class ShippingCompanyManager extends Component
 
     public ?string $tracking_provider = null;
 
+    /** @var array<int, string> Child carrier keys (e.g. ['gcc', 'ups']) for order form dropdown */
+    public array $carrier_options_selected = [];
+
     protected function rules(): array
     {
         return [
@@ -45,13 +48,15 @@ class ShippingCompanyManager extends Component
             'lark_app_secret' => 'nullable|string|max:255',
             'lark_base_token' => 'nullable|string|max:255',
             'lark_table_id' => 'nullable|string|max:255',
-            'tracking_provider' => 'nullable|string|in:itdida,faster,choicexp,ups',
+            'tracking_provider' => 'nullable|string|in:itdida,faster,choicexp,ups,gcc',
+            'carrier_options_selected' => 'nullable|array',
+            'carrier_options_selected.*' => 'string|in:gcc,ups,itdida,choicexp',
         ];
     }
 
     public function openCreateModal(): void
     {
-        $this->reset(['editingId', 'name', 'google_sheet_id', 'sheet_name', 'is_active', 'lark_base_token', 'lark_table_id', 'tracking_provider']);
+        $this->reset(['editingId', 'name', 'google_sheet_id', 'sheet_name', 'is_active', 'lark_base_token', 'lark_table_id', 'tracking_provider', 'carrier_options_selected']);
         $this->lark_app_id = 'cli_a9d1affbbe38de1a';
         $this->lark_app_secret = '6eUjWpgdf1Pdxkz8y0xyFgTHIqT4xAwh';
         $this->is_active = true;
@@ -73,6 +78,7 @@ class ShippingCompanyManager extends Component
         $this->lark_base_token = $company->lark_base_token;
         $this->lark_table_id = $company->lark_table_id;
         $this->tracking_provider = $company->tracking_provider;
+        $this->carrier_options_selected = $company->carrier_options ?? [];
 
         // Default to Google if it has config, otherwise Lark
         $this->activeIntegration = ($company->google_sheet_id) ? 'google' : 'lark';
@@ -94,6 +100,7 @@ class ShippingCompanyManager extends Component
             'lark_base_token' => $this->lark_base_token,
             'lark_table_id' => $this->lark_table_id,
             'tracking_provider' => $this->tracking_provider,
+            'carrier_options' => array_values(array_unique($this->carrier_options_selected)),
         ];
 
         if ($this->editingId) {
@@ -105,7 +112,7 @@ class ShippingCompanyManager extends Component
         }
 
         $this->showModal = false;
-        $this->reset(['editingId', 'name', 'google_sheet_id', 'sheet_name', 'is_active', 'lark_app_id', 'lark_app_secret', 'lark_base_token', 'lark_table_id', 'tracking_provider']);
+        $this->reset(['editingId', 'name', 'google_sheet_id', 'sheet_name', 'is_active', 'lark_app_id', 'lark_app_secret', 'lark_base_token', 'lark_table_id', 'tracking_provider', 'carrier_options_selected']);
     }
 
     public function delete(int $id): void
@@ -226,8 +233,11 @@ class ShippingCompanyManager extends Component
 
     public function render()
     {
+        $carrierLabels = config('tracking.carrier_labels', []);
+
         return view('livewire.admin.shipping-company-manager', [
             'companies' => ShippingCompany::orderBy('name')->paginate(10),
+            'carrierLabels' => $carrierLabels,
         ]);
     }
 }

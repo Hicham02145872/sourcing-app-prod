@@ -151,9 +151,17 @@ class SourcingOrderWorkflow extends Component
 
         $company = $companyId ? ShippingCompany::find($companyId) : null;
 
+        // If company has child carriers (e.g. YNPS → GCC, UPS), leave carrier for admin to choose; otherwise set to company name
+        $newCarrier = null;
+        if ($company) {
+            $newCarrier = $company->getCarrierOptionsWithLabels() !== [] ? null : $company->name;
+        } else {
+            $newCarrier = $this->tracking_carrier;
+        }
+
         $this->sourcingOrder->update([
             'shipping_company_id' => $companyId ?: null,
-            'tracking_carrier' => $company ? $company->name : $this->tracking_carrier,
+            'tracking_carrier' => $newCarrier,
         ]);
 
         $this->sourcingOrder->refresh();
@@ -166,9 +174,15 @@ class SourcingOrderWorkflow extends Component
 
     public function render()
     {
+        $selectedCompany = $this->sourcingOrder->shipping_company_id
+            ? ShippingCompany::find($this->sourcingOrder->shipping_company_id)
+            : null;
+        $carrierOptionsForCompany = $selectedCompany ? $selectedCompany->getCarrierOptionsWithLabels() : [];
+
         return view('livewire.admin.sourcing-order-workflow', [
             'admins' => User::where('role', 'admin')->orderBy('name')->get(),
             'shippingCompanies' => ShippingCompany::where('is_active', true)->orderBy('name')->get(),
+            'carrierOptionsForCompany' => $carrierOptionsForCompany,
         ]);
     }
 }

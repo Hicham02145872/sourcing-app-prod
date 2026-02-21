@@ -135,7 +135,7 @@
                                     </div>
                                      <div>
                                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Shipping Company') }}</p>
-                                        <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->tracking_carrier ?: ($sourcingOrder->shippingCompany?->name ?? __('Not assigned')) }}</p>
+                                        <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->shippingCompany?->name ?: ($sourcingOrder->tracking_carrier ?? __('Not assigned')) }}</p>
                                     </div>
                                 </div>
 

@@ -120,6 +120,11 @@
                 </span>
             </div>
 
+            <div class="mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 border border-amber-100">
+                <span class="flex-shrink-0 text-amber-600" aria-hidden="true">→</span>
+                <p class="text-xs text-amber-800">{{ __('Select the carrier used for this shipment so we can detect the correct tracking.') }}</p>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="tracking_number" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Tracking Number') }}</label>
@@ -127,7 +132,16 @@
                 </div>
                 <div>
                     <label for="tracking_carrier" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Carrier') }}</label>
-                    <input type="text" wire:model.defer="tracking_carrier" id="tracking_carrier" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-slate-50" placeholder="Ex: Faster.ae, DHL...">
+                    @if(!empty($carrierOptionsForCompany))
+                        <select wire:model.defer="tracking_carrier" id="tracking_carrier" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-white">
+                            <option value="">{{ __('Choose carrier') }}...</option>
+                            @foreach($carrierOptionsForCompany as $opt)
+                                <option value="{{ $opt['key'] }}">{{ $opt['label'] }}</option>
+                            @endforeach
+                        </select>
+                    @else
+                        <input type="text" wire:model.defer="tracking_carrier" id="tracking_carrier" class="w-full px-3 py-2 border border-slate-300 rounded text-sm focus:ring-1 focus:ring-slate-900 focus:border-slate-900 bg-slate-50" placeholder="Ex: Faster.ae, DHL...">
+                    @endif
                 </div>
             </div>
 
