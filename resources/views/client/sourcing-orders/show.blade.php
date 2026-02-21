@@ -115,9 +115,9 @@
                                         <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Track your shipment status') }}</p>
                                     </div>
                                 </div>
-                                @if($sourcingOrder->tracking_number)
+                                @if($sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
                                     <div class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-mono font-bold text-slate-500 uppercase tracking-tighter">
-                                        ID: FSB{{ str_pad($sourcingOrder->id, 6, '0', STR_PAD_LEFT) }}
+                                        ID: {{ $sourcingOrder->fsb_tracking_number }}
                                     </div>
                                 @endif
                             </div>
@@ -139,9 +139,13 @@
                                     </div>
                                 </div>
 
+                                @if($sourcingOrder->fsb_tracking_created_at && !$sourcingOrder->hasRealTracking())
+                                <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">{{ __('Your shipment is being prepared. Live carrier tracking will appear here once assigned.') }}</p>
+                                @endif
+
                                 @if($sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
                                 <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
-                                    <a href="{{ route('client.tracking.index', ['number' => 'FSB' . str_pad($sourcingOrder->id, 6, '0', STR_PAD_LEFT)]) }}" 
+                                    <a href="{{ route('client.tracking.index', ['number' => $sourcingOrder->fsb_tracking_number]) }}" 
                                        class="w-full sm:w-auto px-6 py-2.5 bg-[#EF7722] hover:bg-[#d66616] text-white text-sm font-bold rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" /></svg>
                                         {{ __('Track my shipment') }}
