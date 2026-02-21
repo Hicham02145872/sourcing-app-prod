@@ -115,7 +115,7 @@
                                         <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Track your shipment status') }}</p>
                                     </div>
                                 </div>
-                                @if($sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
+                                @if($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
                                     <div class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-mono font-bold text-slate-500 uppercase tracking-tighter">
                                         ID: {{ $sourcingOrder->fsb_tracking_number }}
                                     </div>
@@ -126,7 +126,7 @@
                                     <div>
                                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Tracking Number') }}</p>
                                         <p class="text-sm font-mono font-bold text-slate-900 dark:text-white">
-                                            @if($sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
+                                            @if($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
                                                 {{ $sourcingOrder->fsb_tracking_number }}
                                             @else
                                                 {{ __('Pending...') }}
@@ -139,11 +139,11 @@
                                     </div>
                                 </div>
 
-                                @if($sourcingOrder->fsb_tracking_created_at && !$sourcingOrder->hasRealTracking())
+                                @if(($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at) && !$sourcingOrder->hasRealTracking())
                                 <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">{{ __('Your shipment is being prepared. Live carrier tracking will appear here once assigned.') }}</p>
                                 @endif
 
-                                @if($sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
+                                @if($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
                                 <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
                                     <a href="{{ route('client.tracking.index', ['number' => $sourcingOrder->fsb_tracking_number]) }}" 
                                        class="w-full sm:w-auto px-6 py-2.5 bg-[#EF7722] hover:bg-[#d66616] text-white text-sm font-bold rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">

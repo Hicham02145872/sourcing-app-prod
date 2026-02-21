@@ -49,6 +49,13 @@ class SourcingOrderController extends Controller
     public function show(SourcingOrder $sourcingOrder): View
     {
         $this->authorize('view', $sourcingOrder);
+
+        // Backfill FSB tracking date for paid orders that don't have it (e.g. set to paid before listener existed)
+        if ($sourcingOrder->status === 'paid' && is_null($sourcingOrder->fsb_tracking_created_at)) {
+            $sourcingOrder->update(['fsb_tracking_created_at' => now()]);
+            $sourcingOrder->refresh();
+        }
+
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
 
         return view('client.sourcing-orders.show', compact('sourcingOrder', 'paymentMethods'));
