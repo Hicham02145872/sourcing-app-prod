@@ -9,14 +9,19 @@ class VirtualTrackingStatusService
 {
     /**
      * Get virtual tracking status for an order.
+     *
+     * @param  \DateTimeInterface|null  $asOf  Optional reference time (for tests). Defaults to now().
      */
-    public function getVirtualStatus(SourcingOrder $order): string
+    public function getVirtualStatus(SourcingOrder $order, ?\DateTimeInterface $asOf = null): string
     {
-        if (!$order->fsb_tracking_created_at) {
+        if (! $order->fsb_tracking_created_at) {
             return 'pending_payment';
         }
 
-        $hoursSinceCreation = now()->diffInHours($order->fsb_tracking_created_at);
+        $ref = $asOf ?? now();
+        $hoursSinceCreation = (int) abs(
+            \Illuminate\Support\Carbon::parse($ref)->diffInHours($order->fsb_tracking_created_at, false)
+        );
 
         if ($hoursSinceCreation < 24) {
             return 'shipment_preparing';
@@ -35,10 +40,12 @@ class VirtualTrackingStatusService
 
     /**
      * Get virtual tracking response for API.
+     *
+     * @param  \DateTimeInterface|null  $asOf  Optional reference time (for tests). Defaults to now().
      */
-    public function getVirtualTrackingResponse(SourcingOrder $order): array
+    public function getVirtualTrackingResponse(SourcingOrder $order, ?\DateTimeInterface $asOf = null): array
     {
-        $virtualStatus = $this->getVirtualStatus($order);
+        $virtualStatus = $this->getVirtualStatus($order, $asOf);
         
         $statusTexts = [
             'pending_payment' => __('Pending Payment'),

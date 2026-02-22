@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Events\ProofOfPaymentUploadedEvent;
+use App\Events\SourcingOrderStatusChanged;
 use App\Http\Controllers\Controller;
 use App\Models\PaymentMethod;
 use App\Models\SourcingOrder;
@@ -50,8 +51,11 @@ class SourcingOrderController extends Controller
     {
         $this->authorize('view', $sourcingOrder);
 
-        // Backfill FSB tracking date for paid orders that don't have it (e.g. set to paid before listener existed)
-        if ($sourcingOrder->status === 'paid' && is_null($sourcingOrder->fsb_tracking_created_at)) {
+        // Backfill FSB tracking when paid and not assigned to shipping company or real tracking (same rule as listener)
+        $eligibleForFsb = $sourcingOrder->status === 'paid'
+            && is_null($sourcingOrder->fsb_tracking_created_at)
+            && (! $sourcingOrder->shipping_company_id || empty(trim((string) $sourcingOrder->tracking_number)));
+        if ($eligibleForFsb) {
             $sourcingOrder->update(['fsb_tracking_created_at' => now()]);
             $sourcingOrder->refresh();
         }
@@ -83,6 +87,9 @@ class SourcingOrderController extends Controller
                 'proof_of_payment_path' => $path,
                 'status' => 'paid',
             ]);
+
+            // Trigger status change so FSB tracking is initialized and client gets notification with tracking number
+            event(new SourcingOrderStatusChanged($sourcingOrder));
 
             // Notify only the assigned admin and all super admins
             $assignedAdminId = $sourcingOrder->assigned_to_admin_id;

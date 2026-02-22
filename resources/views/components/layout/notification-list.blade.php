@@ -34,6 +34,14 @@
                 <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-2" 
                    x-text="notification.body"></p>
 
+                {{-- FSB tracking number (when status paid → FSB generated) --}}
+                <template x-if="notification.type === 'fsb_tracking_generated' && notification.tracking_number">
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">{{ __('Numéro de suivi') }}:</span>
+                        <code class="text-xs font-bold text-[#EF7722] bg-[#EF7722]/10 px-2 py-0.5 rounded border border-[#EF7722]/30" x-text="notification.tracking_number"></code>
+                    </div>
+                </template>
+
                 {{-- Action Area (Delete) --}}
                 <div class="flex items-center justify-end mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button @click.stop="deleteNotification(notification.id)" 

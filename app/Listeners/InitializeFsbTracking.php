@@ -15,8 +15,12 @@ class InitializeFsbTracking
     {
         $order = $event->sourcingOrder;
 
-        // Only initialize FSB tracking when order status changes to 'paid'
-        if ($order->status === 'paid' && is_null($order->fsb_tracking_created_at)) {
+        // Only initialize FSB when order is paid and not yet assigned to a shipping company or real tracking
+        $eligible = $order->status === 'paid'
+            && is_null($order->fsb_tracking_created_at)
+            && (! $order->shipping_company_id || empty(trim((string) $order->tracking_number)));
+
+        if ($eligible) {
             $order->update([
                 'fsb_tracking_created_at' => now(),
             ]);
