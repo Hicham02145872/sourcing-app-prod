@@ -349,6 +349,12 @@ class SourcingOrderController extends Controller
         $sourcingOrder->update($validated);
 
         if (! empty($validated['tracking_number']) && $sourcingOrder->user) {
+            // Remove FSB tracking notification so client only sees the real tracking one
+            $sourcingOrder->user->notifications()
+                ->where('type', \App\Notifications\FsbTrackingGenerated::class)
+                ->whereJsonContains('data->sourcing_order_id', $sourcingOrder->id)
+                ->delete();
+
             $sourcingOrder->user->notify(new \App\Notifications\TrackingNumberAdded($sourcingOrder));
         }
 

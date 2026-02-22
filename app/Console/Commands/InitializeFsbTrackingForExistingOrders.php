@@ -19,17 +19,22 @@ class InitializeFsbTrackingForExistingOrders extends Command
      *
      * @var string
      */
-    protected $description = 'Initialize fsb_tracking_created_at for existing paid orders that don\'t have it set';
+    protected $description = 'Initialize fsb_tracking_created_at for paid orders without shipping company or tracking number';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $this->info('Initializing FSB tracking for existing paid orders...');
+        $this->info('Initializing FSB tracking for paid orders without shipping company or tracking...');
 
         $orders = SourcingOrder::where('status', 'paid')
             ->whereNull('fsb_tracking_created_at')
+            ->where(function ($q) {
+                $q->whereNull('shipping_company_id')
+                    ->orWhereNull('tracking_number')
+                    ->orWhere('tracking_number', '');
+            })
             ->get();
 
         if ($orders->isEmpty()) {

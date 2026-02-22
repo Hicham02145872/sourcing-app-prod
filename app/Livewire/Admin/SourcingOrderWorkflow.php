@@ -90,6 +90,12 @@ class SourcingOrderWorkflow extends Component
         $this->sourcingOrder->refresh();
 
         if ($this->sourcingOrder->tracking_number && $this->sourcingOrder->user) {
+            // Remove FSB tracking notification so client only sees the real tracking one
+            $this->sourcingOrder->user->notifications()
+                ->where('type', \App\Notifications\FsbTrackingGenerated::class)
+                ->whereJsonContains('data->sourcing_order_id', $this->sourcingOrder->id)
+                ->delete();
+
             $this->sourcingOrder->user->notify(new TrackingNumberAdded($this->sourcingOrder));
         }
 
