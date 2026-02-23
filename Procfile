@@ -1,1 +1,1 @@
-worker: php artisan queue:work redis --tries=3
+worker: php artisan queue:work database --tries=3 --queue=default,mail

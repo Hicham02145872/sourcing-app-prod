@@ -23,7 +23,6 @@ class CustomVerifyEmail extends VerifyEmailBase implements ShouldQueue
      */
     public function __construct()
     {
-        $this->onQueue('mail');
         $this->afterCommit();
     }
 
