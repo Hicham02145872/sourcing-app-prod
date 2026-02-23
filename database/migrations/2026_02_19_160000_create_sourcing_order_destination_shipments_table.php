@@ -15,7 +15,9 @@ return new class extends Migration
         Schema::create('sourcing_order_destination_shipments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sourcing_order_id')->constrained('sourcing_orders')->onDelete('cascade');
-            $table->foreignId('sourcing_request_destination_id')->constrained('sourcing_request_destinations')->onDelete('cascade');
+            $table->foreignId('sourcing_request_destination_id');
+            $table->foreign('sourcing_request_destination_id', 'dest_shipments_dest_id_fk')
+                ->references('id')->on('sourcing_request_destinations')->onDelete('cascade');
             $table->string('tracking_number')->nullable();
             $table->string('tracking_carrier')->nullable();
             $table->foreignId('shipping_company_id')->nullable()->constrained('shipping_companies')->nullOnDelete();
