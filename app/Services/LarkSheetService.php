@@ -525,9 +525,10 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         $quotation = $order->quotation;
 
         $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
-        $imageUrl = $sr->product_image ? asset('storage/'.$sr->product_image) : '';
+        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 4)' : '';
 
         $labelImageUrl = ShippingLabelImageService::getImageUrl($order, $destination);
+        $shippingLabelCell = $labelImageUrl ? '=IMAGE("'.$labelImageUrl.'", 4)' : '';
 
         $unitPrice = (float) ($quotation->unit_price ?? 0);
         $totalPrice = $unitPrice * (int) $quantity;
@@ -541,7 +542,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
             number_format($totalPrice, 2, '.', ''),
             '',
             '',
-            $labelImageUrl,
+            $shippingLabelCell,
         ];
     }
 }
