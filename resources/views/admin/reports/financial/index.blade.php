@@ -11,13 +11,19 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
-            <!-- Summary Cards -->
+            <!-- Summary Cards (original currency, no conversion) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Daily -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg p-6 border-l-4 border-blue-500">
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">{{ __('Daily Net Profit') }}</div>
-                    <div class="mt-2 text-3xl font-bold {{ $dailyTotal >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                        {{ number_format($dailyTotal, 2) }} <span class="text-xs font-bold text-slate-400 uppercase ml-1">MAD</span>
+                    <div class="mt-2 space-y-1">
+                        @forelse($dailyTotalsByCurrency ?? [] as $currency => $total)
+                            <div class="text-2xl font-bold {{ $total >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                {{ number_format($total, 2) }} <span class="text-xs font-bold text-slate-400 uppercase ml-1">{{ $currency }}</span>
+                            </div>
+                        @empty
+                            <div class="text-2xl font-bold text-slate-400">—</div>
+                        @endforelse
                     </div>
                     <div class="text-xs text-gray-400 mt-1">{{ \Carbon\Carbon::today()->translatedFormat('M d, Y') }}</div>
                 </div>
@@ -25,8 +31,14 @@
                 <!-- Weekly -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg p-6 border-l-4 border-purple-500">
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">{{ __('Weekly Net Profit') }}</div>
-                    <div class="mt-2 text-3xl font-bold {{ $weeklyTotal >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                        {{ number_format($weeklyTotal, 2) }} <span class="text-xs font-bold text-slate-400 uppercase ml-1">MAD</span>
+                    <div class="mt-2 space-y-1">
+                        @forelse($weeklyTotalsByCurrency ?? [] as $currency => $total)
+                            <div class="text-2xl font-bold {{ $total >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                {{ number_format($total, 2) }} <span class="text-xs font-bold text-slate-400 uppercase ml-1">{{ $currency }}</span>
+                            </div>
+                        @empty
+                            <div class="text-2xl font-bold text-slate-400">—</div>
+                        @endforelse
                     </div>
                     <div class="text-xs text-gray-400 mt-1">{{ __('Current Week') }}</div>
                 </div>
@@ -34,8 +46,14 @@
                 <!-- Monthly -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg p-6 border-l-4 border-green-500">
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">{{ __('Monthly Net Profit') }}</div>
-                    <div class="mt-2 text-3xl font-bold {{ $monthlyTotal >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                        {{ number_format($monthlyTotal, 2) }} <span class="text-xs font-bold text-slate-400 uppercase ml-1">MAD</span>
+                    <div class="mt-2 space-y-1">
+                        @forelse($monthlyTotalsByCurrency ?? [] as $currency => $total)
+                            <div class="text-2xl font-bold {{ $total >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                {{ number_format($total, 2) }} <span class="text-xs font-bold text-slate-400 uppercase ml-1">{{ $currency }}</span>
+                            </div>
+                        @empty
+                            <div class="text-2xl font-bold text-slate-400">—</div>
+                        @endforelse
                     </div>
                     <div class="text-xs text-gray-400 mt-1">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</div>
                 </div>

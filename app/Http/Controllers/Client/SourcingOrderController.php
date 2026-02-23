@@ -51,6 +51,12 @@ class SourcingOrderController extends Controller
     {
         $this->authorize('view', $sourcingOrder);
 
+        $sourcingOrder->load([
+            'quotation.sourcingRequest.destinations.country',
+            'destinationShipments.shippingCompany',
+            'shippingCompany',
+        ]);
+
         // Backfill FSB tracking when paid and not assigned to shipping company or real tracking (same rule as listener)
         $eligibleForFsb = $sourcingOrder->status === 'paid'
             && is_null($sourcingOrder->fsb_tracking_created_at)

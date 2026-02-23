@@ -18,20 +18,14 @@ class ReportController extends Controller
 
         $orders = $query->paginate(10);
 
-        $dailyTotal = $this->calculateTotalInMad(
-            SourcingOrder::whereDate('sourcing_orders.updated_at', \Carbon\Carbon::today())->with('quotation')->get(),
-            'net_profit_or_loss'
-        );
+        $dailyOrders = SourcingOrder::whereDate('sourcing_orders.updated_at', \Carbon\Carbon::today())->with('quotation')->get();
+        $weeklyOrders = SourcingOrder::whereBetween('sourcing_orders.updated_at', [\Carbon\Carbon::now()->startOfWeek(), \Carbon\Carbon::now()->endOfWeek()])->with('quotation')->get();
+        $monthlyOrders = SourcingOrder::whereMonth('sourcing_orders.updated_at', \Carbon\Carbon::now()->month)->whereYear('sourcing_orders.updated_at', \Carbon\Carbon::now()->year)->with('quotation')->get();
 
-        $weeklyTotal = $this->calculateTotalInMad(
-            SourcingOrder::whereBetween('sourcing_orders.updated_at', [\Carbon\Carbon::now()->startOfWeek(), \Carbon\Carbon::now()->endOfWeek()])->with('quotation')->get(),
-            'net_profit_or_loss'
-        );
+        $dailyTotalsByCurrency = $this->calculateTotalsByOriginalCurrency($dailyOrders, 'net_profit_or_loss');
+        $weeklyTotalsByCurrency = $this->calculateTotalsByOriginalCurrency($weeklyOrders, 'net_profit_or_loss');
+        $monthlyTotalsByCurrency = $this->calculateTotalsByOriginalCurrency($monthlyOrders, 'net_profit_or_loss');
 
-        $monthlyTotal = $this->calculateTotalInMad(
-            SourcingOrder::whereMonth('sourcing_orders.updated_at', \Carbon\Carbon::now()->month)->whereYear('sourcing_orders.updated_at', \Carbon\Carbon::now()->year)->with('quotation')->get(),
-            'net_profit_or_loss'
-        );
         $chartData = [
             'weeklyProfitChart' => $this->prepareWeeklyProfitChartData(clone $query),
             'shippedProductsChart' => $this->prepareShippedProductsChartData(clone $query),
@@ -45,10 +39,26 @@ class ReportController extends Controller
             'orders',
             'availableDestinations',
             'chartData',
-            'dailyTotal',
-            'weeklyTotal',
-            'monthlyTotal'
+            'dailyTotalsByCurrency',
+            'weeklyTotalsByCurrency',
+            'monthlyTotalsByCurrency'
         ));
+    }
+
+    /**
+     * Sum amounts by original order currency (no conversion).
+     *
+     * @return array<string, float>
+     */
+    private function calculateTotalsByOriginalCurrency($collection, string $column): array
+    {
+        $totals = [];
+        foreach ($collection as $item) {
+            $amount = $item->{$column} ?? 0;
+            $currency = $item->quotation->currency ?? 'USD';
+            $totals[$currency] = ($totals[$currency] ?? 0) + (float) $amount;
+        }
+        return $totals;
     }
 
     private function getFilteredQuery(Request $request): Builder
@@ -187,20 +197,15 @@ class ReportController extends Controller
             return redirect()->back()->with('error', __('No data to export for selected criteria.'));
         }
 
-        $dailyTotal = $this->calculateTotalInMad(
-            SourcingOrder::whereDate('sourcing_orders.updated_at', \Carbon\Carbon::today())->with('quotation')->get(),
-            'net_profit_or_loss'
-        );
-        $weeklyTotal = $this->calculateTotalInMad(
-            SourcingOrder::whereBetween('sourcing_orders.updated_at', [\Carbon\Carbon::now()->startOfWeek(), \Carbon\Carbon::now()->endOfWeek()])->with('quotation')->get(),
-            'net_profit_or_loss'
-        );
-        $monthlyTotal = $this->calculateTotalInMad(
-            SourcingOrder::whereMonth('sourcing_orders.updated_at', \Carbon\Carbon::now()->month)->whereYear('sourcing_orders.updated_at', \Carbon\Carbon::now()->year)->with('quotation')->get(),
-            'net_profit_or_loss'
-        );
+        $dailyOrders = SourcingOrder::whereDate('sourcing_orders.updated_at', \Carbon\Carbon::today())->with('quotation')->get();
+        $weeklyOrders = SourcingOrder::whereBetween('sourcing_orders.updated_at', [\Carbon\Carbon::now()->startOfWeek(), \Carbon\Carbon::now()->endOfWeek()])->with('quotation')->get();
+        $monthlyOrders = SourcingOrder::whereMonth('sourcing_orders.updated_at', \Carbon\Carbon::now()->month)->whereYear('sourcing_orders.updated_at', \Carbon\Carbon::now()->year)->with('quotation')->get();
 
-        $pdf = \PDF::loadView('admin.reports.sales-margin-pdf', compact('orders', 'dailyTotal', 'weeklyTotal', 'monthlyTotal'));
+        $dailyTotalsByCurrency = $this->calculateTotalsByOriginalCurrency($dailyOrders, 'net_profit_or_loss');
+        $weeklyTotalsByCurrency = $this->calculateTotalsByOriginalCurrency($weeklyOrders, 'net_profit_or_loss');
+        $monthlyTotalsByCurrency = $this->calculateTotalsByOriginalCurrency($monthlyOrders, 'net_profit_or_loss');
+
+        $pdf = \PDF::loadView('admin.reports.sales-margin-pdf', compact('orders', 'dailyTotalsByCurrency', 'weeklyTotalsByCurrency', 'monthlyTotalsByCurrency'));
 
         return $pdf->download('financial_report_'.now()->format('Y-m-d_H-i').'.pdf');
     }

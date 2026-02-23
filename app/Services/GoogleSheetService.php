@@ -78,9 +78,24 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
             return false;
         }
 
-        $data = $this->mapOrderToData($order);
+        $order->load(['user', 'quotation.sourcingRequest.destinations.country', 'destinationShipments', 'shippingCompany']);
+        $destinations = $order->quotation->sourcingRequest->destinations;
+        $syncedFields = array_keys(self::SHIPPING_SHEET_HEADERS);
+
         try {
-            return $this->upsertRow($data, $order->id * 5, $order->id);
+            if ($destinations->count() > 1) {
+                foreach ($destinations as $index => $destination) {
+                    $data = $this->mapOrderToDataForShippingSheet($order, $destination);
+                    $displayId = ($order->id * 5) + $index;
+                    $this->upsertRow($data, $displayId, $order->id, $syncedFields);
+                }
+            } else {
+                $dest = $destinations->first();
+                $data = $this->mapOrderToDataForShippingSheet($order, $dest);
+                $this->upsertRow($data, $order->id * 5, $order->id, $syncedFields);
+            }
+
+            return true;
         } catch (\Exception $e) {
             \Log::error("Google Sheet Sync Failed for Order #{$order->id}: ".$e->getMessage());
 
@@ -110,7 +125,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
     }
 
     /**
-     * Batch Sync (To be implemented fully if needed).
+     * Batch Sync (shipping company sheet: same columns as Lark).
      */
     public function batchSync(array $orders, \App\Models\ShippingCompany $company): array
     {
@@ -119,11 +134,23 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
 
         $allData = [];
         foreach ($orders as $order) {
-            $allData[] = $this->mapOrderToData($order);
+            $order->load(['user', 'quotation.sourcingRequest.destinations.country', 'destinationShipments', 'shippingCompany']);
+            $destinations = $order->quotation->sourcingRequest->destinations;
+
+            if ($destinations->count() > 1) {
+                foreach ($destinations as $index => $destination) {
+                    $data = $this->mapOrderToDataForShippingSheet($order, $destination);
+                    $data['id'] = ($order->id * 5) + $index;
+                    $allData[] = $data;
+                }
+            } else {
+                $allData[] = $this->mapOrderToDataForShippingSheet($order, $destinations->first());
+            }
         }
 
         try {
-            $stats = $this->batchUpsertRows($allData);
+            $syncedFields = array_keys(self::SHIPPING_SHEET_HEADERS);
+            $stats = $this->batchUpsertRows($allData, $syncedFields);
 
             return ['success' => true, 'synced' => ($stats['updated'] + $stats['appended'])];
         } catch (\Exception $e) {
@@ -132,7 +159,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
     }
 
     /**
-     * Helper to map order to data array.
+     * Helper to map order to data array (main app sheet).
      */
     protected function mapOrderToData(\App\Models\SourcingOrder $order): array
     {
@@ -154,8 +181,36 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         ];
     }
 
+    protected function mapOrderToDataForShippingSheet(\App\Models\SourcingOrder $order, ?\App\Models\SourcingRequestDestination $destination = null): array
+    {
+        $sr = $order->quotation->sourcingRequest;
+        $quotation = $order->quotation;
+
+        $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
+        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 1)' : '';
+
+        $labelImageUrl = \App\Services\ShippingLabelImageService::getImageUrl($order, $destination);
+        $shippingLabelCell = '=IMAGE("'.$labelImageUrl.'", 1)';
+
+        $unitPrice = $quotation->unit_price ?? 0;
+        $totalPrice = $order->total_amount ?? 0;
+
+        return [
+            'product_image' => $imageUrl,
+            'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+            'product_name' => $sr->product_name ?? 'N/A',
+            'quantity' => (int) $quantity,
+            'product_price' => (string) $unitPrice,
+            'total_price' => (string) $totalPrice,
+            'tracking_number' => '',
+            'address' => '',
+            'shipping_label' => $shippingLabelCell,
+        ];
+    }
+
     /**
      * Ensure headers and formatting.
+     * For shipping company sheets, uses the same headers as Lark (Order ID, Date, Status, Client Name, etc.).
      */
     public function ensureHeaders(\App\Models\ShippingCompany $company): array
     {
@@ -167,12 +222,12 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
             return ['success' => false, 'message' => 'Config missing'];
         }
 
-        return $this->runEnsureHeaders();
+        return $this->runEnsureHeaders($company);
     }
 
-    protected function runEnsureHeaders(): array
+    protected function runEnsureHeaders(?\App\Models\ShippingCompany $company = null): array
     {
-        return $this->originalEnsureHeaders();
+        return $this->originalEnsureHeaders($company);
     }
 
     protected function getSheetIdByName(string $sheetName): ?int
@@ -246,7 +301,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         }
     }
 
-    protected function originalEnsureHeaders(): array
+    protected function originalEnsureHeaders(?\App\Models\ShippingCompany $company = null): array
     {
         if ($this->sheetId === null) {
             Log::error("Could not find sheet ID for sheet name: {$this->sheetName}. Cannot style headers.");
@@ -264,19 +319,26 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
             $values = $response->getValues();
 
             if (empty($values)) {
-                $setting = GoogleSheetSetting::first();
-                $availableFields = self::AVAILABLE_FIELDS;
-                $syncedFields = $setting->synced_fields ?? array_keys($availableFields);
-
-                // Build headers
-                $headers = [];
-                foreach ($syncedFields as $fieldKey) {
-                    if (isset($availableFields[$fieldKey])) {
-                        $headers[] = $availableFields[$fieldKey];
-                    }
-                }
-                if (empty($headers)) {
+                if ($company !== null) {
+                    // Shipping company sheet: same headers as Lark
+                    $availableFields = self::SHIPPING_SHEET_HEADERS;
+                    $syncedFields = array_keys($availableFields);
                     $headers = array_values($availableFields);
+                } else {
+                    $setting = GoogleSheetSetting::first();
+                    $availableFields = self::AVAILABLE_FIELDS;
+                    $syncedFields = $setting->synced_fields ?? array_keys($availableFields);
+
+                    // Build headers
+                    $headers = [];
+                    foreach ($syncedFields as $fieldKey) {
+                        if (isset($availableFields[$fieldKey])) {
+                            $headers[] = $availableFields[$fieldKey];
+                        }
+                    }
+                    if (empty($headers)) {
+                        $headers = array_values($availableFields);
+                    }
                 }
 
                 // Set header values
@@ -466,7 +528,6 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         'id' => 'Order ID',
         'created_at' => 'Date Création',
         'status' => 'Statut',
-        'client_name' => 'Nom Client',
         'client_email' => 'Email Client',
         'product_name' => 'Nom Produit',
         'quantity' => 'Quantité',
@@ -475,26 +536,42 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         'shipping_method' => 'Méthode Livraison',
         'tracking_number' => 'Numéro Suivi',
         'carrier' => 'Transporteur',
-        'admin_assigned' => 'Admin Assigné',
-        'net_profit' => 'Profit Net',
         'product_image' => 'Image Produit',
+    ];
+
+    /**
+     * Headers for Shipping Company Sheet – same as Lark for consistency.
+     */
+    const SHIPPING_SHEET_HEADERS = [
+        'product_image' => 'PICTURE',
+        'created_at' => 'SELLING DATE',
+        'product_name' => 'PRODUCT NAME',
+        'quantity' => 'QUANTITY',
+        'product_price' => 'PRODUCT PRICE',
+        'total_price' => 'TOTAL PRICE',
+        'tracking_number' => 'TRACKING NUMBER FROM CHINA',
+        'address' => 'Shipping address',
+        'shipping_label' => 'LABEL SHIPPING',
     ];
 
     /**
      * Upsert multiple rows in a batch (optimized for performance).
      *
-     * @param  array  $allOrdersData  Array of order data arrays
+     * @param  array  $allOrdersData  Array of order data arrays (associative per row)
+     * @param  array|null  $syncedFields  When provided (e.g. shipping company sheet), use this column order
      * @return array statistics on operations
      */
-    public function batchUpsertRows(array $allOrdersData)
+    public function batchUpsertRows(array $allOrdersData, ?array $syncedFields = null)
     {
         if (empty($allOrdersData)) {
             return ['updated' => 0, 'appended' => 0];
         }
 
         try {
-            $setting = GoogleSheetSetting::first();
-            $syncedFields = $setting->synced_fields ?? array_keys(self::AVAILABLE_FIELDS);
+            if ($syncedFields === null) {
+                $setting = GoogleSheetSetting::first();
+                $syncedFields = $setting->synced_fields ?? array_keys(self::AVAILABLE_FIELDS);
+            }
 
             // 1. Fetch existing data to determine which rows to update vs append
             // We assume column A (or the ID column) is used to identifying rows.
@@ -571,17 +648,16 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
 
                 $batchUpdateBody = new \Google\Service\Sheets\BatchUpdateValuesRequest([
                     'data' => $data,
-                    'valueInputOption' => 'RAW',
+                    'valueInputOption' => 'USER_ENTERED',
                 ]);
 
                 $this->sheetsService->spreadsheets_values->batchUpdate($this->spreadsheetId, $batchUpdateBody);
             }
 
-            // 4. Execute Appends (Single Append Call for all new rows)
             if (! empty($dataToAppend)) {
                 $range = $this->sheetName.'!A:ZZ';
                 $body = new ValueRange(['values' => $dataToAppend]);
-                $params = ['valueInputOption' => 'RAW'];
+                $params = ['valueInputOption' => 'USER_ENTERED'];
 
                 $this->sheetsService->spreadsheets_values->append(
                     $this->spreadsheetId,
@@ -608,18 +684,23 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
 
     /**
      * Upsert a row in the Google Sheet (Update if exists, Append if not).
+     *
+     * @param  array  $data  Associative array of field => value
+     * @param  array|null  $syncedFields  When provided (e.g. for shipping company sheet), use this column order instead of GoogleSheetSetting
      */
-    public function upsertRow(array $data, int $sheetDisplayId, ?int $internalId = null)
+    public function upsertRow(array $data, int $sheetDisplayId, ?int $internalId = null, ?array $syncedFields = null)
     {
         try {
-            $setting = GoogleSheetSetting::first();
-            $syncedFields = $setting->synced_fields ?? array_keys(self::AVAILABLE_FIELDS);
+            if ($syncedFields === null) {
+                $setting = GoogleSheetSetting::first();
+                $syncedFields = $setting->synced_fields ?? array_keys(self::AVAILABLE_FIELDS);
+            }
 
             // Find index of 'id' field to match Row in Sheet
             $idIndex = array_search('id', $syncedFields);
             if ($idIndex === false) {
                 // If ID is not synced, we can't find the row to update, so just append
-                return $this->appendRow($data, $internalId);
+                return $this->appendRow($data, $internalId, $syncedFields);
             }
 
             // Convert idIndex to column letter
@@ -650,7 +731,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
 
                 $updateRange = $this->sheetName."!A{$rowIndex}:".self::indexToLetter(count($finalData)).$rowIndex;
                 $body = new ValueRange(['values' => [$finalData]]);
-                $params = ['valueInputOption' => 'RAW'];
+                $params = ['valueInputOption' => 'USER_ENTERED'];
 
                 $this->sheetsService->spreadsheets_values->update(
                     $this->spreadsheetId,
@@ -667,7 +748,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
                 return true;
             } else {
                 // APPEND NEW ROW
-                return $this->appendRow($data, $internalId);
+                return $this->appendRow($data, $internalId, $syncedFields);
             }
 
         } catch (\Exception $e) {
@@ -676,11 +757,13 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         }
     }
 
-    public function appendRow($data, ?int $orderId = null)
+    public function appendRow($data, ?int $orderId = null, ?array $syncedFields = null)
     {
         try {
-            $setting = GoogleSheetSetting::first();
-            $syncedFields = $setting->synced_fields ?? [];
+            if ($syncedFields === null) {
+                $setting = GoogleSheetSetting::first();
+                $syncedFields = $setting->synced_fields ?? [];
+            }
 
             // Helper to get selected fields data
             // If dynamic data mapping is needed, the caller should pass an associative array
@@ -706,9 +789,8 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
             // Define range for appending (wide range to support any number of columns)
             $range = $this->sheetName.'!A:ZZ';
 
-            // Append row
             $body = new ValueRange(['values' => [$finalData]]);
-            $params = ['valueInputOption' => 'RAW'];
+            $params = ['valueInputOption' => 'USER_ENTERED'];
             $response = $this->sheetsService->spreadsheets_values->append(
                 $this->spreadsheetId,
                 $range,

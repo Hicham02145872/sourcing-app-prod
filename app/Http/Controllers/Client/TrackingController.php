@@ -105,8 +105,7 @@ class TrackingController extends Controller
 
                 // Mettre à jour le statut de la commande côté client quand on a du tracking réel (cron ou cache)
                 if (empty($result['is_virtual']) && str_starts_with(strtoupper(trim($trackingNumber)), 'FSB')) {
-                    $orderId = (int) substr(trim($trackingNumber), 3);
-                    $order = \App\Models\SourcingOrder::find($orderId);
+                    $order = \App\Models\SourcingOrder::resolveFsbNumberToOrder(trim($trackingNumber));
                     if ($order && $order->hasRealTracking()) {
                         $this->autoUpdateOrderStatus->updateOrderStatusFromTrackingResult($order, $result);
                     }

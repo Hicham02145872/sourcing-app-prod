@@ -147,30 +147,36 @@
         <tr>
             <td width="33%" class="summary-card">
                 <div class="summary-label">{{ __('Daily Profit') }}</div>
-                <div class="currency-row">
-                    <span class="summary-value {{ $dailyTotal >= 0 ? 'text-emerald' : 'text-red' }}">
-                        {{ number_format($dailyTotal, 2) }}
-                    </span>
-                    <span style="font-size: 10px; color: #94a3b8;">MAD</span>
-                </div>
+                @forelse($dailyTotalsByCurrency ?? [] as $currency => $total)
+                    <div class="currency-row">
+                        <span class="summary-value {{ $total >= 0 ? 'text-emerald' : 'text-red' }}">{{ number_format($total, 2) }}</span>
+                        <span style="font-size: 10px; color: #94a3b8;">{{ $currency }}</span>
+                    </div>
+                @empty
+                    <div class="currency-row"><span class="summary-value">—</span></div>
+                @endforelse
             </td>
             <td width="33%" class="summary-card">
                 <div class="summary-label">{{ __('Weekly Profit') }}</div>
-                <div class="currency-row">
-                    <span class="summary-value {{ $weeklyTotal >= 0 ? 'text-emerald' : 'text-red' }}">
-                        {{ number_format($weeklyTotal, 2) }}
-                    </span>
-                    <span style="font-size: 10px; color: #94a3b8;">MAD</span>
-                </div>
+                @forelse($weeklyTotalsByCurrency ?? [] as $currency => $total)
+                    <div class="currency-row">
+                        <span class="summary-value {{ $total >= 0 ? 'text-emerald' : 'text-red' }}">{{ number_format($total, 2) }}</span>
+                        <span style="font-size: 10px; color: #94a3b8;">{{ $currency }}</span>
+                    </div>
+                @empty
+                    <div class="currency-row"><span class="summary-value">—</span></div>
+                @endforelse
             </td>
             <td width="33%" class="summary-card">
                 <div class="summary-label">{{ __('Monthly Profit') }}</div>
-                <div class="currency-row">
-                    <span class="summary-value {{ $monthlyTotal >= 0 ? 'text-emerald' : 'text-red' }}">
-                        {{ number_format($monthlyTotal, 2) }}
-                    </span>
-                    <span style="font-size: 10px; color: #94a3b8;">MAD</span>
-                </div>
+                @forelse($monthlyTotalsByCurrency ?? [] as $currency => $total)
+                    <div class="currency-row">
+                        <span class="summary-value {{ $total >= 0 ? 'text-emerald' : 'text-red' }}">{{ number_format($total, 2) }}</span>
+                        <span style="font-size: 10px; color: #94a3b8;">{{ $currency }}</span>
+                    </div>
+                @empty
+                    <div class="currency-row"><span class="summary-value">—</span></div>
+                @endforelse
             </td>
         </tr>
     </table>

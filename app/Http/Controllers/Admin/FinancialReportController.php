@@ -28,23 +28,13 @@ class FinancialReportController extends Controller
 
         $orders = $query->latest('updated_at')->paginate(20);
 
-        // Aggregations in MAD
-        $totalProfit = $this->calculateTotalInMad($query->get(), 'net_profit_or_loss');
+        $dailyOrders = SourcingOrder::whereDate('updated_at', Carbon::today())->with('quotation')->get();
+        $weeklyOrders = SourcingOrder::whereBetween('updated_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])->with('quotation')->get();
+        $monthlyOrders = SourcingOrder::whereMonth('updated_at', Carbon::now()->month)->whereYear('updated_at', Carbon::now()->year)->with('quotation')->get();
 
-        $dailyTotal = $this->calculateTotalInMad(
-            SourcingOrder::whereDate('updated_at', Carbon::today())->with('quotation')->get(),
-            'net_profit_or_loss'
-        );
-
-        $weeklyTotal = $this->calculateTotalInMad(
-            SourcingOrder::whereBetween('updated_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])->with('quotation')->get(),
-            'net_profit_or_loss'
-        );
-
-        $monthlyTotal = $this->calculateTotalInMad(
-            SourcingOrder::whereMonth('updated_at', Carbon::now()->month)->whereYear('updated_at', Carbon::now()->year)->with('quotation')->get(),
-            'net_profit_or_loss'
-        );
+        $dailyTotalsByCurrency = $this->calculateTotalsByOriginalCurrency($dailyOrders, 'net_profit_or_loss');
+        $weeklyTotalsByCurrency = $this->calculateTotalsByOriginalCurrency($weeklyOrders, 'net_profit_or_loss');
+        $monthlyTotalsByCurrency = $this->calculateTotalsByOriginalCurrency($monthlyOrders, 'net_profit_or_loss');
 
         // Subtract approved refunds from totals
         $dailyRefunds = $this->calculateRefundsTotal(Carbon::today(), Carbon::today());
@@ -55,18 +45,12 @@ class FinancialReportController extends Controller
         );
         $totalRefunds = $this->calculateRefundsTotal(null, null);
 
-        $dailyTotal -= $dailyRefunds;
-        $weeklyTotal -= $weeklyRefunds;
-        $monthlyTotal -= $monthlyRefunds;
-        $totalProfit -= $totalRefunds;
-
         return view('admin.reports.financial.index', compact(
             'orders',
             'period',
-            'totalProfit',
-            'dailyTotal',
-            'weeklyTotal',
-            'monthlyTotal'
+            'dailyTotalsByCurrency',
+            'weeklyTotalsByCurrency',
+            'monthlyTotalsByCurrency'
         ));
     }
 
@@ -149,7 +133,6 @@ class FinancialReportController extends Controller
             $amount = $item->{$column} ?? 0;
 
             // RefundRequest has relation to sourcingOrder, which has relation to quotation
-            // SourcingOrder has relation to quotation
             $quotation = $item->quotation ?? ($item->sourcingOrder->quotation ?? null);
             $currency = $quotation->currency ?? 'USD';
 
@@ -158,6 +141,23 @@ class FinancialReportController extends Controller
         }
 
         return (float) $total;
+    }
+
+    /**
+     * Sum amounts by original order currency (no conversion).
+     *
+     * @return array<string, float>
+     */
+    private function calculateTotalsByOriginalCurrency($collection, string $column): array
+    {
+        $totals = [];
+        foreach ($collection as $item) {
+            $amount = $item->{$column} ?? 0;
+            $quotation = $item->quotation ?? null;
+            $currency = $quotation->currency ?? 'USD';
+            $totals[$currency] = ($totals[$currency] ?? 0) + (float) $amount;
+        }
+        return $totals;
     }
 
     /**

@@ -49,12 +49,19 @@
                         </div>
                         
                         <div>
-                            <div class="flex items-baseline gap-1">
-                                <span class="text-3xl font-extrabold tracking-tight {{ $dailyTotal >= 0 ? 'text-slate-800' : 'text-red-500' }}">
-                                    {{ number_format($dailyTotal, 2) }}
-                                </span>
-                                <span class="text-xs font-bold text-slate-400 uppercase ml-1">MAD</span>
-                            </div>
+                            @forelse($dailyTotalsByCurrency ?? [] as $currency => $total)
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-extrabold tracking-tight {{ $total >= 0 ? 'text-slate-800' : 'text-red-500' }}">
+                                        {{ number_format($total, 2) }}
+                                    </span>
+                                    <span class="text-xs font-bold text-slate-400 uppercase ml-1">{{ $currency }}</span>
+                                </div>
+                            @empty
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-extrabold text-slate-400">—</span>
+                                    <span class="text-xs text-slate-400">{{ __('No data') }}</span>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
                     
@@ -82,12 +89,19 @@
                         </div>
                         
                         <div>
-                            <div class="flex items-baseline gap-1">
-                                <span class="text-4xl font-extrabold tracking-tight text-white drop-shadow-sm">
-                                    {{ number_format($weeklyTotal, 2) }}
-                                </span>
-                                <span class="text-xs font-bold text-indigo-300 uppercase ml-1">MAD</span>
-                            </div>
+                            @forelse($weeklyTotalsByCurrency ?? [] as $currency => $total)
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm">
+                                        {{ number_format($total, 2) }}
+                                    </span>
+                                    <span class="text-xs font-bold text-indigo-300 uppercase ml-1">{{ $currency }}</span>
+                                </div>
+                            @empty
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-extrabold text-slate-500">—</span>
+                                    <span class="text-xs text-slate-400">{{ __('No data') }}</span>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
                     
@@ -113,12 +127,19 @@
                         </div>
                         
                         <div>
-                            <div class="flex items-baseline gap-1">
-                                <span class="text-3xl font-extrabold tracking-tight {{ $monthlyTotal >= 0 ? 'text-slate-800' : 'text-red-500' }}">
-                                    {{ number_format($monthlyTotal, 2) }}
-                                </span>
-                                <span class="text-xs font-bold text-slate-400 uppercase ml-1">MAD</span>
-                            </div>
+                            @forelse($monthlyTotalsByCurrency ?? [] as $currency => $total)
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-extrabold tracking-tight {{ $total >= 0 ? 'text-slate-800' : 'text-red-500' }}">
+                                        {{ number_format($total, 2) }}
+                                    </span>
+                                    <span class="text-xs font-bold text-slate-400 uppercase ml-1">{{ $currency }}</span>
+                                </div>
+                            @empty
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-extrabold text-slate-400">—</span>
+                                    <span class="text-xs text-slate-400">{{ __('No data') }}</span>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
                     

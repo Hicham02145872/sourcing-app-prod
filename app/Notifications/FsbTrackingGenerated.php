@@ -42,20 +42,26 @@ class FsbTrackingGenerated extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $fsbNumber = $this->sourcingOrder->fsb_tracking_number;
         $productName = $this->sourcingOrder->quotation->sourcingRequest->product_name ?? __('your order');
+        $fsbNumbers = $this->getFsbNumbers();
+        $fsbList = implode(', ', $fsbNumbers);
 
-        return (new MailMessage)
+        $mail = (new MailMessage)
             ->subject(__('📦 Your FSB Tracking Number is Ready'))
             ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
             ->line(__('Your order ":productName" can now be tracked!', [
                 'productName' => $productName,
-            ]))
-            ->line(__('Your FSB tracking number: **:number**', [
-                'number' => $fsbNumber,
-            ]))
+            ]));
+
+        if (count($fsbNumbers) > 1) {
+            $mail->line(__('Your FSB tracking numbers: **:numbers**', ['numbers' => $fsbList]));
+        } else {
+            $mail->line(__('Your FSB tracking number: **:number**', ['number' => $fsbList]));
+        }
+
+        return $mail
             ->line(__('You can track your shipment status in real-time using this number.'))
-            ->action(__('Track My Shipment'), route('client.tracking.index', ['number' => $fsbNumber]))
+            ->action(__('Track My Shipment'), route('client.tracking.index', ['number' => $fsbNumbers[0]]))
             ->line(__('Thank you for choosing FastSourcingBrothers!'));
     }
 
@@ -66,20 +72,23 @@ class FsbTrackingGenerated extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        $fsbNumber = $this->sourcingOrder->fsb_tracking_number;
         $productName = $this->sourcingOrder->quotation->sourcingRequest->product_name ?? __('your order');
+        $fsbNumbers = $this->getFsbNumbers();
+        $fsbList = implode(', ', $fsbNumbers);
+
+        $body = count($fsbNumbers) > 1
+            ? __('Your order ":productName" can now be tracked. Your FSB tracking numbers: :numbers', ['productName' => $productName, 'numbers' => $fsbList])
+            : __('Your order ":productName" can now be tracked. Your FSB tracking number: :number', ['productName' => $productName, 'number' => $fsbList]);
 
         return [
             'sourcing_order_id' => $this->sourcingOrder->id,
             'title' => __('📦 FSB Tracking Number Ready'),
-            'body' => __('Your order ":productName" can now be tracked. Your FSB tracking number: :number', [
-                'productName' => $productName,
-                'number' => $fsbNumber,
-            ]),
+            'body' => $body,
             'type' => 'fsb_tracking_generated',
             'product_name' => $productName,
-            'tracking_number' => $fsbNumber,
-            'click_action' => route('client.tracking.index', ['number' => $fsbNumber]),
+            'tracking_number' => $fsbNumbers[0],
+            'tracking_numbers' => $fsbNumbers,
+            'click_action' => route('client.tracking.index', ['number' => $fsbNumbers[0]]),
             'order_url' => route('client.sourcing-orders.show', $this->sourcingOrder->id),
         ];
     }
@@ -91,11 +100,14 @@ class FsbTrackingGenerated extends Notification implements ShouldQueue
      */
     public function toFcm(object $notifiable)
     {
-        $fsbNumber = $this->sourcingOrder->fsb_tracking_number;
-        $url = route('client.tracking.index', ['number' => $fsbNumber]);
+        $fsbNumbers = $this->getFsbNumbers();
+        $fsbList = implode(', ', $fsbNumbers);
+        $url = route('client.tracking.index', ['number' => $fsbNumbers[0]]);
 
         $title = __('📦 FSB Tracking Number Ready');
-        $body = __('Your FSB tracking number: :number. Tap to track your shipment.', ['number' => $fsbNumber]);
+        $body = count($fsbNumbers) > 1
+            ? __('Your FSB tracking numbers: :numbers. Tap to track your shipment.', ['numbers' => $fsbList])
+            : __('Your FSB tracking number: :number. Tap to track your shipment.', ['number' => $fsbList]);
 
         $notification = FirebaseNotification::create($title, $body);
 
@@ -110,10 +122,31 @@ class FsbTrackingGenerated extends Notification implements ShouldQueue
             ->withData([
                 'click_action' => $url,
                 'sourcing_order_id' => (string) $this->sourcingOrder->id,
-                'tracking_number' => $fsbNumber,
+                'tracking_number' => $fsbNumbers[0],
                 'image' => $imageUrl ?? '',
                 'order_url' => $url,
                 'unread_count' => (string) ($notifiable->unreadNotifications()->count() + 1),
             ]);
+    }
+
+    /**
+     * Build the list of FSB numbers for this order (one per destination, or just the main one).
+     *
+     * @return string[]
+     */
+    protected function getFsbNumbers(): array
+    {
+        $this->sourcingOrder->loadMissing('quotation.sourcingRequest.destinations');
+
+        if ($this->sourcingOrder->hasMultipleDestinations()) {
+            $destinations = $this->sourcingOrder->quotation->sourcingRequest->destinations;
+            $numbers = [];
+            foreach ($destinations as $index => $dest) {
+                $numbers[] = $this->sourcingOrder->getFsbTrackingNumberForDestinationIndex($index);
+            }
+            return $numbers;
+        }
+
+        return [$this->sourcingOrder->fsb_tracking_number];
     }
 }

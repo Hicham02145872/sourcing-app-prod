@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ShippingCompany;
 use App\Models\SourcingOrder;
+use App\Services\ShippingLabelImageService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -221,7 +222,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
 
         $rows = [];
         foreach ($orders as $order) {
-            $order->load(['user', 'quotation.sourcingRequest.destinations.country']);
+            $order->load(['user', 'quotation.sourcingRequest.destinations.country', 'destinationShipments', 'shippingCompany']);
             $destinations = $order->quotation->sourcingRequest->destinations;
 
             if ($destinations->isEmpty()) {
@@ -358,8 +359,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         // Auto-install headers if missing
         $this->ensureHeaders($company);
 
-        // Load order destinations
-        $order->load(['user', 'quotation.sourcingRequest.destinations.country']);
+        $order->load(['user', 'quotation.sourcingRequest.destinations.country', 'destinationShipments', 'shippingCompany']);
         $destinations = $order->quotation->sourcingRequest->destinations;
 
         if ($destinations->isEmpty()) {
@@ -462,14 +462,13 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         if ($isEmpty) {
             Log::info("Sheet {$sheetId} is empty. Installing headers using values_update (A1).");
 
-            $headers = ['Order ID', 'Date', 'Status', 'Client Name', 'Product Name', 'Quantity', 'Tracking Number', 'Transporteur', 'Address', 'Phone', 'Image URL', 'Notes'];
+            $headers = ['PICTURE', 'SELLING DATE', 'PRODUCT NAME', 'QUANTITY', 'PRODUCT PRICE', 'TOTAL PRICE', 'TRACKING NUMBER FROM CHINA', 'Shipping address', 'LABEL SHIPPING'];
 
-            // Use values_update to force headers at A1:L1
             $urlUpdate = "{$this->baseUrl}/sheets/v2/spreadsheets/{$spreadsheetToken}/values";
 
             $payload = [
                 'valueRange' => [
-                    'range' => "{$sheetId}!A1:L1",
+                    'range' => "{$sheetId}!A1:I1",
                     'values' => [$headers],
                 ],
             ];
@@ -481,11 +480,9 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
             }
         }
 
-        // Ensure columns are wide enough for better readability
-        // Column range A to K (0 to 11)
-        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 0, 12, 160);
-        // Image column even wider
-        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 9, 10, 180);
+        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 1, 9, 160);
+        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 1, 1, 200);
+        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 9, 9, 200);
     }
 
     /**
@@ -524,27 +521,27 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
     protected function mapOrderToRow(SourcingOrder $order, ?\App\Models\SourcingRequestDestination $destination): array
     {
         $sr = $order->quotation->sourcingRequest;
+        $quotation = $order->quotation;
 
         $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
-        $address = $destination ? ($destination->address.($destination->country ? ' ('.$destination->country->name.')' : '')) : ($sr->address ?? 'N/A');
-
         $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 1)' : '';
 
-        $carrier = $order->tracking_carrier ?? $order->shippingCompany?->name ?? '';
+        $labelImageUrl = ShippingLabelImageService::getImageUrl($order, $destination);
+        $shippingLabelCell = '=IMAGE("'.$labelImageUrl.'", 1)';
+
+        $unitPrice = $quotation->unit_price ?? 0;
+        $totalPrice = $order->total_amount ?? 0;
 
         return [
-            (string) ($order->id * 5), // display_id
+            $imageUrl,
             $order->created_at->format('Y-m-d H:i:s'),
-            strtoupper(str_replace('_', ' ', $order->status)),
-            $order->user->name,
             $sr->product_name,
             (int) $quantity,
-            $order->tracking_number ?? '',
-            (string) $carrier,
-            (string) $address,
-            (string) ($sr->phone_number ?? 'N/A'),
-            $imageUrl,
-            $sr->note ?? '',
+            (string) $unitPrice,
+            (string) $totalPrice,
+            '',
+            '',
+            $shippingLabelCell,
         ];
     }
 }

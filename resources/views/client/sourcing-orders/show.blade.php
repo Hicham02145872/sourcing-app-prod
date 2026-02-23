@@ -122,35 +122,87 @@
                                 @endif
                             </div>
                             <div class="p-6">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Tracking Number') }}</p>
-                                        <p class="text-sm font-mono font-bold text-slate-900 dark:text-white">
-                                            @if($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
-                                                {{ $sourcingOrder->fsb_tracking_number }}
-                                            @else
-                                                {{ __('Pending...') }}
-                                            @endif
-                                        </p>
+                                @if($sourcingOrder->hasMultipleDestinations())
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ __('Each destination has its own tracking number. Click the button below each parcel to see its status.') }}</p>
+                                    <div class="space-y-5">
+                                        @foreach($sourcingOrder->quotation->sourcingRequest->destinations as $dest)
+                                            @php
+                                                $destLabel = $dest->country?->name ?? __('Destination #:n', ['n' => $dest->id]);
+                                                if ($dest->service_type ?? null) { $destLabel .= ' · ' . $dest->service_type; }
+                                                if (isset($dest->quantity)) { $destLabel .= ' (' . __(':n units', ['n' => $dest->quantity]) . ')'; }
+                                                $realTrackingNum = $sourcingOrder->getTrackingNumberForDestination($dest->id);
+                                                $shippingCo = $sourcingOrder->getShippingCompanyForDestination($dest->id);
+                                                $destFsbNumber = $sourcingOrder->getFsbTrackingNumberForDestinationIndex($loop->index);
+                                                $displayTracking = $sourcingOrder->fsb_tracking_created_at ? $destFsbNumber : __('Pending...');
+                                                $hasRealTracking = !empty(trim((string) $realTrackingNum));
+                                                $showVirtualForDest = !$hasRealTracking && $sourcingOrder->fsb_tracking_created_at;
+                                                $virtualStatus = $showVirtualForDest ? $sourcingOrder->getVirtualTrackingStatus() : null;
+                                                $virtualLabel = $virtualStatus === 'shipment_preparing' ? __('Shipment Preparing') : ($virtualStatus === 'in_transit_china' ? __('In Transit China') : ($virtualStatus === 'pending_payment' ? __('Pending Payment') : null));
+                                                $canTrackDest = $sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at || $hasRealTracking;
+                                            @endphp
+                                            <div class="p-5 rounded-xl border-2 border-[#EBEBEB] dark:border-slate-600 bg-gradient-to-br from-slate-50 to-[#EBEBEB] dark:from-slate-800/50 dark:to-slate-700/50 shadow-sm">
+                                                <div class="flex flex-wrap items-center gap-2 mb-3">
+                                                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#EF7722] text-white text-sm font-bold shadow">{{ $loop->iteration }}</span>
+                                                    <h4 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                                                        {{ $destLabel }}
+                                                    </h4>
+                                                    @if($hasRealTracking)
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{{ __('Live tracking') }}</span>
+                                                    @elseif($virtualLabel)
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{{ $virtualLabel }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div class="p-3 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600">
+                                                        <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{{ __('Tracking Number') }}</p>
+                                                        <p class="text-sm font-mono font-bold text-slate-900 dark:text-white break-all">{{ $displayTracking }}</p>
+                                                    </div>
+                                                    <div class="p-3 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600">
+                                                        <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{{ __('Shipping Company') }}</p>
+                                                        <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $shippingCo?->name ?: __('Not assigned') }}</p>
+                                                    </div>
+                                                </div>
+                                                @if($canTrackDest)
+                                                    <div class="mt-4">
+                                                        <a href="{{ route('client.tracking.index', ['number' => $destFsbNumber]) }}" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto min-h-[44px] px-5 py-3 bg-[#EF7722] hover:bg-[#d66616] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2">
+                                                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" /></svg>
+                                                            {{ __('Track this parcel') }}
+                                                        </a>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
                                     </div>
-                                     <div>
-                                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Shipping Company') }}</p>
-                                        <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->shippingCompany?->name ?: ($sourcingOrder->tracking_carrier ?? __('Not assigned')) }}</p>
+                                    <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">{{ __('Your order has :count parcel(s). Each has a unique tracking number above.', ['count' => $sourcingOrder->quotation->sourcingRequest->destinations->count()]) }}</p>
+                                @else
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
+                                            <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{{ __('Tracking Number') }}</p>
+                                            <p class="text-base font-mono font-bold text-slate-900 dark:text-white">
+                                                @if($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
+                                                    {{ $sourcingOrder->fsb_tracking_number }}
+                                                @else
+                                                    {{ __('Pending...') }}
+                                                @endif
+                                            </p>
+                                        </div>
+                                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
+                                            <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{{ __('Shipping Company') }}</p>
+                                            <p class="text-base font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->shippingCompany?->name ?: ($sourcingOrder->tracking_carrier ?? __('Not assigned')) }}</p>
+                                        </div>
                                     </div>
-                                </div>
-
-                                @if(($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at) && !$sourcingOrder->hasRealTracking())
-                                <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">{{ __('Your shipment is being prepared. Live carrier tracking will appear here once assigned.') }}</p>
-                                @endif
-
-                                @if($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
-                                <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
-                                    <a href="{{ route('client.tracking.index', ['number' => $sourcingOrder->fsb_tracking_number]) }}" 
-                                       class="w-full sm:w-auto px-6 py-2.5 bg-[#EF7722] hover:bg-[#d66616] text-white text-sm font-bold rounded-lg shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" /></svg>
-                                        {{ __('Track my shipment') }}
-                                    </a>
-                                </div>
+                                    @if(($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at) && !$sourcingOrder->hasRealTracking())
+                                        <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">{{ __('Your shipment is being prepared. Live carrier tracking will appear here once assigned.') }}</p>
+                                    @endif
+                                    @if($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at || $sourcingOrder->tracking_number)
+                                        <div class="mt-5">
+                                            <a href="{{ route('client.tracking.index', ['number' => $sourcingOrder->fsb_tracking_number]) }}" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto min-h-[48px] px-6 py-3 bg-[#EF7722] hover:bg-[#d66616] text-white text-base font-bold rounded-xl shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" /></svg>
+                                                {{ __('Track my shipment') }}
+                                            </a>
+                                        </div>
+                                    @endif
                                 @endif
                             </div>
                         </div>

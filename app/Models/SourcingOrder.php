@@ -128,6 +128,56 @@ class SourcingOrder extends Model
         return $this->belongsTo(ShippingCompany::class);
     }
 
+    /**
+     * Per-destination tracking/shipping when order has multiple destinations.
+     */
+    public function destinationShipments()
+    {
+        return $this->hasMany(SourcingOrderDestinationShipment::class);
+    }
+
+    /**
+     * Whether this order has more than one destination (so we use per-destination tracking).
+     */
+    public function hasMultipleDestinations(): bool
+    {
+        $count = $this->quotation?->sourcingRequest?->destinations?->count() ?? 0;
+
+        return $count > 1;
+    }
+
+    /**
+     * Get tracking number for a destination. Uses destination_shipments when order has multiple destinations, else order-level.
+     */
+    public function getTrackingNumberForDestination(?int $sourcingRequestDestinationId): ?string
+    {
+        if ($this->hasMultipleDestinations() && $sourcingRequestDestinationId) {
+            $shipment = $this->relationLoaded('destinationShipments')
+                ? $this->destinationShipments->firstWhere('sourcing_request_destination_id', $sourcingRequestDestinationId)
+                : $this->destinationShipments()->where('sourcing_request_destination_id', $sourcingRequestDestinationId)->first();
+
+            return $shipment?->tracking_number;
+        }
+
+        return $this->tracking_number;
+    }
+
+    /**
+     * Get shipping company for a destination. Uses destination_shipments when order has multiple destinations, else order-level.
+     */
+    public function getShippingCompanyForDestination(?int $sourcingRequestDestinationId): ?ShippingCompany
+    {
+        if ($this->hasMultipleDestinations() && $sourcingRequestDestinationId) {
+            $shipment = $this->relationLoaded('destinationShipments')
+                ? $this->destinationShipments->firstWhere('sourcing_request_destination_id', $sourcingRequestDestinationId)
+                : $this->destinationShipments()->with('shippingCompany')->where('sourcing_request_destination_id', $sourcingRequestDestinationId)->first();
+
+            return $shipment?->shippingCompany;
+        }
+
+        return $this->shippingCompany;
+    }
+
     public function canTransitionTo(string $newStatus): bool
     {
         // Admins can skip statuses and move to any defined status (non-transactional)
@@ -296,11 +346,72 @@ class SourcingOrder extends Model
     }
 
     /**
-     * Get the FSB tracking number alias.
+     * Get the FSB tracking number alias (main order).
      */
     public function getFsbTrackingNumberAttribute(): string
     {
         return 'FSB'.str_pad($this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Get the FSB tracking number for a destination index (0-based).
+     * First destination = FSB000010, second = FSB000011 for order id 10.
+     */
+    public function getFsbTrackingNumberForDestinationIndex(int $index): string
+    {
+        $numeric = $this->id + $index;
+
+        return 'FSB'.str_pad((string) $numeric, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Resolve an FSB number (e.g. FSB000011) to the corresponding order.
+     * Per-destination: 11 = order 10 dest 1. We try (order_id + index) first so multi-dest orders win.
+     */
+    public static function resolveFsbNumberToOrder(string $fsbNumber): ?self
+    {
+        $resolved = self::resolveFsbNumberToOrderAndDestinationIndex($fsbNumber);
+
+        return $resolved['order'] ?? null;
+    }
+
+    /**
+     * Resolve FSB to order and destination index (0-based) for per-destination tracking.
+     *
+     * @return array{order: self, destination_index: int}|null
+     */
+    public static function resolveFsbNumberToOrderAndDestinationIndex(string $fsbNumber): ?array
+    {
+        $numeric = (int) substr($fsbNumber, 3);
+
+        for ($index = 1; $index <= $numeric; $index++) {
+            $orderId = $numeric - $index;
+            $order = self::with('quotation.sourcingRequest.destinations')->find($orderId);
+            if ($order && $order->quotation?->sourcingRequest?->destinations?->count() > $index) {
+                return ['order' => $order, 'destination_index' => $index];
+            }
+        }
+
+        $order = self::find($numeric);
+        if ($order) {
+            return ['order' => $order, 'destination_index' => 0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether this destination (by index) has a real tracking number assigned.
+     */
+    public function hasRealTrackingForDestinationIndex(int $destinationIndex): bool
+    {
+        $destinations = $this->quotation?->sourcingRequest?->destinations;
+        if (! $destinations || ! $destinations->has($destinationIndex)) {
+            return $this->hasRealTracking();
+        }
+        $destId = $destinations->get($destinationIndex)->id;
+
+        return ! empty(trim((string) $this->getTrackingNumberForDestination($destId)));
     }
 
     /**

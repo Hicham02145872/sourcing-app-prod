@@ -97,10 +97,28 @@ class SourcingOrderController extends Controller
     {
         $this->authorize('view', $sourcingOrder);
 
+        if (request()->query('format') === 'html') {
+            return view('admin.sourcing-orders.shipping-label', compact('sourcingOrder'));
+        }
+
         $pdf = Pdf::loadView('admin.sourcing-orders.shipping-label', compact('sourcingOrder'));
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->download('shipping-label-'.$sourcingOrder->id.'.pdf');
+    }
+
+    public function showShippingLabelForDestination(SourcingOrder $sourcingOrder, \App\Models\SourcingRequestDestination $destination)
+    {
+        $this->authorize('view', $sourcingOrder);
+
+        if (request()->query('format') === 'html') {
+            return view('admin.sourcing-orders.shipping-label-destination', compact('sourcingOrder', 'destination'));
+        }
+
+        $pdf = Pdf::loadView('admin.sourcing-orders.shipping-label-destination', compact('sourcingOrder', 'destination'));
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->download('shipping-label-'.$sourcingOrder->id.'-dest-'.$destination->id.'.pdf');
     }
 
     public function downloadProofOfPayment(SourcingOrder $sourcingOrder)
