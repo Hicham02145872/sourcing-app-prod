@@ -85,7 +85,6 @@
                 <td class="value">{{ $sourcingOrder->quotation->sourcingRequest->product_name ?? 'N/A' }}</td>
             </tr>
             <tr>
-            <tr>
                 <td class="label">Quantity</td>
                 <td class="value">{{ $destination->quantity }}</td>
             </tr>
@@ -112,8 +111,5 @@
         </div>
         @endforeach
     </div>
-
-    </div>
 </body>
 </html>
-```

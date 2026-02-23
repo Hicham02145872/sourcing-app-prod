@@ -187,21 +187,21 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         $quotation = $order->quotation;
 
         $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
-        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 1)' : '';
+        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 4)' : '';
 
         $labelImageUrl = \App\Services\ShippingLabelImageService::getImageUrl($order, $destination);
-        $shippingLabelCell = '=IMAGE("'.$labelImageUrl.'", 1)';
+        $shippingLabelCell = $labelImageUrl ? '=IMAGE("'.$labelImageUrl.'", 4)' : '';
 
-        $unitPrice = $quotation->unit_price ?? 0;
-        $totalPrice = $order->total_amount ?? 0;
+        $unitPrice = (float) ($quotation->unit_price ?? 0);
+        $totalPrice = $unitPrice * (int) $quantity;
 
         return [
             'product_image' => $imageUrl,
             'created_at' => $order->created_at->format('Y-m-d H:i:s'),
             'product_name' => $sr->product_name ?? 'N/A',
             'quantity' => (int) $quantity,
-            'product_price' => (string) $unitPrice,
-            'total_price' => (string) $totalPrice,
+            'product_price' => number_format($unitPrice, 2, '.', ''),
+            'total_price' => number_format($totalPrice, 2, '.', ''),
             'tracking_number' => '',
             'address' => '',
             'shipping_label' => $shippingLabelCell,
@@ -483,14 +483,62 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
                     ],
                 ]);
 
-                // 4. Auto-resize columns
+                // 4. Set PICTURE column (A) wider
+                $pictureIndex = array_search('PICTURE', $headers);
+                if ($pictureIndex !== false) {
+                    $requests[] = new Request([
+                        'updateDimensionProperties' => [
+                            'range' => [
+                                'sheetId' => $this->sheetId,
+                                'dimension' => 'COLUMNS',
+                                'startIndex' => $pictureIndex,
+                                'endIndex' => $pictureIndex + 1,
+                            ],
+                            'properties' => ['pixelSize' => 250],
+                            'fields' => 'pixelSize',
+                        ],
+                    ]);
+                }
+
+                // 5. Set LABEL SHIPPING column (I) wider
+                $labelIndex = array_search('LABEL SHIPPING', $headers);
+                if ($labelIndex !== false) {
+                    $requests[] = new Request([
+                        'updateDimensionProperties' => [
+                            'range' => [
+                                'sheetId' => $this->sheetId,
+                                'dimension' => 'COLUMNS',
+                                'startIndex' => $labelIndex,
+                                'endIndex' => $labelIndex + 1,
+                            ],
+                            'properties' => ['pixelSize' => 300],
+                            'fields' => 'pixelSize',
+                        ],
+                    ]);
+                }
+
+                // 6. Set default row height for data rows
+                $requests[] = new Request([
+                    'updateDimensionProperties' => [
+                        'range' => [
+                            'sheetId' => $this->sheetId,
+                            'dimension' => 'ROWS',
+                            'startIndex' => 1,
+                            'endIndex' => 1000,
+                        ],
+                        'properties' => ['pixelSize' => 150],
+                        'fields' => 'pixelSize',
+                    ],
+                ]);
+
+                // 7. Auto-resize other columns
                 $requests[] = new Request([
                     'autoResizeDimensions' => [
                         'dimensions' => [
                             'sheetId' => $this->sheetId,
                             'dimension' => 'COLUMNS',
-                            'startIndex' => 0,
-                            'endIndex' => count($headers),
+                            'startIndex' => 1,
+                            'endIndex' => count($headers) - 1,
                         ],
                     ],
                 ]);

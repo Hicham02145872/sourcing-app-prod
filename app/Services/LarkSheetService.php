@@ -481,8 +481,9 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         }
 
         $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 1, 9, 160);
-        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 1, 1, 200);
-        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 9, 9, 200);
+        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 1, 1, 250);
+        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'COLUMNS', 9, 9, 300);
+        $this->updateDimension($spreadsheetToken, $accessToken, $sheetId, 'ROWS', 1, 100, 150);
     }
 
     /**
@@ -524,24 +525,23 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         $quotation = $order->quotation;
 
         $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
-        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 1)' : '';
+        $imageUrl = $sr->product_image ? asset('storage/'.$sr->product_image) : '';
 
         $labelImageUrl = ShippingLabelImageService::getImageUrl($order, $destination);
-        $shippingLabelCell = '=IMAGE("'.$labelImageUrl.'", 1)';
 
-        $unitPrice = $quotation->unit_price ?? 0;
-        $totalPrice = $order->total_amount ?? 0;
+        $unitPrice = (float) ($quotation->unit_price ?? 0);
+        $totalPrice = $unitPrice * (int) $quantity;
 
         return [
             $imageUrl,
             $order->created_at->format('Y-m-d H:i:s'),
             $sr->product_name,
             (int) $quantity,
-            (string) $unitPrice,
-            (string) $totalPrice,
+            number_format($unitPrice, 2, '.', ''),
+            number_format($totalPrice, 2, '.', ''),
             '',
             '',
-            $shippingLabelCell,
+            $labelImageUrl,
         ];
     }
 }
