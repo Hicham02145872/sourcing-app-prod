@@ -12,7 +12,16 @@ class AlternativeSourcingNotification extends Notification implements ShouldQueu
 {
     use Queueable;
 
-    public function __construct(public Quotation $quotation) {}
+    public $tries = 3;
+
+    public $maxExceptions = 3;
+
+    public $backoff = [60, 300, 900];
+
+    public function __construct(public Quotation $quotation)
+    {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

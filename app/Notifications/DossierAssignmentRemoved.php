@@ -14,7 +14,16 @@ class DossierAssignmentRemoved extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public SourcingRequest $sourcingRequest) {}
+    public $tries = 3;
+
+    public $maxExceptions = 3;
+
+    public $backoff = [60, 300, 900];
+
+    public function __construct(public SourcingRequest $sourcingRequest)
+    {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {

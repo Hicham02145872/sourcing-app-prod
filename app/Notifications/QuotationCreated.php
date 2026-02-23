@@ -18,13 +18,14 @@ class QuotationCreated extends Notification implements ShouldQueue
 
     public $tries = 3;
 
-    public $backoff = [60, 300, 900]; // 1min, 5min, 15min
+    public $maxExceptions = 3;
+
+    public $backoff = [60, 300, 900];
 
     public function __construct(Quotation $quotation)
     {
-
         $this->quotation = $quotation;
-
+        $this->afterCommit();
     }
 
     public function via(object $notifiable): array
@@ -122,10 +123,11 @@ class QuotationCreated extends Notification implements ShouldQueue
             ]);
     }
 
-    public function retryUntil(): \DateTime
+    public function failed(\Throwable $exception): void
     {
-
-        return now()->addHours(24);
-
+        \Illuminate\Support\Facades\Log::error('QuotationCreated notification permanently failed', [
+            'quotation_id' => $this->quotation->id ?? null,
+            'error' => $exception->getMessage(),
+        ]);
     }
 }

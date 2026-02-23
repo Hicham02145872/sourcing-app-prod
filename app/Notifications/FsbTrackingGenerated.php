@@ -14,12 +14,20 @@ class FsbTrackingGenerated extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public $tries = 3;
+
+    public $maxExceptions = 3;
+
+    public $backoff = [60, 300, 900];
+
     /**
      * Create a new notification instance.
      */
     public function __construct(
         protected SourcingOrder $sourcingOrder
-    ) {}
+    ) {
+        $this->afterCommit();
+    }
 
     /**
      * Get the notification's delivery channels.

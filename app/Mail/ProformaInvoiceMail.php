@@ -22,16 +22,14 @@ class ProformaInvoiceMail extends Mailable implements ShouldQueue
 
     public $tries = 3;
 
-    public $backoff = [60, 300, 900]; // 1min, 5min, 15min
+    public $maxExceptions = 3;
 
-    /**
-     * Create a new message instance.
-     *
-     * ✅ Only accept and store the SourcingOrder model
-     */
+    public $backoff = [60, 300, 900];
+
     public function __construct(SourcingOrder $sourcingOrder)
     {
         $this->sourcingOrder = $sourcingOrder;
+        $this->afterCommit();
     }
 
     /**
@@ -106,11 +104,11 @@ class ProformaInvoiceMail extends Mailable implements ShouldQueue
         return $pdf;
     }
 
-    /**
-     * Determine the time at which the job should timeout.
-     */
-    public function retryUntil(): \DateTime
+    public function failed(\Throwable $exception): void
     {
-        return now()->addHours(24);
+        Log::error('ProformaInvoiceMail permanently failed', [
+            'order_id' => $this->sourcingOrder->id ?? null,
+            'error' => $exception->getMessage(),
+        ]);
     }
 }

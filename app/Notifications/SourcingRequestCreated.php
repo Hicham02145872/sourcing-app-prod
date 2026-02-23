@@ -14,6 +14,12 @@ class SourcingRequestCreated extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public $tries = 3;
+
+    public $maxExceptions = 3;
+
+    public $backoff = [60, 300, 900];
+
     protected $sourcingRequest;
 
     /**
@@ -22,6 +28,7 @@ class SourcingRequestCreated extends Notification implements ShouldQueue
     public function __construct(SourcingRequest $sourcingRequest)
     {
         $this->sourcingRequest = $sourcingRequest;
+        $this->afterCommit();
     }
 
     /**

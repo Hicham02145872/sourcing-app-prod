@@ -14,11 +14,18 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public $tries = 3;
+
+    public $maxExceptions = 3;
+
+    public $backoff = [60, 300, 900];
+
     protected $sourcingOrder;
 
     public function __construct(SourcingOrder $sourcingOrder)
     {
         $this->sourcingOrder = $sourcingOrder;
+        $this->afterCommit();
     }
 
     public function via(object $notifiable): array

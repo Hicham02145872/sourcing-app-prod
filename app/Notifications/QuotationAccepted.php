@@ -16,9 +16,16 @@ class QuotationAccepted extends Notification implements ShouldQueue
 
     protected $quotation;
 
+    public $tries = 3;
+
+    public $maxExceptions = 3;
+
+    public $backoff = [60, 300, 900];
+
     public function __construct(Quotation $quotation)
     {
         $this->quotation = $quotation;
+        $this->afterCommit();
     }
 
     public function via(object $notifiable): array

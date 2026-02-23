@@ -13,12 +13,18 @@ class RefundStatusUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public $tries = 3;
+
+    public $maxExceptions = 3;
+
+    public $backoff = [60, 300, 900];
+
     /**
      * Create a new notification instance.
      */
     public function __construct(public RefundRequest $refundRequest)
     {
-        //
+        $this->afterCommit();
     }
 
     /**

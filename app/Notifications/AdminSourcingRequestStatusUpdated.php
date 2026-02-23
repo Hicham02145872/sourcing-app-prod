@@ -12,11 +12,18 @@ class AdminSourcingRequestStatusUpdated extends Notification implements ShouldQu
 {
     use Queueable;
 
+    public $tries = 3;
+
+    public $maxExceptions = 3;
+
+    public $backoff = [60, 300, 900];
+
     protected $sourcingRequest;
 
     public function __construct(SourcingRequest $sourcingRequest)
     {
         $this->sourcingRequest = $sourcingRequest;
+        $this->afterCommit();
     }
 
     public function via($notifiable): array
