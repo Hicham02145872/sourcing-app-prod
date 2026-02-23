@@ -525,10 +525,10 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         $quotation = $order->quotation;
 
         $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
-        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 4)' : '';
+        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'")' : '';
 
         $labelImageUrl = ShippingLabelImageService::getImageUrl($order, $destination);
-        $shippingLabelCell = $labelImageUrl ? '=IMAGE("'.$labelImageUrl.'", 4)' : '';
+        $shippingLabelCell = $labelImageUrl ? '=IMAGE("'.$labelImageUrl.'")' : '';
 
         $unitPrice = (float) ($quotation->unit_price ?? 0);
         $totalPrice = $unitPrice * (int) $quantity;
