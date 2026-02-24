@@ -15,21 +15,12 @@
                         <div class="w-8 h-8 bg-[#EBEBEB] dark:bg-slate-700 text-slate-500 rounded-full flex items-center justify-center text-sm font-bold">2</div>
                         <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ __('Destinations') }}</span>
                     </div>
-                    <div class="h-0.5 flex-1 mx-4 bg-[#EBEBEB] dark:bg-slate-700"></div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-[#EBEBEB] dark:bg-slate-700 text-slate-500 rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                        <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ __('Contact Info') }}</span>
-                    </div>
                 </div>
             </div>
 
             <form method="POST" action="{{ route('client.sourcing-requests.update', $sourcingRequest) }}" enctype="multipart/form-data"
                   x-data="sourcingRequestForm" @submit.prevent="submitForm"
-                  data-translation-destination-required="{{ __('At least one destination is required!') }}"
-                  data-translation-getting-location="{{ __('Getting your location...') }}"
-                  data-translation-location-captured="{{ __('Location captured successfully!') }}"
-                  data-translation-location-error="{{ __('Unable to retrieve your location.') }}"
-                  data-translation-geolocation-unsupported="{{ __('Geolocation is not supported by your browser.') }}">
+                  data-translation-destination-required="{{ __('At least one destination is required!') }}">
                 @csrf
                 @method('PUT')
 
@@ -256,59 +247,6 @@
                     </button>
                 </div>
 
-                <!-- Step 3: Contact Info -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-[#EBEBEB] dark:border-slate-700 p-6 sm:p-8 mb-6">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
-                        <span class="w-8 h-8 bg-[#EF7722] text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
-                        {{ __('Your Information') }}
-                    </h3>
-
-                    <input type="hidden" id="phone_number" name="phone_number" value="{{ old('phone_number', auth()->user()->phone) }}" />
-
-                    <div class="space-y-4">
-                        <!-- Address Section -->
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-                                {{ __('Delivery Address') }}
-                            </label>
-                            <div class="flex flex-col sm:flex-row gap-3 p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600 mb-3">
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="radio" id="address_manual" name="address_option" value="manual" class="form-radio h-4 w-4 text-[#EF7722] focus:ring-[#EF7722]" {{ old('address_option', $sourcingRequest->address ? 'manual' : 'geolocation') == 'manual' ? 'checked' : '' }}>
-                                    <span class="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('Enter manually') }}</span>
-                                </label>
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="radio" id="address_geolocation" name="address_option" value="geolocation" class="form-radio h-4 w-4 text-[#EF7722] focus:ring-[#EF7722]" {{ old('address_option', $sourcingRequest->address ? 'manual' : 'geolocation') == 'geolocation' ? 'checked' : '' }}>
-                                    <span class="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('Use my location') }}</span>
-                                </label>
-                            </div>
-
-                            <!-- Manual Address -->
-                            <div id="manual-address-container" style="{{ old('address_option', $sourcingRequest->address ? 'manual' : 'geolocation') == 'manual' ? '' : 'display: none;' }}">
-                                <textarea id="address" 
-                                          rows="2" 
-                                          class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] resize-none shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
-                                          name="address" 
-                                          placeholder="{{ __('Full address including street, city, and postal code') }}">{{ old('address', $sourcingRequest->address) }}</textarea>
-                            </div>
-
-                            <!-- Geolocation -->
-                            <div id="geolocation-container" style="{{ old('address_option', $sourcingRequest->address ? 'manual' : 'geolocation') == 'geolocation' ? '' : 'display: none;' }}">
-                                <button type="button" 
-                                        @click="getGeolocation"
-                                        class="w-full py-2.5 bg-[#EF7722] hover:bg-[#FAA533] text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                    </svg>
-                                    {{ __('Get My Location') }}
-                                </button>
-                                <p id="location-feedback" class="mt-3 text-sm font-medium text-center"></p>
-                                <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $sourcingRequest->latitude) }}">
-                                <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $sourcingRequest->longitude) }}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Submit Buttons -->
                 <div class="flex flex-col-reverse sm:flex-row gap-3 justify-end">
                     <a href="{{ route('client.dashboard') }}" 
@@ -330,22 +268,6 @@
     @push('scripts')
     <script>
         document.addEventListener('alpine:init', () => {
-            const addressOptions = document.querySelectorAll('input[name="address_option"]');
-            const manualAddressContainer = document.getElementById('manual-address-container');
-            const geolocationContainer = document.getElementById('geolocation-container');
-
-            addressOptions.forEach(option => {
-                option.addEventListener('change', () => {
-                    if (option.value === 'manual') {
-                        manualAddressContainer.style.display = 'block';
-                        geolocationContainer.style.display = 'none';
-                    } else {
-                        manualAddressContainer.style.display = 'none';
-                        geolocationContainer.style.display = 'block';
-                    }
-                });
-            });
-
             const input = document.getElementById('product_image');
             const preview = document.getElementById('product_image_preview');
             const placeholder = document.getElementById('placeholder');
@@ -535,36 +457,6 @@
                         }
                     } catch (error) {
                         window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __("A network error occurred.") }}' }));
-                    }
-                },
-
-                getGeolocation() {
-                    const form = document.querySelector('form');
-                    const locationFeedback = document.getElementById('location-feedback');
-                    const latitudeInput = document.getElementById('latitude');
-                    const longitudeInput = document.getElementById('longitude');
-
-                    locationFeedback.textContent = form.dataset.translationGettingLocation;
-                    locationFeedback.className = 'mt-3 text-sm font-medium text-blue-600 dark:text-blue-400 text-center';
-
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                                latitudeInput.value = position.coords.latitude;
-                                longitudeInput.value = position.coords.longitude;
-                                locationFeedback.textContent = form.dataset.translationLocationCaptured;
-                                locationFeedback.className = 'mt-3 text-sm font-medium text-green-600 dark:text-green-400 text-center';
-                            },
-                            (error) => {
-                                latitudeInput.value = '';
-                                longitudeInput.value = '';
-                                locationFeedback.textContent = form.dataset.translationLocationError;
-                                locationFeedback.className = 'mt-3 text-sm font-medium text-red-600 dark:text-red-400 text-center';
-                            }
-                        );
-                    } else {
-                        locationFeedback.textContent = form.dataset.translationGeolocationUnsupported;
-                        locationFeedback.className = 'mt-3 text-sm font-medium text-red-600 dark:text-red-400 text-center';
                     }
                 }
             }));
