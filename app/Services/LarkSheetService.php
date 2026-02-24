@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ShippingCompany;
 use App\Models\SourcingOrder;
 use App\Services\ShippingLabelImageService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -404,6 +405,76 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         }
 
         Log::error("Failed to sync order #{$order->id} to Lark Sheet. Response: ".$response->body());
+
+        return false;
+    }
+
+    /**
+     * Sync only the given destinations of an order to the given company's sheet.
+     *
+     * @param  Collection<int, \App\Models\SourcingRequestDestination>  $destinations
+     */
+    public function syncOrderDestinations(SourcingOrder $order, ShippingCompany $company, Collection $destinations): bool
+    {
+        if ($destinations->isEmpty()) {
+            return true;
+        }
+
+        if (! $company->lark_app_id || ! $company->lark_app_secret || ! $company->lark_base_token) {
+            Log::warning("Lark configuration missing for shipping company: {$company->name}");
+
+            return false;
+        }
+
+        $token = $this->getAccessToken($company->lark_app_id, $company->lark_app_secret);
+        if (! $token) {
+            Log::error("Could not obtain Lark access token for company: {$company->name}");
+
+            return false;
+        }
+
+        $realToken = $this->resolveRealToken($company->lark_base_token, $token);
+        $targetSheetTitle = $company->lark_table_id ?: 'Sheet1';
+        $sheetId = $this->resolveSheetId($realToken, $token, $targetSheetTitle);
+        if (! $sheetId) {
+            Log::error("Could not find sheet with title '{$targetSheetTitle}' for company {$company->name}");
+
+            return false;
+        }
+
+        $this->ensureHeaders($company);
+        $order->load(['user', 'quotation.sourcingRequest.destinations.country', 'destinationShipments', 'shippingCompany']);
+
+        $rows = [];
+        foreach ($destinations as $destination) {
+            $rows[] = $this->mapOrderToRow($order, $destination);
+        }
+
+        $url = "{$this->baseUrl}/sheets/v2/spreadsheets/{$realToken}/values_append";
+        $payload = [
+            'valueRange' => [
+                'range' => $sheetId,
+                'values' => $rows,
+            ],
+        ];
+
+        Log::info("Syncing Order #{$order->id} to Lark (destinations: ".$destinations->count().") for company: {$company->name}. Range: {$sheetId}.");
+
+        $response = Http::withToken($token)->post($url, $payload);
+        $responseData = $response->json();
+
+        if ($response->successful() && isset($responseData['code']) && $responseData['code'] === 0) {
+            Log::info("Successfully synced order #{$order->id} destinations to Lark Sheet for {$company->name}.");
+            if (isset($responseData['data']['updates']['updatedRange']) && preg_match('/!([A-Z]+)(\d+):([A-Z]+)(\d+)/', $responseData['data']['updates']['updatedRange'], $matches)) {
+                $startRow = (int) $matches[2] - 1;
+                $endRow = (int) $matches[4];
+                $this->updateDimension($realToken, $token, $sheetId, 'ROWS', $startRow, $endRow, 140);
+            }
+
+            return true;
+        }
+
+        Log::error("Failed to sync order #{$order->id} destinations to Lark. Response: ".$response->body());
 
         return false;
     }

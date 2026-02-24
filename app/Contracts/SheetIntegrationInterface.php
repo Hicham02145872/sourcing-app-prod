@@ -4,6 +4,7 @@ namespace App\Contracts;
 
 use App\Models\ShippingCompany;
 use App\Models\SourcingOrder;
+use Illuminate\Support\Collection;
 
 interface SheetIntegrationInterface
 {
@@ -21,6 +22,14 @@ interface SheetIntegrationInterface
      * Sync a single order to the sheet.
      */
     public function syncOrder(SourcingOrder $order, ShippingCompany $company): bool;
+
+    /**
+     * Sync only the given destinations of an order to the given company's sheet.
+     * Used when an order has multiple destinations, each assigned to a different shipping company.
+     *
+     * @param  Collection<int, \App\Models\SourcingRequestDestination>  $destinations
+     */
+    public function syncOrderDestinations(SourcingOrder $order, ShippingCompany $company, Collection $destinations): bool;
 
     /**
      * Update the status of an existing order row.

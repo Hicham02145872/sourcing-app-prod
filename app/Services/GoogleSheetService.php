@@ -10,6 +10,7 @@ use Google\Service\Sheets;
 use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
 use Google\Service\Sheets\Request;
 use Google\Service\Sheets\ValueRange;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -98,6 +99,48 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
             return true;
         } catch (\Exception $e) {
             \Log::error("Google Sheet Sync Failed for Order #{$order->id}: ".$e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Sync only the given destinations of an order to the given company's sheet.
+     *
+     * @param  Collection<int, \App\Models\SourcingRequestDestination>  $destinations
+     */
+    public function syncOrderDestinations(\App\Models\SourcingOrder $order, \App\Models\ShippingCompany $company, Collection $destinations): bool
+    {
+        if ($destinations->isEmpty()) {
+            return true;
+        }
+
+        $this->spreadsheetId = $company->google_sheet_id;
+        $this->sheetName = $company->sheet_name ?: 'sourcing';
+        $this->sheetId = $this->getSheetIdByName($this->sheetName);
+
+        if (! $this->spreadsheetId) {
+            return false;
+        }
+
+        $order->load(['user', 'quotation.sourcingRequest.destinations.country', 'destinationShipments', 'shippingCompany']);
+        $allDestinations = $order->quotation->sourcingRequest->destinations;
+        $syncedFields = array_keys(self::SHIPPING_SHEET_HEADERS);
+
+        try {
+            foreach ($destinations as $destination) {
+                $index = $allDestinations->search(fn ($d) => $d->id === $destination->id);
+                if ($index === false) {
+                    continue;
+                }
+                $displayId = ($order->id * 5) + $index;
+                $data = $this->mapOrderToDataForShippingSheet($order, $destination);
+                $this->upsertRow($data, $displayId, $order->id, $syncedFields);
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            \Log::error("Google Sheet Sync (destinations) Failed for Order #{$order->id}: ".$e->getMessage());
 
             return false;
         }

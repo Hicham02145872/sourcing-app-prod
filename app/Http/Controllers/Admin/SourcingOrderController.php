@@ -259,6 +259,13 @@ class SourcingOrderController extends Controller
     {
         $this->authorize('update', $sourcingOrder);
 
+        $sourcingOrder->load(['shippingCompany', 'user', 'quotation.sourcingRequest.destinations', 'destinationShipments']);
+
+        // Multi-destination: sync each destination to its assigned company's sheet
+        if ($sourcingOrder->hasMultipleDestinations()) {
+            return $this->manualSyncMultiDestinationOrder($sourcingOrder);
+        }
+
         if (! $sourcingOrder->shipping_company_id) {
             return response()->json([
                 'success' => false,
@@ -266,9 +273,7 @@ class SourcingOrderController extends Controller
             ], 422);
         }
 
-        $sourcingOrder->load(['shippingCompany', 'user', 'quotation.sourcingRequest']);
         $company = $sourcingOrder->shippingCompany;
-
         $factory = app(\App\Services\SheetIntegrationFactory::class);
         $service = $factory->getService($company);
 
@@ -308,6 +313,78 @@ class SourcingOrderController extends Controller
                 'message' => $userMessage,
             ], 500);
         }
+    }
+
+    /**
+     * Manual sync for orders with multiple destinations: sync each destination to its assigned company's sheet.
+     */
+    protected function manualSyncMultiDestinationOrder(SourcingOrder $sourcingOrder): JsonResponse
+    {
+        $destinationsById = $sourcingOrder->quotation->sourcingRequest->destinations->keyBy('id');
+        $byCompany = $sourcingOrder->destinationShipments
+            ->filter(fn ($s) => ! empty($s->shipping_company_id))
+            ->groupBy('shipping_company_id');
+
+        if ($byCompany->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => __('Assign at least one shipping company per destination, then sync.'),
+            ], 422);
+        }
+
+        $factory = app(\App\Services\SheetIntegrationFactory::class);
+        $lastError = null;
+        $syncedCount = 0;
+
+        foreach ($byCompany as $companyId => $shipments) {
+            $company = \App\Models\ShippingCompany::find($companyId);
+            if (! $company) {
+                continue;
+            }
+            $service = $factory->getService($company);
+            if (! $service) {
+                $lastError = __('Sheet not configured for :name.', ['name' => $company->name]);
+                continue;
+            }
+
+            $destinationIds = $shipments->pluck('sourcing_request_destination_id')->filter()->values();
+            $destinations = $destinationIds->map(fn ($id) => $destinationsById->get($id))->filter()->values();
+
+            if ($destinations->isEmpty()) {
+                continue;
+            }
+
+            try {
+                $success = $service->syncOrderDestinations($sourcingOrder, $company, $destinations);
+                if ($success) {
+                    $syncedCount++;
+                } else {
+                    $lastError = __('Sync failed for :name.', ['name' => $company->name]);
+                }
+            } catch (\Throwable $e) {
+                Log::error("Manual multi-destination sync failed for Order #{$sourcingOrder->id} / {$company->name}: ".$e->getMessage());
+                $lastError = \App\Support\SheetSyncErrorHelper::toUserMessage($e);
+            }
+        }
+
+        if ($syncedCount > 0) {
+            $sourcingOrder->update([
+                'sheet_synced_at' => now(),
+                'sheet_sync_error' => $lastError ? \App\Support\SheetSyncErrorHelper::toUserMessage(new \Exception($lastError)) : null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $syncedCount === $byCompany->count()
+                    ? __('Successfully synced to all shipping company sheets.')
+                    : __('Synced to :count company sheet(s). :note', ['count' => $syncedCount, 'note' => $lastError ?? '']),
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $lastError ?? __('Sync failed.'),
+        ], 500);
     }
 
     public function updateFinancials(Request $request, SourcingOrder $sourcingOrder): RedirectResponse

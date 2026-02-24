@@ -77,8 +77,8 @@
                 </div>
             @endif
 
-            @if(auth()->user()->isSuperAdmin() || $sourcingOrder->assigned_to_admin_id === auth()->id())
-                <!-- Shipping Company Assignment -->
+            @if((auth()->user()->isSuperAdmin() || $sourcingOrder->assigned_to_admin_id === auth()->id()) && !$sourcingOrder->hasMultipleDestinations())
+                <!-- Shipping Company Assignment (hidden when multiple destinations: use per-destination assignment below) -->
                 <div class="mt-4 pt-4 border-t border-slate-100">
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('Shipping Company') }}</label>
                     <div class="flex items-center gap-3">

@@ -44,14 +44,20 @@ class SyncOrderToSheet implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        // Must have a shipping company assigned
+        $order->load(['shippingCompany', 'quotation.sourcingRequest.destinations', 'destinationShipments']);
+
+        // Multi-destination: sync each destination to its assigned company's sheet
+        if ($order->hasMultipleDestinations()) {
+            $this->syncMultiDestinationOrder($order, $event);
+            return;
+        }
+
+        // Single destination: must have global shipping company assigned
         if (! $order->shipping_company_id) {
             return;
         }
 
-        $order->load('shippingCompany');
         $company = $order->shippingCompany;
-
         $service = $this->factory->getService($company);
         if (! $service) {
             Log::info("No sheet integration service found for company: {$company->name}");
@@ -59,7 +65,6 @@ class SyncOrderToSheet implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        // Idempotency check to prevent redundant syncs
         $eventKey = ($event instanceof SourcingOrderStatusChanged) ? "status_{$order->status}" : 'payment';
         $lockKey = "sheet_sync_lock_{$order->id}_{$eventKey}";
         if (Cache::has($lockKey)) {
@@ -71,10 +76,6 @@ class SyncOrderToSheet implements ShouldBeUnique, ShouldQueue
 
         try {
             Log::info("Syncing Order #{$order->id} to {$company->name} integration...");
-
-            // If it's a status change, we might want to update instead of full sync
-            // but for simplicity, most sheet services handle upsert/sync logically.
-            // Let's use the service's syncOrder method which handles append/update.
             $success = $service->syncOrder($order, $company);
 
             if ($success) {
@@ -94,6 +95,79 @@ class SyncOrderToSheet implements ShouldBeUnique, ShouldQueue
                 'sheet_sync_error' => $userMessage,
             ]);
             throw $e;
+        }
+    }
+
+    /**
+     * When order has multiple destinations, group by assigned shipping company and sync
+     * each destination only to that company's sheet.
+     */
+    protected function syncMultiDestinationOrder(SourcingOrder $order, $event): void
+    {
+        $eventKey = ($event instanceof SourcingOrderStatusChanged) ? "status_{$order->status}" : 'payment';
+        $lockKey = "sheet_sync_lock_{$order->id}_{$eventKey}";
+        if (Cache::has($lockKey)) {
+            Log::info("Aborting multi-destination sync for Order #{$order->id} ({$eventKey}): Task already in progress or recently finished.");
+            return;
+        }
+        Cache::put($lockKey, true, now()->addMinutes(2));
+
+        $destinationsById = $order->quotation->sourcingRequest->destinations->keyBy('id');
+        $byCompany = $order->destinationShipments
+            ->filter(fn ($s) => ! empty($s->shipping_company_id))
+            ->groupBy('shipping_company_id');
+
+        if ($byCompany->isEmpty()) {
+            Log::info("Order #{$order->id} has multiple destinations but none assigned to a shipping company; skipping sheet sync.");
+            Cache::forget($lockKey);
+            return;
+        }
+
+        $lastError = null;
+        $anySuccess = false;
+
+        foreach ($byCompany as $companyId => $shipments) {
+            $company = \App\Models\ShippingCompany::find($companyId);
+            if (! $company) {
+                continue;
+            }
+            $service = $this->factory->getService($company);
+            if (! $service) {
+                Log::info("No sheet integration service found for company: {$company->name}");
+                continue;
+            }
+
+            $destinationIds = $shipments->pluck('sourcing_request_destination_id')->filter()->values();
+            $destinations = $destinationIds->map(fn ($id) => $destinationsById->get($id))->filter()->values();
+
+            if ($destinations->isEmpty()) {
+                continue;
+            }
+
+            try {
+                Log::info("Syncing Order #{$order->id} destinations to {$company->name} (".$destinations->count()." rows)...");
+                $success = $service->syncOrderDestinations($order, $company, $destinations);
+                if ($success) {
+                    $anySuccess = true;
+                } else {
+                    $lastError = "Sync failed for {$company->name}";
+                }
+            } catch (\Throwable $e) {
+                Log::error("Error syncing Order #{$order->id} to {$company->name}: ".$e->getMessage());
+                $lastError = $e->getMessage();
+            }
+        }
+
+        Cache::forget($lockKey);
+
+        if ($anySuccess) {
+            SourcingOrder::where('id', $order->id)->update([
+                'sheet_synced_at' => now(),
+                'sheet_sync_error' => $lastError ? \App\Support\SheetSyncErrorHelper::toUserMessage(new \Exception($lastError)) : null,
+            ]);
+        }
+        if ($lastError && ! $anySuccess) {
+            throw new \Exception("Multi-destination sync failed for Order #{$order->id}: ".$lastError);
         }
     }
 }
