@@ -30,6 +30,9 @@ class SourcingRequest extends Model
         'cancelled',
     ];
 
+    /** Statuts à prioriser en tête de liste (ex: négociation en attente). */
+    public const CRITICAL_STATUSES_FOR_LIST = ['negotiating'];
+
     protected $fillable = [
         'user_id',
         'product_name',

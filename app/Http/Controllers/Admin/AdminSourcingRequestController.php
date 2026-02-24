@@ -163,7 +163,13 @@ class AdminSourcingRequestController extends Controller
         // Admins can now see all requests, but standard admins are restricted to "read-only"
         // on requests assigned to others via Policy/Gate checks.
 
-        // Sort: My Assignments -> Unassigned -> Others, then by Created At
+        // Sort: Critical statuses first (e.g. negotiating), then assignment priority, then by Created At
+        $criticalStatuses = SourcingRequest::CRITICAL_STATUSES_FOR_LIST;
+        if (! empty($criticalStatuses)) {
+            $placeholders = implode(',', array_map(fn ($s) => "'".addslashes($s)."'", $criticalStatuses));
+            $query->orderByRaw("CASE WHEN sourcing_requests.status IN ({$placeholders}) THEN 0 ELSE 1 END ASC");
+        }
+
         if (auth()->check()) {
             $userId = auth()->id();
             $query->orderByRaw('CASE 
