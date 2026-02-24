@@ -272,20 +272,23 @@
     </div>
 
     @push('scripts')
+    @php
+        $loadingMessages = [
+            __('Connecting to carrier network...'),
+            __('Intercepting logistics signals...'),
+            __('Parsing shipment history...'),
+            __('Fetching real-time updates...'),
+            __('Analyzing transit route...'),
+            __('Decrypting tracking data...'),
+            __('Finalizing results...'),
+        ];
+    @endphp
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // 1. Declare State
             let messageInterval;
             let abortController = null;
-            const messages = @json([
-                __('Connecting to carrier network...'),
-                __('Intercepting logistics signals...'),
-                __('Parsing shipment history...'),
-                __('Fetching real-time updates...'),
-                __('Analyzing transit route...'),
-                __('Decrypting tracking data...'),
-                __('Finalizing results...')
-            ]);
+            const messages = @json($loadingMessages);
 
             // 2. DOM Elements
             const elements = {
