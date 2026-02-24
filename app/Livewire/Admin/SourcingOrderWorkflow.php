@@ -179,6 +179,26 @@ class SourcingOrderWorkflow extends Component
 
             try {
                 $result = $trackingService->refreshTracking($trackingNumber, $carrier ?: null);
+
+                // Validation: vérifier que le provider détecté est compatible avec la shipping company assignée à cette destination
+                $shippingCompany = $this->sourcingOrder->getShippingCompanyForDestination($dest->id);
+                $rawProvider = strtolower($result['raw_provider'] ?? '');
+                if ($shippingCompany) {
+                    $allowedProviders = $this->getAllowedProvidersForShippingCompany($shippingCompany);
+                    if (! empty($allowedProviders) && $rawProvider && ! in_array($rawProvider, $allowedProviders, true)) {
+                        $results[$dest->id] = [
+                            'success' => false,
+                            'error' => __('Tracking number is not valid for :company (detected carrier: :carrier).', [
+                                'company' => $shippingCompany->name,
+                                'carrier' => $result['provider'] ?? $rawProvider,
+                            ]),
+                            'dest_label' => $dest->country?->name ?? __('Destination #:n', ['n' => $dest->id]),
+                        ];
+                        $errorCount++;
+                        continue;
+                    }
+                }
+
                 $result['dest_label'] = $dest->country?->name ?? __('Destination #:n', ['n' => $dest->id]);
                 $results[$dest->id] = $result;
 
@@ -210,6 +230,44 @@ class SourcingOrderWorkflow extends Component
         } else {
             $this->dispatch('show-error-toast', message: __('Could not retrieve tracking for any destination.'));
         }
+    }
+
+    /**
+     * Providers autorisés pour une shipping company donnée (en fonction de ses carrier_options).
+     *
+     * Exemple :
+     *  - gcc  → faster
+     *  - ups  → ups
+     *  - choicexp → choicexp
+     *  - itdida → itdida
+     */
+    protected function getAllowedProvidersForShippingCompany(?ShippingCompany $company): array
+    {
+        if (! $company) {
+            return [];
+        }
+
+        $options = $company->carrier_options ?? [];
+        if (! is_array($options) || empty($options)) {
+            return [];
+        }
+
+        $map = [
+            'gcc' => 'faster',
+            'faster' => 'faster',
+            'ups' => 'ups',
+            'choicexp' => 'choicexp',
+            'itdida' => 'itdida',
+        ];
+
+        $allowed = [];
+        foreach ($options as $key) {
+            if (isset($map[$key])) {
+                $allowed[] = $map[$key];
+            }
+        }
+
+        return array_values(array_unique($allowed));
     }
 
     public function assignTo($adminId)

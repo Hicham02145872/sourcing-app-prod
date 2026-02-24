@@ -317,7 +317,7 @@ class UnifiedTrackingService
         }
 
         $provider = $this->detectProvider($realNumber, $realCarrier);
-        
+
         $service = $this->getService($provider);
 
         if (! $service) {
@@ -330,7 +330,10 @@ class UnifiedTrackingService
 
         Log::info('🛰️ [UNIFIED SERVICE] Calling provider service', ['class' => get_class($service)]);
         $response = $service->getTrackingInfo($realNumber);
-        
+
+        // Expose the provider interne (technique) pour l'admin (validation par shipping company)
+        $response['raw_provider'] = strtolower($provider);
+
         // Map provider names for branding (e.g. Faster -> FSB)
         $providerDisplayMap = [
             'faster' => 'FSB',
