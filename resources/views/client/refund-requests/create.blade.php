@@ -112,7 +112,7 @@
                                 </div>
                                 <input type="number" name="amount_requested" id="amount_requested" step="0.01" min="0.01" max="{{ $remainingAmount }}" 
                                        class="block w-full rounded-xl border-slate-200 dark:border-slate-700 pl-8 focus:border-[#EF7722] focus:ring-[#EF7722] bg-white dark:bg-slate-900 text-slate-900 dark:text-white sm:text-sm"
-                                       placeholder="0.00">
+                                       placeholder="{{ __('Amount placeholder') }}">
                             </div>
                             @if($remainingAmount < $sourcingOrder->total_amount)
                                 <p class="text-[10px] text-orange-600 font-bold italic">

@@ -186,7 +186,7 @@
                                                       required 
                                                       min="1" 
                                                       class="w-full rounded-lg text-sm shadow-sm dark:bg-slate-800 dark:text-white border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722]" 
-                                                      placeholder="100" />
+                                                      placeholder="{{ __('Quantity placeholder') }}" />
                                     </div>
 
                                     <div>
@@ -418,7 +418,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
                                     <label for="destinations_${newIndex}_quantity" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">{{ __('Quantity') }}</label>
-                                    <input type="number" id="destinations_${newIndex}_quantity" name="destinations[${newIndex}][quantity]" required min="1" class="w-full rounded-lg text-sm shadow-sm dark:bg-slate-800 dark:text-white border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722]" placeholder="100" />
+                                    <input type="number" id="destinations_${newIndex}_quantity" name="destinations[${newIndex}][quantity]" required min="1" class="w-full rounded-lg text-sm shadow-sm dark:bg-slate-800 dark:text-white border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722]" placeholder="{{ __('Quantity placeholder') }}" />
                                 </div>
                                 <div>
                                     <label for="destinations_${newIndex}_country_id" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">{{ __('Country') }}</label>

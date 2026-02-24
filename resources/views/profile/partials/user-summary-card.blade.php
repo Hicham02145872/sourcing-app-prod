@@ -25,7 +25,7 @@
         
         <div class="mt-6 flex items-center justify-center gap-2">
             <span class="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-full text-xs font-bold uppercase tracking-wider border border-orange-200/50 dark:border-orange-800/30">
-                {{ $user->role ?? 'Client' }}
+                {{ $user->role ?? __('Client') }}
             </span>
             <span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold uppercase tracking-wider border border-slate-200/50 dark:border-slate-600/30">
                 {{ __('Member since') }} {{ $user->created_at->format('M Y') }}

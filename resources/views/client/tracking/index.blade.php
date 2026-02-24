@@ -157,9 +157,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">{{ __('Status estimé') }}</p>
+                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">{{ __('Estimated status') }}</p>
                             <p id="virtualStatusMessage" class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                                {{ __('Votre numéro de suivi réel sera disponible sous peu. Les mises à jour automatiques commenceront une fois le numéro assigné.') }}
+                                {{ __('Your real tracking number will be available shortly. Automatic updates will start once the number is assigned.') }}
                             </p>
                         </div>
                     </div>
@@ -192,28 +192,28 @@
                                 <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-[#EF7722] flex items-center justify-center z-10 shadow-sm">
                                     <svg class="w-5 h-5 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </div>
-                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">ORDER</span>
+                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{{ __('Order') }}</span>
                             </div>
                             <!-- Step 2 -->
                             <div class="flex flex-col items-center">
                                 <div id="step2Dot" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center z-10 shadow-sm">
                                     <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9a1 1 0 01-1-1m3 0V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9a1 1 0 01-1-1m8 1a1 1 0 021 1v1a1 1 0 01-1 1h-1a1 1 0 00-1 1v1a1 1 0 01-1 1h-1a1 1 0 00-1 1v1a1 1 0 01-1 1H9m4-1V8a1 1 0 00-1-1h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 00-.293.707V16m0 0a1 1 0 001 1h6.586a1 1 0 00.707-.293l2.414-2.414a1 1 0 00.293-.707V8.414a1 1 0 00-.293-.707l-2.414-2.414a1 1 0 00-.707-.293H13"/></svg>
                                 </div>
-                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">IN TRANSIT</span>
+                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{{ __('In transit') }}</span>
                             </div>
                             <!-- Step 3 -->
                             <div class="flex flex-col items-center">
                                 <div id="step3Dot" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center z-10 shadow-sm">
                                     <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                                 </div>
-                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">OUT FOR DELIVERY</span>
+                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{{ __('Out for delivery') }}</span>
                             </div>
                             <!-- Step 4 -->
                             <div class="flex flex-col items-center">
                                 <div id="step4Dot" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center z-10 shadow-sm">
                                     <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </div>
-                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">DELIVERED</span>
+                                <span class="absolute top-12 text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{{ __('Delivered') }}</span>
                             </div>
                         </div>
                     </div>
@@ -277,15 +277,15 @@
             // 1. Declare State
             let messageInterval;
             let abortController = null;
-            const messages = [
-                "Connecting to carrier network...",
-                "Intercepting logistics signals...",
-                "Parsing shipment history...",
-                "Fetching real-time updates...",
-                "Analyzing transit route...",
-                "Decrypting tracking data...",
-                "Finalizing results..."
-            ];
+            const messages = @json([
+                __('Connecting to carrier network...'),
+                __('Intercepting logistics signals...'),
+                __('Parsing shipment history...'),
+                __('Fetching real-time updates...'),
+                __('Analyzing transit route...'),
+                __('Decrypting tracking data...'),
+                __('Finalizing results...')
+            ]);
 
             // 2. DOM Elements
             const elements = {
@@ -409,7 +409,7 @@
                         }
 
                         if (elements.loadingText) {
-                            elements.loadingText.innerText = result.current_status || "Processing request...";
+                            elements.loadingText.innerText = result.current_status || "{{ __('Processing request...') }}";
                         }
                         if (elements.loadingSubtext) {
                             elements.loadingSubtext.innerText = "{{ __('This may take a couple of minutes for live carrier data. We will retry automatically.') }}";
@@ -428,7 +428,7 @@
                     }
                     
                     if (response.status === 404) {
-                        throw new Error(`Shipment Not Found: ${result.error || "We could not locate this number. Please verify or contact support."}`);
+                        throw new Error(`{{ __("Shipment Not Found:") }} ${result.error || "{{ __('We could not locate this number. Please verify or contact support.') }}"}`);
                     }
                     
                     if (!response.ok) throw new Error(result.error || 'A connection error occurred.');
@@ -443,7 +443,7 @@
 
                 } catch (error) {
                     if (error.name === 'AbortError') return;
-                    if (elements.errorMessage) elements.errorMessage.textContent = error.message.includes('Failed to fetch') ? "Network error. Please check your connection." : error.message;
+                    if (elements.errorMessage) elements.errorMessage.textContent = error.message.includes('Failed to fetch') ? "{{ __("Network error. Please check your connection.") }}" : error.message;
                     if (elements.errorState) elements.errorState.classList.remove('hidden');
                 } finally {
                     if (shouldResetUI) resetStatus();

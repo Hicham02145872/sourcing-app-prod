@@ -52,7 +52,7 @@
                         <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                             {{ __('Final Warning') }}
                         </h2>
-                        <p class="text-sm text-slate-500 font-medium">Cette action est irréversible.</p>
+                        <p class="text-sm text-slate-500 font-medium">{{ __('This action cannot be undone.') }}</p>
                     </div>
                 </div>
 

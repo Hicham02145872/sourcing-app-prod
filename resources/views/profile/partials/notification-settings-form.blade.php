@@ -27,19 +27,19 @@
         <div class="flex flex-col md:flex-row items-center justify-between p-6 bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700/50 gap-6">
             <div class="flex-1">
                 <div class="flex items-center gap-3">
-                    <span class="text-base font-bold text-slate-900 dark:text-white">Push Notifications</span>
+                    <span class="text-base font-bold text-slate-900 dark:text-white">{{ __('Push Notifications') }}</span>
                     <template x-if="permission === 'granted'">
                         <span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-200/50">
                             {{ __('Active') }}
                         </span>
                     </template>
                 </div>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Recevez des alertes directement sur votre appareil (Mobile & Desktop).</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ __('Receive alerts directly on your device (Mobile & Desktop).') }}</p>
                 
                 <template x-if="permission === 'denied'">
                     <span class="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 mt-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
-                        BLOQUÉES (Vérifiez les réglages du navigateur)
+                        {{ __('BLOCKED (Check browser settings)') }}
                     </span>
                 </template>
             </div>
@@ -73,9 +73,9 @@
                     <div class="p-3 bg-orange-100 dark:bg-orange-900/40 rounded-xl text-[#EF7722] group-hover/notif:scale-110 transition-transform shadow-inner">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     </div>
-                    <span class="text-base font-bold text-slate-800 dark:text-slate-100">Nouveaux Devis</span>
+                    <span class="text-base font-bold text-slate-800 dark:text-slate-100">{{ __('New Quotations') }}</span>
                 </div>
-                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Soyez alerté dès qu'un administrateur envoie un nouveau devis pour vos recherches.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{{ __('Be notified when an administrator sends a new quotation for your requests.') }}</p>
             </div>
 
             <div class="group/notif p-6 border border-slate-100 dark:border-slate-700/50 rounded-2xl bg-white dark:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-300">
@@ -83,9 +83,9 @@
                     <div class="p-3 bg-blue-100 dark:bg-blue-900/40 rounded-xl text-blue-600 group-hover/notif:scale-110 transition-transform shadow-inner">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
-                    <span class="text-base font-bold text-slate-800 dark:text-slate-100">Suivi Logistique</span>
+                    <span class="text-base font-bold text-slate-800 dark:text-slate-100">{{ __('Logistics Tracking') }}</span>
                 </div>
-                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Suivez chaque étape : Arrivée UAE, Dédouanement, En livraison.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{{ __('Track every step: UAE Arrival, Customs Clearance, Out for delivery.') }}</p>
             </div>
         </div>
     </div>

@@ -32,7 +32,7 @@
                             </div>
                             <input type="text" id="trackingNumberInput" name="number" value="{{ $initialNumber ?? '' }}" 
                                    class="block w-full pl-10 pr-3 py-2.5 border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-md focus:ring-[#EF7722] focus:border-[#EF7722] sm:text-sm shadow-sm transition-all" 
-                                   placeholder="e.g. JTE300387065227" required>
+                                   placeholder="{{ __('e.g. JTE300387065227') }}" required>
                         </div>
                     </div>
                     <button type="submit" id="trackButton" class="w-full sm:w-auto px-6 py-2.5 bg-[#EF7722] hover:bg-[#d66616] text-white font-medium rounded-md shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
@@ -126,7 +126,7 @@
                     <!-- Footer / Branding -->
                     <div class="px-8 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-center">
                         <div class="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-                            <span class="text-[10px] uppercase tracking-tighter text-slate-400 font-bold">Powered by</span>
+                            <span class="text-[10px] uppercase tracking-tighter text-slate-400 font-bold">{{ __('Powered by') }}</span>
                             <img src="https://static.17track.net/res/www/img/common/logo.png" alt="17TRACK" class="h-4 object-contain">
                         </div>
                     </div>
@@ -180,7 +180,7 @@
                 resetUI();
                 loadingState.classList.remove('hidden');
                 button.disabled = true;
-                button.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Searching...';
+                button.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> {{ __("Searching...") }}';
 
                 try {
                     const response = await fetch(`{{ route('client.tracking.17track.data') }}?number=${encodeURIComponent(number)}`, {
@@ -221,9 +221,9 @@
                 
                 // Populate UI
                 resultTrackingNumber.textContent = number;
-                latestStatusText.textContent = statusInfo.status || 'Active';
-                latestLocation.textContent = latest.location || 'In Transit';
-                latestDate.textContent = latest.time_iso ? new Date(latest.time_iso).toLocaleString() : 'Just now';
+                latestStatusText.textContent = statusInfo.status || '{{ __("Active") }}';
+                latestLocation.textContent = latest.location || '{{ __("In transit") }}';
+                latestDate.textContent = latest.time_iso ? new Date(latest.time_iso).toLocaleString() : '{{ __("Just now") }}';
 
                 // Dynamic Icon based on status
                 const status = (statusInfo.status || '').toLowerCase();
@@ -265,7 +265,7 @@
                 const text = document.getElementById('resultTrackingNumber').innerText;
                 if(text) {
                     navigator.clipboard.writeText(text);
-                    alert("Tracking number copied!");
+                    alert("{{ __("Tracking number copied!") }}");
                 }
             }
         });
