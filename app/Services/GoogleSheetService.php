@@ -187,10 +187,10 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
         $quotation = $order->quotation;
 
         $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
-        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'")' : '';
+        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 1)' : '';
 
         $labelImageUrl = \App\Services\ShippingLabelImageService::getImageUrl($order, $destination);
-        $shippingLabelCell = $labelImageUrl ? '=IMAGE("'.$labelImageUrl.'")' : '';
+        $shippingLabelCell = $labelImageUrl ? '=IMAGE("'.$labelImageUrl.'", 1)' : '';
 
         $unitPrice = (float) ($quotation->unit_price ?? 0);
         $totalPrice = $unitPrice * (int) $quantity;

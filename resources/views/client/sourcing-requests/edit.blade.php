@@ -222,6 +222,17 @@
                                     </div>
                                 </div>
 
+                                <div class="mt-3">
+                                    <label for="destinations_{{ $index }}_address" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
+                                        {{ __('Delivery Address') }}
+                                    </label>
+                                    <textarea id="destinations_{{ $index }}_address"
+                                              name="destinations[{{ $index }}][address]"
+                                              rows="2"
+                                              class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] resize-none shadow-sm dark:bg-slate-800 dark:text-white text-sm"
+                                              placeholder="{{ __('Full address for this destination') }}">{{ old('destinations.' . $index . '.address', $destination->address) }}</textarea>
+                                </div>
+
                                 <button type="button" 
                                         @click="removeDestination($event)"
                                         class="remove-destination w-full sm:w-auto px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-300 dark:border-red-700/30 rounded-lg transition-all text-sm font-medium flex items-center justify-center gap-2">
@@ -428,6 +439,10 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="mt-3">
+                                <label for="destinations_${newIndex}_address" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">{{ __('Delivery Address') }}</label>
+                                <textarea id="destinations_${newIndex}_address" name="destinations[${newIndex}][address]" rows="2" class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] resize-none shadow-sm dark:bg-slate-800 dark:text-white text-sm" placeholder="{{ __('Full address for this destination') }}"></textarea>
+                            </div>
                             <button type="button" @click="removeDestination($event)" class="remove-destination w-full sm:w-auto px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-300 dark:border-red-700/30 rounded-lg transition-all text-sm font-medium flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -466,7 +481,7 @@
                         setTimeout(() => {
                             block.remove();
                             document.querySelectorAll('.destination-block').forEach((b, idx) => {
-                                b.querySelectorAll('input, select').forEach(el => {
+                                b.querySelectorAll('input, select, textarea').forEach(el => {
                                     if (el.hasAttribute('name')) {
                                         const name = el.getAttribute('name').replace(/destinations\[\d+\]/, `destinations[${idx}]`);
                                         el.setAttribute('name', name);

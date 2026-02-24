@@ -37,6 +37,7 @@ class UpdateSourcingRequestRequest extends FormRequest
             'destinations.*.country_id' => 'required|exists:countries,id',
             'destinations.*.service_id' => 'required|exists:services,id',
             'destinations.*.quantity' => 'required|integer|min:1',
+            'destinations.*.address' => 'nullable|string|max:1000',
         ];
     }
 
