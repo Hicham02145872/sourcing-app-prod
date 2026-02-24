@@ -1177,5 +1177,13 @@
     "Current Password": "Mot de passe actuel",
     "Update Security": "Mettre à jour la sécurité",
     "Notification Settings": "Paramètres de notification",
-    "Stay updated on your sourcing requests and orders in real-time.": "Restez informé de vos demandes de sourcing et commandes en temps réel."
+    "Stay updated on your sourcing requests and orders in real-time.": "Restez informé de vos demandes de sourcing et commandes en temps réel.",
+    "Client Negotiation": "Négociation client",
+    "Awaiting your update": "En attente de votre mise à jour",
+    "Client message": "Message du client",
+    "No negotiation notes from the client.": "Aucune note de négociation du client.",
+    "Update quotation (reply to negotiation)": "Mettre à jour le devis (répondre à la négociation)",
+    "Edit quotation": "Modifier le devis",
+    "Client requested negotiation": "Le client a demandé une négociation",
+    "Update the quotation to reply to the client.": "Mettez à jour le devis pour répondre au client."
 }

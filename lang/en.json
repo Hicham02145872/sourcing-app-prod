@@ -1068,5 +1068,13 @@
     "Current Password": "Current Password",
     "Update Security": "Update Security",
     "Notification Settings": "Notification Settings",
-    "Stay updated on your sourcing requests and orders in real-time.": "Stay updated on your sourcing requests and orders in real-time."
+    "Stay updated on your sourcing requests and orders in real-time.": "Stay updated on your sourcing requests and orders in real-time.",
+    "Client Negotiation": "Client Negotiation",
+    "Awaiting your update": "Awaiting your update",
+    "Client message": "Client message",
+    "No negotiation notes from the client.": "No negotiation notes from the client.",
+    "Update quotation (reply to negotiation)": "Update quotation (reply to negotiation)",
+    "Edit quotation": "Edit quotation",
+    "Client requested negotiation": "Client requested negotiation",
+    "Update the quotation to reply to the client.": "Update the quotation to reply to the client."
 }

@@ -62,6 +62,7 @@
                                     'accepted' => 'bg-green-50 text-green-700 border-green-200',
                                     'rejected' => 'bg-red-50 text-red-700 border-red-200',
                                     'expired' => 'bg-slate-50 text-slate-700 border-slate-200',
+                                    'negotiating' => 'bg-blue-50 text-blue-700 border-blue-200',
                                 ];
                                 $statusClass = $statusConfig[$quotation->status] ?? $statusConfig['pending'];
                             @endphp
@@ -167,6 +168,39 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Card: Client Negotiation (when negotiating or has notes) -->
+                    @if($quotation->status === 'negotiating' || $quotation->negotiation_notes)
+                        <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden {{ $quotation->status === 'negotiating' ? 'border-blue-200 ring-1 ring-blue-100' : '' }}">
+                            <div class="px-6 py-4 border-b {{ $quotation->status === 'negotiating' ? 'bg-blue-50/50 border-blue-100' : 'border-slate-100 bg-slate-50/50' }} flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                    <h3 class="text-sm font-bold text-slate-900">{{ __('Client Negotiation') }}</h3>
+                                </div>
+                                @if($quotation->status === 'negotiating')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 uppercase tracking-wider">
+                                        {{ __('Awaiting your update') }}
+                                    </span>
+                                @endif
+                            </div>
+                            <div class="p-6">
+                                @if($quotation->negotiation_notes)
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">{{ __('Client message') }}</label>
+                                        <p class="text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">"{{ $quotation->negotiation_notes }}"</p>
+                                    </div>
+                                @else
+                                    <p class="text-sm text-slate-500 italic">{{ __('No negotiation notes from the client.') }}</p>
+                                @endif
+                                <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                                    <a href="{{ route('admin.quotations.edit', $quotation) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-[#EF7722] hover:bg-[#d66616] text-white text-xs font-bold uppercase tracking-widest rounded shadow-sm transition-all">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        {{ $quotation->status === 'negotiating' ? __('Update quotation (reply to negotiation)') : __('Edit quotation') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Card 3: Logistics Details -->
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
@@ -323,6 +357,18 @@
                                     </div>
                                     <h4 class="text-sm font-bold text-slate-900">{{ __('Quotation Rejected') }}</h4>
                                     <p class="text-xs text-slate-500 mt-1">{{ __('This quotation will not be sent to the client.') }}</p>
+                                </div>
+                            @elseif($quotation->status === 'negotiating')
+                                <div class="text-center py-4">
+                                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 mb-3 border-4 border-blue-50 shadow-sm">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-slate-900">{{ __('Client requested negotiation') }}</h4>
+                                    <p class="text-xs text-slate-500 mt-1">{{ __('Update the quotation to reply to the client.') }}</p>
+                                    <a href="{{ route('admin.quotations.edit', $quotation) }}" class="mt-4 inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-[#EF7722] hover:bg-[#d66616] text-white text-xs font-bold uppercase tracking-widest rounded shadow-sm transition-all">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        {{ __('Update quotation (reply to negotiation)') }}
+                                    </a>
                                 </div>
                             @else
                                 <div class="text-center py-4">
