@@ -1058,5 +1058,15 @@
     "New Quotations": "New Quotations",
     "Be notified when an administrator sends a new quotation for your requests.": "Be notified when an administrator sends a new quotation for your requests.",
     "Logistics Tracking": "Logistics Tracking",
-    "Track every step: UAE Arrival, Customs Clearance, Out for delivery.": "Track every step: UAE Arrival, Customs Clearance, Out for delivery."
+    "Track every step: UAE Arrival, Customs Clearance, Out for delivery.": "Track every step: UAE Arrival, Customs Clearance, Out for delivery.",
+    "Profile Information": "Profile Information",
+    "Update your account's profile information and email address.": "Update your account's profile information and email address.",
+    "Profile Photo": "Profile Photo",
+    "Update your profile picture. Max size 5MB.": "Update your profile picture. Max size 5MB.",
+    "Update Password": "Update Password",
+    "Ensure your account is using a long, random password to stay secure.": "Ensure your account is using a long, random password to stay secure.",
+    "Current Password": "Current Password",
+    "Update Security": "Update Security",
+    "Notification Settings": "Notification Settings",
+    "Stay updated on your sourcing requests and orders in real-time.": "Stay updated on your sourcing requests and orders in real-time."
 }

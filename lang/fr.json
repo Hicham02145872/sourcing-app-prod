@@ -1167,5 +1167,15 @@
     "New Quotations": "Nouveaux devis",
     "Be notified when an administrator sends a new quotation for your requests.": "Soyez alerté lorsqu'un administrateur envoie un nouveau devis pour vos recherches.",
     "Logistics Tracking": "Suivi logistique",
-    "Track every step: UAE Arrival, Customs Clearance, Out for delivery.": "Suivez chaque étape : arrivée EAU, dédouanement, en livraison."
+    "Track every step: UAE Arrival, Customs Clearance, Out for delivery.": "Suivez chaque étape : arrivée EAU, dédouanement, en livraison.",
+    "Profile Information": "Informations du profil",
+    "Update your account's profile information and email address.": "Mettez à jour les informations de votre profil et votre adresse e-mail.",
+    "Profile Photo": "Photo de profil",
+    "Update your profile picture. Max size 5MB.": "Mettez à jour votre photo de profil. Taille max. 5 Mo.",
+    "Update Password": "Modifier le mot de passe",
+    "Ensure your account is using a long, random password to stay secure.": "Utilisez un mot de passe long et aléatoire pour sécuriser votre compte.",
+    "Current Password": "Mot de passe actuel",
+    "Update Security": "Mettre à jour la sécurité",
+    "Notification Settings": "Paramètres de notification",
+    "Stay updated on your sourcing requests and orders in real-time.": "Restez informé de vos demandes de sourcing et commandes en temps réel."
 }
