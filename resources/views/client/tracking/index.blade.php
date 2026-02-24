@@ -182,7 +182,7 @@
                     </div>
 
                     <!-- Journey Progress Bar -->
-                    <div class="relative py-8">
+                    <div class="relative py-8 min-h-[7rem]">
                         <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-100 dark:bg-slate-700 -translate-y-1/2 rounded-full"></div>
                         <div id="journeyProgressBar" class="absolute top-1/2 left-0 h-1 bg-[#EF7722] -translate-y-1/2 rounded-full transition-all duration-1000" style="width: 0%"></div>
                         
@@ -218,14 +218,16 @@
                         </div>
                     </div>
 
-                    <!-- Dubai Notice -->
-                    <div class="mt-12 p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-xl flex items-start gap-3">
-                        <svg class="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <p class="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-                            {{ __('From Dubai to your country, status updates may be entered manually by our team. Progress will appear here as your order moves.') }}
-                        </p>
+                    <!-- Dubai Notice (inside card) -->
+                    <div class="mt-8 w-full">
+                        <div class="p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-xl flex items-start gap-3 min-w-0">
+                            <svg class="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-xs text-amber-800 dark:text-amber-200 leading-relaxed break-words min-w-0">
+                                {{ __('From Dubai to your country, status updates may be entered manually by our team. Progress will appear here as your order moves.') }}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
