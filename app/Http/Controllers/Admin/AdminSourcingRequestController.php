@@ -163,23 +163,16 @@ class AdminSourcingRequestController extends Controller
         // Admins can now see all requests, but standard admins are restricted to "read-only"
         // on requests assigned to others via Policy/Gate checks.
 
-        // Sort: Critical statuses first (e.g. negotiating), then assignment priority, then by Created At
+        // Sort: 1) Critical statuses first (e.g. negotiating), 2) unassigned → my assignments → others, 3) newest first
         $criticalStatuses = SourcingRequest::CRITICAL_STATUSES_FOR_LIST;
-        if (! empty($criticalStatuses)) {
-            $placeholders = implode(',', array_map(fn ($s) => "'".addslashes($s)."'", $criticalStatuses));
-            $query->orderByRaw("CASE WHEN sourcing_requests.status IN ({$placeholders}) THEN 0 ELSE 1 END ASC");
-        }
-
-        if (auth()->check()) {
-            $userId = auth()->id();
-            $query->orderByRaw('CASE 
-            WHEN assigned_to_admin_id IS NULL THEN 1 
-            WHEN assigned_to_admin_id = ? THEN 2 
-            ELSE 3 
-        END', [$userId]);
-        }
-
-        $query->latest();
+        $criticalSql = empty($criticalStatuses)
+            ? '1'
+            : "CASE WHEN sourcing_requests.status IN (".implode(',', array_map(fn ($s) => "'".addslashes($s)."'", $criticalStatuses)).") THEN 0 ELSE 1 END";
+        $userId = auth()->id();
+        $assignmentSql = $userId
+            ? "CASE WHEN sourcing_requests.assigned_to_admin_id IS NULL THEN 1 WHEN sourcing_requests.assigned_to_admin_id = ".(int) $userId." THEN 2 ELSE 3 END"
+            : '0';
+        $query->orderByRaw("{$criticalSql} ASC, {$assignmentSql} ASC, sourcing_requests.created_at DESC");
 
         $sourcingRequests = $query->paginate(10);
         $admins = \App\Models\User::where('role', 'admin')->get(); // For manual assignment dropdown
