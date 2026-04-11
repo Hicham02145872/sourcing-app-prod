@@ -2,6 +2,23 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1716280169750538');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1716280169750538&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
     <link rel="canonical" href="https://www.fastsourcingbrothers.com/">
     <meta name="google-site-verification" content="ISX4oQbk-jf2HH1RX6gRkyfvgFYdlT4QyQYdLFcqMdY" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -519,6 +536,50 @@
                 </div>
             </div>
         </section>
+        
+        <!-- Trust Bar (Payment & Shipping) -->
+        <section class="py-12 bg-white border-y border-slate-100 reveal delay-300">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex flex-col items-center gap-10">
+                    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Secure Payments & Global Logistics Partners</p>
+                    
+                    <div class="flex flex-wrap items-center justify-center gap-10 md:gap-20 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700">
+                        <!-- Payments -->
+                        <div class="flex items-center gap-10">
+                            <!-- Visa SVG -->
+                            <svg class="h-8 md:h-10 w-auto" viewBox="0 0 750 471" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="750" height="471" rx="40" fill="#1A1F71"/>
+                                <path d="M278.2 334.5l33.4-195.7h53.4l-33.4 195.7h-53.4zM524.3 142.8c-10.6-3.9-27.2-8.1-47.9-8.1-52.8 0-90 26.5-90.3 64.4-.3 28 26.5 43.6 46.7 52.9 20.7 9.5 27.7 15.6 27.6 24.1-.1 13-16.6 19-31.9 19-21.3 0-32.6-2.9-50.1-10l-6.9-3.1-7.5 43.5c12.5 5.4 35.5 10.1 59.4 10.3 56.1 0 92.5-26.2 93-66.8.2-22.2-14-39.2-44.7-53.2-18.6-9.1-30-15.1-29.9-24.3 0-8.1 9.7-16.8 30.5-16.8 17.4-.3 30 3.5 39.8 7.5l4.8 2.2 7.4-43.6zM657.5 139.8h-41.3c-12.8 0-22.3 3.5-27.9 16.3l-79.2 178.4h56l11.1-29h68.4l6.5 29.1h49.5l-43.1-194.8zm-65.8 127.8l21.1-54.2 12 54.2h-33.1zM221.6 139.8l-52.4 133.3-5.6-27-18.7-89c-3.2-12.3-12.5-15.9-24-16.3H38.6l-.9 4.3c20.3 4.9 38.5 12 52.1 20 7.8 4.5 10.1 8.4 12.6 18.9l42.1 152.5h56.6l84.1-196.7h-63.6z" fill="white"/>
+                            </svg>
+                            <!-- Mastercard SVG -->
+                            <svg class="h-7 md:h-10 w-auto" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="16" r="10" fill="#EB001B" fill-opacity="0.8"/><circle cx="20" cy="16" r="10" fill="#F79E1B" fill-opacity="0.8"/><path d="M16 10.3c1.9 1.5 3.1 3.8 3.1 6.3s-1.2 4.8-3.1 6.3c-1.9-1.5-3.1-3.8-3.1-6.3s1.2-4.8 3.1-6.3z" fill="#FF5F00"/></svg>
+                            <!-- American Express Official Logo -->
+                            <svg class="h-7 md:h-10 w-auto" viewBox="0 0 750 471" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="750" height="471" rx="40" fill="#016FD0"/>
+                                <path d="M 128 169 L 96 248 L 96 169 L 50 169 L 50 302 L 96 302 L 96 278 L 106 302 L 150 302 L 160 278 L 160 302 L 700 302 L 700 169 Z M 128 193 L 144 236 L 112 236 Z M 180 169 L 180 302 L 226 302 L 226 260 L 258 302 L 296 302 L 296 169 L 250 169 L 250 212 L 218 169 Z M 316 169 L 316 302 L 430 302 L 430 278 L 362 278 L 362 248 L 428 248 L 428 224 L 362 224 L 362 193 L 430 193 L 430 169 Z M 450 169 L 450 302 L 496 302 L 496 260 L 510 260 L 540 302 L 594 302 L 556 254 C 574 248 584 234 584 214 C 584 188 566 169 540 169 Z M 496 193 L 534 193 C 542 193 546 199 546 207 C 546 215 542 221 534 221 L 496 221 Z M 604 169 L 604 302 L 700 302 L 700 278 L 650 278 L 650 248 L 698 248 L 698 224 L 650 224 L 650 193 L 700 193 L 700 169 Z" fill="white"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- Divider -->
+                        <div class="hidden md:block w-px h-8 bg-slate-200"></div>
+
+                        <!-- Logistics -->
+                        <div class="flex items-center gap-10">
+                            <!-- DHL styled -->
+                            <span class="text-2xl md:text-3xl font-black text-[#D40511] italic tracking-tighter">DHL</span>
+                            <!-- FedEx styled -->
+                            <div class="flex items-center text-xl md:text-2xl font-black italic tracking-tighter">
+                                <span class="text-[#4D148C]">Fed</span><span class="text-[#FF6600]">Ex</span>
+                            </div>
+                            <!-- UPS styled -->
+                            <span class="text-2xl md:text-3xl font-black text-[#351C15] tracking-tighter">UPS</span>
+                            <!-- Aramex styled -->
+                            <span class="text-lg md:text-xl font-bold text-[#e11d48]">aramex</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Process Section (Modern Timeline) -->
         <section id="how-it-works" class="py-24 bg-white relative">
@@ -734,14 +795,22 @@
 
                     <div class="flex flex-col gap-4 text-sm">
                         <h4 class="font-bold text-slate-900">Contact</h4>
-                        <a href="mailto:contact@fastsourcingbrothers.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
+                        <a href="mailto:support@fastsourcingbrothers.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            contact@fastsourcingbrothers.com
+                            support@fastsourcingbrothers.com
                         </a>
-                        <a href="tel:+212646522071" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                            +212 646522071
-                        </a>
+                        <p class="text-slate-500 flex items-start gap-2">
+                            <svg class="w-4 h-4 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 12.414A8 8 0 106.343 17.657l4.243-4.243m7.071 3.243a8 8 0 11-11.314 0 8 8 0 0111.314 0z"/></svg>
+                            5830 E 2nd St, Ste 7000 #34612, Casper, WY 82609, USA
+                        </p>
+                        <a href="{{ route('support') }}" class="text-slate-500 hover:text-red-600 transition-colors">Contact Us</a>
+                    </div>
+
+                    <div class="flex flex-col gap-3 text-sm">
+                        <h4 class="font-bold text-slate-900">Legal</h4>
+                        <a href="{{ route('refund-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors">Refund Policy</a>
+                        <a href="{{ route('shipping-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors">Shipping Policy</a>
+                        <a href="{{ route('privacy-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors">Privacy Policy</a>
                     </div>
 
                     <div class="flex gap-4">
@@ -754,8 +823,39 @@
                     </div>
                 </div>
                 
-                <div class="border-t border-slate-100 pt-8 text-center text-xs text-slate-400">
-                    &copy; 2025 FastSourcingBrothers. All rights reserved.
+                <div class="border-t border-slate-100 pt-8 space-y-6">
+                    <div class="space-y-4">
+                        <p class="text-[10px] font-bold tracking-[0.2em] text-slate-400 text-center uppercase">Verified Professional Network</p>
+                        <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+                            {{-- Payments Row --}}
+                            <div class="flex items-center gap-6">
+                                <svg class="h-6 md:h-7 w-auto" viewBox="0 0 750 471" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="750" height="471" rx="40" fill="#1A1F71"/>
+                                    <path d="M278.2 334.5l33.4-195.7h53.4l-33.4 195.7h-53.4zM524.3 142.8c-10.6-3.9-27.2-8.1-47.9-8.1-52.8 0-90 26.5-90.3 64.4-.3 28 26.5 43.6 46.7 52.9 20.7 9.5 27.7 15.6 27.6 24.1-.1 13-16.6 19-31.9 19-21.3 0-32.6-2.9-50.1-10l-6.9-3.1-7.5 43.5c12.5 5.4 35.5 10.1 59.4 10.3 56.1 0 92.5-26.2 93-66.8.2-22.2-14-39.2-44.7-53.2-18.6-9.1-30-15.1-29.9-24.3 0-8.1 9.7-16.8 30.5-16.8 17.4-.3 30 3.5 39.8 7.5l4.8 2.2 7.4-43.6zM657.5 139.8h-41.3c-12.8 0-22.3 3.5-27.9 16.3l-79.2 178.4h56l11.1-29h68.4l6.5 29.1h49.5l-43.1-194.8zm-65.8 127.8l21.1-54.2 12 54.2h-33.1zM221.6 139.8l-52.4 133.3-5.6-27-18.7-89c-3.2-12.3-12.5-15.9-24-16.3H38.6l-.9 4.3c20.3 4.9 38.5 12 52.1 20 7.8 4.5 10.1 8.4 12.6 18.9l42.1 152.5h56.6l84.1-196.7h-63.6z" fill="white"/>
+                                </svg>
+                                <svg class="h-6 md:h-7 w-auto" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="16" r="10" fill="#EB001B" fill-opacity="0.8"/><circle cx="20" cy="16" r="10" fill="#F79E1B" fill-opacity="0.8"/><path d="M16 10.3c1.9 1.5 3.1 3.8 3.1 6.3s-1.2 4.8-3.1 6.3c-1.9-1.5-3.1-3.8-3.1-6.3s1.2-4.8 3.1-6.3z" fill="#FF5F00"/></svg>
+                                <!-- American Express Official Logo -->
+                                <svg class="h-6 md:h-7 w-auto" viewBox="0 0 750 471" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="750" height="471" rx="40" fill="#016FD0"/>
+                                    <path d="M 128 169 L 96 248 L 96 169 L 50 169 L 50 302 L 96 302 L 96 278 L 106 302 L 150 302 L 160 278 L 160 302 L 700 302 L 700 169 Z M 128 193 L 144 236 L 112 236 Z M 180 169 L 180 302 L 226 302 L 226 260 L 258 302 L 296 302 L 296 169 L 250 169 L 250 212 L 218 169 Z M 316 169 L 316 302 L 430 302 L 430 278 L 362 278 L 362 248 L 428 248 L 428 224 L 362 224 L 362 193 L 430 193 L 430 169 Z M 450 169 L 450 302 L 496 302 L 496 260 L 510 260 L 540 302 L 594 302 L 556 254 C 574 248 584 234 584 214 C 584 188 566 169 540 169 Z M 496 193 L 534 193 C 542 193 546 199 546 207 C 546 215 542 221 534 221 L 496 221 Z M 604 169 L 604 302 L 700 302 L 700 278 L 650 278 L 650 248 L 698 248 L 698 224 L 650 224 L 650 193 L 700 193 L 700 169 Z" fill="white"/>
+                                </svg>
+                            </div>
+                            
+                            {{-- Shipping Row --}}
+                            <div class="flex items-center gap-6">
+                                <span class="text-lg font-black text-[#D40511] italic tracking-tight">DHL</span>
+                                <div class="flex items-center text-sm font-black italic tracking-tighter">
+                                    <span class="text-[#4D148C]">Fed</span><span class="text-[#FF6600]">Ex</span>
+                                </div>
+                                <span class="text-lg font-black text-[#351C15] tracking-tight">UPS</span>
+                                <span class="text-sm font-bold text-[#e11d48]">aramex</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center text-xs text-slate-400 space-y-1">
+                        <p>© 2026 Fast Sourcing Brothers LLC. Registered in Wyoming, USA.</p>
+                        <p>Address: 5830 E 2nd St, Ste 7000 #34612, Casper, WY 82609.</p>
+                    </div>
                 </div>
             </div>
         </footer>

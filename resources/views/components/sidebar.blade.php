@@ -137,7 +137,7 @@
                 <div>
                      <div class="px-3 mb-2 mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('Workflow') }}</div>
                      <div class="space-y-1">
-                        @if(auth()->user()->isSuperAdmin())
+                        @if(auth()->user()?->isSuperAdmin())
                         <a href="{{ route('admin.shipment-calendar.index') }}" 
                            class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.shipment-calendar.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -190,7 +190,7 @@
                             <span>{{ __('Refunds') }}</span>
                         </a>
 
-                        @if(auth()->user()->isSuperAdmin())
+                        @if(auth()->user()?->isSuperAdmin())
                         <a href="{{ route('admin.shipping-fees.index') }}" 
                            class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.shipping-fees.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -212,7 +212,7 @@
                 </div>
 
                 {{-- Section: Management --}}
-                @if(auth()->user()->isSuperAdmin())
+                @if(auth()->user()?->isSuperAdmin())
                 <div>
                      <div class="space-y-1 mt-4">
                         <a href="{{ route('admin.users.index') }}" 
@@ -251,7 +251,7 @@
                 </div>
                 @endif
 
-                @if(auth()->user()->isSuperAdmin())
+                @if(auth()->user()?->isSuperAdmin())
                 {{-- Section: Quick Management (Dropdown) --}}
                 <div x-data="{ open: {{ request()->routeIs('admin.countries.*') || request()->routeIs('admin.services.*') || request()->routeIs('admin.categories.*') ? 'true' : 'false' }} }">
                      <button @click="open = !open" 
@@ -292,7 +292,7 @@
                 </div>
                 @endif
 
-                @if(auth()->user()->isSuperAdmin())
+                @if(auth()->user()?->isSuperAdmin())
                 {{-- Section: Super Admin --}}
                 <div>
                      <div class="px-3 mb-2 mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('System') }}</div>
@@ -350,20 +350,21 @@
 
         <div class="flex items-center gap-3 px-1 mb-3">
             <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
-                @if (Auth::user()->profile_photo_path)
+                @if (Auth::user()?->profile_photo_path)
                     <img class="h-full w-full object-cover" src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" />
                 @else
                     <div class="h-full w-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                        <span class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()->name ?? 'G', 0, 1)) }}</span>
+                        <span class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()?->name ?? 'G', 0, 1)) }}</span>
                     </div>
                 @endif
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-slate-800 dark:text-gray-200 truncate">{{ Auth::user()->name ?? __('Guest') }}</p>
+                <p class="text-sm font-semibold text-slate-800 dark:text-gray-200 truncate">{{ Auth::user()?->name ?? __('Guest') }}</p>
                 <p class="text-[10px] uppercase font-bold text-slate-500 tracking-wide">{{ strtoupper($role) }}</p>
             </div>
         </div>
 
+        @auth
         <form method="POST" action="{{ route('logout') }}" onsubmit="localStorage.removeItem('spam_warning_dismissed')">
             @csrf
             <button type="submit" class="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-red-600 dark:hover:text-red-400 transition-colors group">
@@ -373,6 +374,14 @@
                 <span>{{ __('Sign Out') }}</span>
             </button>
         </form>
+        @else
+        <a href="{{ route('login') }}" class="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+            </svg>
+            <span>{{ __('Sign In') }}</span>
+        </a>
+        @endauth
     </div>
 </aside>
 

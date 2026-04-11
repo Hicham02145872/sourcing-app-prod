@@ -4,7 +4,7 @@
 
 <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900" x-data="{ sidebarOpen: false }" x-cloak>
     {{-- Sidebar --}}
-    <x-sidebar :role="auth()->user()->role ?? 'client'" />
+    <x-sidebar :role="auth()->user()?->role ?? 'client'" />
 
     {{-- Main Container --}}
     <div class="flex flex-col w-full lg:ml-64 min-h-screen">

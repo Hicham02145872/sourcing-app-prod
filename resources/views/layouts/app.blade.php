@@ -493,7 +493,7 @@
 </head>
 
     <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900" x-data="{ sidebarOpen: false }" x-cloak>
-    <x-sidebar :role="auth()->user()->role ?? 'client'" :adminSourcingRequestCount="$adminSourcingRequestCount ?? 0" :clientQuotationCount="$clientQuotationCount ?? 0" />
+    <x-sidebar :role="auth()->user()?->role ?? 'client'" :adminSourcingRequestCount="$adminSourcingRequestCount ?? 0" :clientQuotationCount="$clientQuotationCount ?? 0" />
 
     <x-layout.header />
 

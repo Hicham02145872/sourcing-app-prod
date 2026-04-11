@@ -7,7 +7,7 @@
             
             {{-- Avatar with refined styling --}}
             <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-sm group-hover:border-[#EF7722]/30 transition-colors">
-                @if (auth()->user()->profile_photo_path)
+                @if (auth()->user()?->profile_photo_path)
                     <img class="h-full w-full object-cover" src="{{ Storage::url(auth()->user()->profile_photo_path) }}" alt="{{ auth()->user()->name }}" />
                 @else
                     <span class="text-sm font-bold text-slate-800 dark:text-slate-200">

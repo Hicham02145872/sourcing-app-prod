@@ -21,6 +21,8 @@ Route::get('/', function () {
 
 // Public static pages
 Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy-policy');
+Route::get('/refund-policy', [PageController::class, 'refund'])->name('refund-policy');
+Route::get('/shipping-policy', [PageController::class, 'shipping'])->name('shipping-policy');
 Route::get('/terms-of-service', [PageController::class, 'terms'])->name('terms-of-service');
 Route::get('/support', [PageController::class, 'support'])->name('support');
 

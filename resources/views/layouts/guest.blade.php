@@ -114,7 +114,7 @@
                 <!-- Footer Links -->
                 <div class="mt-8 text-center">
                     <p class="text-xs text-slate-400 dark:text-slate-500">
-                        © {{ date('Y') }} FastSourcingBrothers. All rights reserved.
+                        © 2026 Fast Sourcing Brothers LLC. Registered in Wyoming, USA.
                     </p>
                 </div>
             </div>
