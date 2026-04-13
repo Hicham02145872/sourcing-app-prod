@@ -73,4 +73,14 @@
             Check your spam folder or click resend above
         </p>
     </div>
+
+    <!-- Track Complete Registration Event -->
+    <script>
+        if (typeof fbq !== 'undefined') {
+            fbq('track', 'CompleteRegistration', {
+                value: 0,
+                currency: 'USD'
+            });
+        }
+    </script>
 </x-guest-layout>
