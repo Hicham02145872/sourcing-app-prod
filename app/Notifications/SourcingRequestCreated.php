@@ -69,8 +69,10 @@ class SourcingRequestCreated extends Notification implements ShouldQueue
     {
         return [
             'sourcing_request_id' => $this->sourcingRequest->id,
-            'title' => 'New Sourcing Request: #'.$this->sourcingRequest->id,
-            'body' => 'A new request for "'.$this->sourcingRequest->product_name.'" has been created.',
+            'title_key' => 'New Sourcing Request: #:requestId',
+            'title_params' => ['requestId' => $this->sourcingRequest->id],
+            'body_key' => 'A new request for ":productName" has been created.',
+            'body_params' => ['productName' => $this->sourcingRequest->product_name],
             'type' => 'sourcing_request',
         ];
     }

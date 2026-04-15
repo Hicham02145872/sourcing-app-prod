@@ -48,11 +48,12 @@ class QuotationNegotiationRequested extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
-            'title' => __('Negotiation Requested'),
-            'body' => __('Client requested a negotiation for \':productName\' (#:requestId).', [
+            'title_key' => 'Negotiation Requested',
+            'body_key' => "Client requested a negotiation for ':productName' (#:requestId).",
+            'body_params' => [
                 'productName' => $this->sourcingRequest->product_name,
                 'requestId' => $this->sourcingRequest->id,
-            ]),
+            ],
             'sourcing_request_id' => $this->sourcingRequest->id,
             'status' => 'negotiating',
             'click_action' => route('admin.sourcing-requests.show', $this->sourcingRequest->id),

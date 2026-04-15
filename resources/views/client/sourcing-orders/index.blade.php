@@ -204,7 +204,7 @@
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
                                                 </svg>
-                                                {{ __(ucfirst(str_replace('_', ' ', $order->client_status))) }}
+                                                {{ $order->status_label }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">

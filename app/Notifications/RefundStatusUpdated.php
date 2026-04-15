@@ -89,11 +89,12 @@ class RefundStatusUpdated extends Notification implements ShouldQueue
         return [
             'refund_request_id' => $this->refundRequest->id,
             'status' => $this->refundRequest->status,
-            'title' => $this->refundRequest->status === 'approved' ? __('Refund Approved') : __('Refund Rejected'),
-            'message' => __('Your refund request for order #:orderId is now :status.', [
+            'title_key' => $this->refundRequest->status === 'approved' ? 'Refund Approved' : 'Refund Rejected',
+            'body_key' => 'Your refund request for order #:orderId is now :status.',
+            'body_params' => [
                 'orderId' => $this->refundRequest->sourcingOrder->id,
                 'status' => $this->refundRequest->status,
-            ]),
+            ],
         ];
     }
 }

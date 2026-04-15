@@ -57,15 +57,17 @@ class TrackingNumberAdded extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         $fsbNumber = $this->sourcingOrder->fsb_tracking_number;
-        $productName = $this->sourcingOrder->quotation->sourcingRequest->product_name ?? __('your order');
+        $productName = $this->sourcingOrder->quotation->sourcingRequest->product_name ?? '';
 
         return [
             'sourcing_order_id' => $this->sourcingOrder->id,
-            'title' => __('📦 Tracking number for order #:orderId', ['orderId' => $fsbNumber]),
-            'body' => __('Your order ":productName" can now be tracked. Your tracking reference: :number', [
+            'title_key' => '📦 Tracking number for order #:orderId',
+            'title_params' => ['orderId' => $fsbNumber],
+            'body_key' => 'Your order ":productName" can now be tracked. Your tracking reference: :number',
+            'body_params' => [
                 'productName' => $productName,
                 'number' => $fsbNumber,
-            ]),
+            ],
             'type' => 'tracking_added',
             'product_name' => $productName,
             'tracking_number' => $fsbNumber,

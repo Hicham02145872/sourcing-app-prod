@@ -1,5 +1,5 @@
 {{-- components/layout/user-menu.blade.php --}}
-<div class="flex items-center gap-3 ml-4">
+<div class="flex items-center gap-3 ms-4">
     <div class="relative" x-data="{ open: false }">
         <button @click="open = !open" 
                 class="flex items-center gap-3 p-1.5 pr-4 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-all duration-200 focus:outline-none group"
@@ -21,7 +21,7 @@
                     {{ optional(auth()->user())->name }}
                 </p>
                 <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 mt-0.5">
-                    {{ optional(auth()->user())->role ?? __('User') }}
+                    {{ __(auth()->user()?->getRoleLabel() ?? 'User') }}
                 </p>
             </div>
 
@@ -37,7 +37,7 @@
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 scale-95 translate-y-2"
              x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-             class="absolute right-0 mt-3 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 dark:border-slate-800 overflow-hidden z-50 ring-1 ring-slate-200/50 dark:ring-slate-800/50"
+             class="absolute end-0 mt-3 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 dark:border-slate-800 overflow-hidden z-50 ring-1 ring-slate-200/50 dark:ring-slate-800/50"
              style="display: none;">
             
             {{-- User Info Header - Enterprise Style --}}
@@ -49,7 +49,7 @@
                 
                 <div class="mt-4">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 tracking-wider uppercase">
-                        {{ optional(auth()->user())->role ?? __('User') }}
+                        {{ __(auth()->user()?->getRoleLabel() ?? 'User') }}
                     </span>
                 </div>
             </div>

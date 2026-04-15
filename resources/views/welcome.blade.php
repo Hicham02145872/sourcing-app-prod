@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -315,6 +315,20 @@
             from { transform: rotate(0deg) translateX(150px) rotate(0deg); }
             to { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
         }
+
+        /* ═══════════ RTL Support (Arabic) ═══════════ */
+        [dir="rtl"] body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+        [dir="rtl"] .text-left { text-align: right; }
+        [dir="rtl"] .lg\:text-left { text-align: right; }
+        [dir="rtl"] .lg\:order-1 { order: 2; }
+        [dir="rtl"] .lg\:order-2 { order: 1; }
+        [dir="rtl"] .space-x-1 > :not([hidden]) ~ :not([hidden]) { --tw-space-x-reverse: 1; }
+        [dir="rtl"] .gap-3 { direction: rtl; }
+        [dir="rtl"] .lg\:justify-start { justify-content: flex-end; }
+        [dir="rtl"] .absolute.left-6 { left: auto; right: 1.5rem; }
+        [dir="rtl"] .absolute.bottom-6.left-6 { left: auto; right: 1.5rem; }
+        [dir="rtl"] .absolute.bottom-0.left-0 { left: auto; right: 0; }
+        [dir="rtl"] .pl-lang { padding-left: 0; padding-right: 0.5rem; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 selection:bg-red-100 selection:text-red-900">
@@ -409,23 +423,31 @@
 
                 <!-- Desktop Menu -->
                 <div class="hidden lg:flex items-center space-x-1">
-                    <a href="#how-it-works" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">Process</a>
-                    <a href="#benefits" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">Benefits</a>
-                    <a href="#testimonials" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">Reviews</a>
+                    <a href="#how-it-works" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">{{ __('welcome.nav.process') }}</a>
+                    <a href="#benefits" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">{{ __('welcome.nav.benefits') }}</a>
+                    <a href="#testimonials" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">{{ __('welcome.nav.reviews') }}</a>
                 </div>
 
                 <!-- Auth & Mobile Toggle -->
                 <div class="flex items-center gap-3">
                     @auth
                         <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10">
-                            Dashboard
+                            {{ __('welcome.nav.dashboard') }}
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="hidden sm:inline-block px-4 py-2 text-sm font-medium text-slate-700 hover:text-red-600">Login</a>
+                        <a href="{{ route('login') }}" class="hidden sm:inline-block px-4 py-2 text-sm font-medium text-slate-700 hover:text-red-600">{{ __('welcome.nav.login') }}</a>
                         <a href="{{ route('register') }}" class="px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-slate-900/10">
-                            Get Started
+                            {{ __('welcome.nav.get_started') }}
                         </a>
                     @endauth
+
+                    {{-- Language Switcher --}}
+                    <div class="hidden sm:flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-bold">
+                        <a href="/en" class="px-2.5 py-1 rounded-md transition-all {{ app()->getLocale() === 'en' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900' }}">EN</a>
+                        <a href="/fr" class="px-2.5 py-1 rounded-md transition-all {{ app()->getLocale() === 'fr' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900' }}">FR</a>
+                        <a href="/ar" class="px-2.5 py-1 rounded-md transition-all {{ app()->getLocale() === 'ar' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900' }}">AR</a>
+                    </div>
+
                     <button onclick="toggleMenu()" class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
@@ -436,14 +458,20 @@
         <!-- Mobile Menu Overlay -->
         <div id="mobileMenu" class="hidden fixed inset-0 z-40 bg-white/95 backdrop-blur-xl pt-24 px-6">
             <div class="flex flex-col space-y-4 text-center">
-                <a href="#how-it-works" class="text-xl font-medium text-slate-900 py-2 border-b border-slate-100">How It Works</a>
-                <a href="#benefits" class="text-xl font-medium text-slate-900 py-2 border-b border-slate-100">Benefits</a>
-                <a href="#testimonials" class="text-xl font-medium text-slate-900 py-2 border-b border-slate-100">Testimonials</a>
+                <a href="#how-it-works" class="text-xl font-medium text-slate-900 py-2 border-b border-slate-100">{{ __('welcome.nav.how_it_works') }}</a>
+                <a href="#benefits" class="text-xl font-medium text-slate-900 py-2 border-b border-slate-100">{{ __('welcome.nav.benefits') }}</a>
+                <a href="#testimonials" class="text-xl font-medium text-slate-900 py-2 border-b border-slate-100">{{ __('welcome.nav.reviews') }}</a>
                 @auth
-                    <a href="{{ route('dashboard') }}" class="text-xl font-medium text-slate-900 py-2">Dashboard</a>
+                    <a href="{{ route('dashboard') }}" class="text-xl font-medium text-slate-900 py-2">{{ __('welcome.nav.dashboard') }}</a>
                 @else
-                    <a href="{{ route('login') }}" class="text-xl font-medium text-slate-900 py-2">Login</a>
+                    <a href="{{ route('login') }}" class="text-xl font-medium text-slate-900 py-2">{{ __('welcome.nav.login') }}</a>
                 @endauth
+                {{-- Mobile Language Switcher --}}
+                <div class="flex items-center justify-center gap-2 pt-2">
+                    <a href="/en" class="px-4 py-2 rounded-lg text-sm font-bold {{ app()->getLocale() === 'en' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600' }}">EN</a>
+                    <a href="/fr" class="px-4 py-2 rounded-lg text-sm font-bold {{ app()->getLocale() === 'fr' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600' }}">FR</a>
+                    <a href="/ar" class="px-4 py-2 rounded-lg text-sm font-bold {{ app()->getLocale() === 'ar' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600' }}">AR</a>
+                </div>
                 <button onclick="toggleMenu()" class="absolute top-6 right-6 p-2 bg-slate-100 rounded-full">
                     <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -459,24 +487,24 @@
                     <div class="text-center lg:text-left reveal">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-100 text-red-700 text-xs font-bold uppercase tracking-wide mb-6">
                             <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                            Trusted by 200+ 
+                            {{ __('welcome.hero.badge') }}
                         </div>
 
                         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
-                            Sourcing made <br>
+                            {{ __('welcome.hero.headline') }} <br>
                             <span class="gradient-text" id="typed-text"></span>
                         </h1>
 
                         <p class="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
-                            Stop wrestling with complex supply chains. We verify suppliers, negotiate prices, and handle logistics so you can scale faster.
+                            {{ __('welcome.hero.description') }}
                         </p>
 
                         <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                             <a href="{{ route('register') }}" class="px-8 py-4 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-all shadow-xl shadow-red-500/20 hover:scale-[1.02]">
-                                Start Your Request
+                                {{ __('welcome.hero.cta_primary') }}
                             </a>
                             <a href="#how-it-works" class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all">
-                                How It Works
+                                {{ __('welcome.hero.cta_secondary') }}
                             </a>
                         </div>
 
@@ -484,15 +512,15 @@
                         <div class="mt-12 pt-8 border-t border-slate-200 grid grid-cols-3 gap-8">
                             <div>
                                 <div class="text-2xl font-bold text-slate-900 counter" data-target="200">0</div>
-                                <div class="text-xs text-slate-500 uppercase font-medium mt-1">Clients</div>
+                                <div class="text-xs text-slate-500 uppercase font-medium mt-1">{{ __('welcome.stats.clients') }}</div>
                             </div>
                             <div>
                                 <div class="text-2xl font-bold text-slate-900 counter" data-target="2000">0</div>
-                                <div class="text-xs text-slate-500 uppercase font-medium mt-1">Suppliers</div>
+                                <div class="text-xs text-slate-500 uppercase font-medium mt-1">{{ __('welcome.stats.suppliers') }}</div>
                             </div>
                             <div>
                                 <div class="text-2xl font-bold text-slate-900 counter" data-target="90">0</div>
-                                <div class="text-xs text-slate-500 uppercase font-medium mt-1">Satisfaction</div>
+                                <div class="text-xs text-slate-500 uppercase font-medium mt-1">{{ __('welcome.stats.satisfaction') }}</div>
                             </div>
                         </div>
                     </div>
@@ -512,8 +540,8 @@
                                     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold text-slate-900">Verified Experts</p>
-                                    <p class="text-xs text-slate-500">Active Support Team</p>
+                                    <p class="text-sm font-bold text-slate-900">{{ __('welcome.hero.verified_experts') }}</p>
+                                    <p class="text-xs text-slate-500">{{ __('welcome.hero.active_support') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -526,7 +554,7 @@
         <section class="py-12 bg-white border-y border-slate-100 reveal delay-300">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex flex-col items-center gap-10">
-                    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Secure Payments & Global Logistics Partners</p>
+                    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ __('welcome.trust_bar') }}</p>
                     
                     <div class="flex flex-wrap items-center justify-center gap-10 md:gap-20 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700">
                         <!-- Payments -->
@@ -573,8 +601,8 @@
                     
                     <!-- Content -->
                     <div class="order-2 lg:order-1 reveal">
-                        <span class="text-red-600 font-bold tracking-wider text-sm uppercase">The Workflow</span>
-                        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-6">From request to delivery,<br>we handle the heavy lifting.</h2>
+                        <span class="text-red-600 font-bold tracking-wider text-sm uppercase">{{ __('welcome.process.label') }}</span>
+                        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-6">{{ __('welcome.process.heading') }}</h2>
                         
                         <div class="space-y-0 relative mt-10">
                             <!-- Vertical Line -->
@@ -586,8 +614,8 @@
                                     <span class="font-bold text-slate-400 group-hover:text-red-600">1</span>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-900">Submit Requirements</h3>
-                                    <p class="text-slate-600 mt-1 text-sm leading-relaxed">Fill out our smart form. We analyze your specs to match with the perfect factory.</p>
+                                    <h3 class="text-lg font-bold text-slate-900">{{ __('welcome.process.step1.title') }}</h3>
+                                    <p class="text-slate-600 mt-1 text-sm leading-relaxed">{{ __('welcome.process.step1.desc') }}</p>
                                 </div>
                             </div>
 
@@ -597,8 +625,8 @@
                                     <span class="font-bold text-slate-400 group-hover:text-yellow-600">2</span>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-900">Compare Quotes</h3>
-                                    <p class="text-slate-600 mt-1 text-sm leading-relaxed">Receive a detailed report with competitive pricing and landed cost analysis.</p>
+                                    <h3 class="text-lg font-bold text-slate-900">{{ __('welcome.process.step2.title') }}</h3>
+                                    <p class="text-slate-600 mt-1 text-sm leading-relaxed">{{ __('welcome.process.step2.desc') }}</p>
                                 </div>
                             </div>
 
@@ -608,8 +636,8 @@
                                     <span class="font-bold text-slate-400 group-hover:text-green-600">3</span>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-900">Production & Delivery</h3>
-                                    <p class="text-slate-600 mt-1 text-sm leading-relaxed">We oversee manufacturing, conduct QC, and manage shipping to your door.</p>
+                                    <h3 class="text-lg font-bold text-slate-900">{{ __('welcome.process.step3.title') }}</h3>
+                                    <p class="text-slate-600 mt-1 text-sm leading-relaxed">{{ __('welcome.process.step3.desc') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -636,8 +664,8 @@
         <section class="py-24 px-4 bg-slate-50 border-t border-slate-200">
             <div class="max-w-7xl mx-auto">
                 <div class="text-center max-w-2xl mx-auto mb-16 reveal">
-                    <h2 class="text-3xl font-bold text-slate-900">Operations Excellence</h2>
-                    <p class="text-slate-600 mt-4">We don't just send emails. We are on the ground ensuring your product quality and supply chain integrity.</p>
+                    <h2 class="text-3xl font-bold text-slate-900">{{ __('welcome.ops.heading') }}</h2>
+                    <p class="text-slate-600 mt-4">{{ __('welcome.ops.subheading') }}</p>
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
@@ -646,9 +674,9 @@
                         <img src="{{ asset('images/fsb-warehouse.jpg') }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Warehouse">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                         <div class="absolute bottom-0 left-0 p-8">
-                            <div class="inline-block px-2 py-1 bg-yellow-500 text-white text-[10px] font-bold rounded mb-2">QUALITY CONTROL</div>
-                            <h3 class="text-2xl font-bold text-white mb-2">On-Site Inspections</h3>
-                            <p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">Strict AQL standards applied before any payment release.</p>
+                            <div class="inline-block px-2 py-1 bg-yellow-500 text-white text-[10px] font-bold rounded mb-2">{{ __('welcome.ops.qc_label') }}</div>
+                            <h3 class="text-2xl font-bold text-white mb-2">{{ __('welcome.ops.qc_title') }}</h3>
+                            <p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">{{ __('welcome.ops.qc_desc') }}</p>
                         </div>
                     </div>
 
@@ -657,9 +685,9 @@
                         <img src="{{ asset('images/fsb-container.jpg') }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Container">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                         <div class="absolute bottom-0 left-0 p-8">
-                            <div class="inline-block px-2 py-1 bg-red-600 text-white text-[10px] font-bold rounded mb-2">LOGISTICS</div>
-                            <h3 class="text-2xl font-bold text-white mb-2">Secure Shipping</h3>
-                            <p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">Full container load supervision and freight management.</p>
+                            <div class="inline-block px-2 py-1 bg-red-600 text-white text-[10px] font-bold rounded mb-2">{{ __('welcome.ops.logistics_label') }}</div>
+                            <h3 class="text-2xl font-bold text-white mb-2">{{ __('welcome.ops.logistics_title') }}</h3>
+                            <p class="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">{{ __('welcome.ops.logistics_desc') }}</p>
                         </div>
                     </div>
                 </div>
@@ -675,24 +703,24 @@
                         <div class="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center mb-6">
                             <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">Save 40% Time</h3>
-                        <p class="text-slate-600 leading-relaxed">Stop searching for suppliers. We utilize our pre-vetted network to get you results in hours, not weeks.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">{{ __('welcome.benefits.b1.title') }}</h3>
+                        <p class="text-slate-600 leading-relaxed">{{ __('welcome.benefits.b1.desc') }}</p>
                     </div>
                     <!-- Benefit 2 -->
                     <div class="pro-card p-8 reveal delay-100">
                         <div class="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center mb-6">
                             <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">Risk Free</h3>
-                        <p class="text-slate-600 leading-relaxed">We hold payments in escrow until quality is verified. Zero tolerance for defects or scams.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">{{ __('welcome.benefits.b2.title') }}</h3>
+                        <p class="text-slate-600 leading-relaxed">{{ __('welcome.benefits.b2.desc') }}</p>
                     </div>
                     <!-- Benefit 3 -->
                     <div class="pro-card p-8 reveal delay-200">
                         <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center mb-6">
                             <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">Direct Factory Price</h3>
-                        <p class="text-slate-600 leading-relaxed">No middlemen fees. We negotiate directly with manufacturers to get you the best landed cost.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">{{ __('welcome.benefits.b3.title') }}</h3>
+                        <p class="text-slate-600 leading-relaxed">{{ __('welcome.benefits.b3.desc') }}</p>
                     </div>
                 </div>
             </div>
@@ -702,14 +730,14 @@
         <section id="testimonials" class="py-24 bg-white border-t border-slate-100">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="text-center mb-16 reveal">
-                    <h2 class="text-3xl font-bold text-slate-900">Client Feedback</h2>
+                    <h2 class="text-3xl font-bold text-slate-900">{{ __('welcome.testimonials.heading') }}</h2>
                 </div>
 
                 <div class="grid md:grid-cols-3 gap-8">
                     <!-- Review 1 -->
                     <div class="bg-slate-50 p-8 rounded-2xl reveal">
                         <div class="flex text-yellow-400 mb-4 text-sm">★★★★★</div>
-                        <p class="text-slate-700 mb-6 italic">"The response speed is much better than before, and the whole process has become smoother and more efficient. A great experience overall."</p>
+                        <p class="text-slate-700 mb-6 italic">"{{ __('welcome.testimonials.r1.text') }}"</p>
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600">M</div>
                             <div>
@@ -722,7 +750,7 @@
                     <!-- Review 2 -->
                     <div class="bg-slate-50 p-8 rounded-2xl reveal delay-100">
                         <div class="flex text-yellow-400 mb-4 text-sm">★★★★★</div>
-                        <p class="text-slate-700 mb-6 italic">"This service directly contributed to the growth of my business. The team is professional, the company is trustworthy."</p>
+                        <p class="text-slate-700 mb-6 italic">"{{ __('welcome.testimonials.r2.text') }}"</p>
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600">H</div>
                             <div>
@@ -735,7 +763,7 @@
                     <!-- Review 3 -->
                     <div class="bg-slate-50 p-8 rounded-2xl reveal delay-200">
                         <div class="flex text-yellow-400 mb-4 text-sm">★★★★★</div>
-                        <p class="text-slate-700 mb-6 italic">"The prices are truly competitive and much better than platforms like Alibaba. Plus, the quality and follow-up make it safer."</p>
+                        <p class="text-slate-700 mb-6 italic">"{{ __('welcome.testimonials.r3.text') }}"</p>
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600">F</div>
                             <div>
@@ -756,10 +784,10 @@
                     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-slate-800 to-transparent opacity-50"></div>
                     
                     <div class="relative z-10">
-                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Start your sourcing journey</h2>
-                        <p class="text-slate-400 mb-10 max-w-lg mx-auto">Access our global network of verified suppliers. No upfront commitment required.</p>
+                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">{{ __('welcome.cta.heading') }}</h2>
+                        <p class="text-slate-400 mb-10 max-w-lg mx-auto">{{ __('welcome.cta.subheading') }}</p>
                         <a href="{{ route('register') }}" class="inline-block px-8 py-4 bg-white text-slate-900 rounded-xl font-bold hover:bg-red-50 transition-colors shadow-lg shadow-white/10">
-                            Create Free Account
+                            {{ __('welcome.cta.button') }}
                         </a>
                     </div>
                 </div>
@@ -775,11 +803,11 @@
                         <div class="flex items-center gap-2 mb-4">
                             <span class="text-xl font-bold text-slate-900 tracking-tight">FastSourcingBrothers</span>
                         </div>
-                        <p class="text-slate-500 text-sm leading-relaxed">Simplifying global trade through technology and expert on-ground support.</p>
+                        <p class="text-slate-500 text-sm leading-relaxed">{{ __('welcome.footer.tagline') }}</p>
                     </div>
 
                     <div class="flex flex-col gap-4 text-sm">
-                        <h4 class="font-bold text-slate-900">Contact</h4>
+                        <h4 class="font-bold text-slate-900">{{ __('welcome.footer.contact') }}</h4>
                         <a href="mailto:support@fastsourcingbrothers.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             support@fastsourcingbrothers.com
@@ -788,14 +816,14 @@
                             <svg class="w-4 h-4 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 12.414A8 8 0 106.343 17.657l4.243-4.243m7.071 3.243a8 8 0 11-11.314 0 8 8 0 0111.314 0z"/></svg>
                             5830 E 2nd St, Ste 7000 #34612, Casper, WY 82609, USA
                         </p>
-                        <a href="{{ route('support') }}" class="text-slate-500 hover:text-red-600 transition-colors">Contact Us</a>
+                        <a href="{{ route('support') }}" class="text-slate-500 hover:text-red-600 transition-colors">{{ __('welcome.footer.contact_us') }}</a>
                     </div>
 
                     <div class="flex flex-col gap-3 text-sm">
-                        <h4 class="font-bold text-slate-900">Legal</h4>
-                        <a href="{{ route('refund-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors">Refund Policy</a>
-                        <a href="{{ route('shipping-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors">Shipping Policy</a>
-                        <a href="{{ route('privacy-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors">Privacy Policy</a>
+                        <h4 class="font-bold text-slate-900">{{ __('welcome.footer.legal') }}</h4>
+                        <a href="{{ route('refund-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors">{{ __('welcome.footer.refund_policy') }}</a>
+                        <a href="{{ route('shipping-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors">{{ __('welcome.footer.shipping_policy') }}</a>
+                        <a href="{{ route('privacy-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors">{{ __('welcome.footer.privacy_policy') }}</a>
                     </div>
 
                     <div class="flex gap-4">
@@ -810,7 +838,7 @@
                 
                 <div class="border-t border-slate-100 pt-8 space-y-6">
                     <div class="space-y-4">
-                        <p class="text-[10px] font-bold tracking-[0.2em] text-slate-400 text-center uppercase">Verified Professional Network</p>
+                        <p class="text-[10px] font-bold tracking-[0.2em] text-slate-400 text-center uppercase">{{ __('welcome.footer.verified_network') }}</p>
                         <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
                             {{-- Payments Row --}}
                             <div class="flex items-center gap-6">
@@ -986,13 +1014,13 @@
         // --- TYPED.JS ANIMATION ---
         document.addEventListener('DOMContentLoaded', function() {
             const typed = new Typed('#typed-text', {
-                strings: [
-                    'effortless.',
-                    'efficient.',
-                    'reliable.',
-                    'seamless.',
-                    'transparent.'
-                ],
+                strings: {!! json_encode([
+                    __('welcome.typed.0'),
+                    __('welcome.typed.1'),
+                    __('welcome.typed.2'),
+                    __('welcome.typed.3'),
+                    __('welcome.typed.4'),
+                ]) !!},
                 typeSpeed: 80,
                 backSpeed: 50,
                 backDelay: 2000,

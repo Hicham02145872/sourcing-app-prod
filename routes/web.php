@@ -12,12 +12,27 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SourcingRequestController; // Add this line
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
 Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
-Route::get('/', function () {
-    return view('welcome');
+// Root: auto-detect locale and redirect to clean URL
+Route::get('/', function (Request $request) {
+    $supported = ['en', 'fr', 'ar'];
+    $locale = Session::get('locale')
+        ?? $request->getPreferredLanguage($supported)
+        ?? config('app.locale', 'en');
+    if (! in_array($locale, $supported)) {
+        $locale = 'en';
+    }
+
+    return redirect('/' . $locale, 302);
 });
+
+// Locale-prefixed welcome page: /en  /fr  /ar
+Route::get('/{locale}', function ($locale) {
+    return view('welcome');
+})->where('locale', 'en|fr|ar')->name('welcome');
 
 // Public static pages
 Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy-policy');

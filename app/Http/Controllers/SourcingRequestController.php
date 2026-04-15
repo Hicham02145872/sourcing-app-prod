@@ -117,6 +117,7 @@ class SourcingRequestController extends Controller
         $this->authorize('create', SourcingRequest::class);
         $validated = $request->validated();
 
+        
         $sourcingRequest = DB::transaction(function () use ($request, $validated) {
             if ($request->hasFile('product_image')) {
                 $validated['product_image'] = $this->imageService->compressAndStore(

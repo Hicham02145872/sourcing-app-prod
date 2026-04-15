@@ -143,7 +143,7 @@
                                                     $statusClass = $statusClasses[$request->status] ?? 'bg-slate-100 text-slate-800';
                                                 @endphp
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide {{ $statusClass }}">
-                                                    {{ __(ucfirst(str_replace('_', ' ', $request->status))) }}
+                                                    {{ $request->status_label }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-xs text-slate-500">{{ $request->created_at->format('M d, Y') }}</td>

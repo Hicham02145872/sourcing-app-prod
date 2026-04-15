@@ -7,7 +7,7 @@
     <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
             {{-- Logo --}}
-            <div class="flex-shrink-0 mr-4">
+            <div class="flex-shrink-0 me-4">
                 <a href="{{ route('dashboard') }}">
                     <img class="block h-[190px] w-auto" src="{{ asset('images/logo1.png') }}" alt="{{ config('app.name') }}">
                 </a>
@@ -15,7 +15,7 @@
 
             {{-- Mobile Menu Button --}}
             <button @click="sidebarOpen = !sidebarOpen" 
-                    class="lg:hidden p-2.5 -ml-2 text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white">
+                    class="lg:hidden p-2.5 -ms-2 text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
                 </svg>

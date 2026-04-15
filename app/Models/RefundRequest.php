@@ -49,4 +49,12 @@ class RefundRequest extends Model
     {
         return $this->belongsTo(User::class, 'assigned_to_admin_id');
     }
+
+    /**
+     * Get the translated status label.
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return __($this->status);
+    }
 }

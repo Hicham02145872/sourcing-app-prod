@@ -287,6 +287,7 @@
     @endphp
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const uiLocale = @json(app()->getLocale() === 'ar' ? 'ar' : (app()->getLocale() === 'fr' ? 'fr-FR' : 'en-US'));
             // 1. Declare State
             let messageInterval;
             let abortController = null;
@@ -472,7 +473,7 @@
                 }
                 
                 if (elements.resultTrackingNumber) elements.resultTrackingNumber.textContent = number;
-                if (elements.latestStatusText) elements.latestStatusText.textContent = result.current_status || getField(latest, ['status_en', 'status', 'Status']) || 'Status Pending';
+                if (elements.latestStatusText) elements.latestStatusText.textContent = result.current_status || getField(latest, ['status_en', 'status', 'Status']) || @json(__('Status Pending'));
                 
                 let location = getField(latest, ['location', 'Location']);
                 if (!location || location.trim() === '') {
@@ -524,7 +525,7 @@
                 const mapContainer = document.getElementById('mapContainer');
                 if (!mapContainer) return;
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1`, { headers: { 'Accept-Language': 'en' } });
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1`, { headers: { 'Accept-Language': uiLocale } });
                     const data = await response.json();
                     if (data?.length > 0) {
                         const { lat, lon } = data[0];
@@ -549,7 +550,7 @@
                 const isCached = responseTime < 150;
                 if (elements.cacheDot && elements.cacheStatusText) {
                     elements.cacheDot.className = `w-2 h-2 rounded-full mr-2 ${isCached ? 'bg-green-500' : 'bg-blue-500'}`;
-                    elements.cacheStatusText.textContent = isCached ? 'System Cache' : 'Live Data';
+                    elements.cacheStatusText.textContent = isCached ? @json(__('System Cache')) : @json(__('Live Data'));
                 }
                 if (elements.responseTime) elements.responseTime.textContent = responseTime + ' ms';
                 if (provider && elements.providerName) elements.providerName.textContent = provider.toUpperCase();
@@ -660,16 +661,16 @@
                 if (!str) return '';
                 if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
                     const d = new Date(str.replace(/-/g, '/'));
-                    if (!isNaN(d.getTime())) return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                    if (!isNaN(d.getTime())) return d.toLocaleString(uiLocale, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
                 }
                 const extracted = extractDateFromText(str);
                 if (extracted) {
                     const d = new Date(extracted.replace(/-/g, '/'));
-                    if (!isNaN(d.getTime())) return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                    if (!isNaN(d.getTime())) return d.toLocaleString(uiLocale, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
                 }
                 const d = new Date(str.replace(/-/g, '/'));
                 if (isNaN(d.getTime())) return '';
-                return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                return d.toLocaleString(uiLocale, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
             }
 
             function escapeHtml(t) { return t?.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }

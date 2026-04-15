@@ -13,6 +13,42 @@ class NotificationController extends Controller
     use NotificationFilterTrait;
 
     /**
+     * Traduit un statut dans la locale courante.
+     */
+    private function translateStatus(string $status): string
+    {
+        $map = [
+            'pending'                               => __('Pending'),
+            'in_review'                             => __('In review'),
+            'quoted'                                => __('Quoted'),
+            'rejected'                              => __('Rejected'),
+            'accepted'                              => __('Accepted'),
+            'cancelled'                             => __('Cancelled'),
+            'negotiating'                           => __('Negotiating'),
+            'pending_payment'                       => __('Pending payment'),
+            'paid'                                  => __('Paid'),
+            'shipment_preparing'                    => __('Shipment Preparing'),
+            'in_transit_china'                      => __('In Transit (Departure from China)'),
+            'arrival_uae'                           => __('Arrival in UAE'),
+            'customs_clearance_uae'                 => __('Customs Clearance in UAE'),
+            'in_transit_uae'                        => __('In Transit (Departure from UAE)'),
+            'arrival_destination_country'           => __('Arrival in Destination Country'),
+            'customs_clearance_destination_country' => __('Customs Clearance in Destination Country'),
+            'out_for_delivery'                      => __('Out for Delivery'),
+            'delivered'                             => __('Delivered'),
+            'delivery_failed'                       => __('Delivery Failed'),
+            'shipment_delayed'                      => __('Shipment Delayed'),
+            'shipment_returned'                     => __('Shipment Returned'),
+            'shipment_canceled'                     => __('Shipment Canceled'),
+            'order_completed'                       => __('Order Completed'),
+            'on_hold'                               => __('On Hold'),
+            'approved'                              => __('Approved'),
+        ];
+
+        return $map[$status] ?? ucfirst(str_replace('_', ' ', $status));
+    }
+
+    /**
      * Met à jour le token FCM de l'utilisateur connecté.
      */
     public function updateToken(Request $request)
@@ -129,33 +165,116 @@ class NotificationController extends Controller
             $data = is_string($notification->data)
                 ? json_decode($notification->data, true) ?? []
                 : ($notification->data ?? []);
+            $title = $data['title'] ?? $data['notification']['title'] ?? 'Notification';
+            $body = $data['message'] ?? $data['body'] ?? $data['notification']['body'] ?? 'Nouvelle notification';
 
-            $status = $data['status'] ?? null;
-            $productName = $data['product_name'] ?? null;
-
-            $defaultTitle = 'Mise à jour de demande';
-            if ($status && $productName) {
-                $statusLabels = [
-                    'pending' => 'En attente',
-                    'processing' => 'En traitement',
-                    'completed' => 'Terminée',
-                    'cancelled' => 'Annulée',
-                ];
-                $statusLabel = $statusLabels[$status] ?? ucfirst($status);
-                $defaultTitle = "Demande $statusLabel";
+            // Fallback for older literal strings stored in DB
+            if (is_string($title)) {
+                if (str_starts_with($title, 'Update: ')) {
+                    $rawStatus = trim(str_replace('Update: ', '', $title));
+                    $translatedStatus = $this->translateStatus(str_replace(' ', '_', strtolower($rawStatus)));
+                    $title = __('Update: ') . $translatedStatus;
+                } elseif (str_contains($title, 'Order Status Update: ')) {
+                    $emoji = str_contains($title, '📦') ? '📦' : (str_contains($title, '✅') ? '✅' : (str_contains($title, '🇦🇪') ? '🇦🇪' : '🔔'));
+                    $rawStatus = trim(last(explode('Order Status Update: ', $title)));
+                    $translatedStatus = $this->translateStatus(str_replace(' ', '_', strtolower($rawStatus)));
+                    $title = __(':emoji Order Status Update: :status', ['emoji' => $emoji, 'status' => $translatedStatus]);
+                } elseif (str_contains($title, 'New Quotation: ')) {
+                    preg_match('/New Quotation: ([\d\.]+) (\w+)/', $title, $matches);
+                    if (count($matches) >= 3) {
+                        $title = __('📄 New Quotation: :amount :currency', ['amount' => $matches[1], 'currency' => $matches[2]]);
+                    }
+                } elseif (str_contains($title, 'Tracking number for order #')) {
+                    $orderId = last(explode('#', $title));
+                    $title = __('📦 Tracking number for order #:orderId', ['orderId' => $orderId]);
+                }
             }
 
-            $title = $data['title']
-                ?? $data['notification']['title']
-                ?? $notification->data['title']
-                ?? $defaultTitle;
+            if (is_string($body)) {
+                if (str_contains($body, 'is now ')) {
+                    $parts = explode('is now ', $body);
+                    if (count($parts) > 1) {
+                        $prefix = trim($parts[0]);
+                        $rawStatus = trim(trim($parts[1]), "'.");
+                        
+                        if (str_contains($prefix, 'Your order #')) {
+                            preg_match('/Your order #(\d+)/', $prefix, $matches);
+                            $orderId = $matches[1] ?? '';
+                            $translatedStatus = $this->translateStatus(str_replace(' ', '_', strtolower($rawStatus)));
+                            $body = __('Your order #:orderId is now :status.', [
+                                'orderId' => $orderId,
+                                'status' => $translatedStatus
+                            ]);
+                        } elseif (str_contains($prefix, 'Your request for')) {
+                            preg_match("/Your request for '([^']+)'/", $prefix, $matches);
+                            $productName = $matches[1] ?? '';
+                            $translatedStatus = $this->translateStatus(str_replace(' ', '_', strtolower($rawStatus)));
+                            $body = __("Your request for ':productName' is now ':status'.", [
+                                'productName' => $productName,
+                                'status' => $translatedStatus
+                            ]);
+                        }
+                    }
+                } elseif (str_contains($body, 'can now be tracked')) {
+                    if (str_contains($body, 'FSB tracking number:')) {
+                        preg_match('/Your order "([^"]+)" can now be tracked\. Your FSB tracking number: (\w+)/', $body, $matches);
+                        if (count($matches) >= 3) {
+                            $body = __('Your order ":productName" can now be tracked. Your FSB tracking number: :number', [
+                                'productName' => $matches[1],
+                                'number' => $matches[2]
+                            ]);
+                        }
+                    } else {
+                        preg_match('/Your order "([^"]+)" can now be tracked\. Your tracking reference: (\w+)/', $body, $matches);
+                        if (count($matches) >= 3) {
+                            $body = __('Your order ":productName" can now be tracked. Your tracking reference: :number', [
+                                'productName' => $matches[1],
+                                'number' => $matches[2]
+                            ]);
+                        }
+                    }
+                } elseif (str_contains($body, "You've received a new quote for '")) {
+                    preg_match("/You've received a new quote for '([^']+)'./", $body, $matches);
+                    if (count($matches) >= 2) {
+                        $body = __("You've received a new quote for ':productName'. Click to view details.", ['productName' => $matches[1]]);
+                    }
+                }
+            }
 
-            $body = $data['message']
-                ?? $data['body']
-                ?? $data['notification']['body']
-                ?? $notification->data['body']
-                ?? $notification->data['message']
-                ?? 'Nouvelle notification';
+            // If it's the new structured format, we can refine it
+            if (isset($data['title_key'])) {
+                $title = __($data['title_key'], $data['title_params'] ?? []);
+            } elseif ($title === 'order_status_update_title') {
+                $statusLabel = $this->translateStatus($data['status'] ?? '');
+                $emoji = $data['emoji'] ?? '🔔';
+                $title = __(':emoji Order Status Update: :status', ['emoji' => $emoji, 'status' => $statusLabel]);
+            } else {
+                $title = __($title);
+            }
+
+            if (isset($data['body_key'])) {
+                $params = $data['body_params'] ?? [];
+                if (isset($params['status'])) {
+                    $params['status'] = $this->translateStatus($params['status']);
+                }
+                $body = __($data['body_key'], $params);
+            } elseif (isset($data['title']) && $data['title'] === 'order_status_update_title') {
+                 $statusLabel = $this->translateStatus($data['status'] ?? '');
+                 if (isset($data['status']) && $data['status'] === 'paid') {
+                     $body = __('Payment confirmed! Next step: Shipment preparation.');
+                 } elseif (isset($data['status']) && $data['status'] === 'arrival_uae') {
+                     $body = __('Great news! Your package has arrived in the UAE.');
+                 } elseif (isset($data['status']) && $data['status'] === 'delivery_failed') {
+                     $body = __('Delivery failed. Please check your order details to reschedule.');
+                 } else {
+                     $body = __('Your order #:orderId is now :status.', [
+                         'orderId' => $data['sourcing_order_id'] ?? '',
+                         'status' => $statusLabel,
+                     ]);
+                 }
+            } else {
+                $body = __($body);
+            }
 
             $clickAction = $data['click_action']
                 ?? $data['notification']['click_action']

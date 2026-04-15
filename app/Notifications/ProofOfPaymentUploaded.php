@@ -74,8 +74,9 @@ class ProofOfPaymentUploaded extends Notification implements ShouldQueue
 
         return [
             'sourcing_order_id' => $this->sourcingOrder->id,
-            'title' => __('Payment Uploaded'),
-            'body' => __(':clientName uploaded proof of payment for the order related to \':productName\'.', ['clientName' => $clientName, 'productName' => $productName]),
+            'title_key' => 'Payment Uploaded',
+            'body_key' => ":clientName uploaded proof of payment for the order related to ':productName'.",
+            'body_params' => ['clientName' => $clientName, 'productName' => $productName],
             'link' => route('admin.sourcing-orders.show', $this->sourcingOrder->id),
         ];
     }

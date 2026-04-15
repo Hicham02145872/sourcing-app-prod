@@ -65,13 +65,15 @@ class QuotationCreated extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'title' => __('📄 New Quotation: :amount :currency', [
+            'title_key' => '📄 New Quotation: :amount :currency',
+            'title_params' => [
                 'amount' => $this->quotation->amount,
                 'currency' => $this->quotation->currency,
-            ]),
-            'body' => __('You\'ve received a new quote for \':productName\'. Click to view details.', [
+            ],
+            'body_key' => "You've received a new quote for ':productName'. Click to view details.",
+            'body_params' => [
                 'productName' => $this->quotation->sourcingRequest->product_name,
-            ]),
+            ],
             'sourcing_request_id' => $this->quotation->sourcing_request_id,
             'quotation_id' => $this->quotation->id,
             'amount' => $this->quotation->amount,

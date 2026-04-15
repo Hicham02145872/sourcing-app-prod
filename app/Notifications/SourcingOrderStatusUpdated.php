@@ -57,17 +57,34 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
-        $statusLabel = $this->getStatusLabel($this->sourcingOrder->status);
-        $emoji = $this->getStatusEmoji($this->sourcingOrder->status);
+        $status = $this->sourcingOrder->status;
+        $emoji = $this->getStatusEmoji($status);
 
         return [
             'sourcing_order_id' => $this->sourcingOrder->id,
-            'title' => __(':emoji Order Status Update: :status', ['emoji' => $emoji, 'status' => $statusLabel]),
-            'body' => $this->getStatusBody($this->sourcingOrder->status, $statusLabel),
-            'type' => 'info',
+            'title_key' => ':emoji Order Status: :status',
+            'title_params' => ['emoji' => $emoji, 'status' => $status],
+            'body_key' => $this->getStatusBodyKey($status),
+            'body_params' => [
+                'orderId' => $this->sourcingOrder->id,
+                'status' => $status,
+            ],
+            'status' => $status,
+            'emoji' => $emoji,
             'product_name' => $this->sourcingOrder->quotation->sourcingRequest->product_name,
+            'type' => 'info',
             'click_action' => route('client.sourcing-orders.show', $this->sourcingOrder->id),
         ];
+    }
+
+    private function getStatusBodyKey(string $status): string
+    {
+        return match ($status) {
+            'paid' => 'Payment confirmed! Next step: Shipment preparation.',
+            'arrival_uae' => 'Great news! Your package has arrived in the UAE.',
+            'delivery_failed' => 'Delivery failed. Please check your order details to reschedule.',
+            default => 'Your order #:orderId is now :status.',
+        };
     }
 
     public function toFcm($notifiable)

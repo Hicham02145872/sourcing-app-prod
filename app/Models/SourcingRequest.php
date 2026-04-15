@@ -61,11 +61,27 @@ class SourcingRequest extends Model
     }
 
     /**
+     * Get the translated status label.
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return __($this->status);
+    }
+
+    /**
      * Get the custom display ID (multiple of 5).
      */
     public function getDisplayIdAttribute(): int
     {
         return $this->id * 5;
+    }
+
+    /**
+     * Get the translated shipping method label.
+     */
+    public function getShippingMethodLabelAttribute(): string
+    {
+        return $this->shipping_method ? __($this->shipping_method) : __('N/A');
     }
 
     public function isAssigned()

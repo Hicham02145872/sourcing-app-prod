@@ -84,7 +84,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: {{ $statusData['color'] }}">{{ $statusData['title'] ?? __('Current Status') }}</p>
-                                <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ $statusLabel }}</p>
+                                <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ $sourcingOrder->status_label }}</p>
                             </div>
                         </div>
                         <div class="text-center sm:text-right bg-white dark:bg-slate-800 rounded-lg px-4 py-3 border border-[#EBEBEB] dark:border-slate-700">
@@ -272,7 +272,7 @@
                                                 <svg class="w-4 h-4 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                                                 </svg>
-                                                <p class="text-sm font-bold text-slate-900 dark:text-white capitalize">{{ $sourcingOrder->quotation->sourcingRequest->shipping_method ?? __('Not specified') }}</p>
+                                                <p class="text-sm font-bold text-slate-900 dark:text-white capitalize">{{ $sourcingOrder->quotation->sourcingRequest->shipping_method_label }}</p>
                                             </div>
                                         </div>
 
@@ -574,7 +574,7 @@
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
                                     </svg>
-                                    {{ $statusLabel }}
+                                    {{ $sourcingOrder->status_label }}
 </span>
                             </div>
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -173,7 +173,7 @@
 
                     } catch (err) {
                         console.error("❌ Erreur chargement notifications:", err);
-                        this.error = "Impossible de charger les notifications";
+                        this.error = @json(__('Impossible de charger les notifications'));
                     } finally {
                         this.loading = false;
                     }
@@ -245,7 +245,7 @@
                                 if (!n.read_at) n.read_at = new Date().toISOString();
                             });
                             this.unreadCount = 0;
-                            this.showSuccessToast('Toutes les notifications ont été marquées comme lues');
+                            this.showSuccessToast(@json(__('All notifications marked as read')));
                         }
                     } catch (err) {
                         console.error('❌ Erreur marquage toutes notifications:', err);
@@ -281,7 +281,7 @@
                 async clearAll() {
                     if (this.notifications.length === 0) return;
 
-                    if (!confirm('Êtes-vous sûr de vouloir supprimer toutes les notifications ?')) {
+                    if (!confirm(@json(__('Are you sure you want to delete all notifications?')))) {
                         return;
                     }
 
@@ -298,7 +298,7 @@
                         if (response.ok) {
                             this.notifications = [];
                             this.unreadCount = 0;
-                            this.showSuccessToast('Toutes les notifications ont été supprimées');
+                            this.showSuccessToast(@json(__('All notifications have been deleted')));
                         }
                     } catch (err) {
                         console.error('❌ Erreur suppression toutes notifications:', err);
@@ -331,22 +331,23 @@
                     if (!dateString) return '';
                     const date = new Date(dateString);
                     const now = new Date();
+                    const uiLocale = @json(app()->getLocale() === 'ar' ? 'ar' : (app()->getLocale() === 'fr' ? 'fr-FR' : 'en-US'));
                     const diffMs = now - date;
                     const diffMins = Math.floor(diffMs / 60000);
                     const diffHours = Math.floor(diffMs / 3600000);
                     const diffDays = Math.floor(diffMs / 86400000);
 
-                    if (diffMins < 1) return 'À l\'instant';
-                    if (diffMins < 60) return `Il y a ${diffMins} min`;
-                    if (diffHours < 24) return `Il y a ${diffHours}h`;
-                    if (diffDays === 1) return 'Hier';
-                    if (diffDays < 7) return `Il y a ${diffDays}j`;
-                    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                    if (diffMins < 1) return @json(__('Just now'));
+                    if (diffMins < 60) return `${diffMins} ${@json(__('min ago'))}`;
+                    if (diffHours < 24) return `${diffHours} ${@json(__('h ago'))}`;
+                    if (diffDays === 1) return @json(__('Yesterday'));
+                    if (diffDays < 7) return `${diffDays} ${@json(__('d ago'))}`;
+                    return date.toLocaleDateString(uiLocale, { day: 'numeric', month: 'short' });
                 },
 
                                 showToast(notification) {
                                     const type = notification.notification?.type || 'default'; // Default to 'default' type if not specified
-                                    const message = notification.notification?.title || 'Nouvelle notification';
+                                    const message = notification.notification?.title || @json(__('New notification'));
                                     if (type === 'error' || type === 'warning') { // Consider 'warning' as an error for toast purposes
                                         window.dispatchEvent(new CustomEvent('show-error-toast', { detail: message }));
                                     } else {
@@ -405,12 +406,12 @@
                         console.log("✅ FCM Token obtenu");
                         const success = await sendTokenToServer(currentToken);
                         if (success) {
-                            window.dispatchEvent(new CustomEvent('show-success-toast', { detail: 'Notifications activées avec succès !' }));
+                            window.dispatchEvent(new CustomEvent('show-success-toast', { detail: @json(__('Notifications activées avec succès !')) }));
                             return true;
                         }
                     }
                 } else if (permission === 'denied') {
-                    window.dispatchEvent(new CustomEvent('show-error-toast', { detail: 'Permission refusée. Vous pouvez la réactiver dans les paramètres de votre navigateur.' }));
+                    window.dispatchEvent(new CustomEvent('show-error-toast', { detail: @json(__('Permission refusée. Vous pouvez la réactiver dans les paramètres de votre navigateur.')) }));
                 }
                 return false;
             } catch (err) {
@@ -501,7 +502,7 @@
 
     <x-layout.header />
 
-    <div class="lg:ml-64 pt-24 flex flex-col flex-1 min-h-screen">
+    <div class="lg:ms-64 pt-24 flex flex-col flex-1 min-h-screen">
         <!-- Page Header -->
         @if (isset($header))
             <header class="bg-white dark:bg-gray-800 shadow">
@@ -524,7 +525,7 @@
                         <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span>&copy; {{ date('Y') }} <strong>{{ config('app.name') }}</strong>. Tous droits réservés.</span>
+                        <span>&copy; {{ date('Y') }} <strong>{{ config('app.name') }}</strong>. {{ __('All rights reserved.') }}</span>
                     </div>
 
                 </div>
@@ -565,7 +566,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <div class="ml-3 w-0 flex-1 pt-0.5">
+                            <div class="ms-3 w-0 flex-1 pt-0.5">
                                 <p class="text-sm font-medium"
                                     :class="{
                                         'text-green-800 dark:text-green-200': toast.type === 'success',
@@ -573,7 +574,7 @@
                                     }"
                                     x-text="toast.message"></p>
                             </div>
-                            <div class="ml-4 flex-shrink-0 flex">
+                            <div class="ms-4 flex-shrink-0 flex">
                                 <button @click="removeToast(toast.id)"
                                     class="rounded-md inline-flex focus:outline-none focus:ring-2 focus:ring-offset-2"
                                     :class="{

@@ -62,10 +62,10 @@
                             <!-- Status Header -->
                             @php
                                 $statusConfigs = [
-                                    'pending' => ['class' => 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/10 dark:border-amber-900/30 dark:text-amber-400', 'label' => 'Awaiting Review'],
-                                    'under_review' => ['class' => 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/10 dark:border-blue-900/30 dark:text-blue-400', 'label' => 'Under Review'],
-                                    'approved' => ['class' => 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/10 dark:border-emerald-900/30 dark:text-emerald-400', 'label' => 'Claim Approved'],
-                                    'rejected' => ['class' => 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/10 dark:border-red-900/30 dark:text-red-400', 'label' => 'Claim Rejected'],
+                                    'pending' => ['class' => 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/10 dark:border-amber-900/30 dark:text-amber-400', 'label' => __('Awaiting Review')],
+                                    'under_review' => ['class' => 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/10 dark:border-blue-900/30 dark:text-blue-400', 'label' => __('Under Review')],
+                                    'approved' => ['class' => 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/10 dark:border-emerald-900/30 dark:text-emerald-400', 'label' => __('Claim Approved')],
+                                    'rejected' => ['class' => 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/10 dark:border-red-900/30 dark:text-red-400', 'label' => __('Claim Rejected')],
                                 ];
                                 $config = $statusConfigs[$refundRequest->status] ?? $statusConfigs['pending'];
                             @endphp
@@ -82,7 +82,7 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <h3 class="text-xs font-bold uppercase tracking-widest">{{ __('Resolution Status') }}: {{ __($config['label']) }}</h3>
+                                        <h3 class="text-xs font-bold uppercase tracking-widest">{{ __('Resolution Status') }}: {{ $refundRequest->status_label }}</h3>
                                         <p class="text-[10px] opacity-75 uppercase tracking-tight">{{ __('Last updated') }} {{ $refundRequest->updated_at->format('M d, Y') }}</p>
                                     </div>
                                 </div>

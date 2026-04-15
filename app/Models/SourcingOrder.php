@@ -346,6 +346,14 @@ class SourcingOrder extends Model
     }
 
     /**
+     * Get the translated client status label.
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return __($this->client_status);
+    }
+
+    /**
      * Get the FSB tracking number alias (main order).
      */
     public function getFsbTrackingNumberAttribute(): string

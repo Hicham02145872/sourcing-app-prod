@@ -82,29 +82,18 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
      */
     public function toArray($notifiable)
     {
-
-        $statusLabel = $this->getStatusLabel($this->sourcingRequest->status);
-
         return [
-
-            'title' => __('Sourcing Request Updated'),
-
-            'body' => __('Your request for \':productName\' is now \':status\'.', [
-
+            'title_key' => 'Sourcing Request Updated',
+            'body_key' => "Your request for ':productName' is now ':status'.",
+            'body_params' => [
                 'productName' => $this->sourcingRequest->product_name,
-
-                'status' => $statusLabel,
-
-            ]),
-
+                'status' => $this->sourcingRequest->status,
+            ],
             'click_action' => route('client.sourcing-requests.show', $this->sourcingRequest->id),
-
             'sourcing_request_id' => $this->sourcingRequest->id,
-
             'status' => $this->sourcingRequest->status,
-
+            'product_name' => $this->sourcingRequest->product_name,
         ];
-
     }
 
     /**

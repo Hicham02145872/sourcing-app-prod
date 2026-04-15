@@ -6,7 +6,7 @@
             
             {{-- Status Pillar (Enterprise Indicator) --}}
             <div x-show="!notification.read_at" 
-                 class="absolute left-0 top-0 bottom-0 w-1 bg-[#EF7722]"></div>
+                 class="absolute start-0 top-0 bottom-0 w-1 bg-[#EF7722]"></div>
 
             {{-- Icon Section --}}
             <div class="flex-shrink-0">

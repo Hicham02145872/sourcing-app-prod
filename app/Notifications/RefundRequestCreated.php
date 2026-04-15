@@ -51,8 +51,13 @@ class RefundRequestCreated extends Notification implements ShouldQueue
     {
         return [
             'refund_request_id' => $this->refundRequest->id,
-            'title' => __('New Refund Request: #').$this->refundRequest->sourcingOrder->id,
-            'body' => __('A new ').$this->refundRequest->type.__(' refund request for ').number_format($this->refundRequest->amount_requested, 2).__(' has been created.'),
+            'title_key' => 'New Refund Request: #:orderId',
+            'title_params' => ['orderId' => $this->refundRequest->sourcingOrder->id],
+            'body_key' => 'A new :type refund request for :amount has been created.',
+            'body_params' => [
+                'type' => $this->refundRequest->type,
+                'amount' => number_format($this->refundRequest->amount_requested, 2),
+            ],
             'type' => 'refund_request',
         ];
     }

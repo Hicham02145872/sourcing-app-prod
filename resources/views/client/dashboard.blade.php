@@ -9,7 +9,7 @@
                  x-transition:leave="transition ease-in duration-300"
                  x-transition:leave-start="opacity-100 transform scale-100"
                  x-transition:leave-end="opacity-0 transform scale-95"
-                 class="relative bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded-r-lg shadow-md mb-8 p-4 sm:p-5">
+                 class="relative bg-amber-50 dark:bg-amber-900/20 border-s-4 border-amber-500 rounded-e-lg shadow-md mb-8 p-4 sm:p-5">
                 
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0">
@@ -32,7 +32,7 @@
                         </p>
                     </div>
                     <button @click="show = false; localStorage.setItem('spam_warning_dismissed', 'true')" 
-                            class="flex-shrink-0 -mt-1 -mr-1 p-1.5 bg-amber-100 dark:bg-amber-800/50 hover:bg-amber-200 dark:hover:bg-amber-800 rounded-lg text-amber-600 dark:text-amber-400 transition-colors duration-200 group"
+                            class="flex-shrink-0 -mt-1 -me-1 p-1.5 bg-amber-100 dark:bg-amber-800/50 hover:bg-amber-200 dark:hover:bg-amber-800 rounded-lg text-amber-600 dark:text-amber-400 transition-colors duration-200 group"
                             title="{{ __('Don\'t show this again') }}">
                         <span class="sr-only">{{ __('Dismiss') }}</span>
                         <svg class="h-5 w-5 transform group-hover:rotate-90 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,7 +54,7 @@
                 
                 {{-- Decorative background elements --}}
                 <div class="absolute inset-0 bg-grid-white/[0.1] bg-[size:20px_20px]"></div>
-                <div class="absolute -right-6 -bottom-6 text-white/10 transform rotate-12 pointer-events-none">
+                <div class="absolute -end-6 -bottom-6 text-white/10 transform rotate-12 pointer-events-none">
                     <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19.615 3.184c-3.613-.253-11.128-.253-14.742 0C1.98 3.336.5 4.981.5 7.643v8.52c0 2.662 1.48 4.307 4.373 4.459 3.613.253 11.128.253 14.742 0 2.893-.152 4.373-1.797 4.373-4.459v-8.52c0-2.662-1.48-4.307-4.373-4.459zm-9.544 11.189V7.625l5.064 3.376-5.064 3.372z"/>
                     </svg>
@@ -195,7 +195,7 @@
                             </div>
                             
                             {{-- Archived Link --}}
-                            <a href="{{ route('client.sourcing-requests.archived') }}" class="text-xs font-semibold text-slate-500 hover:text-red-500 underline decoration-slate-300 hover:decoration-red-300 transition-colors ml-2">
+                            <a href="{{ route('client.sourcing-requests.archived') }}" class="text-xs font-semibold text-slate-500 hover:text-red-500 underline decoration-slate-300 hover:decoration-red-300 transition-colors ms-2">
                                 {{ __('View Archived') }}
                             </a>
                         </div>
@@ -209,8 +209,8 @@
                                            id="searchInput"
                                            placeholder="{{ __('Search product...') }}" 
                                            value="{{ request('search') }}" 
-                                           class="w-full pl-9 pr-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 dark:text-white shadow-sm">
-                                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                           class="w-full ps-9 pe-4 py-2 text-sm border border-[#EBEBEB] dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#EF7722] focus:border-transparent bg-white dark:bg-slate-700 dark:text-white shadow-sm">
+                                    <svg class="w-4 h-4 text-slate-400 absolute start-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                     </svg>
                                 </div>
@@ -346,12 +346,12 @@
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $statusData['icon'] }}"/>
                                                     </svg>
-                                                    {{ __(ucfirst(str_replace('_', ' ', $request->status))) }}
+                                                    {{ $request->status_label }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm text-slate-900 dark:text-white">
-                                                    {{ $request->shipping_method ? __(ucfirst($request->shipping_method)) : __('N/A') }}
+                                                    {{ $request->shipping_method_label }}
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -360,7 +360,7 @@
                                                         <span class="fi fi-{{ strtolower($destination->country->code) }} text-base border border-[#EBEBEB] dark:border-slate-600 rounded-sm" title="{{ $destination->country->name }}"></span>
                                                     @endforeach
                                                     @if($request->destinations->count() > 3)
-                                                        <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 ml-1">
+                                                        <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 ms-1">
                                                             +{{ $request->destinations->count() - 3 }}
                                                         </span>
                                                     @endif
@@ -393,7 +393,7 @@
                                                         
                                                         <div x-show="open" 
                                                              x-transition
-                                                             class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-[#EBEBEB] dark:border-slate-700 py-1 z-20">
+                                                             class="absolute end-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-[#EBEBEB] dark:border-slate-700 py-1 z-20">
                                                             
                                                             @if ($request->status === 'pending')
                                                                 <a href="{{ route('client.sourcing-requests.edit', $request) }}" 

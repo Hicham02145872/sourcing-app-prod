@@ -52,10 +52,12 @@ class AlternativeSourcingNotification extends Notification implements ShouldQueu
             'product_name' => $this->quotation->sourcingRequest->product_name,
             'actual_sourcing_location' => $this->quotation->actual_sourcing_location,
             'sourcing_note' => $this->quotation->sourcing_note,
-            'message' => __('Alternative sourcing location (:location) chosen for :product', [
+            'title_key' => 'Alternative Sourcing Location',
+            'body_key' => 'Alternative sourcing location (:location) chosen for :product',
+            'body_params' => [
                 'location' => ucfirst($this->quotation->actual_sourcing_location),
                 'product' => $this->quotation->sourcingRequest->product_name,
-            ]),
+            ],
             'type' => 'alternative_sourcing',
         ];
     }

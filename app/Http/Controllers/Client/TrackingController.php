@@ -114,7 +114,7 @@ class TrackingController extends Controller
                 // If not in result, we can detect it again or pass it from unified service
                 return response()->json([
                     'data' => $result['events'] ?? [],
-                    'current_status' => $result['status_text'] ?? $result['current_status'] ?? ($result['events'][0]['status_en'] ?? $result['events'][0]['status'] ?? 'Update Success'),
+                    'current_status' => __($result['status_text'] ?? $result['current_status'] ?? ($result['events'][0]['status_en'] ?? $result['events'][0]['status'] ?? 'Update Success')),
                     'current_status_fr' => $result['current_status_fr'] ?? ($result['events'][0]['status_fr'] ?? null),
                     'tracking_number' => $result['tracking_number'] ?? $trackingNumber,
                     'provider' => $provider,

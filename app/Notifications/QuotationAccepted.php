@@ -54,11 +54,12 @@ class QuotationAccepted extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'title' => __('Quotation Accepted'),
-            'body' => __('The quote for \':productName\' was accepted by :clientName.', [
+            'title_key' => 'Quotation Accepted',
+            'body_key' => "The quote for ':productName' was accepted by :clientName.",
+            'body_params' => [
                 'productName' => $this->quotation->sourcingRequest->product_name,
                 'clientName' => $this->quotation->sourcingRequest->user->name,
-            ]),
+            ],
             'quotation_id' => $this->quotation->id,
             'sourcing_order_id' => $this->quotation->order->id,
             'click_action' => route('admin.sourcing-orders.index'),

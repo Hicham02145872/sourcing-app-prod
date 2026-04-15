@@ -1,9 +1,9 @@
 {{-- resources/views/components/sidebar-enterprise-custom.blade.php --}}
 @props(['role' => 'client', 'adminSourcingRequestCount' => 0, 'clientQuotationCount' => 0])
 
-<aside class="fixed top-[5rem] bottom-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-sm transform transition-transform duration-300 lg:translate-x-0 flex flex-col" 
+<aside class="fixed top-[5rem] bottom-0 start-0 z-50 w-64 bg-white dark:bg-slate-900 border-e border-slate-200 dark:border-slate-800 shadow-sm transform transition-transform duration-300 lg:translate-x-0 flex flex-col" 
        id="sidebar"
-       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+       :class="sidebarOpen ? 'translate-x-0' : (document.documentElement.dir === 'rtl' ? 'translate-x-full' : '-translate-x-full')">
     
     {{-- Main Content Wrapper --}}
     <div class="flex-1 overflow-y-auto pt-6 px-4">
@@ -64,7 +64,7 @@
                             </svg>
                             <span>{{ __('Quotations') }}</span>
                             @if($clientQuotationCount > 0)
-                                <span class="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-800 dark:bg-blue-900 dark:text-blue-200">{{ $clientQuotationCount }}</span>
+                                <span class="ms-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-800 dark:bg-blue-900 dark:text-blue-200">{{ $clientQuotationCount }}</span>
                             @endif
                         </a>
 
@@ -154,7 +154,7 @@
                             </svg>
                             <span>{{ __('Requests') }}</span>
                             @if($adminSourcingRequestCount > 0)
-                                <span class="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-800 dark:bg-blue-900 dark:text-blue-200">{{ $adminSourcingRequestCount }}</span>
+                                <span class="ms-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-800 dark:bg-blue-900 dark:text-blue-200">{{ $adminSourcingRequestCount }}</span>
                             @endif
                         </a>
 
@@ -273,19 +273,19 @@
                          
                         {{-- Countries --}}
                         <a href="{{ route('admin.countries.index') }}" 
-                           class="flex items-center gap-3 px-3 py-2 pl-11 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.countries.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                           class="flex items-center gap-3 px-3 py-2 ps-11 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.countries.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <span>{{ __('Countries') }}</span>
                         </a>
 
                         {{-- Services --}}
                         <a href="{{ route('admin.services.index') }}" 
-                           class="flex items-center gap-3 px-3 py-2 pl-11 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.services.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                           class="flex items-center gap-3 px-3 py-2 ps-11 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.services.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <span>{{ __('Services') }}</span>
                         </a>
 
                         {{-- Categories --}}
                         <a href="{{ route('admin.categories.index') }}" 
-                           class="flex items-center gap-3 px-3 py-2 pl-11 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.categories.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                           class="flex items-center gap-3 px-3 py-2 ps-11 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.categories.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
                             <span>{{ __('Categories') }}</span>
                         </a>
                     </div>

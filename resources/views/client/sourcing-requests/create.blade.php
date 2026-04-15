@@ -32,6 +32,19 @@
                   data-translation-geolocation-unsupported="{{ __('Geolocation is not supported by your browser.') }}">
                 @csrf
 
+                <!-- Global Error Alert -->
+                <div id="global-errors" class="hidden mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                            <h4 class="text-sm font-bold text-red-800 dark:text-red-300">{{ __('Validation Errors') }}</h4>
+                            <ul id="global-errors-list" class="mt-1 text-sm text-red-700 dark:text-red-400 list-disc list-inside"></ul>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Step 1: Product Details -->
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-[#EBEBEB] dark:border-slate-700 p-6 sm:p-8 mb-6">
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
@@ -67,7 +80,7 @@
                                     </label>
                                     <x-text-input id="product_url" 
                                                   class="block w-full rounded-lg border-[#EBEBEB] dark:border-slate-600 focus:border-[#EF7722] focus:ring-[#EF7722] shadow-sm dark:bg-slate-700 dark:text-white text-sm" 
-                                                  type="url" 
+                                                  type="text" 
                                                   name="product_url" 
                                                   :value="old('product_url')" 
                                                   required 
@@ -128,7 +141,7 @@
                                         <span class="text-xs font-medium text-center">{{ __('Upload') }}</span>
                                     </div>
                                     <label for="product_image" class="absolute inset-0 cursor-pointer"></label>
-                                    <input id="product_image" type="file" class="sr-only" name="product_image" accept="image/*" required />
+                                    <input id="product_image" type="file" class="sr-only" name="product_image" accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml,image/webp" required />
                                 </div>
                                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">{{ __('Max 15MB') }} <span class="text-red-500">*</span></p>
                             </div>
@@ -396,8 +409,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                    </select>
-                                </div>
                             </div>
                             <div class="mt-3">
                                 <label for="destinations_${newIndex}_address" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">{{ __('Delivery Address') }}</label>
@@ -485,22 +496,65 @@
                             }, 1500);
                         } else if (response.status === 422) {
                             window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __("Please check the form for errors.") }}' }));
+                            
+                            // Clear existing errors
+                            document.querySelectorAll('.validation-error').forEach(el => el.remove());
+                            document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+                            const globalErrors = document.getElementById('global-errors');
+                            const globalErrorsList = document.getElementById('global-errors-list');
+                            globalErrors.classList.add('hidden');
+                            globalErrorsList.innerHTML = '';
+
                             if (data.errors) {
+                                let hasGlobalErrors = false;
+                                
                                 for (const field in data.errors) {
-                                    const inputEl = document.querySelector(`[name="${field}"]`);
-                                    if (inputEl) {
-                                        inputEl.classList.add('border-red-500');
-                                    } else {
-                                        // Try to find array inputs (e.g. destinations.0.address -> destinations[0][address])
-                                        const arrayName = field.replace(/\.(\d+)\./, '[$1][');
-                                        const arrayInput = document.querySelector(`[name="${arrayName}"]`) || document.querySelector(`[name="${arrayName}]"]`);
-                                        if (arrayInput) {
-                                            arrayInput.classList.add('border-red-500');
-                                        } else {
-                                            console.warn(`Could not find input for error field: ${field}`);
+                                    let inputEl = document.querySelector(`[name="${field}"]`);
+                                    
+                                    if (!inputEl) {
+                                        // Try array syntax (destinations.0.address -> destinations[0][address])
+                                        const parts = field.split('.');
+                                        if (parts.length > 1) {
+                                            const nameSelector = parts[0] + '[' + parts[1] + '][' + parts.slice(2).join('][') + ']';
+                                            inputEl = document.querySelector(`[name="${nameSelector}"]`);
+                                        }
+                                        
+                                        // Fallback to searching for ID
+                                        if (!inputEl) {
+                                            const idSelector = field.replace(/\./g, '_');
+                                            inputEl = document.getElementById(idSelector);
                                         }
                                     }
+
+                                    if (inputEl) {
+                                        inputEl.classList.add('border-red-500');
+                                        
+                                        // Special handling for hidden/special inputs
+                                        let errorContainer = inputEl.parentNode;
+                                        if (field === 'product_image') {
+                                            errorContainer = document.getElementById('image-drop-zone').parentNode;
+                                        } else if (field === 'sourcing_location' || field === 'shipping_method') {
+                                            errorContainer = inputEl.closest('div').parentNode;
+                                        }
+
+                                        const errorMsg = document.createElement('p');
+                                        errorMsg.className = 'text-xs text-red-500 mt-1 validation-error';
+                                        errorMsg.textContent = data.errors[field][0];
+                                        errorContainer.appendChild(errorMsg);
+                                    } else {
+                                        // Add to global errors if no input found
+                                        hasGlobalErrors = true;
+                                        const li = document.createElement('li');
+                                        li.textContent = `${field}: ${data.errors[field][0]}`;
+                                        globalErrorsList.appendChild(li);
+                                    }
                                 }
+                                
+                                if (hasGlobalErrors) {
+                                    globalErrors.classList.remove('hidden');
+                                    globalErrors.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
+                                
                                 console.log('Validation errors:', data.errors);
                             }
                         } else {

@@ -57,7 +57,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Status') }}</p>
-                                <p class="text-lg font-bold text-slate-900 dark:text-white capitalize">{{ __(str_replace('_', ' ', $sourcingRequest->status)) }}</p>
+                                <p class="text-lg font-bold text-slate-900 dark:text-white capitalize">{{ $sourcingRequest->status_label }}</p>
                             </div>
                         </div>
 
@@ -154,7 +154,7 @@
                                                 @endif
                                             </svg>
                                             <p class="text-sm font-semibold text-slate-900 dark:text-white capitalize">
-                                                {{ $sourcingRequest->shipping_method ?? 'Not specified' }}
+                                                {{ $sourcingRequest->shipping_method_label }}
                                             </p>
                                         </div>
                                     </div>
@@ -510,7 +510,7 @@
                                 <div class="flex justify-between items-center p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">
                                     <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">{{ __('Status') }}</span>
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#EF7722]/10 text-[#EF7722]">
-                                        {{ str_replace('_', ' ', $sourcingRequest->status) }}
+                                        {{ $sourcingRequest->status_label }}
                                     </span>
                                 </div>
 
