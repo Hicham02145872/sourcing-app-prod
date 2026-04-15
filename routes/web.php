@@ -18,21 +18,22 @@ Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('la
 
 // Root: auto-detect locale and redirect to clean URL
 Route::get('/', function (Request $request) {
-    $supported = ['en', 'fr', 'ar'];
+    $supported = ['eng', 'fr', 'ar'];
+    $preferredLocale = $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en';
     $locale = Session::get('locale')
-        ?? $request->getPreferredLanguage($supported)
-        ?? config('app.locale', 'en');
+        ?? ($preferredLocale === 'en' ? 'eng' : $preferredLocale)
+        ?? config('app.locale', 'eng');
     if (! in_array($locale, $supported)) {
-        $locale = 'en';
+        $locale = 'eng';
     }
 
     return redirect('/' . $locale, 302);
 });
 
-// Locale-prefixed welcome page: /en  /fr  /ar
+// Locale-prefixed welcome page: /eng  /fr  /ar
 Route::get('/{locale}', function ($locale) {
     return view('welcome');
-})->where('locale', 'en|fr|ar')->name('welcome');
+})->where('locale', 'eng|fr|ar')->name('welcome');
 
 // Public static pages
 Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy-policy');

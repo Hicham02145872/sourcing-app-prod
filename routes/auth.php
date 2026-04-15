@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -11,55 +10,72 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
+$localePattern = 'eng|fr|ar';
+
+Route::middleware('guest')->group(function () use ($localePattern) {
+    Route::get('{locale?}/register', [RegisteredUserController::class, 'create'])
+        ->where('locale', $localePattern)
         ->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store'])
+    Route::post('{locale?}/register', [RegisteredUserController::class, 'store'])
+        ->where('locale', $localePattern)
         ->middleware('throttle:5,1');
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
+    Route::get('{locale?}/login', [AuthenticatedSessionController::class, 'create'])
+        ->where('locale', $localePattern)
         ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store'])
+    Route::post('{locale?}/login', [AuthenticatedSessionController::class, 'store'])
+        ->where('locale', $localePattern)
         ->middleware('throttle:5,1');
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+    Route::get('{locale?}/forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->where('locale', $localePattern)
         ->name('password.request');
 
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+    Route::post('{locale?}/forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->where('locale', $localePattern)
         ->middleware('throttle:5,1')
         ->name('password.email');
 
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+    Route::get('{locale?}/reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->where('locale', $localePattern)
         ->name('password.reset');
 
-    Route::post('reset-password', [NewPasswordController::class, 'store'])
+    Route::post('{locale?}/reset-password', [NewPasswordController::class, 'store'])
+        ->where('locale', $localePattern)
         ->middleware('throttle:3,1')
         ->name('password.store');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('verify-email', EmailVerificationPromptController::class)
+Route::middleware('auth')->group(function () use ($localePattern) {
+    Route::get('{locale?}/verify-email', [\App\Http\Controllers\Auth\EmailVerificationPromptController::class, '__invoke'])
+        ->where('locale', $localePattern)
         ->name('verification.notice');
 
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+    Route::get('{locale?}/verify-email/{id}/{hash}', VerifyEmailController::class)
+        ->where('locale', $localePattern)
         ->middleware(['signed', 'throttle:6,10'])
         ->name('verification.verify');
 
-    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+    Route::post('{locale?}/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+        ->where('locale', $localePattern)
         ->middleware('throttle:6,10')
         ->name('verification.send');
 
-    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
+    Route::get('{locale?}/confirm-password', [ConfirmablePasswordController::class, 'show'])
+        ->where('locale', $localePattern)
         ->name('password.confirm');
 
-    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
+    Route::post('{locale?}/confirm-password', [ConfirmablePasswordController::class, 'store'])
+        ->where('locale', $localePattern);
 
-    Route::put('password', [PasswordController::class, 'update'])
+    Route::put('{locale?}/password', [PasswordController::class, 'update'])
+        ->where('locale', $localePattern)
         ->middleware('throttle:5,1')
         ->name('password.update');
 
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+    Route::post('{locale?}/logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->where('locale', $localePattern)
         ->name('logout');
 });

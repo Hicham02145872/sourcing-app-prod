@@ -9,9 +9,9 @@ class LanguageController extends Controller
 {
     public function switch($locale)
     {
-        $supported = ['en', 'fr', 'ar'];
+        $supported = ['eng', 'fr', 'ar'];
         if (! in_array($locale, $supported, true)) {
-            $locale = 'en';
+            $locale = 'eng';
         }
 
         Session::put('locale', $locale);

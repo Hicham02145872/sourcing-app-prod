@@ -2,10 +2,10 @@
     <!-- Header -->
     <div class="mb-10">
         <h1 class="text-3xl font-semibold text-slate-900 dark:text-white mb-2">
-            Set new password
+            {{ __('Set new password') }}
         </h1>
         <p class="text-slate-500 dark:text-slate-400">
-            Create a strong password for your account
+            {{ __('Create a strong password for your account') }}
         </p>
     </div>
 
@@ -19,7 +19,7 @@
         <!-- Email (Read-only) -->
         <div>
             <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Email address
+                {{ __('Email address') }}
             </label>
             <input id="email" 
                 type="email" 
@@ -36,32 +36,32 @@
         <!-- New Password -->
         <div>
             <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                New password
+                {{ __('New password') }}
             </label>
             <input id="password" 
                 type="password" 
                 name="password" 
                 required 
                 autocomplete="new-password"
-                placeholder="Enter new password"
+                placeholder="{{ __('Enter new password') }}"
                 class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
             <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                Must be at least 8 characters long
+                {{ __('Must be at least 8 characters long') }}
             </p>
         </div>
 
         <!-- Confirm Password -->
         <div>
             <label for="password_confirmation" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Confirm password
+                {{ __('Confirm password') }}
             </label>
             <input id="password_confirmation"
                 type="password"
                 name="password_confirmation" 
                 required 
                 autocomplete="new-password"
-                placeholder="Re-enter new password"
+                placeholder="{{ __('Re-enter new password') }}"
                 class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
@@ -69,7 +69,7 @@
         <!-- Submit Button -->
         <button type="submit"
                 class="w-full py-3.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2 mt-8">
-            Reset password
+            {{ __('Reset password') }}
         </button>
     </form>
 
@@ -81,7 +81,7 @@
     <!-- Back to Login -->
     <p class="text-center text-sm text-slate-600 dark:text-slate-400">
         <a href="{{ route('login') }}" class="font-medium text-[#EF7722] hover:text-[#FAA533] transition-colors">
-            Back to sign in
+            {{ __('Back to sign in') }}
         </a>
     </p>
 </x-guest-layout>

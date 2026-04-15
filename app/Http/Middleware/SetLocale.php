@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 
 class SetLocale
 {
@@ -14,7 +15,12 @@ class SetLocale
      *
      * @var array<int, string>
      */
-    private array $supportedLocales = ['en', 'fr', 'ar'];
+    private array $supportedLocales = ['eng', 'fr', 'ar'];
+
+    private function toAppLocale(string $locale): string
+    {
+        return $locale === 'eng' ? 'en' : $locale;
+    }
 
     /**
      * Handle an incoming request.
@@ -27,21 +33,26 @@ class SetLocale
         $urlLocale = $request->segment(1);
 
         if ($urlLocale && in_array($urlLocale, $this->supportedLocales, true)) {
-            App::setLocale($urlLocale);
+            App::setLocale($this->toAppLocale($urlLocale));
             Session::put('locale', $urlLocale);
+            URL::defaults(['locale' => $urlLocale]);
 
             return $next($request);
         }
 
         if (Session::has('locale') && in_array(Session::get('locale'), $this->supportedLocales, true)) {
-            App::setLocale(Session::get('locale'));
+            $sessionLocale = Session::get('locale');
+            App::setLocale($this->toAppLocale($sessionLocale));
+            URL::defaults(['locale' => $sessionLocale]);
 
             return $next($request);
         }
 
-        $preferredLocale = $request->getPreferredLanguage($this->supportedLocales) ?? config('app.locale', 'en');
+        $preferredLocale = $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? config('app.locale', 'en');
+        $urlLocale = $preferredLocale === 'en' ? 'eng' : $preferredLocale;
         App::setLocale($preferredLocale);
-        Session::put('locale', $preferredLocale);
+        Session::put('locale', $urlLocale);
+        URL::defaults(['locale' => $urlLocale]);
 
         return $next($request);
     }

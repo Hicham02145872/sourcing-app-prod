@@ -7,17 +7,17 @@
             </svg>
         </div>
         <h1 class="text-3xl font-semibold text-slate-900 dark:text-white mb-2 text-center">
-            Verify your email
+            {{ __('Verify your email') }}
         </h1>
         <p class="text-slate-500 dark:text-slate-400 text-center">
-            Check your inbox for the verification link
+            {{ __('Check your inbox for the verification link') }}
         </p>
     </div>
 
     <!-- Info Message -->
     <div class="mb-8 p-4 bg-[#EF7722]/10 border border-[#EF7722]/20 rounded-xl">
         <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed text-center">
-            We've sent a verification link to your email address. Click the link to activate your account.
+            {{ __('We\'ve sent a verification link to your email address. Click the link to activate your account.') }}
         </p>
     </div>
 
@@ -29,7 +29,7 @@
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                 </svg>
                 <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300">
-                    Verification link sent successfully!
+                    {{ __('Verification link sent successfully!') }}
                 </p>
             </div>
         </div>
@@ -69,8 +69,8 @@
     <!-- Help Text -->
     <div class="mt-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
         <p class="text-xs text-slate-600 dark:text-slate-400 text-center leading-relaxed">
-            <strong>Didn't receive the email?</strong><br/>
-            Check your spam folder or click resend above
+            <strong>{{ __("Didn't receive the email?") }}</strong><br/>
+            {{ __('Check your spam folder or click resend above') }}
         </p>
     </div>
 
