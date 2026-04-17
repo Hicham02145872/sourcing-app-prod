@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 
 class DevDashboard extends Component
@@ -28,6 +30,14 @@ class DevDashboard extends Component
     public $trackingLogs = [];
 
     public $users = [];
+
+    public $userSearch = '';
+
+    public $passwordInputs = [];
+
+    public $passwordConfirmations = [];
+
+    public $currentAdminPassword = '';
 
     public $logs = '';
 
@@ -240,6 +250,89 @@ class DevDashboard extends Component
 
             return redirect()->route('dashboard');
         }
+    }
+
+    public function getFilteredUsersProperty()
+    {
+        $users = $this->users instanceof \Illuminate\Support\Collection
+            ? $this->users
+            : collect($this->users);
+
+        if (empty($this->userSearch)) {
+            return $users;
+        }
+
+        $search = strtolower(trim($this->userSearch));
+
+        return $users->filter(function ($user) use ($search) {
+            return str_contains(strtolower((string) $user->name), $search)
+                || str_contains(strtolower((string) $user->email), $search)
+                || str_contains(strtolower((string) $user->role), $search);
+        });
+    }
+
+    public function updateUserPassword($userId)
+    {
+        $actor = Auth::user();
+
+        if (! $actor) {
+            $this->dispatch('show-error-toast', message: 'Unauthorized action.');
+
+            return;
+        }
+
+        $validator = Validator::make(
+            [
+                'current_admin_password' => $this->currentAdminPassword,
+                'password' => $this->passwordInputs[$userId] ?? '',
+                'password_confirmation' => $this->passwordConfirmations[$userId] ?? '',
+            ],
+            [
+                'current_admin_password' => ['required', 'string'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            $this->dispatch('show-error-toast', message: $validator->errors()->first());
+
+            return;
+        }
+
+        if (! Hash::check($this->currentAdminPassword, (string) $actor->password)) {
+            $this->dispatch('show-error-toast', message: 'Current password is incorrect.');
+
+            return;
+        }
+
+        $user = User::find($userId);
+
+        if (! $user) {
+            $this->dispatch('show-error-toast', message: 'User not found.');
+
+            return;
+        }
+
+        if ((int) $user->id === (int) $actor->id) {
+            $this->dispatch('show-error-toast', message: 'You cannot reset your own password from this panel.');
+
+            return;
+        }
+
+        if (in_array((string) $user->role, ['super_admin', 'developer'], true)) {
+            $this->dispatch('show-error-toast', message: 'Password reset is blocked for protected roles.');
+
+            return;
+        }
+
+        $user->password = $this->passwordInputs[$userId];
+        $user->save();
+
+        $this->currentAdminPassword = '';
+        $this->passwordInputs[$userId] = '';
+        $this->passwordConfirmations[$userId] = '';
+
+        $this->dispatch('show-success-toast', message: "Password updated for {$user->name}.");
     }
 
     public function generateTestData($type, $count = 5)

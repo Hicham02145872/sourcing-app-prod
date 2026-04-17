@@ -26,7 +26,7 @@
     <div class="flex-1 flex overflow-hidden">
         <!-- Sidebar Navigation -->
         <nav class="w-64 bg-white border-r border-slate-200 p-4 flex flex-col gap-1 overflow-y-auto">
-            @foreach(['sync' => 'Sync Monitor', 'testing' => 'Test Tools', 'tracking' => 'Tracking Monitor', 'cache' => 'Cache Monitor', 'notifications' => 'Notifications', 'flags' => 'Feature Flags', 'health' => 'System Health', 'shortcuts' => 'Shortcuts', 'env' => 'Env Preview', 'mail' => 'Mail Viewer', 'backups' => 'Backups', 'scheduler' => 'Scheduler', 'sessions' => 'Sessions', 'seeders' => 'Seeders', 'queue' => 'Queue Monitor', 'db' => 'Database Explorer', 'audit' => 'Status Audit', 'debug' => 'Debugger'] as $tab => $label)
+            @foreach(['sync' => 'Sync Monitor', 'testing' => 'Test Tools', 'users' => 'Users', 'tracking' => 'Tracking Monitor', 'cache' => 'Cache Monitor', 'notifications' => 'Notifications', 'flags' => 'Feature Flags', 'health' => 'System Health', 'shortcuts' => 'Shortcuts', 'env' => 'Env Preview', 'mail' => 'Mail Viewer', 'backups' => 'Backups', 'scheduler' => 'Scheduler', 'sessions' => 'Sessions', 'seeders' => 'Seeders', 'queue' => 'Queue Monitor', 'db' => 'Database Explorer', 'audit' => 'Status Audit', 'debug' => 'Debugger'] as $tab => $label)
                 <button wire:click="$set('activeTab', '{{ $tab }}')" 
                     class="w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-tight transition-none {{ $activeTab === $tab ? 'bg-slate-900 text-white' : 'text-slate-600 border border-transparent border-b-slate-100 hover:border-slate-300' }}">
                     {{ $label }}
@@ -124,6 +124,98 @@
                             @endforeach
                         </div>
                     </section>
+                </div>
+            @endif
+
+            @if($activeTab === 'users')
+                <div class="space-y-8">
+                    <div class="flex justify-between items-start border-b border-slate-300 pb-6">
+                        <div>
+                            <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Users Management</h2>
+                            <p class="text-xs text-slate-500 uppercase mt-1">View all users and reset account passwords</p>
+                        </div>
+                        <div class="w-full max-w-sm">
+                            <input
+                                wire:model.live.debounce.300ms="userSearch"
+                                type="text"
+                                placeholder="Search by name, email, role..."
+                                class="w-full bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 p-4 grid grid-cols-1 lg:grid-cols-3 gap-3 items-center">
+                        <div class="lg:col-span-2 text-[10px] font-black uppercase text-amber-900 tracking-wider">
+                            Extra protection enabled: enter your current password to authorize each reset. Protected roles (super_admin, developer) and self-reset are blocked.
+                        </div>
+                        <input
+                            wire:model.defer="currentAdminPassword"
+                            type="password"
+                            placeholder="Your current password"
+                            class="bg-white border border-amber-300 text-xs px-3 py-2 outline-none focus:border-amber-500 transition-none"
+                        >
+                    </div>
+
+                    <div class="bg-white border border-slate-200 overflow-hidden">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-200">
+                                    <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">User</th>
+                                    <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Role</th>
+                                    <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Email Verification</th>
+                                    <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Update Password</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @forelse($this->filteredUsers as $user)
+                                    <tr class="text-xs align-top hover:bg-slate-50 transition-none">
+                                        <td class="px-4 py-3">
+                                            <div class="font-bold text-slate-900">{{ $user->name }}</div>
+                                            <div class="text-[10px] text-slate-500 font-mono">{{ $user->email }}</div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-[9px] px-2 py-1 bg-slate-200 text-slate-700 font-black uppercase">{{ $user->role }}</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            @if($user->email_verified_at)
+                                                <span class="text-[9px] px-2 py-1 bg-emerald-100 text-emerald-800 font-black uppercase">Verified</span>
+                                            @else
+                                                <span class="text-[9px] px-2 py-1 bg-rose-100 text-rose-800 font-black uppercase">Not Verified</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <input
+                                                    wire:model.defer="passwordInputs.{{ $user->id }}"
+                                                    type="password"
+                                                    placeholder="New password"
+                                                    class="bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none"
+                                                >
+                                                <input
+                                                    wire:model.defer="passwordConfirmations.{{ $user->id }}"
+                                                    type="password"
+                                                    placeholder="Confirm password"
+                                                    class="bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none"
+                                                >
+                                                <button
+                                                    wire:click="updateUserPassword({{ $user->id }})"
+                                                    class="bg-slate-900 text-white px-3 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-none"
+                                                >
+                                                    Save Password
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-12 text-center text-slate-400 text-xs uppercase font-bold tracking-widest">
+                                            No users found for this search
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             @endif
 

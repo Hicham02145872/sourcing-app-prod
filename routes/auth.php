@@ -49,6 +49,15 @@ Route::middleware('guest')->group(function () use ($localePattern) {
 });
 
 Route::middleware('auth')->group(function () use ($localePattern) {
+    // Legacy non-localized routes kept for backward compatibility with old email links.
+    Route::get('verify-email', [\App\Http\Controllers\Auth\EmailVerificationPromptController::class, '__invoke']);
+
+    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,10']);
+
+    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+        ->middleware('throttle:6,10');
+
     Route::get('{locale?}/verify-email', [\App\Http\Controllers\Auth\EmailVerificationPromptController::class, '__invoke'])
         ->where('locale', $localePattern)
         ->name('verification.notice');

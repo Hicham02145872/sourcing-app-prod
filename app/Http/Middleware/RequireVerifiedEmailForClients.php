@@ -24,7 +24,24 @@ class RequireVerifiedEmailForClients
 
         // Clients must have verified email
         if ($user && $user->isClient() && !$user->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
+            $supportedLocales = ['eng', 'fr', 'ar'];
+
+            $locale = $request->segment(1);
+            $locale = $locale === 'en' ? 'eng' : $locale;
+
+            if (!in_array($locale, $supportedLocales, true)) {
+                $sessionLocale = session('locale');
+                $sessionLocale = $sessionLocale === 'en' ? 'eng' : $sessionLocale;
+                $locale = in_array($sessionLocale, $supportedLocales, true) ? $sessionLocale : null;
+            }
+
+            if (!$locale) {
+                $appLocale = app()->getLocale();
+                $appLocale = $appLocale === 'en' ? 'eng' : $appLocale;
+                $locale = in_array($appLocale, $supportedLocales, true) ? $appLocale : 'eng';
+            }
+
+            return redirect()->route('verification.notice', ['locale' => $locale]);
         }
 
         return $next($request);
