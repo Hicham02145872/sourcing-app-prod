@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -8,7 +8,7 @@
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <title>{{ $title ?? 'Legal' }} - FastSourcingBrothers</title>
+    <title>{{ $title ?? __('legal.common.legal') }} - FastSourcingBrothers</title>
     
     <!-- Font: Inter & Style Script & Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,27 +85,27 @@
         <div class="fixed top-0 left-0 right-0 z-50 pt-4 px-4 flex justify-center">
             <nav class="glass-nav w-full max-w-6xl rounded-2xl shadow-sm border border-white/50 px-6 h-16 flex items-center justify-between">
                 <!-- Logo -->
-                <a href="/" class="flex-shrink-0 flex items-center gap-2">
+                <a href="{{ route('welcome') }}" class="flex-shrink-0 flex items-center gap-2">
                     <img class="h-20 w-20" src="{{ asset('images/logo1.png') }}" alt="{{ config('app.name') }}">
                 </a>
 
                 <!-- Desktop Menu -->
                 <div class="hidden lg:flex items-center space-x-1">
-                    <a href="/#how-it-works" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">Process</a>
-                    <a href="/#benefits" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">Benefits</a>
-                    <a href="/#testimonials" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">Reviews</a>
+                    <a href="{{ route('welcome') }}#how-it-works" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">{{ __('welcome.nav.process') }}</a>
+                    <a href="{{ route('welcome') }}#benefits" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">{{ __('welcome.nav.benefits') }}</a>
+                    <a href="{{ route('welcome') }}#testimonials" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">{{ __('welcome.nav.reviews') }}</a>
                 </div>
 
                 <!-- Auth -->
                 <div class="flex items-center gap-3">
                     @auth
                         <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10">
-                            Dashboard
+                            {{ __('welcome.nav.dashboard') }}
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="hidden sm:inline-block px-4 py-2 text-sm font-medium text-slate-700 hover:text-red-600">Login</a>
+                        <a href="{{ route('login') }}" class="hidden sm:inline-block px-4 py-2 text-sm font-medium text-slate-700 hover:text-red-600">{{ __('welcome.nav.login') }}</a>
                         <a href="{{ route('register') }}" class="px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-slate-900/10">
-                            Get Started
+                            {{ __('welcome.nav.get_started') }}
                         </a>
                     @endauth
                 </div>
@@ -127,28 +127,28 @@
                         <div class="flex items-center gap-2 mb-4">
                             <span class="text-xl font-bold text-slate-900 tracking-tight">FastSourcingBrothers</span>
                         </div>
-                        <p class="text-slate-500 text-sm leading-relaxed">Simplifying global trade through technology and expert on-ground support.</p>
+                        <p class="text-slate-500 text-sm leading-relaxed">{{ __('welcome.footer.tagline') }}</p>
                     </div>
 
                     <div class="flex flex-col gap-4 text-sm">
-                        <h4 class="font-bold text-slate-900">Contact</h4>
+                        <h4 class="font-bold text-slate-900">{{ __('welcome.footer.contact') }}</h4>
                         <a href="mailto:support@fastsourcingbrothers.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             support@fastsourcingbrothers.com
                         </a>
-                        <a href="{{ route('support') }}" class="text-slate-500 hover:text-red-600 transition-colors">Contact Us</a>
+                        <a href="{{ route('support') }}" class="text-slate-500 hover:text-red-600 transition-colors">{{ __('welcome.footer.contact_us') }}</a>
                     </div>
 
                     <div class="flex flex-col gap-3 text-sm">
-                        <h4 class="font-bold text-slate-900">Legal</h4>
-                        <a href="{{ route('refund-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors font-semibold underline decoration-red-500/30">Refund Policy</a>
-                        <a href="{{ route('shipping-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors font-semibold underline decoration-red-500/30">Shipping Policy</a>
-                        <a href="{{ route('privacy-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors font-semibold underline decoration-red-500/30">Privacy Policy</a>
+                        <h4 class="font-bold text-slate-900">{{ __('welcome.footer.legal') }}</h4>
+                        <a href="{{ route('refund-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors font-semibold underline decoration-red-500/30">{{ __('welcome.footer.refund_policy') }}</a>
+                        <a href="{{ route('shipping-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors font-semibold underline decoration-red-500/30">{{ __('welcome.footer.shipping_policy') }}</a>
+                        <a href="{{ route('privacy-policy') }}" class="text-slate-500 hover:text-red-600 transition-colors font-semibold underline decoration-red-500/30">{{ __('welcome.footer.privacy_policy') }}</a>
                     </div>
                 </div>
 
                 <div class="border-t border-slate-100 pt-8 text-center text-xs text-slate-400">
-                    <p>© 2026 Fast Sourcing Brothers LLC. Registered in Wyoming, USA.</p>
+                    <p>{{ __('legal.common.copyright') }}</p>
                 </div>
             </div>
         </footer>

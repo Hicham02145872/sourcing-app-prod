@@ -35,12 +35,48 @@ Route::get('/{locale}', function ($locale) {
     return view('welcome');
 })->where('locale', 'eng|fr|ar')->name('welcome');
 
-// Public static pages
-Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy-policy');
-Route::get('/refund-policy', [PageController::class, 'refund'])->name('refund-policy');
-Route::get('/shipping-policy', [PageController::class, 'shipping'])->name('shipping-policy');
-Route::get('/terms-of-service', [PageController::class, 'terms'])->name('terms-of-service');
-Route::get('/support', [PageController::class, 'support'])->name('support');
+// Public static pages with locale in path (same style as welcome)
+Route::prefix('{locale}')
+    ->where(['locale' => 'eng|fr|ar'])
+    ->group(function () {
+        Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy-policy');
+        Route::get('/refund-policy', [PageController::class, 'refund'])->name('refund-policy');
+        Route::get('/shipping-policy', [PageController::class, 'shipping'])->name('shipping-policy');
+        Route::get('/terms-of-service', [PageController::class, 'terms'])->name('terms-of-service');
+        Route::get('/support', [PageController::class, 'support'])->name('support');
+    });
+
+// Backward-compatible redirects for old non-localized legal/support URLs
+Route::get('/privacy-policy', function (Request $request) {
+    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = $locale === 'en' ? 'eng' : $locale;
+
+    return redirect()->route('privacy-policy', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);
+});
+Route::get('/refund-policy', function (Request $request) {
+    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = $locale === 'en' ? 'eng' : $locale;
+
+    return redirect()->route('refund-policy', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);
+});
+Route::get('/shipping-policy', function (Request $request) {
+    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = $locale === 'en' ? 'eng' : $locale;
+
+    return redirect()->route('shipping-policy', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);
+});
+Route::get('/terms-of-service', function (Request $request) {
+    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = $locale === 'en' ? 'eng' : $locale;
+
+    return redirect()->route('terms-of-service', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);
+});
+Route::get('/support', function (Request $request) {
+    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = $locale === 'en' ? 'eng' : $locale;
+
+    return redirect()->route('support', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);
+});
 
 Route::get('/dashboard', function () {
     if (auth()->user()->isDeveloper()) {
