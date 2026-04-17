@@ -55,6 +55,7 @@ class ShippingFeeEdit extends Component
                             'price_per_kg' => $item->price_per_kg,
                             'estimation_days' => $item->estimation_days,
                             'estimation_unit' => $item->estimation_unit ?? 'days',
+                            '_deleted' => false,
                         ];
                         $found = true;
                         break;
@@ -67,6 +68,7 @@ class ShippingFeeEdit extends Component
                         'price_per_kg' => $item->price_per_kg,
                         'estimation_days' => $item->estimation_days,
                         'estimation_unit' => $item->estimation_unit ?? 'days',
+                        '_deleted' => false,
                     ];
                 }
             }
@@ -90,17 +92,117 @@ class ShippingFeeEdit extends Component
             $this->itemsData[$type] = [];
             for ($i = 0; $i < 8; $i++) {
                 $this->itemsData[$type][] = [
+                    'id' => null,
                     'item_style' => $defaultStyles[$i] ?? 'Style '.($i + 1),
                     'price_per_kg' => null,
                     'estimation_days' => null,
                     'estimation_unit' => 'days',
+                    '_deleted' => false,
                 ];
             }
         }
     }
 
+    public function addCategory(string $transportType): void
+    {
+        if (! in_array($transportType, $this->transportTypes, true)) {
+            return;
+        }
+
+        $this->itemsData[$transportType][] = [
+            'id' => null,
+            'item_style' => '',
+            'price_per_kg' => null,
+            'estimation_days' => null,
+            'estimation_unit' => 'days',
+            '_deleted' => false,
+        ];
+    }
+
+    public function removeCategory(string $transportType, int $index): void
+    {
+        if (! in_array($transportType, $this->transportTypes, true)) {
+            return;
+        }
+
+        if (! isset($this->itemsData[$transportType][$index])) {
+            return;
+        }
+
+        if (! empty($this->itemsData[$transportType][$index]['id'])) {
+            $this->itemsData[$transportType][$index]['_deleted'] = true;
+
+            return;
+        }
+
+        unset($this->itemsData[$transportType][$index]);
+        $this->itemsData[$transportType] = array_values($this->itemsData[$transportType]);
+
+        if (empty($this->itemsData[$transportType])) {
+            $this->itemsData[$transportType][] = [
+                'id' => null,
+                'item_style' => '',
+                'price_per_kg' => null,
+                'estimation_days' => null,
+                'estimation_unit' => 'days',
+                '_deleted' => false,
+            ];
+        }
+    }
+
+    public function restoreCategory(string $transportType, int $index): void
+    {
+        if (! in_array($transportType, $this->transportTypes, true)) {
+            return;
+        }
+
+        if (! isset($this->itemsData[$transportType][$index])) {
+            return;
+        }
+
+        $this->itemsData[$transportType][$index]['_deleted'] = false;
+    }
+
+    private function hasDuplicateCategories(): bool
+    {
+        foreach ($this->transportTypes as $type) {
+            $seenStyles = [];
+
+            foreach ($this->itemsData[$type] as $itemRow) {
+                if (! empty($itemRow['_deleted'])) {
+                    continue;
+                }
+
+                $style = trim((string) ($itemRow['item_style'] ?? ''));
+
+                if ($style === '') {
+                    continue;
+                }
+
+                $normalizedStyle = strtolower($style);
+
+                if (isset($seenStyles[$normalizedStyle])) {
+                    return true;
+                }
+
+                $seenStyles[$normalizedStyle] = true;
+            }
+        }
+
+        return false;
+    }
+
     public function save(): void
     {
+        $this->resetErrorBag();
+
+        if ($this->hasDuplicateCategories()) {
+            $this->addError('duplicate_categories', __('Each transport type must have unique category names for this country.'));
+            $this->dispatch('show-error-toast', message: __('Please remove duplicate categories before saving.'));
+
+            return;
+        }
+
         $data = [
             'country_id' => $this->country->id,
             'currency' => $this->currency,
@@ -115,19 +217,54 @@ class ShippingFeeEdit extends Component
             $data
         );
 
-        // Sync items
+        // Sync items by id and remove deleted rows from the form.
         foreach ($this->transportTypes as $type) {
+            $keptItemIds = [];
+
             foreach ($this->itemsData[$type] as $itemRow) {
-                if (! empty($itemRow['item_style'])) {
-                    $fee->items()->updateOrCreate(
-                        ['transport_type' => $type, 'item_style' => $itemRow['item_style']],
-                        [
-                            'price_per_kg' => $itemRow['price_per_kg'],
-                            'estimation_days' => $itemRow['estimation_days'],
-                            'estimation_unit' => $itemRow['estimation_unit'] ?? 'days',
-                        ]
-                    );
+                if (! empty($itemRow['_deleted'])) {
+                    continue;
                 }
+
+                $itemStyle = trim((string) ($itemRow['item_style'] ?? ''));
+
+                if ($itemStyle === '') {
+                    continue;
+                }
+
+                $payload = [
+                    'transport_type' => $type,
+                    'item_style' => $itemStyle,
+                    'price_per_kg' => ($itemRow['price_per_kg'] ?? '') === '' ? null : $itemRow['price_per_kg'],
+                    'estimation_days' => ($itemRow['estimation_days'] ?? '') === '' ? null : $itemRow['estimation_days'],
+                    'estimation_unit' => $itemRow['estimation_unit'] ?? 'days',
+                ];
+
+                if (! empty($itemRow['id'])) {
+                    $existingItem = $fee->items()
+                        ->where('id', $itemRow['id'])
+                        ->where('transport_type', $type)
+                        ->first();
+
+                    if ($existingItem) {
+                        $existingItem->update($payload);
+                        $keptItemIds[] = $existingItem->id;
+
+                        continue;
+                    }
+                }
+
+                $createdItem = $fee->items()->create($payload);
+                $keptItemIds[] = $createdItem->id;
+            }
+
+            if (empty($keptItemIds)) {
+                $fee->items()->where('transport_type', $type)->delete();
+            } else {
+                $fee->items()
+                    ->where('transport_type', $type)
+                    ->whereNotIn('id', $keptItemIds)
+                    ->delete();
             }
         }
 

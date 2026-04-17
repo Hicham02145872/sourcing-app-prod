@@ -1,4 +1,10 @@
 <div class="space-y-8">
+    @error('duplicate_categories')
+        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {{ $message }}
+        </div>
+    @enderror
+
     {{-- Top Section: Quick Summary & Base Fees --}}
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {{-- Country Details --}}
@@ -93,40 +99,103 @@
                      x-transition:enter-start="opacity-0"
                      x-transition:enter-end="opacity-100"
                      class="overflow-x-auto rounded-xl border border-slate-100">
+                    @php
+                        $activeCount = collect($itemsData[$type])->where('_deleted', '!=', true)->count();
+                        $newCount = collect($itemsData[$type])->where('_deleted', '!=', true)->whereNull('id')->count();
+                        $deletedCount = collect($itemsData[$type])->where('_deleted', true)->count();
+                    @endphp
+                    <div class="px-4 py-3 bg-white border-b border-slate-100 flex justify-end">
+                        <div class="mr-auto flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                            <span class="px-2 py-1 rounded-md bg-slate-100 text-slate-600">{{ __('Active') }}: {{ $activeCount }}</span>
+                            @if($newCount > 0)
+                                <span class="px-2 py-1 rounded-md bg-emerald-100 text-emerald-700">{{ __('New') }}: {{ $newCount }}</span>
+                            @endif
+                            @if($deletedCount > 0)
+                                <span class="px-2 py-1 rounded-md bg-red-100 text-red-700">{{ __('To Delete') }}: {{ $deletedCount }}</span>
+                            @endif
+                        </div>
+                        <button
+                            type="button"
+                            wire:click="addCategory('{{ $type }}')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-slate-200 text-slate-600 hover:text-orange-600 hover:border-orange-200 hover:bg-orange-50 transition-colors"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            {{ __('Add Category') }}
+                        </button>
+                    </div>
                     <table class="min-w-full divide-y divide-slate-100">
                         <thead class="bg-slate-50">
                             <tr>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Item Style / Category') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100/30">{{ __('Price per') }} {{ strtoupper($unit) }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Estimated Delay') }}</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50 bg-white">
                             @foreach($itemsData[$type] as $index => $item)
-                                <tr class="hover:bg-slate-50/50 transition-colors group">
+                                @php
+                                    $isDeleted = !empty($item['_deleted']);
+                                    $isNew = empty($item['id']);
+                                @endphp
+                                <tr wire:key="shipping-item-{{ $type }}-{{ $index }}" class="transition-colors group {{ $isDeleted ? 'bg-red-50/70' : 'hover:bg-slate-50/50' }}">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-4">
                                             <div class="w-2 h-2 rounded-full {{ $type === 'air' ? 'bg-orange-500' : ($type === 'sea' ? 'bg-blue-500' : 'bg-green-500') }} opacity-40"></div>
+                                            @if($isNew && !$isDeleted)
+                                                <span class="shrink-0 px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-widest">{{ __('New') }}</span>
+                                            @endif
+                                            @if($isDeleted)
+                                                <span class="shrink-0 px-2 py-1 rounded-md bg-red-100 text-red-700 text-[10px] font-bold uppercase tracking-widest">{{ __('Deleted') }}</span>
+                                            @endif
                                             <input wire:model="itemsData.{{ $type }}.{{ $index }}.item_style" 
                                                    type="text" 
-                                                   class="w-full text-sm font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 group-hover:text-slate-900 transition-colors" 
+                                                   @disabled($isDeleted)
+                                                   class="w-full text-sm font-bold bg-transparent border-none focus:ring-0 p-0 transition-colors {{ $isDeleted ? 'text-slate-400 line-through' : 'text-slate-700 group-hover:text-slate-900' }}" 
                                                    placeholder="{{ __('Describe style...') }}">
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 bg-slate-50/10">
                                         <div class="flex items-center justify-center gap-2">
                                             <span class="text-xs font-bold text-slate-400">{{ $currency }}</span>
-                                            <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg" type="number" step="0.01" class="w-32 text-center text-sm font-bold text-slate-600 bg-white border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-slate-300 focus:border-slate-300 outline-none transition-all">
+                                            <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg" @disabled($isDeleted) type="number" step="0.01" class="w-32 text-center text-sm font-bold text-slate-600 bg-white border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-slate-300 focus:border-slate-300 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through">
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center gap-2">
-                                            <input wire:model="itemsData.{{ $type }}.{{ $index }}.estimation_days" type="text" class="w-24 text-center text-sm font-bold text-slate-600 bg-slate-50 border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-orange-200 outline-none transition-all" placeholder="e.g. 7-9">
-                                            <select wire:model="itemsData.{{ $type }}.{{ $index }}.estimation_unit" class="text-xs font-bold text-slate-500 bg-transparent border-none focus:ring-0 p-0">
+                                            <input wire:model="itemsData.{{ $type }}.{{ $index }}.estimation_days" @disabled($isDeleted) type="text" class="w-24 text-center text-sm font-bold text-slate-600 bg-slate-50 border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-orange-200 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through" placeholder="e.g. 7-9">
+                                            <select wire:model="itemsData.{{ $type }}.{{ $index }}.estimation_unit" @disabled($isDeleted) class="text-xs font-bold text-slate-500 bg-transparent border-none focus:ring-0 p-0 disabled:text-slate-400">
                                                 <option value="days">{{ __('Days') }}</option>
                                                 <option value="months">{{ __('Months') }}</option>
                                             </select>
                                         </div>
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        @if($isDeleted)
+                                            <button
+                                                type="button"
+                                                wire:click="restoreCategory('{{ $type }}', {{ $index }})"
+                                                class="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-widest rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                                {{ __('Restore') }}
+                                            </button>
+                                        @else
+                                            <button
+                                                type="button"
+                                                wire:click="removeCategory('{{ $type }}', {{ $index }})"
+                                                class="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-widest rounded-md border border-red-100 text-red-500 hover:bg-red-50 transition-colors"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                                {{ __('Remove') }}
+                                            </button>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

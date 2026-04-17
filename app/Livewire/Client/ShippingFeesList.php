@@ -72,15 +72,21 @@ class ShippingFeesList extends Component
                 'Health Care Products',
             ];
 
-            $fetchedStyles = \App\Models\ShippingFeeItem::where('transport_type', $this->selectedCategory)
-                ->whereHas('shippingFee', function ($q) {
-                    $q->whereHas('country');
+            $fetchedStyles = $countries->getCollection()
+                ->flatMap(function ($country) {
+                    return $country->shippingFee?->items ?? collect();
                 })
-                ->distinct()
+                ->filter(function ($item) {
+                    return $item->transport_type === $this->selectedCategory
+                        && ! is_null($item->price_per_kg)
+                        && trim((string) $item->item_style) !== '';
+                })
                 ->pluck('item_style')
+                ->unique()
+                ->values()
                 ->toArray();
 
-            // Sort fetched styles based on defaultOrder, keep others at the end
+            // Sort fetched styles based on defaultOrder, keep custom styles at the end.
             $itemStyles = collect($fetchedStyles)->sortBy(function ($style) use ($defaultOrder) {
                 $index = array_search($style, $defaultOrder);
 

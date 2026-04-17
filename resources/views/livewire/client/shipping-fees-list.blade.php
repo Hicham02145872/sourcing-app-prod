@@ -227,9 +227,9 @@
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
                                         @php
-                                            $airCount = $country->shippingFee?->items->where('transport_type', 'air')->whereNotNull('price_16_49')->count() ?? 0;
-                                            $seaCount = $country->shippingFee?->items->where('transport_type', 'sea')->whereNotNull('price_16_49')->count() ?? 0;
-                                            $trainCount = $country->shippingFee?->items->where('transport_type', 'train')->whereNotNull('price_16_49')->count() ?? 0;
+                                            $airCount = $country->shippingFee?->items->where('transport_type', 'air')->whereNotNull('price_per_kg')->count() ?? 0;
+                                            $seaCount = $country->shippingFee?->items->where('transport_type', 'sea')->whereNotNull('price_per_kg')->count() ?? 0;
+                                            $trainCount = $country->shippingFee?->items->where('transport_type', 'train')->whereNotNull('price_per_kg')->count() ?? 0;
                                         @endphp
 
                                         @if($airCount > 0)
