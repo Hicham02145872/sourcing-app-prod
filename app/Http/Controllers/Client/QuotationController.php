@@ -18,7 +18,7 @@ use Illuminate\View\View;
 
 class QuotationController extends Controller
 {
-    public function index(): View
+    public function index(string $locale): View
     {
         $this->authorize('viewAny', Quotation::class);
         $sourcingRequests = SourcingRequest::where('user_id', auth()->id())
@@ -33,7 +33,7 @@ class QuotationController extends Controller
         return view('client.quotations.index', compact('sourcingRequests'));
     }
 
-    public function accept(Request $request, Quotation $quotation): RedirectResponse
+    public function accept(Request $request, string $locale, Quotation $quotation): RedirectResponse
     {
         $this->authorize('update', $quotation);
 
@@ -93,7 +93,7 @@ class QuotationController extends Controller
         return redirect()->route('client.sourcing-orders.show', $sourcingOrder)->with('status', 'Quotation accepted successfully! A pro-forma invoice has been sent to your email.');
     }
 
-    public function reject(Request $request, Quotation $quotation): RedirectResponse
+    public function reject(Request $request, string $locale, Quotation $quotation): RedirectResponse
     {
         $this->authorize('update', $quotation);
 
@@ -110,7 +110,7 @@ class QuotationController extends Controller
         return redirect()->route('client.sourcing-requests.show', $quotation->sourcingRequest)->with('status', 'Quotation rejected successfully.');
     }
 
-    public function negotiate(Request $request, Quotation $quotation): RedirectResponse
+    public function negotiate(Request $request, string $locale, Quotation $quotation): RedirectResponse
     {
         $this->authorize('update', $quotation);
 

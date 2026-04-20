@@ -28,7 +28,7 @@ class SourcingRequestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(string $locale): View
     {
         $this->authorize('viewAny', SourcingRequest::class);
         $sourcingRequests = auth()->user()->sourcingRequests()
@@ -40,7 +40,7 @@ class SourcingRequestController extends Controller
         return view('client.sourcing-requests.index', compact('sourcingRequests'));
     }
 
-    public function archived(): View
+    public function archived(string $locale): View
     {
         $this->authorize('viewAny', SourcingRequest::class);
         $sourcingRequests = auth()->user()->sourcingRequests()
@@ -54,7 +54,7 @@ class SourcingRequestController extends Controller
         return view('client.sourcing-requests.archived', compact('sourcingRequests', 'categories'));
     }
 
-    public function handling(Request $request): View
+    public function handling(Request $request, string $locale): View
     {
         $this->authorize('viewAny', SourcingRequest::class);
         $query = auth()->user()->sourcingRequests()
@@ -84,7 +84,7 @@ class SourcingRequestController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(SourcingRequest $sourcingRequest): View
+    public function show(string $locale, SourcingRequest $sourcingRequest): View
     {
         $this->authorize('view', $sourcingRequest);
 
@@ -97,7 +97,7 @@ class SourcingRequestController extends Controller
     /**
      * Display the sourcing request creation form.
      */
-    public function create(): View
+    public function create(string $locale): View
     {
         $this->authorize('create', SourcingRequest::class);
         // Retrieve all categories, countries, and services for the form
@@ -112,7 +112,7 @@ class SourcingRequestController extends Controller
     /**
      * Store a newly created sourcing request in storage.
      */
-    public function store(StoreSourcingRequestRequest $request)
+    public function store(StoreSourcingRequestRequest $request, string $locale)
     {
         $this->authorize('create', SourcingRequest::class);
         $validated = $request->validated();
@@ -164,7 +164,7 @@ class SourcingRequestController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(SourcingRequest $sourcingRequest): View
+    public function edit(string $locale, SourcingRequest $sourcingRequest): View
     {
         $this->authorize('update', $sourcingRequest);
 
@@ -179,7 +179,7 @@ class SourcingRequestController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSourcingRequestRequest $request, SourcingRequest $sourcingRequest)
+    public function update(UpdateSourcingRequestRequest $request, string $locale, SourcingRequest $sourcingRequest)
     {
         $this->authorize('update', $sourcingRequest);
 
@@ -249,7 +249,7 @@ class SourcingRequestController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(SourcingRequest $sourcingRequest): RedirectResponse
+    public function destroy(string $locale, SourcingRequest $sourcingRequest): RedirectResponse
     {
         $this->authorize('delete', $sourcingRequest);
 
@@ -263,7 +263,7 @@ class SourcingRequestController extends Controller
         return redirect()->back()->with('status', 'Sourcing request deleted successfully!');
     }
 
-    public function history(Request $request, TimelineService $timelineService): View
+    public function history(Request $request, string $locale, TimelineService $timelineService): View
     {
         $user = auth()->user();
         $fullTimeline = $timelineService->generateTimeline($user);
@@ -290,7 +290,7 @@ class SourcingRequestController extends Controller
         return view('client.history.index', ['timeline' => $paginatedTimeline]);
     }
 
-    public function exportHistory(Request $request, TimelineService $timelineService)
+    public function exportHistory(Request $request, string $locale, TimelineService $timelineService)
     {
         $user = auth()->user();
         $timeline = $timelineService->generateTimeline($user);
@@ -310,7 +310,7 @@ class SourcingRequestController extends Controller
     /**
      * Duplicate the specified resource.
      */
-    public function duplicate(SourcingRequest $sourcingRequest): RedirectResponse
+    public function duplicate(string $locale, SourcingRequest $sourcingRequest): RedirectResponse
     {
         $this->authorize('create', $sourcingRequest);
 
@@ -331,7 +331,7 @@ class SourcingRequestController extends Controller
         return redirect()->route('client.dashboard')->with('status', 'Sourcing request duplicated successfully!');
     }
 
-    public function cancel(SourcingRequest $sourcingRequest): RedirectResponse
+    public function cancel(string $locale, SourcingRequest $sourcingRequest): RedirectResponse
     {
         $this->authorize('cancel', $sourcingRequest);
 

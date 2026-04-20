@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class ClientDashboardController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, string $locale)
     {
         $user = auth()->user();
         $query = $user->sourcingRequests()

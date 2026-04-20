@@ -18,7 +18,7 @@ class TrackingController extends Controller
     /**
      * Show the tracking page.
      */
-    public function index(Request $request): View
+    public function index(Request $request, string $locale): View
     {
         // Simple view return, no API call here.
         // If query params exist (e.g. from redirect), we can pass them to view to auto-trigger JS.
@@ -30,7 +30,7 @@ class TrackingController extends Controller
     /**
      * Show the 17TRACK tracking page.
      */
-    public function seventeenTrackIndex(Request $request): View
+    public function seventeenTrackIndex(Request $request, string $locale): View
     {
         $initialNumber = $request->query('number', '');
 
@@ -40,7 +40,7 @@ class TrackingController extends Controller
     /**
      * AJAX Endpoint to fetch 17TRACK data.
      */
-    public function seventeenTrackData(Request $request): JsonResponse
+    public function seventeenTrackData(Request $request, string $locale): JsonResponse
     {
         $trackingNumber = $request->query('number');
 
@@ -62,7 +62,7 @@ class TrackingController extends Controller
     /**
      * AJAX Endpoint to fetch tracking data using unified service.
      */
-    public function data(Request $request): JsonResponse
+    public function data(Request $request, string $locale): JsonResponse
     {
         \Log::debug('!!! [TRACKING DEBUG] DATA METHOD ENTERED !!!', ['number' => $request->query('number')]);
         set_time_limit(120);

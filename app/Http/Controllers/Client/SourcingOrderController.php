@@ -9,13 +9,13 @@ use App\Models\PaymentMethod;
 use App\Models\SourcingOrder;
 use App\Models\User;
 use App\Notifications\ProofOfPaymentUploaded;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use PDF;
 
 class SourcingOrderController extends Controller
 {
@@ -23,7 +23,7 @@ class SourcingOrderController extends Controller
         protected \App\Services\ImageProcessingService $imageService
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request, string $locale): View
     {
         $this->authorize('viewAny', SourcingOrder::class);
 
@@ -47,7 +47,7 @@ class SourcingOrderController extends Controller
         return view('client.sourcing-orders.index', compact('sourcingOrders'));
     }
 
-    public function show(SourcingOrder $sourcingOrder): View
+    public function show(string $locale, SourcingOrder $sourcingOrder): View
     {
         $this->authorize('view', $sourcingOrder);
 
@@ -71,7 +71,7 @@ class SourcingOrderController extends Controller
         return view('client.sourcing-orders.show', compact('sourcingOrder', 'paymentMethods'));
     }
 
-    public function uploadProofOfPayment(Request $request, SourcingOrder $sourcingOrder): RedirectResponse
+    public function uploadProofOfPayment(Request $request, string $locale, SourcingOrder $sourcingOrder): RedirectResponse
     {
         $this->authorize('uploadProofOfPayment', $sourcingOrder);
 
@@ -121,14 +121,14 @@ class SourcingOrderController extends Controller
         return redirect()->route('client.sourcing-orders.show', $sourcingOrder)->with('status', 'Proof of payment uploaded successfully. It will be reviewed by an admin.');
     }
 
-    public function showReceipt(SourcingOrder $sourcingOrder): View
+    public function showReceipt(string $locale, SourcingOrder $sourcingOrder): View
     {
         $this->authorize('view', $sourcingOrder);
 
         return view('client.sourcing-orders.receipt', compact('sourcingOrder'));
     }
 
-    public function downloadProofOfPayment(SourcingOrder $sourcingOrder)
+    public function downloadProofOfPayment(string $locale, SourcingOrder $sourcingOrder)
     {
         $this->authorize('view', $sourcingOrder);
         if (! $sourcingOrder->proof_of_payment_path) {
@@ -138,7 +138,7 @@ class SourcingOrderController extends Controller
         return Storage::disk('local')->download($sourcingOrder->proof_of_payment_path);
     }
 
-    public function export(Request $request)
+    public function export(Request $request, string $locale)
     {
         $this->authorize('viewAny', SourcingOrder::class);
 
@@ -159,8 +159,22 @@ class SourcingOrderController extends Controller
 
         $sourcingOrders = $query->get();
 
-        $pdf = PDF::loadView('client.sourcing-orders.pdf', compact('sourcingOrders'));
+        $pdf = Pdf::loadView('client.sourcing-orders.pdf', compact('sourcingOrders'));
 
         return $pdf->stream('sourcing-orders.pdf');
+    }
+
+    public function showShippingLabel(string $locale, SourcingOrder $sourcingOrder)
+    {
+        $this->authorize('view', $sourcingOrder);
+
+        if (request()->query('format') === 'html') {
+            return view('client.sourcing-orders.shipping-label', compact('sourcingOrder'));
+        }
+
+        $pdf = Pdf::loadView('client.sourcing-orders.shipping-label', compact('sourcingOrder'));
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->download('shipping-label-'.$sourcingOrder->id.'.pdf');
     }
 }

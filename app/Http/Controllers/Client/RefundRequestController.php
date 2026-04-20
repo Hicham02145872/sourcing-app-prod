@@ -15,7 +15,7 @@ class RefundRequestController extends Controller
         protected \App\Services\ImageProcessingService $imageService
     ) {}
 
-    public function index(): View
+    public function index(string $locale): View
     {
         $deliveredOrders = SourcingOrder::where('user_id', auth()->id())
             ->where('status', 'delivered')
@@ -40,7 +40,7 @@ class RefundRequestController extends Controller
         return view('client.refund-requests.index', compact('deliveredOrders', 'refundRequests', 'stats'));
     }
 
-    public function create(SourcingOrder $sourcingOrder): View
+    public function create(string $locale, SourcingOrder $sourcingOrder): View
     {
         $this->authorize('requestRefund', $sourcingOrder);
 
@@ -55,7 +55,7 @@ class RefundRequestController extends Controller
         return view('client.refund-requests.create', compact('sourcingOrder', 'remainingAmount'));
     }
 
-    public function store(Request $request, SourcingOrder $sourcingOrder): RedirectResponse
+    public function store(Request $request, string $locale, SourcingOrder $sourcingOrder): RedirectResponse
     {
         $this->authorize('requestRefund', $sourcingOrder);
 
@@ -154,7 +154,7 @@ class RefundRequestController extends Controller
         }
     }
 
-    public function show(RefundRequest $refundRequest): View
+    public function show(string $locale, RefundRequest $refundRequest): View
     {
         $this->authorize('view', $refundRequest);
 

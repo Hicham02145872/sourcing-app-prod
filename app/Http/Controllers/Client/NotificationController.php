@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, string $locale)
     {
         $user = Auth::user();
         $notifications = $user->notifications()->paginate(15); // Adjust pagination as needed
@@ -19,7 +19,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function markAsRead(Request $request, $notificationId)
+    public function markAsRead(Request $request, string $locale, string $notificationId)
     {
         $user = Auth::user();
         $notification = $user->notifications()->where('id', $notificationId)->first();

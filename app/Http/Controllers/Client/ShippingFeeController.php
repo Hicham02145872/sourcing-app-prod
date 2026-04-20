@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 
 class ShippingFeeController extends Controller
 {
-    public function index()
+    public function index(string $locale)
     {
         return view('client.shipping-fees.index');
     }

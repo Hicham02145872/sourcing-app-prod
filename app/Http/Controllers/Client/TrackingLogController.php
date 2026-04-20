@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class TrackingLogController extends Controller
 {
-    public function index()
+    public function index(string $locale)
     {
         $logs = TrackingLog::where('user_id', Auth::id())
             ->latest()
