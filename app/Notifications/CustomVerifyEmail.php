@@ -4,32 +4,18 @@ namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailBase;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\URL;
 
-class CustomVerifyEmail extends VerifyEmailBase implements ShouldQueue
+/**
+ * Envoyée en synchrone : la file d’attente (ShouldQueue) exige un worker
+ * (`php artisan queue:work`) ou Redis/DB configurés — sinon aucun mail ne part.
+ */
+class CustomVerifyEmail extends VerifyEmailBase
 {
-    use Queueable;
-
-    public $tries = 3;
-
-    public $maxExceptions = 3;
-
-    public $backoff = [60, 300, 900];
-
     /**
-     * Create a new notification instance.
-     */
-    public function __construct()
-    {
-        $this->afterCommit();
-    }
-
-    /**
-     * Lien signé incluant /eng|/fr|/ar pour que la vérification ouvre la bonne langue (y compris en file d’attente).
+     * Lien signé incluant /eng|/fr|/ar pour que la vérification ouvre la bonne langue.
      */
     protected function verificationUrl($notifiable): string
     {
