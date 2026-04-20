@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailBase;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\URL;
 
@@ -41,7 +42,10 @@ class CustomVerifyEmail extends VerifyEmailBase
         $urlLocale = User::normalizeUrlLocale($notifiable->preferred_locale ?? null);
         $appLocale = $urlLocale === 'eng' ? 'en' : $urlLocale;
 
-        return Lang::withLocale($appLocale, function () use ($notifiable, $verificationUrl) {
+        $previousLocale = App::getLocale();
+        try {
+            App::setLocale($appLocale);
+
             return (new MailMessage)
                 ->subject(Lang::get('Welcome to :appName! Verify your email address', ['appName' => config('app.name')]))
                 ->greeting(Lang::get('Hello :name!', ['name' => $notifiable->name]))
@@ -50,6 +54,8 @@ class CustomVerifyEmail extends VerifyEmailBase
                 ->action(Lang::get('Verify Email Address'), $verificationUrl)
                 ->line(Lang::get('If you did not create an account, no further action is required.'))
                 ->salutation(Lang::get('Best regards,')."\n".config('app.name').' Team');
-        });
+        } finally {
+            App::setLocale($previousLocale);
+        }
     }
 }
