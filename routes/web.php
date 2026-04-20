@@ -84,9 +84,11 @@ Route::get('/dashboard', function () {
     }
     if (auth()->user()->isAdmin()) {
         return redirect('/admin/dashboard');
-    } else {
-        return redirect('/client/dashboard');
     }
+
+    $locale = \App\Models\User::normalizeUrlLocale(session('locale') ?: auth()->user()->preferred_locale);
+
+    return redirect()->route('client.dashboard', ['locale' => $locale]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('admin.')->group(function () {
@@ -207,7 +209,8 @@ Route::middleware(['auth', 'role:developer', 'verified'])->prefix('admin')->name
     })->name('impersonate');
 });
 
-Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('client.')->group(function () {
+// Espace client localisé : /eng/client/..., /fr/client/..., /ar/client/...
+Route::middleware(['auth', 'role:client', 'verified'])->prefix('{locale}/client')->where(['locale' => 'eng|fr|ar'])->name('client.')->group(function () {
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/sourcing-requests/handling', [SourcingRequestController::class, 'handling'])->name('sourcing-requests.handling');
@@ -249,6 +252,15 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('client')->name('
     // Shipping Fees
     Route::get('/shipping-fees', [App\Http\Controllers\Client\ShippingFeeController::class, 'index'])->name('shipping-fees.index');
 });
+
+// Anciennes URLs /client/... → /{locale}/client/... (session ou préférence utilisateur)
+Route::middleware(['auth', 'role:client', 'verified'])->get('/client/{extra?}', function (Request $request, ?string $extra = null) {
+    $locale = \App\Models\User::normalizeUrlLocale(session('locale') ?: auth()->user()?->preferred_locale);
+    $tail = ($extra !== null && $extra !== '') ? '/'.ltrim($extra, '/') : '/dashboard';
+    $qs = $request->getQueryString();
+
+    return redirect('/'.$locale.'/client'.$tail.($qs ? '?'.$qs : ''));
+})->where('extra', '.*');
 
 Route::middleware(['auth', 'verified.client'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

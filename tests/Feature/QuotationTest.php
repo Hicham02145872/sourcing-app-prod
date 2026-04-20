@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Category;
 use App\Models\Country;
 use App\Models\Service;
 use App\Models\SourcingRequest;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Session;
+use Tests\TestCase;
 
 class QuotationTest extends TestCase
 {
@@ -47,6 +47,7 @@ class QuotationTest extends TestCase
             'unit_price' => 100.50,
             'commission_service' => 10.00,
             'unit_weight' => 5.20,
+            'weight_unit' => 'kg',
             'delivery_cost_china' => 25.00,
             'currency' => 'USD',
             '_token' => Session::token(),
@@ -54,7 +55,7 @@ class QuotationTest extends TestCase
 
         // Act
         $response = $this->actingAs($admin)
-                             ->post(route('admin.quotations.store'), $quotationData);
+            ->post(route('admin.quotations.store'), $quotationData);
 
         // Assert
         $response->assertRedirect(route('admin.dashboard'));
@@ -67,7 +68,7 @@ class QuotationTest extends TestCase
             'unit_weight' => 5.20,
             'delivery_cost_china' => 25.00,
             'currency' => 'USD',
-            'amount' => 135.50, // 100.50 + 10.00 + 25.00
+            'amount' => 10085, // (100.50 * 100) + 10.00 + 25.00
             'status' => 'pending',
         ]);
     }
@@ -80,7 +81,7 @@ class QuotationTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']); // Admin to create the quotation
         $sourcingRequest = SourcingRequest::factory()->create([
             'user_id' => $client->id,
-            'status' => 'in_review',
+            'status' => 'quoted',
         ]);
         $quotation = \App\Models\Quotation::factory()->create([
             'sourcing_request_id' => $sourcingRequest->id,
@@ -89,13 +90,13 @@ class QuotationTest extends TestCase
 
         // Act
         $response = $this->actingAs($client)
-                         ->post(route('client.quotations.accept', $quotation), ['_token' => Session::token()]);
+            ->post(route('client.quotations.accept', $quotation), ['_token' => Session::token()]);
 
         // Assert
         $sourcingOrder = \App\Models\SourcingOrder::where('quotation_id', $quotation->id)->first();
         $this->assertNotNull($sourcingOrder);
 
-        $response->assertRedirect(url('/client/sourcing-orders/' . $sourcingOrder->id));
+        $response->assertRedirect(route('client.sourcing-orders.show', $sourcingOrder));
         $response->assertSessionHas('status', 'Quotation accepted successfully! A pro-forma invoice has been sent to your email.');
 
         $this->assertDatabaseHas('sourcing_orders', [

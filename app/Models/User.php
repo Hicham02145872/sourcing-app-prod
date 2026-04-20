@@ -12,9 +12,13 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, MustVerifyEmailTrait, Notifiable;
 
+    /** Segments d’URL pour les locales publiques (/eng, /fr, /ar). */
+    public const URL_LOCALES = ['eng', 'fr', 'ar'];
+
     protected $fillable = [
         'name',
         'email',
+        'preferred_locale',
         'phone',
         'password',
         'role',
@@ -62,6 +66,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isDeveloper(): bool
     {
         return $this->role === 'developer';
+    }
+
+    /**
+     * Normalise une locale URL (eng|fr|ar), défaut eng.
+     */
+    public static function normalizeUrlLocale(?string $locale): string
+    {
+        return in_array($locale, self::URL_LOCALES, true) ? $locale : 'eng';
     }
 
     public function sourcingOrders()

@@ -16,6 +16,10 @@ class LanguageController extends Controller
 
         Session::put('locale', $locale);
 
+        if (auth()->check()) {
+            auth()->user()->update(['preferred_locale' => $locale]);
+        }
+
         $previousUrl = url()->previous();
         $path = parse_url($previousUrl, PHP_URL_PATH) ?? '/';
         $query = parse_url($previousUrl, PHP_URL_QUERY);

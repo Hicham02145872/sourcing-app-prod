@@ -31,7 +31,15 @@ class CountryController extends Controller
      */
     public function create(): View
     {
-        $countries = Country::all();
+        $existingCodes = Country::query()
+            ->pluck('code')
+            ->map(fn (string $code) => strtoupper($code))
+            ->all();
+
+        $countries = collect($this->isoCountries())
+            ->reject(fn (array $country) => in_array(strtoupper($country['code']), $existingCodes, true))
+            ->values()
+            ->all();
 
         return view('admin.countries.create', compact('countries'));
     }
@@ -46,7 +54,26 @@ class CountryController extends Controller
         ]);
 
         $selectedCountryCode = $request->input('code');
-        $isoCountries = [
+        $isoCountries = $this->isoCountries();
+
+        $countryData = collect($isoCountries)->firstWhere('code', $selectedCountryCode);
+
+        if ($countryData) {
+            Country::firstOrCreate(
+                ['code' => $countryData['code']],
+                ['name' => $countryData['name']]
+            );
+        }
+
+        return redirect()->route('admin.countries.index')->with('success', 'Country created successfully.');
+    }
+
+    /**
+     * @return array<int, array{name: string, code: string}>
+     */
+    private function isoCountries(): array
+    {
+        return [
             ['name' => 'Afghanistan', 'code' => 'AF'],
             ['name' => 'Albania', 'code' => 'AL'],
             ['name' => 'Algeria', 'code' => 'DZ'],
@@ -243,17 +270,6 @@ class CountryController extends Controller
             ['name' => 'Zambia', 'code' => 'ZM'],
             ['name' => 'Zimbabwe', 'code' => 'ZW'],
         ];
-
-        $countryData = collect($isoCountries)->firstWhere('code', $selectedCountryCode);
-
-        if ($countryData) {
-            Country::firstOrCreate(
-                ['code' => $countryData['code']],
-                ['name' => $countryData['name']]
-            );
-        }
-
-        return redirect()->route('admin.countries.index')->with('success', 'Country created successfully.');
     }
 
     /**

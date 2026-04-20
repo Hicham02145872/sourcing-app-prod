@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -47,11 +48,15 @@ class RegisteredUserController extends Controller
             ],
         ]);
 
+        $urlLocale = User::normalizeUrlLocale($request->route('locale') ?: Session::get('locale'));
+        Session::put('locale', $urlLocale);
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
+            'preferred_locale' => $urlLocale,
         ]);
 
         event(new Registered($user));
@@ -63,7 +68,7 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         if (! $user->hasVerifiedEmail()) {
-            return redirect(route('verification.notice', absolute: false));
+            return redirect(route('verification.notice', ['locale' => $urlLocale]));
         }
 
         return redirect(route('dashboard', absolute: false));
