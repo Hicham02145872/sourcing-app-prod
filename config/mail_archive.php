@@ -10,6 +10,7 @@ return [
     | Keep disabled in production unless storage permissions are correctly set.
     |
     */
-    'enabled' => env('MAIL_ARCHIVE_ENABLED', app()->environment(['local', 'testing'])),
+    // Do not call app()->environment() in config bootstrap context.
+    'enabled' => env('MAIL_ARCHIVE_ENABLED', env('APP_ENV') !== 'production'),
 ];
 
