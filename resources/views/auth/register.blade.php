@@ -125,7 +125,7 @@
     <p class="text-center text-sm text-slate-600 dark:text-slate-400">
         {{ __('Already have an account?') }}
         <a href="{{ route('login') }}" class="font-medium text-[#EF7722] hover:text-[#FAA533] transition-colors">
-            {{ __('Sign in') }}
+            {{ __('Sign In') }}
         </a>
     </p>
 </x-guest-layout>

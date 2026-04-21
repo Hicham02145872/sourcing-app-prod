@@ -69,7 +69,7 @@
         <!-- Submit Button -->
         <button type="submit"
                 class="w-full py-3.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2">
-            {{ __('Sign in') }}
+            {{ __('Sign In') }}
         </button>
     </form>
 
