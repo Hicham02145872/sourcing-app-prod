@@ -16,13 +16,11 @@ use Illuminate\Support\Facades\Session;
 
 Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
-// Root: auto-detect locale and redirect to clean URL
+// Root: always default to /eng unless a locale exists in session
 Route::get('/', function (Request $request) {
     $supported = ['eng', 'fr', 'ar'];
-    $preferredLocale = $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en';
     $locale = Session::get('locale')
-        ?? ($preferredLocale === 'en' ? 'eng' : $preferredLocale)
-        ?? config('app.locale', 'eng');
+        ?? 'eng';
     if (! in_array($locale, $supported)) {
         $locale = 'eng';
     }
@@ -48,31 +46,31 @@ Route::prefix('{locale}')
 
 // Backward-compatible redirects for old non-localized legal/support URLs
 Route::get('/privacy-policy', function (Request $request) {
-    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = Session::get('locale', 'eng');
     $locale = $locale === 'en' ? 'eng' : $locale;
 
     return redirect()->route('privacy-policy', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);
 });
 Route::get('/refund-policy', function (Request $request) {
-    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = Session::get('locale', 'eng');
     $locale = $locale === 'en' ? 'eng' : $locale;
 
     return redirect()->route('refund-policy', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);
 });
 Route::get('/shipping-policy', function (Request $request) {
-    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = Session::get('locale', 'eng');
     $locale = $locale === 'en' ? 'eng' : $locale;
 
     return redirect()->route('shipping-policy', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);
 });
 Route::get('/terms-of-service', function (Request $request) {
-    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = Session::get('locale', 'eng');
     $locale = $locale === 'en' ? 'eng' : $locale;
 
     return redirect()->route('terms-of-service', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);
 });
 Route::get('/support', function (Request $request) {
-    $locale = Session::get('locale', $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en');
+    $locale = Session::get('locale', 'eng');
     $locale = $locale === 'en' ? 'eng' : $locale;
 
     return redirect()->route('support', ['locale' => in_array($locale, ['eng', 'fr', 'ar']) ? $locale : 'eng']);

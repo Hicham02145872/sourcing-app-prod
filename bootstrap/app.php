@@ -24,8 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             if (!$locale) {
-                $preferredLocale = $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? 'en';
-                $locale = $preferredLocale === 'en' ? 'eng' : $preferredLocale;
+                $locale = 'eng';
             }
 
             return route('login', ['locale' => $locale]);

@@ -3,6 +3,7 @@
 namespace App\Livewire\Client;
 
 use App\Models\Country;
+use App\Models\ShippingFeeItem;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -20,6 +21,29 @@ class ShippingFeesList extends Component
         'search' => ['except' => ''],
         'selectedCategory' => ['except' => null],
     ];
+
+    public function mount(): void
+    {
+        if (! empty($this->selectedCategory)) {
+            return;
+        }
+
+        // Show detailed table on first page load without requiring a click.
+        foreach (['sea', 'air', 'train'] as $transportType) {
+            $hasRates = ShippingFeeItem::query()
+                ->where('transport_type', $transportType)
+                ->whereNotNull('price_per_kg')
+                ->exists();
+
+            if ($hasRates) {
+                $this->selectedCategory = $transportType;
+
+                return;
+            }
+        }
+
+        $this->selectedCategory = 'sea';
+    }
 
     public function selectCategory($category)
     {

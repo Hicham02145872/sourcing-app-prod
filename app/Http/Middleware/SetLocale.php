@@ -51,9 +51,8 @@ class SetLocale
             return $next($request);
         }
 
-        $preferredLocale = $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? config('app.locale', 'en');
-        $urlLocale = $preferredLocale === 'en' ? 'eng' : $preferredLocale;
-        App::setLocale($preferredLocale);
+        $urlLocale = 'eng';
+        App::setLocale($this->toAppLocale($urlLocale));
         Carbon::setLocale(App::getLocale());
         Session::put('locale', $urlLocale);
         URL::defaults(['locale' => $urlLocale]);
