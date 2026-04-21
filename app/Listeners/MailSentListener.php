@@ -13,10 +13,23 @@ class MailSentListener
      */
     public function handle(MessageSent $event): void
     {
+        // Mail archiving is useful for local debugging, but should be disabled by default in production.
+        if (! config('mail_archive.enabled', false)) {
+            return;
+        }
+
         try {
             $directory = storage_path('app/mails');
             if (! File::exists($directory)) {
                 File::makeDirectory($directory, 0755, true);
+            }
+
+            if (! is_writable($directory)) {
+                Log::warning('MailSentListener skipped: mails directory is not writable.', [
+                    'directory' => $directory,
+                ]);
+
+                return;
             }
 
             // In Laravel 11+, MessageSent wraps a Symfony RawMessage/Email.
@@ -46,7 +59,7 @@ class MailSentListener
                 'body' => $bodyHtml ?: $bodyText ?: '',
             ];
 
-            File::put($directory . '/' . $id . '.json', json_encode($data));
+            File::put($directory.'/'.$id.'.json', json_encode($data));
             
             // Keep only last 50 emails
             $files = File::glob($directory . '/*.json');
