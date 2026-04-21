@@ -8,6 +8,7 @@ use App\Services\AuthLogService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -33,6 +34,11 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         Log::info('RegisteredUserController@store method called.');
+
+        $urlLocale = User::normalizeUrlLocale($request->route('locale') ?: Session::get('locale'));
+        Session::put('locale', $urlLocale);
+        App::setLocale($urlLocale === 'eng' ? 'en' : $urlLocale);
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
@@ -47,9 +53,6 @@ class RegisteredUserController extends Controller
                     ->symbols(),
             ],
         ]);
-
-        $urlLocale = User::normalizeUrlLocale($request->route('locale') ?: Session::get('locale'));
-        Session::put('locale', $urlLocale);
 
         $user = User::create([
             'name' => $request->name,

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
@@ -34,6 +35,7 @@ class SetLocale
 
         if ($urlLocale && in_array($urlLocale, $this->supportedLocales, true)) {
             App::setLocale($this->toAppLocale($urlLocale));
+            Carbon::setLocale(App::getLocale());
             Session::put('locale', $urlLocale);
             URL::defaults(['locale' => $urlLocale]);
 
@@ -43,6 +45,7 @@ class SetLocale
         if (Session::has('locale') && in_array(Session::get('locale'), $this->supportedLocales, true)) {
             $sessionLocale = Session::get('locale');
             App::setLocale($this->toAppLocale($sessionLocale));
+            Carbon::setLocale(App::getLocale());
             URL::defaults(['locale' => $sessionLocale]);
 
             return $next($request);
@@ -51,6 +54,7 @@ class SetLocale
         $preferredLocale = $request->getPreferredLanguage(['en', 'fr', 'ar']) ?? config('app.locale', 'en');
         $urlLocale = $preferredLocale === 'en' ? 'eng' : $preferredLocale;
         App::setLocale($preferredLocale);
+        Carbon::setLocale(App::getLocale());
         Session::put('locale', $urlLocale);
         URL::defaults(['locale' => $urlLocale]);
 

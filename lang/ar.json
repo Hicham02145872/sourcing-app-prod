@@ -381,6 +381,8 @@
     "Processing Order": "معالجة الطلب",
     "Processing request...": "جارٍ معالجة الطلب...",
     "Product": "المنتج",
+    "Pagination Navigation": "تنقل الصفحات",
+    "Go to page :page": "انتقل إلى الصفحة :page",
     "Product Details": "تفاصيل المنتج",
     "Product Information": "معلومات المنتج",
     "Product Link (Alibaba/Amazon/etc)": "رابط المنتج (Alibaba/Amazon/etc)",
@@ -721,5 +723,14 @@
     "Enter new password": "أدخل كلمة المرور الجديدة",
     "Must be at least 8 characters long": "يجب أن تكون 8 أحرف على الأقل",
     "Re-enter new password": "أعد إدخال كلمة المرور الجديدة",
-    "OR": "أو"
+    "OR": "أو",
+    "Welcome back": "مرحباً بعودتك",
+    "Enterprise Sourcing Platform": "منصة توريد للمؤسسات",
+    "Made Simple": "بكل بساطة",
+    "Streamline your procurement process with intelligent automation and real-time supplier management.": "بسّط عمليات الشراء لديك بالأتمتة الذكية وإدارة الموردين في الوقت الفعلي.",
+    "Trusted by 500+ clients worldwide": "موثوق به من أكثر من 500 عميل حول العالم",
+    "Enterprise Security": "أمان على مستوى المؤسسات",
+    "ISO Certified": "معتمد ISO",
+    "© 2026 Fast Sourcing Brothers LLC. Registered in Wyoming, USA.": "© 2026 Fast Sourcing Brothers LLC. مسجّل في وايومنغ، الولايات المتحدة.",
+    "Password requirements hint": "استخدم 8 أحرف على الأقل وتضمين حرف كبير وصغير ورقم ورمز. مثال: MyShop2024!"
 }

@@ -74,6 +74,9 @@
                 autocomplete="new-password"
                 placeholder="{{ __('Create a strong password') }}"
                 class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
+            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed" role="note">
+                {{ __('Password requirements hint') }}
+            </p>
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 

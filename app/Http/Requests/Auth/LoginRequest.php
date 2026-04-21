@@ -5,14 +5,24 @@ namespace App\Http\Requests\Auth;
 use App\Services\AuthLogService;
 use App\Services\SuspiciousActivityService;
 use Illuminate\Auth\Events\Lockout;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $urlLocale = User::normalizeUrlLocale($this->route('locale') ?: Session::get('locale'));
+        Session::put('locale', $urlLocale);
+        App::setLocale($urlLocale === 'eng' ? 'en' : $urlLocale);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */

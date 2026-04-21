@@ -8,8 +8,10 @@ use App\Services\AuthLogService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
@@ -31,6 +33,10 @@ class NewPasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $urlLocale = User::normalizeUrlLocale($request->route('locale') ?: Session::get('locale'));
+        Session::put('locale', $urlLocale);
+        App::setLocale($urlLocale === 'eng' ? 'en' : $urlLocale);
+
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],

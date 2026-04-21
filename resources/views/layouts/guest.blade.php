@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'SmartSource') }} - Enterprise Sourcing Platform</title>
+    <title>{{ config('app.name', 'SmartSource') }} – {{ __('Enterprise Sourcing Platform') }}</title>
     <link rel="canonical" href="https://www.fastsourcingbrothers.com/">
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -60,10 +60,10 @@
                     <div class="max-w-md mx-auto text-center">
                         <h1 class="text-4xl xl:text-5xl font-light mb-6 leading-tight">
                             fastSourcingBrothers<br/>
-                            <span class="font-semibold">Made Simple</span>
+                            <span class="font-semibold">{{ __('Made Simple') }}</span>
                         </h1>
                         <p class="text-lg text-orange-100 leading-relaxed font-light">
-                            Streamline your procurement process with intelligent automation and real-time supplier management.
+                            {{ __('Streamline your procurement process with intelligent automation and real-time supplier management.') }}
                         </p>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                             <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-[#EF7722] flex items-center justify-center text-xs font-semibold">AK</div>
                             <div class="w-10 h-10 rounded-full bg-white/20 border-2 border-[#EF7722] flex items-center justify-center text-xs font-semibold">+99</div>
                         </div>
-                        <span class="text-sm font-light">Trusted by 500+ clients worldwide</span>
+                        <span class="text-sm font-light">{{ __('Trusted by 500+ clients worldwide') }}</span>
                     </div>
                     
                     <div class="flex items-center justify-center gap-8 text-sm">
@@ -85,13 +85,13 @@
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span>Enterprise Security</span>
+                            <span>{{ __('Enterprise Security') }}</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span>ISO Certified</span>
+                            <span>{{ __('ISO Certified') }}</span>
                         </div>
                     </div>
                 </div>
@@ -117,7 +117,7 @@
                 <!-- Footer Links -->
                 <div class="mt-8 text-center">
                     <p class="text-xs text-slate-400 dark:text-slate-500">
-                        © 2026 Fast Sourcing Brothers LLC. Registered in Wyoming, USA.
+                        {{ __('© 2026 Fast Sourcing Brothers LLC. Registered in Wyoming, USA.') }}
                     </p>
                 </div>
             </div>

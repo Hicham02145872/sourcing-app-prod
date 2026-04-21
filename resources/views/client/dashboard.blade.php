@@ -367,7 +367,7 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-slate-900 dark:text-white">{{ $request->created_at->format('M d, Y') }}</div>
+                                                <div class="text-sm text-slate-900 dark:text-white">{{ $request->created_at->translatedFormat('d M Y') }}</div>
                                                 <div class="text-xs text-slate-500 dark:text-slate-400">{{ $request->created_at->diffForHumans() }}</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right">

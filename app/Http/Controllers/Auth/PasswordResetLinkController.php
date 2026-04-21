@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\AuthLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
@@ -26,6 +29,10 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $urlLocale = User::normalizeUrlLocale($request->route('locale') ?: Session::get('locale'));
+        Session::put('locale', $urlLocale);
+        App::setLocale($urlLocale === 'eng' ? 'en' : $urlLocale);
+
         $request->validate([
             'email' => ['required', 'email'],
         ]);
