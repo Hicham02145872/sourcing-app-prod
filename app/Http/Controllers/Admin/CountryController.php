@@ -38,6 +38,7 @@ class CountryController extends Controller
 
         $countries = collect($this->isoCountries())
             ->reject(fn (array $country) => in_array(strtoupper($country['code']), $existingCodes, true))
+            ->map(fn (array $country) => (object) $country)
             ->values()
             ->all();
 
