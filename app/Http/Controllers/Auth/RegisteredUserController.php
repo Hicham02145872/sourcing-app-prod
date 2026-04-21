@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -23,7 +25,23 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        $urlLocale = User::normalizeUrlLocale(Session::get('locale'));
+        $defaultPhoneIso = match ($urlLocale) {
+            'ar' => 'MA',
+            'fr' => 'FR',
+            default => 'US',
+        };
+
+        $phoneCountries = collect(config('phone_dial_codes'))
+            ->map(fn (array $data, string $iso) => ['iso' => $iso, 'dial' => $data['dial'], 'name' => $data['name']])
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->all();
+
+        return view('auth.register', [
+            'phoneCountries' => $phoneCountries,
+            'defaultPhoneIso' => $defaultPhoneIso,
+        ]);
     }
 
     /**
@@ -42,7 +60,8 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'phone' => ['required', 'string', 'max:255'],
+            'phone_country_iso' => ['required', 'string', 'size:2', Rule::in(array_keys(config('phone_dial_codes')))],
+            'phone' => ['required', 'string', 'max:30'],
             'password' => [
                 'required',
                 'confirmed',
@@ -54,10 +73,20 @@ class RegisteredUserController extends Controller
             ],
         ]);
 
+        $nationalDigits = preg_replace('/\D+/', '', $request->phone);
+        if (strlen($nationalDigits) < 6 || strlen($nationalDigits) > 15) {
+            throw ValidationException::withMessages([
+                'phone' => [__('Phone must contain between 6 and 15 digits (without country code).')],
+            ]);
+        }
+
+        $dial = config('phone_dial_codes')[$request->phone_country_iso]['dial'];
+        $fullPhone = '+'.$dial.$nationalDigits;
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone,
+            'phone' => $fullPhone,
             'password' => Hash::make($request->password),
             'preferred_locale' => $urlLocale,
         ]);

@@ -46,20 +46,44 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Phone -->
+        <!-- Phone (country code + national number) -->
         <div>
-            <label for="phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <span class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 {{ __('Phone number') }}
-            </label>
-            <input id="phone"
-                type="text" 
-                name="phone" 
-                value="{{ old('phone') }}"
-                required 
-                autocomplete="tel"
-                placeholder="{{ __('+1 (555) 000-0000') }}"
-                class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
+            </span>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                <div class="sm:w-[min(100%,14rem)] shrink-0">
+                    <label for="phone_country_iso" class="sr-only">{{ __('Country code') }}</label>
+                    <select id="phone_country_iso"
+                            name="phone_country_iso"
+                            required
+                            autocomplete="tel-country-code"
+                            class="w-full px-3 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all">
+                        @foreach($phoneCountries as $row)
+                            <option value="{{ $row['iso'] }}" @selected(old('phone_country_iso', $defaultPhoneIso) === $row['iso'])>
+                                {{ $row['name'] }} (+{{ $row['dial'] }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <label for="phone" class="sr-only">{{ __('National phone number') }}</label>
+                    <input id="phone"
+                        type="tel"
+                        name="phone"
+                        value="{{ old('phone') }}"
+                        required
+                        inputmode="tel"
+                        autocomplete="tel-national"
+                        placeholder="{{ __('Phone national placeholder') }}"
+                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:border-transparent transition-all" />
+                </div>
+            </div>
+            <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                {{ __('Enter your number without repeating the country code.') }}
+            </p>
             <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+            <x-input-error :messages="$errors->get('phone_country_iso')" class="mt-2" />
         </div>
 
         <!-- Password -->
