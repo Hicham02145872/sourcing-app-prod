@@ -46,12 +46,14 @@
                     x-bind:disabled="countdown > 0"
                     class="w-full py-3.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98]">
                 <span x-show="countdown === 0">{{ __('Resend verification email') }}</span>
-                <span x-show="countdown > 0" x-cloak class="flex items-center justify-center gap-2">
-                    <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <span x-show="countdown > 0" x-cloak class="flex flex-wrap items-center justify-center gap-x-1 gap-y-0.5" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+                    <svg class="animate-spin h-4 w-4 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {{ __('Resend available in') }} <span x-text="countdown"></span>s
+                    <span>{{ __('Resend available in') }}</span>
+                    <span class="tabular-nums font-semibold" dir="ltr" x-text="countdown"></span>
+                    <span>{{ __('sec.') }}</span>
                 </span>
             </button>
         </form>
@@ -68,9 +70,9 @@
 
     <!-- Help Text -->
     <div class="mt-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-        <p class="text-xs text-slate-600 dark:text-slate-400 text-center leading-relaxed">
+        <p class="text-xs text-slate-600 dark:text-slate-400 text-center leading-relaxed break-words" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
             <strong>{{ __("Didn't receive the email?") }}</strong><br/>
-            {{ __('Check your spam folder or click resend above') }}
+            <span class="inline-block max-w-full">{{ __('Check your spam folder or click resend above') }}</span>
         </p>
     </div>
 
