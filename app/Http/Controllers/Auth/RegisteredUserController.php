@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -64,19 +64,7 @@ class RegisteredUserController extends Controller
             'password' => [
                 'required',
                 'confirmed',
-                'string',
-                'min:8',
-                function (string $attribute, mixed $value, \Closure $fail): void {
-                    $password = (string) $value;
-                    $isStrong = preg_match('/[a-z]/', $password)
-                        && preg_match('/[A-Z]/', $password)
-                        && preg_match('/\d/', $password)
-                        && preg_match('/[^a-zA-Z0-9]/', $password);
-
-                    if (! $isStrong) {
-                        $fail(__('Strong password validation message'));
-                    }
-                },
+                Rules\Password::defaults()->min(8),
             ],
         ]);
 
