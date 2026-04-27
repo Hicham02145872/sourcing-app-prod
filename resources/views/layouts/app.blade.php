@@ -157,9 +157,13 @@
 
                         const data = await response.json();
                         
-                        if (data.notifications) {
+                        if (Array.isArray(data.notifications)) {
                             this.notifications = data.notifications;
-                            this.unreadCount = data.unread_count || 0;
+                            this.unreadCount = data.unread_count ?? data.count ?? data.notifications.filter(n => !n.read_at).length;
+                        } else if (data.notifications && Array.isArray(data.notifications.data)) {
+                            // Support paginator payload shape: { notifications: { data: [...] }, count: N }
+                            this.notifications = data.notifications.data;
+                            this.unreadCount = data.unread_count ?? data.count ?? this.notifications.filter(n => !n.read_at).length;
                         } else if (Array.isArray(data)) {
                             this.notifications = data;
                             this.unreadCount = data.filter(n => !n.read_at).length;
