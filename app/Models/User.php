@@ -124,4 +124,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new \App\Notifications\CustomVerifyEmail);
     }
+
+    /**
+     * Route custom FCM notifications to the user's token.
+     */
+    public function routeNotificationForFcm(): ?string
+    {
+        return $this->fcm_token ?: null;
+    }
 }

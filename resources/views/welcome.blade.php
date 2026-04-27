@@ -556,7 +556,7 @@
                 <div class="flex flex-col items-center gap-10">
                     <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ __('welcome.trust_bar') }}</p>
                     
-                    <div class="flex flex-wrap items-center justify-center gap-10 md:gap-20 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700">
+                    <div class="flex flex-wrap items-center justify-center gap-10 md:gap-20 opacity-100 transition-all duration-700">
                         <!-- Payments -->
                         <div class="flex items-center gap-10">
                             <!-- Visa SVG -->
@@ -808,9 +808,13 @@
 
                     <div class="flex flex-col gap-4 text-sm">
                         <h4 class="font-bold text-slate-900">{{ __('welcome.footer.contact') }}</h4>
-                        <a href="mailto:support@fastsourcingbrothers.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
+                        <a href="mailto:contact@fastsourcingbrothers.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            support@fastsourcingbrothers.com
+                            contact@fastsourcingbrothers.com
+                        </a>
+                        <a href="tel:+13073020158" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a2 2 0 011.95 1.56l.57 2.31a2 2 0 01-.45 1.86L9.1 10a16 16 0 006.9 6.9l1.27-1.25a2 2 0 011.86-.45l2.31.57A2 2 0 0122 17.72V21a2 2 0 01-2 2h-1C10.72 23 1 13.28 1 1V0a1 1 0 011-1h1z"/></svg>
+                            +1 307 302 0158
                         </a>
                         <p class="text-slate-500 flex items-start gap-2">
                             <svg class="w-4 h-4 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 12.414A8 8 0 106.343 17.657l4.243-4.243m7.071 3.243a8 8 0 11-11.314 0 8 8 0 0111.314 0z"/></svg>
@@ -827,11 +831,17 @@
                     </div>
 
                     <div class="flex gap-4">
-                        <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-red-600 transition-colors">
+                        <a href="https://www.facebook.com/FASTSOURCINGBROTHERS" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-red-600 transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                         </a>
-                        <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-red-600 transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452z"/></svg>
+                        <a href="https://x.com/FSB_SOURCING" target="_blank" rel="noopener noreferrer" aria-label="X" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-red-600 transition-colors">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21l-6.56 7.497L22.5 22h-6.31l-4.94-6.45L5.6 22H2.84l7.01-8.005L2 2h6.4l4.46 5.89L18.244 2zm-2.21 18h1.75L7.45 3.9H5.58L16.034 20z"/></svg>
+                        </a>
+                        <a href="https://www.tiktok.com/@fast.sourcing.bro" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-red-600 transition-colors">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69A4.83 4.83 0 0116 4V14.5a6.5 6.5 0 11-5.54-6.43v3.06a3.44 3.44 0 103.48 3.43L14 2h3a4.85 4.85 0 002.59 4.69z"/></svg>
+                        </a>
+                        <a href="https://www.instagram.com/fastsourcingbrother/?hl=fr" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-red-600 transition-colors">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M7.75 2h8.5A5.75 5.75 0 0122 7.75v8.5A5.75 5.75 0 0116.25 22h-8.5A5.75 5.75 0 012 16.25v-8.5A5.75 5.75 0 017.75 2zm0 1.9A3.85 3.85 0 003.9 7.75v8.5a3.85 3.85 0 003.85 3.85h8.5a3.85 3.85 0 003.85-3.85v-8.5a3.85 3.85 0 00-3.85-3.85h-8.5zm8.95 1.43a1.14 1.14 0 110 2.28 1.14 1.14 0 010-2.28zM12 7a5 5 0 110 10 5 5 0 010-10zm0 1.9A3.1 3.1 0 1015.1 12 3.1 3.1 0 0012 8.9z"/></svg>
                         </a>
                     </div>
                 </div>
@@ -839,7 +849,7 @@
                 <div class="border-t border-slate-100 pt-8 space-y-6">
                     <div class="space-y-4">
                         <p class="text-[10px] font-bold tracking-[0.2em] text-slate-400 text-center uppercase">{{ __('welcome.footer.verified_network') }}</p>
-                        <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+                        <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-100 transition-all duration-500">
                             {{-- Payments Row --}}
                             <div class="flex items-center gap-6">
                                 <svg class="h-6 md:h-7 w-auto" viewBox="0 0 750 471" xmlns="http://www.w3.org/2000/svg">
