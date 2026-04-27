@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use App\Models\RefundRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,6 +13,7 @@ use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 class RefundStatusUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
+    use UsesNotifiableLocaleRoutes;
 
     public $tries = 3;
 
@@ -73,7 +75,9 @@ class RefundStatusUpdated extends Notification implements ShouldQueue
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification(FirebaseNotification::create($title, $body))
             ->withData([
-                'click_action' => route('client.refund-requests.show', $this->refundRequest->id),
+                'click_action' => $this->localizedClientRoute($notifiable, 'client.refund-requests.show', [
+                    'refundRequest' => $this->refundRequest->id,
+                ]),
                 'refund_request_id' => (string) $this->refundRequest->id,
                 'status' => $status,
             ]);

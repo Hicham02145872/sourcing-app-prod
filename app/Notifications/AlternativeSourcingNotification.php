@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use App\Models\Quotation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,6 +12,7 @@ use Illuminate\Notifications\Notification;
 class AlternativeSourcingNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+    use UsesNotifiableLocaleRoutes;
 
     public $tries = 3;
 
@@ -40,7 +42,9 @@ class AlternativeSourcingNotification extends Notification implements ShouldQueu
             $mailMessage->line(__('Note from our team: :note', ['note' => $this->quotation->sourcing_note]));
         }
 
-        return $mailMessage->action(__('View Sourcing Request'), route('client.sourcing-requests.show', $this->quotation->sourcingRequest))
+        return $mailMessage->action(__('View Sourcing Request'), $this->localizedClientRoute($notifiable, 'client.sourcing-requests.show', [
+            'sourcingRequest' => $this->quotation->sourcingRequest->id,
+        ]))
             ->line(__('Thank you for your business!'));
     }
 

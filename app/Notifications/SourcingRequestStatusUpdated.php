@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\SourcingRequest;
+use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -13,6 +14,7 @@ use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
+    use UsesNotifiableLocaleRoutes;
 
     public $tries = 3;
 
@@ -60,7 +62,9 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
 
         $statusLabel = $this->getStatusLabel($this->sourcingRequest->status);
 
-        $url = url(route('client.sourcing-requests.show', $this->sourcingRequest->id));
+        $url = url($this->localizedClientRoute($notifiable, 'client.sourcing-requests.show', [
+            'sourcingRequest' => $this->sourcingRequest->id,
+        ]));
 
         return (new MailMessage)
             ->subject(__('Your Sourcing Request #:requestId Status Update', ['requestId' => $this->sourcingRequest->id]))
@@ -89,7 +93,9 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
                 'productName' => $this->sourcingRequest->product_name,
                 'status' => $this->sourcingRequest->status,
             ],
-            'click_action' => route('client.sourcing-requests.show', $this->sourcingRequest->id),
+            'click_action' => $this->localizedClientRoute($notifiable, 'client.sourcing-requests.show', [
+                'sourcingRequest' => $this->sourcingRequest->id,
+            ]),
             'sourcing_request_id' => $this->sourcingRequest->id,
             'status' => $this->sourcingRequest->status,
             'product_name' => $this->sourcingRequest->product_name,
@@ -107,7 +113,9 @@ class SourcingRequestStatusUpdated extends Notification implements ShouldQueue
     public function toFcm($notifiable)
     {
         $statusLabel = $this->getStatusLabel($this->sourcingRequest->status);
-        $url = route('client.sourcing-requests.show', $this->sourcingRequest->id);
+        $url = $this->localizedClientRoute($notifiable, 'client.sourcing-requests.show', [
+            'sourcingRequest' => $this->sourcingRequest->id,
+        ]);
 
         $imageUrl = $this->sourcingRequest->product_image ? asset('storage/'.$this->sourcingRequest->product_image) : null;
 

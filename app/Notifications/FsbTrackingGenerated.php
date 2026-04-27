@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use App\Models\SourcingOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,6 +14,7 @@ use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 class FsbTrackingGenerated extends Notification implements ShouldQueue
 {
     use Queueable;
+    use UsesNotifiableLocaleRoutes;
 
     public $tries = 3;
 
@@ -69,7 +71,7 @@ class FsbTrackingGenerated extends Notification implements ShouldQueue
 
         return $mail
             ->line(__('You can track your shipment status in real-time using this number.'))
-            ->action(__('Track My Shipment'), route('client.tracking.index', ['number' => $fsbNumbers[0]]))
+            ->action(__('Track My Shipment'), $this->localizedClientRoute($notifiable, 'client.tracking.index', ['number' => $fsbNumbers[0]]))
             ->line(__('Thank you for choosing FastSourcingBrothers!'));
     }
 
@@ -96,8 +98,8 @@ class FsbTrackingGenerated extends Notification implements ShouldQueue
             'product_name' => $productName,
             'tracking_number' => $fsbNumbers[0],
             'tracking_numbers' => $fsbNumbers,
-            'click_action' => route('client.tracking.index', ['number' => $fsbNumbers[0]]),
-            'order_url' => route('client.sourcing-orders.show', $this->sourcingOrder->id),
+            'click_action' => $this->localizedClientRoute($notifiable, 'client.tracking.index', ['number' => $fsbNumbers[0]]),
+            'order_url' => $this->localizedClientRoute($notifiable, 'client.sourcing-orders.show', ['sourcingOrder' => $this->sourcingOrder->id]),
         ];
     }
 
@@ -110,7 +112,7 @@ class FsbTrackingGenerated extends Notification implements ShouldQueue
     {
         $fsbNumbers = $this->getFsbNumbers();
         $fsbList = implode(', ', $fsbNumbers);
-        $url = route('client.tracking.index', ['number' => $fsbNumbers[0]]);
+        $url = $this->localizedClientRoute($notifiable, 'client.tracking.index', ['number' => $fsbNumbers[0]]);
 
         $title = __('📦 FSB Tracking Number Ready');
         $body = count($fsbNumbers) > 1

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\SourcingOrder;
+use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -13,6 +14,7 @@ use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 class TrackingNumberAdded extends Notification implements ShouldQueue
 {
     use Queueable;
+    use UsesNotifiableLocaleRoutes;
 
     public $tries = 3;
 
@@ -50,7 +52,7 @@ class TrackingNumberAdded extends Notification implements ShouldQueue
                 'productName' => $productName,
             ]))
             ->line(__('Your tracking reference: :number', ['number' => $fsbNumber]))
-            ->action(__('Track your shipment'), route('client.tracking.index', ['number' => $fsbNumber]))
+            ->action(__('Track your shipment'), $this->localizedClientRoute($notifiable, 'client.tracking.index', ['number' => $fsbNumber]))
             ->line(__('You can also view your order and track it from your dashboard.'));
     }
 
@@ -71,14 +73,18 @@ class TrackingNumberAdded extends Notification implements ShouldQueue
             'type' => 'tracking_added',
             'product_name' => $productName,
             'tracking_number' => $fsbNumber,
-            'click_action' => route('client.sourcing-orders.show', $this->sourcingOrder->id),
+            'click_action' => $this->localizedClientRoute($notifiable, 'client.sourcing-orders.show', [
+                'sourcingOrder' => $this->sourcingOrder->id,
+            ]),
         ];
     }
 
     public function toFcm(object $notifiable)
     {
         $fsbNumber = $this->sourcingOrder->fsb_tracking_number;
-        $url = route('client.sourcing-orders.show', $this->sourcingOrder->id);
+        $url = $this->localizedClientRoute($notifiable, 'client.sourcing-orders.show', [
+            'sourcingOrder' => $this->sourcingOrder->id,
+        ]);
 
         $title = __('📦 Tracking for order #:orderId', ['orderId' => $fsbNumber]);
         $body = __('Your tracking reference: :number. Tap to view your order.', ['number' => $fsbNumber]);

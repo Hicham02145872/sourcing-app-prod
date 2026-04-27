@@ -808,9 +808,9 @@
 
                     <div class="flex flex-col gap-4 text-sm">
                         <h4 class="font-bold text-slate-900">{{ __('welcome.footer.contact') }}</h4>
-                        <a href="mailto:contact@fastsourcingbrothers.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
+                        <a href="mailto:support@fastsourcingbrothers.com" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            contact@fastsourcingbrothers.com
+                            support@fastsourcingbrothers.com
                         </a>
                         <a href="tel:+13073020158" class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a2 2 0 011.95 1.56l.57 2.31a2 2 0 01-.45 1.86L9.1 10a16 16 0 006.9 6.9l1.27-1.25a2 2 0 011.86-.45l2.31.57A2 2 0 0122 17.72V21a2 2 0 01-2 2h-1C10.72 23 1 13.28 1 1V0a1 1 0 011-1h1z"/></svg>

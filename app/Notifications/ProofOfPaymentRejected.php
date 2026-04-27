@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\SourcingOrder;
+use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -12,6 +13,7 @@ use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 class ProofOfPaymentRejected extends Notification implements ShouldQueue
 {
     use Queueable;
+    use UsesNotifiableLocaleRoutes;
 
     public $tries = 3;
 
@@ -61,7 +63,9 @@ class ProofOfPaymentRejected extends Notification implements ShouldQueue
             'body_key' => "Your payment for the order related to ':productName' was rejected.",
             'body_params' => ['productName' => $productName],
             'reason' => $this->sourcingOrder->rejection_reason,
-            'url' => route('client.sourcing-orders.show', $this->sourcingOrder->id),
+            'url' => $this->localizedClientRoute($notifiable, 'client.sourcing-orders.show', [
+                'sourcingOrder' => $this->sourcingOrder->id,
+            ]),
         ];
     }
 
@@ -73,7 +77,9 @@ class ProofOfPaymentRejected extends Notification implements ShouldQueue
      */
     public function toFcm($notifiable)
     {
-        $url = route('client.sourcing-orders.show', $this->sourcingOrder->id);
+        $url = $this->localizedClientRoute($notifiable, 'client.sourcing-orders.show', [
+            'sourcingOrder' => $this->sourcingOrder->id,
+        ]);
 
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification(FirebaseNotification::create(

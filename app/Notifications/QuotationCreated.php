@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use App\Models\Quotation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,6 +14,7 @@ use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 class QuotationCreated extends Notification implements ShouldQueue
 {
     use Queueable;
+    use UsesNotifiableLocaleRoutes;
 
     protected $quotation;
 
@@ -42,7 +44,9 @@ class QuotationCreated extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
 
-        $url = url(route('client.sourcing-requests.show', $this->quotation->sourcingRequest->id));
+        $url = url($this->localizedClientRoute($notifiable, 'client.sourcing-requests.show', [
+            'sourcingRequest' => $this->quotation->sourcingRequest->id,
+        ]));
 
         return (new MailMessage)
             ->subject(__('New Quotation Received for Your Sourcing Request'))
@@ -79,13 +83,17 @@ class QuotationCreated extends Notification implements ShouldQueue
             'amount' => $this->quotation->amount,
             'currency' => $this->quotation->currency,
             'product_name' => $this->quotation->sourcingRequest->product_name,
-            'click_action' => route('client.sourcing-requests.show', $this->quotation->sourcingRequest->id),
+            'click_action' => $this->localizedClientRoute($notifiable, 'client.sourcing-requests.show', [
+                'sourcingRequest' => $this->quotation->sourcingRequest->id,
+            ]),
         ];
     }
 
     public function toFcm(object $notifiable): CloudMessage
     {
-        $url = route('client.sourcing-requests.show', $this->quotation->sourcing_request_id);
+        $url = $this->localizedClientRoute($notifiable, 'client.sourcing-requests.show', [
+            'sourcingRequest' => $this->quotation->sourcing_request_id,
+        ]);
 
         $sourcingRequest = $this->quotation->sourcingRequest;
         $imageUrl = $sourcingRequest->product_image ? asset('storage/'.$sourcingRequest->product_image) : null;

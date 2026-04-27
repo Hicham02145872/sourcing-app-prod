@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use App\Models\SourcingOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,6 +14,7 @@ use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
+    use UsesNotifiableLocaleRoutes;
 
     public $tries = 3;
 
@@ -51,7 +53,9 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
                 'productName' => $this->sourcingOrder->quotation->sourcingRequest->product_name,
                 'status' => $statusLabel,
             ]))
-            ->action(__('View Your Order'), route('client.sourcing-orders.show', $this->sourcingOrder))
+            ->action(__('View Your Order'), $this->localizedClientRoute($notifiable, 'client.sourcing-orders.show', [
+                'sourcingOrder' => $this->sourcingOrder->id,
+            ]))
             ->line(__('Thank you for using our application!'));
     }
 
@@ -73,7 +77,9 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
             'emoji' => $emoji,
             'product_name' => $this->sourcingOrder->quotation->sourcingRequest->product_name,
             'type' => 'info',
-            'click_action' => route('client.sourcing-orders.show', $this->sourcingOrder->id),
+            'click_action' => $this->localizedClientRoute($notifiable, 'client.sourcing-orders.show', [
+                'sourcingOrder' => $this->sourcingOrder->id,
+            ]),
         ];
     }
 
@@ -91,7 +97,9 @@ class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
     {
         $statusLabel = $this->getStatusLabel($this->sourcingOrder->status);
         $emoji = $this->getStatusEmoji($this->sourcingOrder->status);
-        $url = route('client.sourcing-orders.show', $this->sourcingOrder->id);
+        $url = $this->localizedClientRoute($notifiable, 'client.sourcing-orders.show', [
+            'sourcingOrder' => $this->sourcingOrder->id,
+        ]);
 
         $sourcingRequest = $this->sourcingOrder->quotation->sourcingRequest;
         $imageUrl = $sourcingRequest->product_image ? asset('storage/'.$sourcingRequest->product_image) : null;

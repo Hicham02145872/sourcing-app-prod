@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Channels\FcmChannel;
 use App\Models\SocialMediaLink;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Kreait\Firebase\Factory;
@@ -26,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Queue/CLI contexts have no HTTP request, so localized client routes
+        // used in notifications can miss the required {locale} parameter.
+        // Keep a safe default; web middleware can still override per request.
+        URL::defaults(['locale' => 'eng']);
+
         \Illuminate\Support\Facades\Event::listen(
             \Illuminate\Mail\Events\MessageSent::class,
             \App\Listeners\MailSentListener::class
