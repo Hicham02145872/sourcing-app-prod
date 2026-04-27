@@ -5,24 +5,17 @@ namespace App\Notifications;
 use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use App\Models\Quotation;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
-class QuotationCreated extends Notification implements ShouldQueue
+class QuotationCreated extends Notification
 {
     use Queueable;
     use UsesNotifiableLocaleRoutes;
 
     protected $quotation;
-
-    public $tries = 3;
-
-    public $maxExceptions = 3;
-
-    public $backoff = [60, 300, 900];
 
     public function __construct(Quotation $quotation)
     {
@@ -131,13 +124,5 @@ class QuotationCreated extends Notification implements ShouldQueue
                 'request_url' => $url,
                 'unread_count' => (string) ($notifiable->unreadNotifications()->count() + 1), // +1 because this one might not be in DB yet if current process
             ]);
-    }
-
-    public function failed(\Throwable $exception): void
-    {
-        \Illuminate\Support\Facades\Log::error('QuotationCreated notification permanently failed', [
-            'quotation_id' => $this->quotation->id ?? null,
-            'error' => $exception->getMessage(),
-        ]);
     }
 }

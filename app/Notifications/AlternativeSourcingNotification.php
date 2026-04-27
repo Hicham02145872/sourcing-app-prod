@@ -5,20 +5,13 @@ namespace App\Notifications;
 use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use App\Models\Quotation;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AlternativeSourcingNotification extends Notification implements ShouldQueue
+class AlternativeSourcingNotification extends Notification
 {
     use Queueable;
     use UsesNotifiableLocaleRoutes;
-
-    public $tries = 3;
-
-    public $maxExceptions = 3;
-
-    public $backoff = [60, 300, 900];
 
     public function __construct(public Quotation $quotation)
     {

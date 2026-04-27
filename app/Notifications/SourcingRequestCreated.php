@@ -4,21 +4,14 @@ namespace App\Notifications;
 
 use App\Models\SourcingRequest;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
-class SourcingRequestCreated extends Notification implements ShouldQueue
+class SourcingRequestCreated extends Notification
 {
     use Queueable;
-
-    public $tries = 3;
-
-    public $maxExceptions = 3;
-
-    public $backoff = [60, 300, 900];
 
     protected $sourcingRequest;
 

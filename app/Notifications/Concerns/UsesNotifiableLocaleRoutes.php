@@ -10,6 +10,11 @@ trait UsesNotifiableLocaleRoutes
     {
         $locale = User::normalizeUrlLocale($notifiable->preferred_locale ?? null);
 
+        if (isset($params['sourcingRequest']) && ! isset($params['sourcing_request'])) {
+            $params['sourcing_request'] = $params['sourcingRequest'];
+            unset($params['sourcingRequest']);
+        }
+
         return route($routeName, array_merge(['locale' => $locale], $params));
     }
 }

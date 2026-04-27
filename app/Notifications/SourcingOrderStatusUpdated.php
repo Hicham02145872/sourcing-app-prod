@@ -5,22 +5,15 @@ namespace App\Notifications;
 use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use App\Models\SourcingOrder;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
-class SourcingOrderStatusUpdated extends Notification implements ShouldQueue
+class SourcingOrderStatusUpdated extends Notification
 {
     use Queueable;
     use UsesNotifiableLocaleRoutes;
-
-    public $tries = 3;
-
-    public $maxExceptions = 3;
-
-    public $backoff = [60, 300, 900];
 
     protected $sourcingOrder;
 

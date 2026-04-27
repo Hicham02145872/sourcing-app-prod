@@ -5,21 +5,14 @@ namespace App\Notifications;
 use App\Notifications\Concerns\UsesNotifiableLocaleRoutes;
 use App\Models\RefundRequest;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
-class RefundStatusUpdated extends Notification implements ShouldQueue
+class RefundStatusUpdated extends Notification
 {
     use Queueable;
     use UsesNotifiableLocaleRoutes;
-
-    public $tries = 3;
-
-    public $maxExceptions = 3;
-
-    public $backoff = [60, 300, 900];
 
     /**
      * Create a new notification instance.

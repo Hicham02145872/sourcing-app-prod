@@ -4,21 +4,14 @@ namespace App\Notifications;
 
 use App\Models\SourcingOrder;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
-class ProofOfPaymentUploaded extends Notification implements ShouldQueue
+class ProofOfPaymentUploaded extends Notification
 {
     use Queueable;
-
-    public $tries = 3;
-
-    public $maxExceptions = 3;
-
-    public $backoff = [60, 300, 900];
 
     public SourcingOrder $sourcingOrder;
 
