@@ -4,6 +4,7 @@ namespace App\Livewire\Client;
 
 use App\Models\Country;
 use App\Models\ShippingFeeItem;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -30,10 +31,13 @@ class ShippingFeesList extends Component
 
         // Show detailed table on first page load without requiring a click.
         foreach (['sea', 'air', 'train'] as $transportType) {
-            $hasRates = ShippingFeeItem::query()
-                ->where('transport_type', $transportType)
-                ->whereNotNull('price_per_kg')
-                ->exists();
+            $hasRates = rescue(
+                static fn () => ShippingFeeItem::query()
+                    ->where('transport_type', $transportType)
+                    ->whereNotNull('price_per_kg')
+                    ->exists(),
+                false
+            );
 
             if ($hasRates) {
                 $this->selectedCategory = $transportType;
@@ -56,7 +60,10 @@ class ShippingFeesList extends Component
 
     public function selectCountry($countryId)
     {
-        $this->selectedCountry = Country::with(['shippingFee.items'])->find($countryId);
+        $this->selectedCountry = rescue(
+            fn () => Country::with(['shippingFee.items'])->findOrFail($countryId),
+            null
+        );
     }
 
     public function closeCountryDetails()
@@ -71,17 +78,19 @@ class ShippingFeesList extends Component
 
     public function render()
     {
-        $query = Country::with(['shippingFee.items'])
-            ->whereHas('shippingFee');
+        $countries = rescue(function () {
+            $query = Country::with(['shippingFee.items'])
+                ->whereHas('shippingFee');
 
-        if (! empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('code', 'like', '%'.$this->search.'%');
-            });
-        }
+            if (! empty($this->search)) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('code', 'like', '%'.$this->search.'%');
+                });
+            }
 
-        $countries = $query->paginate(12);
+            return $query->paginate(12);
+        }, new LengthAwarePaginator([], 0, 12));
 
         $itemStyles = [];
         if ($this->selectedCategory) {

@@ -36,7 +36,10 @@ class ShippingFeeEdit extends Component
 
     public function mount(Country $country)
     {
-        $this->country = $country->load(['shippingFee.items']);
+        $this->country = rescue(
+            fn () => $country->load(['shippingFee.items']),
+            $country
+        );
         $this->initItemsData();
 
         if ($this->country->shippingFee) {

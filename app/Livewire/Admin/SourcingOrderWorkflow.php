@@ -374,13 +374,13 @@ class SourcingOrderWorkflow extends Component
     public function render()
     {
         $selectedCompany = $this->sourcingOrder->shipping_company_id
-            ? ShippingCompany::find($this->sourcingOrder->shipping_company_id)
+            ? rescue(fn () => ShippingCompany::findOrFail($this->sourcingOrder->shipping_company_id), null)
             : null;
         $carrierOptionsForCompany = $selectedCompany ? $selectedCompany->getCarrierOptionsWithLabels() : [];
 
         return view('livewire.admin.sourcing-order-workflow', [
-            'admins' => User::where('role', 'admin')->orderBy('name')->get(),
-            'shippingCompanies' => ShippingCompany::where('is_active', true)->orderBy('name')->get(),
+            'admins' => rescue(static fn () => User::where('role', 'admin')->orderBy('name')->get(), collect()),
+            'shippingCompanies' => rescue(static fn () => ShippingCompany::where('is_active', true)->orderBy('name')->get(), collect()),
             'carrierOptionsForCompany' => $carrierOptionsForCompany,
         ]);
     }

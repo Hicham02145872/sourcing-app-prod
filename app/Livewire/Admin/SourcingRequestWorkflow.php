@@ -98,7 +98,7 @@ class SourcingRequestWorkflow extends Component
     public function render()
     {
         return view('livewire.admin.sourcing-request-workflow', [
-            'admins' => User::where('role', 'admin')->orderBy('name')->get(),
+            'admins' => rescue(static fn () => User::where('role', 'admin')->orderBy('name')->get(), collect()),
         ]);
     }
 }

@@ -219,7 +219,9 @@ class AdminSourcingRequestController extends Controller
         try {
             $sourcingRequest->transitionTo($validated['status']);
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['generic' => $e->getMessage()]);
+            return redirect()->back()
+                ->withErrors(['generic' => $e->getMessage()])
+                ->with('error', __('The status could not be updated.'));
         }
 
         return redirect()

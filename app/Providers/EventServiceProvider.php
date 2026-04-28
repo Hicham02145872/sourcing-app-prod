@@ -20,7 +20,6 @@ use App\Listeners\UpdateSourcingRequestStatusOnQuotationAccepted;
 use App\Listeners\UpdateSourcingRequestStatusOnQuotationCreated;
 use App\Listeners\UpdateSourcingRequestStatusOnQuotationRejected;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -74,7 +73,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Log::info('EventServiceProvider booting...');
         foreach ($this->listen as $event => $listeners) {
             foreach ($listeners as $listener) {
                 Event::listen($event, $listener);

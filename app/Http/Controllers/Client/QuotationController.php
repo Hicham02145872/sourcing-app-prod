@@ -71,7 +71,9 @@ class QuotationController extends Controller
         } catch (\Exception $e) {
             Log::error('Error accepting quotation: '.$e->getMessage());
 
-            return redirect()->back()->withErrors(['generic' => $e->getMessage()]);
+            return redirect()->back()
+                ->withErrors(['generic' => $e->getMessage()])
+                ->with('error', __('Could not accept the quotation.'));
         }
 
         event(new \App\Events\QuotationAccepted($quotation));
@@ -97,13 +99,21 @@ class QuotationController extends Controller
     {
         $this->authorize('update', $quotation);
 
-        DB::transaction(function () use ($quotation) {
-            // Update the quotation status
-            $quotation->update(['status' => 'rejected']);
+        try {
+            DB::transaction(function () use ($quotation) {
+                // Update the quotation status
+                $quotation->update(['status' => 'rejected']);
 
-            // Also reject the sourcing request
-            $quotation->sourcingRequest->transitionTo('rejected', auth()->user());
-        });
+                // Also reject the sourcing request
+                $quotation->sourcingRequest->transitionTo('rejected', auth()->user());
+            });
+        } catch (\Throwable $e) {
+            Log::error('Error rejecting quotation: '.$e->getMessage());
+
+            return redirect()->back()
+                ->withErrors(['generic' => $e->getMessage()])
+                ->with('error', __('Could not reject the quotation.'));
+        }
 
         event(new \App\Events\QuotationRejected($quotation));
 
@@ -118,16 +128,24 @@ class QuotationController extends Controller
             'negotiation_notes' => 'required|string|max:1000',
         ]);
 
-        DB::transaction(function () use ($request, $quotation) {
-            // Update the quotation status and notes
-            $quotation->update([
-                'status' => 'negotiating',
-                'negotiation_notes' => $request->negotiation_notes,
-            ]);
+        try {
+            DB::transaction(function () use ($request, $quotation) {
+                // Update the quotation status and notes
+                $quotation->update([
+                    'status' => 'negotiating',
+                    'negotiation_notes' => $request->negotiation_notes,
+                ]);
 
-            // Also update the sourcing request status to negotiating
-            $quotation->sourcingRequest->transitionTo('negotiating', auth()->user());
-        });
+                // Also update the sourcing request status to negotiating
+                $quotation->sourcingRequest->transitionTo('negotiating', auth()->user());
+            });
+        } catch (\Throwable $e) {
+            Log::error('Error negotiating quotation: '.$e->getMessage());
+
+            return redirect()->back()
+                ->withErrors(['generic' => $e->getMessage()])
+                ->with('error', __('Could not send the negotiation request.'));
+        }
 
         // We can dispatch an event if needed, for now let's just log or notify admin
         Log::info('Client requested negotiation for quotation #'.$quotation->id);

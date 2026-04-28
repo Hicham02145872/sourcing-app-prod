@@ -92,13 +92,17 @@ class SourcingRequestCreate extends Component
             return [];
         }
 
-        return User::where('role', 'client')
-            ->where(function ($query) {
-                $query->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%');
-            })
-            ->limit(5)
-            ->get();
+        return rescue(
+            fn () => User::where('role', 'client')
+                ->where(function ($query) {
+                    $query->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%');
+                })
+                ->limit(5)
+                ->get()
+                ->all(),
+            []
+        );
     }
 
     public function updatedSearch()
@@ -184,10 +188,10 @@ class SourcingRequestCreate extends Component
     public function render()
     {
         return view('livewire.admin.sourcing-request-create', [
-            'categories' => Category::orderBy('name')->get(),
-            'countries' => Country::orderBy('name')->get(),
-            'services' => Service::orderBy('name')->get(),
-            'admins' => User::whereIn('role', ['admin', 'super-admin'])->orderBy('name')->get(),
+            'categories' => rescue(static fn () => Category::orderBy('name')->get(), collect()),
+            'countries' => rescue(static fn () => Country::orderBy('name')->get(), collect()),
+            'services' => rescue(static fn () => Service::orderBy('name')->get(), collect()),
+            'admins' => rescue(static fn () => User::whereIn('role', ['admin', 'super-admin'])->orderBy('name')->get(), collect()),
         ]);
     }
 }

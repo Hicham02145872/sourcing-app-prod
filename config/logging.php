@@ -135,6 +135,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'errors' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/errors.log'),
+            'level' => env('LOG_ERROR_LEVEL', 'error'),
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

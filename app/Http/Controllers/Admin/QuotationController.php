@@ -375,7 +375,13 @@ class QuotationController extends Controller
 
         // If the request was negotiating, transition it back to quoted
         if ($sourcingRequest->status === 'negotiating') {
-            $sourcingRequest->transitionTo('quoted');
+            try {
+                $sourcingRequest->transitionTo('quoted');
+            } catch (\Throwable $e) {
+                return redirect()->route('admin.sourcing-requests.show', $sourcingRequest)
+                    ->withErrors(['generic' => $e->getMessage()])
+                    ->with('error', __('Could not update sourcing request status.'));
+            }
         }
 
         return redirect()->route('admin.sourcing-requests.show', $sourcingRequest)

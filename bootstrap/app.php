@@ -1,8 +1,13 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Session\TokenMismatchException;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -36,11 +41,86 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified.client' => \App\Http\Middleware\RequireVerifiedEmailForClients::class,
         ]);
 
-        $middleware->web(append: [
+        $middleware->web(prepend: [
+            \App\Http\Middleware\AssignRequestId::class,
+        ], append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\UpdateSessionActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->dontReport([
+            AuthenticationException::class,
+            \Illuminate\Auth\Access\AuthorizationException::class,
+            \Illuminate\Validation\ValidationException::class,
+            \Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class,
+            \Illuminate\Database\Eloquent\ModelNotFoundException::class,
+        ]);
+
+        $exceptions->context(function () {
+            try {
+                $request = request();
+            } catch (\Throwable) {
+                return [];
+            }
+
+            if (! $request instanceof Request) {
+                return [];
+            }
+
+            return array_filter([
+                'user_id' => auth()->id(),
+                'route' => $request->route()?->getName(),
+                'url' => $request->fullUrl(),
+                'method' => $request->method(),
+                'request_id' => $request->attributes->get('request_id'),
+                'ip' => $request->ip(),
+            ], fn ($value) => $value !== null && $value !== '');
+        });
+
+        $exceptions->shouldRenderJsonWhen(function (Request $request, \Throwable $e) {
+            return $request->expectsJson() || $request->hasHeader('X-Livewire');
+        });
+
+        $exceptions->renderable(function (HttpException $e, Request $request) {
+            if ($e->getStatusCode() !== 419) {
+                return null;
+            }
+
+            if (! $e->getPrevious() instanceof TokenMismatchException) {
+                return null;
+            }
+
+            $message = __('Your session has expired. Please refresh the page and try again.');
+            $payload = [
+                'message' => $message,
+                'request_id' => $request->attributes->get('request_id'),
+            ];
+
+            if ($request->expectsJson() || $request->hasHeader('X-Livewire')) {
+                return response()->json($payload, 419);
+            }
+
+            return redirect()
+                ->back()
+                ->with('error', $message)
+                ->withInput();
+        });
+
+        $exceptions->respond(function (SymfonyResponse $response, \Throwable $e, Request $request) {
+            $id = $request->attributes->get('request_id');
+            if ($id) {
+                $response->headers->set('X-Request-ID', $id);
+
+                if ($response instanceof \Illuminate\Http\JsonResponse) {
+                    $data = $response->getData(true);
+                    if (is_array($data) && ! array_key_exists('request_id', $data)) {
+                        $data['request_id'] = $id;
+                        $response->setData($data);
+                    }
+                }
+            }
+
+            return $response;
+        });
     })->create();

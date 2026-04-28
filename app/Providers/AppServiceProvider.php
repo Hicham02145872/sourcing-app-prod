@@ -104,5 +104,28 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Blade::if('featureComingSoon', function ($key) {
             return app(\App\Services\FeatureFlagService::class)->isComingSoon($key, auth()->user());
         });
+
+        // Erreurs dans les actions Livewire : journal + toast (évite un 500 brut sur requête AJAX).
+        // L’événement interne Livewire s’appelle « exception » (voir Livewire\Wrapped).
+        \Livewire\Livewire::listen('exception', function ($component, \Throwable $exception, callable $stopPropagation): void {
+            \Illuminate\Support\Facades\Log::error('Livewire component exception', [
+                'component' => is_object($component) ? $component::class : null,
+                'message' => $exception->getMessage(),
+                'request_id' => request()->attributes->get('request_id'),
+            ]);
+
+            try {
+                if (is_object($component) && method_exists($component, 'dispatch')) {
+                    $component->dispatch(
+                        'show-error-toast',
+                        message: __('An unexpected error occurred. Please retry.')
+                    );
+                }
+            } catch (\Throwable) {
+                // Ignorer si le composant ne peut pas émettre d’événement
+            }
+
+            $stopPropagation();
+        });
     }
 }

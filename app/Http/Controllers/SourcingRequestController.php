@@ -335,7 +335,13 @@ class SourcingRequestController extends Controller
     {
         $this->authorize('cancel', $sourcingRequest);
 
-        $sourcingRequest->transitionTo('rejected');
+        try {
+            $sourcingRequest->transitionTo('rejected');
+        } catch (\Throwable $e) {
+            return redirect()->route('client.dashboard')
+                ->withErrors(['generic' => $e->getMessage()])
+                ->with('error', __('Could not cancel the sourcing request.'));
+        }
 
         return redirect()->route('client.dashboard')->with('status', 'Sourcing request cancelled successfully!');
     }

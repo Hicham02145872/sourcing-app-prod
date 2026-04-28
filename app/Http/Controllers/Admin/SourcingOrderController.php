@@ -152,12 +152,23 @@ class SourcingOrderController extends Controller
             return back()->withErrors(['status' => 'Invalid status transition from '.$sourcingOrder->status.' to '.$validated['status'].'.']);
         }
 
-        $sourcingOrder->update(['status' => $validated['status']]);
+        try {
+            $sourcingOrder->update(['status' => $validated['status']]);
 
-        // Eager-load relationships required by the notification
-        $sourcingOrder->load('quotation.sourcingRequest', 'user');
+            // Eager-load relationships required by the notification
+            $sourcingOrder->load('quotation.sourcingRequest', 'user');
 
-        event(new SourcingOrderStatusChanged($sourcingOrder));
+            event(new SourcingOrderStatusChanged($sourcingOrder));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Sourcing order status update failed', [
+                'order_id' => $sourcingOrder->id,
+                'exception' => $e,
+            ]);
+
+            return back()
+                ->withErrors(['generic' => $e->getMessage()])
+                ->with('error', __('Could not update order status.'));
+        }
 
         return redirect()->route('admin.sourcing-orders.show', $sourcingOrder)->with('status', 'Sourcing order status updated successfully!');
     }

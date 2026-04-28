@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Country;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -30,16 +31,18 @@ class ShippingFeesTable extends Component
 
     public function render()
     {
-        $query = Country::with(['shippingFee.items']);
+        $countries = rescue(function () {
+            $query = Country::with(['shippingFee.items']);
 
-        if (! empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('code', 'like', '%'.$this->search.'%');
-            });
-        }
+            if (! empty($this->search)) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('code', 'like', '%'.$this->search.'%');
+                });
+            }
 
-        $countries = $query->paginate(20);
+            return $query->paginate(20);
+        }, new LengthAwarePaginator([], 0, 20));
 
         return view('livewire.admin.shipping-fees-table', [
             'countries' => $countries,

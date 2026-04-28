@@ -109,23 +109,29 @@ class RefundRequestController extends Controller
             $updateData['refund_proof_path'] = $request->file('refund_proof')->store('refund-proofs', 'public');
         }
 
-        $refundRequest->update($updateData);
+        try {
+            $refundRequest->update($updateData);
 
-        $sourcingOrder = $refundRequest->sourcingOrder;
+            $sourcingOrder = $refundRequest->sourcingOrder;
 
-        if ($status === 'approved') {
-            // Cumulative refund: order.refund_amount = sum of all approved refund requests for this order
-            $totalApproved = $sourcingOrder->refundRequests()
-                ->where('status', 'approved')
-                ->sum('amount_approved');
+            if ($status === 'approved') {
+                // Cumulative refund: order.refund_amount = sum of all approved refund requests for this order
+                $totalApproved = $sourcingOrder->refundRequests()
+                    ->where('status', 'approved')
+                    ->sum('amount_approved');
 
-            $sourcingOrder->update([
-                'refund_amount' => $totalApproved,
-                'refund_proof_path' => $refundRequest->refund_proof_path,
-                'status' => ($totalApproved >= $sourcingOrder->total_amount) ? 'refunded' : 'refund_approved',
-            ]);
-        } else {
-            $sourcingOrder->update(['status' => 'refund_rejected']);
+                $sourcingOrder->update([
+                    'refund_amount' => $totalApproved,
+                    'refund_proof_path' => $refundRequest->refund_proof_path,
+                    'status' => ($totalApproved >= $sourcingOrder->total_amount) ? 'refunded' : 'refund_approved',
+                ]);
+            } else {
+                $sourcingOrder->update(['status' => 'refund_rejected']);
+            }
+        } catch (\Throwable $e) {
+            return back()
+                ->withErrors(['generic' => $e->getMessage()])
+                ->with('error', __('Could not process the refund request.'));
         }
 
         return redirect()->route('admin.refund-requests.index')

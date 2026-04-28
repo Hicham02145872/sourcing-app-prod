@@ -15,6 +15,10 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
+        if (! $request->user()) {
+            abort(401);
+        }
+
         // Check if the authenticated user's role matches the required role
         if ($role === 'admin') {
             if (! $request->user()->isAdmin()) {

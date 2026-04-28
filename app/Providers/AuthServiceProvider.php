@@ -18,16 +18,4 @@ class AuthServiceProvider extends ServiceProvider
         SourcingOrder::class => SourcingOrderPolicy::class,
         \App\Models\RefundRequest::class => \App\Policies\RefundRequestPolicy::class,
     ];
-
-    public function register(): void
-    {
-        \Illuminate\Support\Facades\Log::info('AuthServiceProvider registered');
-    }
-
-    public function boot(): void
-    {
-        $this->app->booted(function () {
-            $this->registerPolicies();
-        });
-    }
 }
