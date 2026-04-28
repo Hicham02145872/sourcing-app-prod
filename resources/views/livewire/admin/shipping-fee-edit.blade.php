@@ -35,10 +35,25 @@
                             </select>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Unit') }}</span>
-                        <div class="flex items-center gap-2">
-                            <select wire:model="unit" class="text-sm font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right uppercase">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Units by transport') }}</span>
+                        <div class="flex items-center justify-between gap-2 text-xs">
+                            <span class="font-bold text-orange-600">{{ __('Air') }}</span>
+                            <select wire:model="transportUnits.air" class="text-xs font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right uppercase">
+                                <option value="kg">KG</option>
+                                <option value="CBM">CBM</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 text-xs">
+                            <span class="font-bold text-blue-600">{{ __('Sea') }}</span>
+                            <select wire:model="transportUnits.sea" class="text-xs font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right uppercase">
+                                <option value="CBM">CBM</option>
+                                <option value="kg">KG</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 text-xs">
+                            <span class="font-bold text-green-600">{{ __('Train') }}</span>
+                            <select wire:model="transportUnits.train" class="text-xs font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right uppercase">
                                 <option value="kg">KG</option>
                                 <option value="CBM">CBM</option>
                             </select>
@@ -129,7 +144,7 @@
                         <thead class="bg-slate-50">
                             <tr>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Item Style / Category') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100/30">{{ __('Price per') }} {{ strtoupper($unit) }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100/30">{{ __('Price per') }} {{ strtoupper($transportUnits[$type] ?? 'KG') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Estimated Delay') }}</th>
                                 <th class="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Actions') }}</th>
                             </tr>

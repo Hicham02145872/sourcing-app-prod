@@ -101,6 +101,9 @@ class ShippingFeesFromAirFreightDDPImport implements ToCollection
                     'country_id' => $country->id,
                     'currency' => 'USD',
                     'unit' => 'kg',
+                    'air_unit' => 'kg',
+                    'sea_unit' => 'CBM',
+                    'train_unit' => 'kg',
                 ]);
                 ShippingFeeItem::updateOrCreate(
                     [

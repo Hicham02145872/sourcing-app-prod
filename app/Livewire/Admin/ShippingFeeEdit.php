@@ -14,7 +14,11 @@ class ShippingFeeEdit extends Component
 
     public $currency = 'USD';
 
-    public $unit = 'kg';
+    public array $transportUnits = [
+        'air' => 'kg',
+        'sea' => 'CBM',
+        'train' => 'kg',
+    ];
 
     public $air_arrival_time = '7-9';
 
@@ -39,7 +43,12 @@ class ShippingFeeEdit extends Component
             $fee = $this->country->shippingFee;
             $this->shippingFee = $fee;
             $this->currency = $fee->currency ?? 'USD';
-            $this->unit = $fee->unit ?? 'kg';
+            $legacyUnit = $fee->unit ?? 'kg';
+            $this->transportUnits = [
+                'air' => $fee->air_unit ?? $legacyUnit,
+                'sea' => $fee->sea_unit ?? 'CBM',
+                'train' => $fee->train_unit ?? $legacyUnit,
+            ];
 
             $this->air_arrival_time = $fee->air_arrival_time ?? '7-9';
             $this->sea_arrival_time = $fee->sea_arrival_time ?? '30-45';
@@ -206,7 +215,11 @@ class ShippingFeeEdit extends Component
         $data = [
             'country_id' => $this->country->id,
             'currency' => $this->currency,
-            'unit' => $this->unit,
+            // Legacy unit kept for backward compatibility with existing integrations.
+            'unit' => $this->transportUnits['air'] ?? 'kg',
+            'air_unit' => $this->transportUnits['air'] ?? 'kg',
+            'sea_unit' => $this->transportUnits['sea'] ?? 'CBM',
+            'train_unit' => $this->transportUnits['train'] ?? 'kg',
             'air_arrival_time' => $this->air_arrival_time,
             'sea_arrival_time' => $this->sea_arrival_time,
             'train_arrival_time' => $this->train_arrival_time,

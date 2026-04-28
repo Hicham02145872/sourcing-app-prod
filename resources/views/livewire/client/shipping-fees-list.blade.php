@@ -167,7 +167,7 @@
                                             @if($item && $item->price_per_kg)
                                                 <div class="inline-flex flex-col items-center">
                                                     <span class="text-[11px] font-black text-slate-900 dark:text-white">{{ number_format($item->price_per_kg, 2) }}</span>
-                                                    <span class="text-[8px] font-bold text-slate-400 uppercase">{{ $country->shippingFee->currency ?? 'USD' }} / {{ strtoupper($country->shippingFee->unit ?? 'KG') }}</span>
+                                                    <span class="text-[8px] font-bold text-slate-400 uppercase">{{ $country->shippingFee->currency ?? 'USD' }} / {{ $country->shippingFee?->getUnitForTransport($selectedCategory ?? 'air') ?? 'KG' }}</span>
                                                     @if($item->estimation_days)
                                                         <span class="mt-1 text-[8px] font-black text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded shadow-sm">
                                                             {{ $item->estimation_days }} {{ __($item->estimation_unit ?? 'days') }}
@@ -345,7 +345,7 @@
                                         <tr>
                                             <th class="px-4 py-3 text-left text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">{{ __('Item Style') }}</th>
                                             <th class="px-4 py-3 text-center text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">{{ __('Delay') }}</th>
-                                            <th class="px-4 py-3 text-center text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">{{ __('Price / ') }}{{ strtoupper($selectedCountry->shippingFee->unit ?? 'KG') }}</th>
+                                            <th class="px-4 py-3 text-center text-xs font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">{{ __('Price / ') }}{{ $selectedCountry->shippingFee?->getUnitForTransport($type) ?? 'KG' }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-[#EBEBEB] dark:divide-slate-700 bg-white dark:bg-slate-800">

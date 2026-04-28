@@ -24,6 +24,12 @@ class ShippingFeeItemSeeder extends Seeder
         ];
 
         foreach ($fees as $fee) {
+            $fee->update([
+                'air_unit' => $fee->air_unit ?? 'kg',
+                'sea_unit' => $fee->sea_unit ?? 'CBM',
+                'train_unit' => $fee->train_unit ?? 'kg',
+            ]);
+
             foreach (['air', 'sea', 'train'] as $type) {
                 foreach ($styles as $style) {
                     ShippingFeeItem::create([

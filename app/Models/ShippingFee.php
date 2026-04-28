@@ -16,7 +16,32 @@ class ShippingFee extends Model
         'train_arrival_time',
         'currency',
         'unit',
+        'air_unit',
+        'sea_unit',
+        'train_unit',
     ];
+
+    public function getUnitForTransport(string $transportType): string
+    {
+        $normalizedType = strtolower($transportType);
+
+        $unit = match ($normalizedType) {
+            'air' => $this->air_unit,
+            'sea' => $this->sea_unit,
+            'train' => $this->train_unit,
+            default => null,
+        };
+
+        if (! empty($unit)) {
+            return strtoupper($unit);
+        }
+
+        if (! empty($this->unit)) {
+            return strtoupper($this->unit);
+        }
+
+        return $normalizedType === 'sea' ? 'CBM' : 'KG';
+    }
 
     public function country(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
