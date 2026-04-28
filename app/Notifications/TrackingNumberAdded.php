@@ -86,9 +86,6 @@ class TrackingNumberAdded extends Notification
 
         $sourcingRequest = $this->sourcingOrder->quotation->sourcingRequest;
         $imageUrl = $sourcingRequest->product_image ? asset('storage/'.$sourcingRequest->product_image) : null;
-        if ($imageUrl) {
-            $notification = $notification->withImage($imageUrl);
-        }
 
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification($notification)

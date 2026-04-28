@@ -102,10 +102,6 @@ class QuotationCreated extends Notification
 
         $notification = FirebaseNotification::create($title, $body);
 
-        if ($imageUrl) {
-            $notification = $notification->withImage($imageUrl);
-        }
-
         $actions = [
             [
                 'action' => 'view_request',
