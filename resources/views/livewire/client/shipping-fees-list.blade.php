@@ -152,19 +152,19 @@
                         <p class="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 sm:text-left">{{ __('Transport mode') }}</p>
                         <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
                             <button type="button" wire:click="setDetailTab('air')" @disabled(!$hasAir)
-                                    class="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'air' ? 'bg-[#EF7722] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#EF7722]/10 dark:bg-slate-800' }}">
-                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                <span class="leading-tight">{{ __('Air freight from China') }}</span>
+                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#EF7722]/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'air' ? 'bg-[#EF7722] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#EF7722]/10 dark:bg-slate-800' }}">
+                                <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                <span class="pointer-events-none leading-tight">{{ __('Air freight from China') }}</span>
                             </button>
                             <button type="button" wire:click="setDetailTab('sea')" @disabled(!$hasSea)
-                                    class="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'sea' ? 'bg-[#0BA6DF] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#0BA6DF]/10 dark:bg-slate-800' }}">
-                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18 M12 5V2"/></svg>
-                                <span class="leading-tight">{{ __('Sea bulk from China') }}</span>
+                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#0BA6DF]/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'sea' ? 'bg-[#0BA6DF] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#0BA6DF]/10 dark:bg-slate-800' }}">
+                                <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18 M12 5V2"/></svg>
+                                <span class="pointer-events-none leading-tight">{{ __('Sea bulk from China') }}</span>
                             </button>
                             <button type="button" wire:click="setDetailTab('train')" @disabled(!$hasTrain)
-                                    class="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'train' ? 'bg-emerald-500 text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-emerald-500/10 dark:bg-slate-800' }}">
-                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                <span class="leading-tight">{{ __('Air freight from United Arab Emirates') }}</span>
+                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'train' ? 'bg-emerald-500 text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-emerald-500/10 dark:bg-slate-800' }}">
+                                <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                <span class="pointer-events-none leading-tight">{{ __('Air freight from United Arab Emirates') }}</span>
                             </button>
                         </div>
                     </div>
@@ -179,8 +179,8 @@
                     </div>
 
                     @if($items->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
+                        <div class="overflow-x-auto select-none" wire:key="sf-tbl-wrap-{{ $selectedCountry->id }}-{{ $detailTab }}">
+                            <table class="min-w-full cursor-default divide-y divide-slate-100 dark:divide-slate-700">
                                 <thead>
                                     <tr class="bg-slate-50/90 dark:bg-slate-900/50">
                                         <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Item Style') }}</th>
