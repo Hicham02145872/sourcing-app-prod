@@ -26,12 +26,17 @@
                 
                 <div class="space-y-3">
                     <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Currency') }}</span>
-                        <div class="flex items-center gap-2">
-                            <select wire:model="currency" class="text-sm font-bold text-orange-600 bg-transparent border-none focus:ring-0 p-0 text-right">
-                                <option value="USD">USD ($)</option>
-                                <option value="EUR">EUR (€)</option>
-                                <option value="MAD">MAD (DH)</option>
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-tight shrink-0 mr-2">{{ __('Currency') }}</span>
+                        <div wire:ignore class="min-w-0 flex-1">
+                            <select
+                                id="admin-shipping-fee-currency-{{ $country->id }}"
+                                data-initial-currency="{{ $currency }}"
+                                autocomplete="off"
+                                class="w-full text-sm font-bold text-orange-600 border border-slate-200 rounded-lg bg-white"
+                            >
+                                @foreach($this->currencies as $code => $label)
+                                    <option value="{{ $code }}">{{ $label }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -244,3 +249,59 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    function initShippingFeeCurrencyTomSelect() {
+        if (typeof TomSelect === 'undefined') return;
+        document.querySelectorAll('select[id^="admin-shipping-fee-currency-"]').forEach(function (el) {
+            var root = el.closest('[wire\\:id]');
+            if (!root) return;
+            var comp = Livewire.find(root.getAttribute('wire:id'));
+            if (!comp) return;
+            if (el.dataset.tsReady === '1' && el.tomselect) {
+                var cur = comp.get('currency');
+                if (cur && el.tomselect.getValue() !== cur) {
+                    el.tomselect.setValue(cur, true);
+                }
+                return;
+            }
+            if (el.tomselect) {
+                el.tomselect.destroy();
+            }
+            el.dataset.tsReady = '1';
+            var ts = new TomSelect(el, {
+                create: false,
+                allowEmptyOption: false,
+                sortField: { field: 'text', direction: 'asc' },
+                placeholder: 'Search currency...',
+                onChange: function (value) {
+                    comp.set('currency', value);
+                },
+            });
+            var initial = comp.get('currency') || el.getAttribute('data-initial-currency') || 'USD';
+            ts.setValue(initial, true);
+        });
+    }
+    function resetShippingFeeCurrencySelects() {
+        document.querySelectorAll('select[id^="admin-shipping-fee-currency-"]').forEach(function (el) {
+            el.dataset.tsReady = '0';
+            if (el.tomselect) {
+                el.tomselect.destroy();
+            }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(initShippingFeeCurrencyTomSelect, 150);
+    });
+    document.addEventListener('livewire:init', function () {
+        setTimeout(initShippingFeeCurrencyTomSelect, 50);
+    });
+    document.addEventListener('livewire:navigated', function () {
+        resetShippingFeeCurrencySelects();
+        setTimeout(initShippingFeeCurrencyTomSelect, 100);
+    });
+})();
+</script>
+@endpush

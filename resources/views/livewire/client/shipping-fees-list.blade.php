@@ -82,17 +82,16 @@
                     </div>
                 </button>
  
-                {{-- Rail Connect --}}
+                {{-- Third tab: labelled as UAE air freight (still uses train transport type in data) --}}
                 <button wire:click="selectCategory('train')" 
                         class="flex items-center gap-3 p-3 rounded-xl transition-all {{ $selectedCategory === 'train' ? 'bg-[#10B981] text-white shadow-md scale-105' : 'hover:bg-[#10B981]/5 text-slate-600 dark:text-slate-400' }}">
                     <div class="w-10 h-10 {{ $selectedCategory === 'train' ? 'bg-white/20' : 'bg-[#10B981]/10 dark:bg-[#10B981]/20' }} rounded-lg flex items-center justify-center">
                         <svg class="w-5 h-5 {{ $selectedCategory === 'train' ? 'text-white' : 'text-[#10B981]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                         </svg>
                     </div>
                     <div class="text-left">
-                        <p class="text-xs font-bold uppercase tracking-wide {{ $selectedCategory === 'train' ? 'text-white' : 'text-slate-700 dark:text-slate-300' }}">{{ __('Rail Connect') }}</p>
-                        <p class="text-[10px] font-bold uppercase tracking-tighter {{ $selectedCategory === 'train' ? 'text-white/80' : 'text-slate-400' }}">{{ __('Silk Road Railway') }}</p>
+                        <p class="text-xs font-bold uppercase tracking-wide {{ $selectedCategory === 'train' ? 'text-white' : 'text-slate-700 dark:text-slate-300' }} leading-snug">{{ __('Air freight from United Arab Emirates') }}</p>
                     </div>
                 </button>
             </div>
@@ -333,11 +332,17 @@
                                         @elseif($type === 'sea')
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M22 17l-10-5-10 5L12 22l10-5z"/><path d="M12 12l10-5-10-5-10 5 10 5z"/><path d="M2 12l10 5 10-5"/></svg>
                                         @elseif($type === 'train')
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="15" x="3" y="4" rx="2"/><path d="M7 11h10"/><path d="M7 15h10"/><path d="M12 4v1"/><path d="M9 19l-2 2"/><path d="M15 19l2 2"/></svg>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                                         @endif
                                     </div>
                                     <div class="flex-1">
-                                        <h4 class="font-bold text-slate-800 dark:text-slate-200 uppercase text-sm">{{ ucfirst($type) }} {{ __('Freight') }}</h4>
+                                        <h4 class="font-bold text-slate-800 dark:text-slate-200 uppercase text-sm">
+                                            @if($type === 'train')
+                                                {{ __('Air freight from United Arab Emirates') }}
+                                            @else
+                                                {{ ucfirst($type) }} {{ __('Freight') }}
+                                            @endif
+                                        </h4>
                                     </div>
                                 </div>
                                 <table class="min-w-full divide-y divide-[#EBEBEB] dark:divide-slate-700">

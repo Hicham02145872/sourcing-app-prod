@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Country;
 use App\Models\ShippingFee;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class ShippingFeeEdit extends Component
@@ -34,6 +35,11 @@ class ShippingFeeEdit extends Component
 
     public array $transportTypes = ['air', 'sea', 'train'];
 
+    public function getCurrenciesProperty(): array
+    {
+        return config('currencies', []);
+    }
+
     public function mount(Country $country)
     {
         $this->country = rescue(
@@ -45,7 +51,9 @@ class ShippingFeeEdit extends Component
         if ($this->country->shippingFee) {
             $fee = $this->country->shippingFee;
             $this->shippingFee = $fee;
-            $this->currency = $fee->currency ?? 'USD';
+            $allowed = array_keys($this->currencies);
+            $cur = strtoupper((string) ($fee->currency ?? 'USD'));
+            $this->currency = in_array($cur, $allowed, true) ? $cur : 'USD';
             $legacyUnit = $fee->unit ?? 'kg';
             $this->transportUnits = [
                 'air' => $fee->air_unit ?? $legacyUnit,
@@ -207,6 +215,10 @@ class ShippingFeeEdit extends Component
     public function save(): void
     {
         $this->resetErrorBag();
+
+        $this->validate([
+            'currency' => ['required', 'string', 'size:3', Rule::in(array_keys($this->currencies))],
+        ]);
 
         if ($this->hasDuplicateCategories()) {
             $this->addError('duplicate_categories', __('Each transport type must have unique category names for this country.'));

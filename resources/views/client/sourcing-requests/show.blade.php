@@ -268,7 +268,7 @@
                                         <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->weight_unit ?? 'g' }}</span></p>
                                     </div>
                                     <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
-                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Local Delivery') }}</p>
+                                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Shipping fees') }}</p>
                                         <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->delivery_cost_china, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->currency }}</span></p>
                                     </div>
                                 </div>
