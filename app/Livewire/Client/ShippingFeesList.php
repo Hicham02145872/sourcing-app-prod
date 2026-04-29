@@ -3,7 +3,6 @@
 namespace App\Livewire\Client;
 
 use App\Models\Country;
-use App\Models\ShippingFeeItem;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -14,49 +13,11 @@ class ShippingFeesList extends Component
 
     public $search = '';
 
-    public $selectedCategory = null;
-
     public $selectedCountry = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'selectedCategory' => ['except' => null],
     ];
-
-    public function mount(): void
-    {
-        if (! empty($this->selectedCategory)) {
-            return;
-        }
-
-        // Show detailed table on first page load without requiring a click.
-        foreach (['sea', 'air', 'train'] as $transportType) {
-            $hasRates = rescue(
-                static fn () => ShippingFeeItem::query()
-                    ->where('transport_type', $transportType)
-                    ->whereNotNull('price_per_kg')
-                    ->exists(),
-                false
-            );
-
-            if ($hasRates) {
-                $this->selectedCategory = $transportType;
-
-                return;
-            }
-        }
-
-        $this->selectedCategory = 'sea';
-    }
-
-    public function selectCategory($category)
-    {
-        if ($this->selectedCategory === $category) {
-            $this->selectedCategory = null;
-        } else {
-            $this->selectedCategory = $category;
-        }
-    }
 
     public function selectCountry($countryId)
     {
@@ -89,47 +50,11 @@ class ShippingFeesList extends Component
                 });
             }
 
-            return $query->paginate(12);
+            return $query->orderBy('name')->paginate(12);
         }, new LengthAwarePaginator([], 0, 12));
-
-        $itemStyles = [];
-        if ($this->selectedCategory) {
-            $defaultOrder = [
-                'Electr & Magnet (No Brand)',
-                'Electr & Magnet (With Brand)',
-                'General Cargo (No Brand)',
-                'General Cargo (With Brand)',
-                'Power Bank, Battery, Cosmetic',
-                'Screens, Electr & Mag (No Brand)',
-                'Screens, Electr & Mag (With Brand)',
-                'Health Care Products',
-            ];
-
-            $fetchedStyles = $countries->getCollection()
-                ->flatMap(function ($country) {
-                    return $country->shippingFee?->items ?? collect();
-                })
-                ->filter(function ($item) {
-                    return $item->transport_type === $this->selectedCategory
-                        && ! is_null($item->price_per_kg)
-                        && trim((string) $item->item_style) !== '';
-                })
-                ->pluck('item_style')
-                ->unique()
-                ->values()
-                ->toArray();
-
-            // Sort fetched styles based on defaultOrder, keep custom styles at the end.
-            $itemStyles = collect($fetchedStyles)->sortBy(function ($style) use ($defaultOrder) {
-                $index = array_search($style, $defaultOrder);
-
-                return $index === false ? 999 : $index;
-            })->values()->toArray();
-        }
 
         return view('livewire.client.shipping-fees-list', [
             'countries' => $countries,
-            'itemStyles' => $itemStyles,
         ]);
     }
 }
