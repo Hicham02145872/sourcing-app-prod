@@ -15,21 +15,53 @@ class ShippingFeesList extends Component
 
     public $selectedCountry = null;
 
+    /** @var 'air'|'sea'|'train' */
+    public string $detailTab = 'air';
+
     protected $queryString = [
         'search' => ['except' => ''],
     ];
 
-    public function selectCountry($countryId)
+    public function selectCountry($countryId): void
     {
         $this->selectedCountry = rescue(
             fn () => Country::with(['shippingFee.items'])->findOrFail($countryId),
             null
         );
+        $this->detailTab = $this->firstAvailableDetailTab();
     }
 
-    public function closeCountryDetails()
+    public function closeCountryDetails(): void
     {
         $this->selectedCountry = null;
+        $this->detailTab = 'air';
+    }
+
+    public function setDetailTab(string $tab): void
+    {
+        if (! in_array($tab, ['air', 'sea', 'train'], true)) {
+            return;
+        }
+        $this->detailTab = $tab;
+    }
+
+    /**
+     * @return 'air'|'sea'|'train'
+     */
+    protected function firstAvailableDetailTab(): string
+    {
+        $fee = $this->selectedCountry?->shippingFee;
+        if (! $fee) {
+            return 'air';
+        }
+        foreach (['air', 'sea', 'train'] as $type) {
+            $has = $fee->items->contains(fn ($i) => $i->transport_type === $type && $i->price_per_kg !== null);
+            if ($has) {
+                return $type;
+            }
+        }
+
+        return 'air';
     }
 
     public function updatingSearch()

@@ -38,10 +38,29 @@
         {{-- Destination picker (modern) --}}
         <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <div class="border-b border-slate-100 bg-gradient-to-b from-slate-50/80 to-white px-6 py-10 text-center dark:border-slate-700 dark:from-slate-900/50 dark:to-slate-800 sm:px-10">
-                <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-lg shadow-blue-500/25">
-                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" class="text-white/30"/>
-                        <path stroke-linecap="round" d="M3 12h18M12 3a15 15 0 0110 9 15 15 0 01-10 9 15 15 0 01-10-9 15 15 0 0110-9z"/>
+                {{-- Globe (style maquette : sphère + orbites) --}}
+                <div class="relative mx-auto mb-8 flex h-40 w-40 items-center justify-center sm:h-44 sm:w-44" aria-hidden="true">
+                    <svg class="absolute inset-0 h-full w-full text-sky-300/80 dark:text-sky-500/40" viewBox="0 0 200 200" fill="none">
+                        <ellipse cx="100" cy="100" rx="92" ry="32" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 6" transform="rotate(-18 100 100)"/>
+                        <ellipse cx="100" cy="100" rx="88" ry="36" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 7" transform="rotate(22 100 100)"/>
+                        <ellipse cx="100" cy="100" rx="96" ry="26" stroke="currentColor" stroke-width="1" stroke-dasharray="3 8" transform="rotate(58 100 100)"/>
+                    </svg>
+                    <svg class="relative z-10 h-28 w-28 overflow-visible drop-shadow-lg sm:h-32 sm:w-32" viewBox="0 0 120 120" aria-hidden="true">
+                        <defs>
+                            <radialGradient id="sfGlobeShine" cx="35%" cy="30%" r="65%">
+                                <stop offset="0%" stop-color="#e0f2fe"/>
+                                <stop offset="45%" stop-color="#38bdf8"/>
+                                <stop offset="100%" stop-color="#0369a1"/>
+                            </radialGradient>
+                            <linearGradient id="sfGlobeShadow" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#0c4a6e" stop-opacity="0"/>
+                                <stop offset="100%" stop-color="#0c4a6e" stop-opacity="0.35"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="60" cy="60" r="52" fill="url(#sfGlobeShine)"/>
+                        <circle cx="60" cy="60" r="52" fill="url(#sfGlobeShadow)"/>
+                        <path d="M28 52c12-8 28-12 44-10m-8 36c-10 8-22 12-36 10" stroke="white" stroke-opacity="0.25" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                        <path d="M60 8v104M8 60h104" stroke="white" stroke-opacity="0.12" stroke-width="0.8"/>
                     </svg>
                 </div>
                 <h3 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">{{ __('Where do you want to ship?') }}</h3>
@@ -88,7 +107,7 @@
             @endif
         </div>
     @else
-        {{-- Country detail: all transport blocks inline --}}
+        {{-- Pays sélectionné : onglets Air / Sea / Air UAE + tableau --}}
         <div wire:key="sf-detail-{{ $selectedCountry->id }}" class="space-y-6">
             <div class="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div class="flex items-center gap-4">
@@ -106,52 +125,67 @@
             </div>
 
             @php
-                $hasAnyBlock = false;
+                $fee = $selectedCountry->shippingFee;
+                $hasAir = $fee?->items->contains(fn ($i) => $i->transport_type === 'air' && $i->price_per_kg !== null) ?? false;
+                $hasSea = $fee?->items->contains(fn ($i) => $i->transport_type === 'sea' && $i->price_per_kg !== null) ?? false;
+                $hasTrain = $fee?->items->contains(fn ($i) => $i->transport_type === 'train' && $i->price_per_kg !== null) ?? false;
+                $currentType = $detailTab;
+                $items = $fee?->items->where('transport_type', $currentType)->filter(fn ($i) => $i->price_per_kg !== null) ?? collect();
+                $sectionTitle = match ($currentType) {
+                    'air' => __('Air freight from China'),
+                    'sea' => __('Sea bulk from China'),
+                    default => __('Air freight from United Arab Emirates'),
+                };
+                $sectionAccent = match ($currentType) {
+                    'air' => ['bar' => 'from-[#EF7722] to-[#FAA533]'],
+                    'sea' => ['bar' => 'from-[#0BA6DF] to-cyan-500'],
+                    default => ['bar' => 'from-emerald-500 to-teal-500'],
+                };
+                $hasAny = $hasAir || $hasSea || $hasTrain;
             @endphp
 
-            @foreach(['air', 'sea', 'train'] as $type)
-                @php
-                    $items = $selectedCountry->shippingFee?->items->where('transport_type', $type)->filter(fn ($i) => $i->price_per_kg !== null);
-                    $sectionTitle = match ($type) {
-                        'air' => __('Air freight from China'),
-                        'sea' => __('Sea bulk from China'),
-                        default => __('Air freight from United Arab Emirates'),
-                    };
-                    $sectionAccent = match ($type) {
-                        'air' => ['bar' => 'from-[#EF7722] to-[#FAA533]', 'badge' => 'bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300'],
-                        'sea' => ['bar' => 'from-[#0BA6DF] to-cyan-500', 'badge' => 'bg-sky-100 text-sky-800 dark:bg-sky-950/50 dark:text-sky-300'],
-                        default => ['bar' => 'from-emerald-500 to-teal-500', 'badge' => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'],
-                    };
-                @endphp
+            @if($hasAny)
+                <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                    <div class="h-1 bg-gradient-to-r {{ $sectionAccent['bar'] }}"></div>
 
-                @if($items && $items->count() > 0)
-                    @php $hasAnyBlock = true; @endphp
-                    <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                        <div class="h-1 bg-gradient-to-r {{ $sectionAccent['bar'] }}"></div>
-                        <div class="flex flex-wrap items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-700 sm:px-6">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl {{ $sectionAccent['badge'] }}">
-                                @if($type === 'sea')
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18 M12 5V2"/></svg>
-                                @else
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                @endif
-                            </div>
-                            <div>
-                                <h4 class="text-base font-bold text-slate-900 dark:text-white">{{ $sectionTitle }}</h4>
-                                @if($type === 'train')
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('United Arab Emirates') }}</p>
-                                @else
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('China') }}</p>
-                                @endif
-                            </div>
+                    <div class="border-b border-slate-100 bg-slate-50/90 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40 sm:px-5">
+                        <p class="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 sm:text-left">{{ __('Transport mode') }}</p>
+                        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
+                            <button type="button" wire:click="setDetailTab('air')" @disabled(!$hasAir)
+                                    class="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'air' ? 'bg-[#EF7722] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#EF7722]/10 dark:bg-slate-800' }}">
+                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                <span class="leading-tight">{{ __('Air freight from China') }}</span>
+                            </button>
+                            <button type="button" wire:click="setDetailTab('sea')" @disabled(!$hasSea)
+                                    class="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'sea' ? 'bg-[#0BA6DF] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#0BA6DF]/10 dark:bg-slate-800' }}">
+                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18 M12 5V2"/></svg>
+                                <span class="leading-tight">{{ __('Sea bulk from China') }}</span>
+                            </button>
+                            <button type="button" wire:click="setDetailTab('train')" @disabled(!$hasTrain)
+                                    class="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'train' ? 'bg-emerald-500 text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-emerald-500/10 dark:bg-slate-800' }}">
+                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                <span class="leading-tight">{{ __('Air freight from United Arab Emirates') }}</span>
+                            </button>
                         </div>
+                    </div>
+
+                    <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-700 sm:px-6">
+                        <h4 class="text-base font-bold text-slate-900 dark:text-white">{{ $sectionTitle }}</h4>
+                        @if($currentType === 'train')
+                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ __('United Arab Emirates') }}</p>
+                        @else
+                            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ __('China') }}</p>
+                        @endif
+                    </div>
+
+                    @if($items->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
                                 <thead>
                                     <tr class="bg-slate-50/90 dark:bg-slate-900/50">
                                         <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Item Style') }}</th>
                                         <th scope="col" class="px-4 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ __('Delay') }}</th>
-                                        <th scope="col" class="px-4 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ __('Price / ') }}{{ $selectedCountry->shippingFee?->getUnitForTransport($type) ?? 'KG' }}</th>
+                                        <th scope="col" class="px-4 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ __('Price / ') }}{{ $selectedCountry->shippingFee?->getUnitForTransport($currentType) ?? 'KG' }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
@@ -176,11 +210,13 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                @endif
-            @endforeach
-
-            @if(!$hasAnyBlock)
+                    @else
+                        <div class="px-5 py-12 text-center sm:px-6">
+                            <p class="text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('No rates for this transport mode.') }}</p>
+                        </div>
+                    @endif
+                </div>
+            @else
                 <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 py-16 text-center dark:border-slate-700 dark:bg-slate-900/30">
                     <p class="text-sm font-medium text-slate-600 dark:text-slate-400">{{ __('No Shipping Data') }}</p>
                     <p class="mt-1 text-xs text-slate-500">{{ __('We do not have indexed rates for this country yet.') }}</p>
