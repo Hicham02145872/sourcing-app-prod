@@ -1,36 +1,100 @@
-<div class="flex flex-col h-screen bg-slate-50 overflow-hidden">
+<div class="flex flex-col h-screen bg-slate-50 overflow-hidden" x-data @keydown.window.prevent="if (($event.metaKey || $event.ctrlKey) && ($event.key === 'k' || $event.key === 'K')) { $wire.set('showCommandPalette', true); }" @if($devPollSeconds > 0) wire:poll.{{ $devPollSeconds }}s="pollDevMonitors" @endif>
     <!-- Custom Dev Header -->
     <header class="flex-none bg-slate-900 border-b border-slate-800 px-6 py-4">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="bg-indigo-600 px-2 py-1 text-xs font-black text-white tracking-tighter uppercase">DEV</div>
-                <h1 class="text-sm font-bold text-white uppercase tracking-widest">Sourcing App / Console</h1>
-            </div>
-            <div class="flex items-center gap-6">
-                <div class="h-4 w-px bg-slate-700"></div>
-                <div class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
-                    <span class="w-2 h-2 bg-emerald-500"></span> System Online
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-4">
+                    <div class="bg-indigo-600 px-2 py-1 text-xs font-black text-white tracking-tighter uppercase">DEV</div>
+                    <h1 class="text-sm font-bold text-white uppercase tracking-widest">Sourcing App / Console</h1>
                 </div>
-                <button wire:click="loadData" class="text-[10px] font-bold text-indigo-400 uppercase border border-indigo-400/30 px-2 py-1 hover:bg-indigo-400 hover:text-slate-900 transition-none">
-                    Reload Matrix
+                <div class="flex items-center gap-6 flex-wrap">
+                    <div class="h-4 w-px bg-slate-700 hidden sm:block"></div>
+                    <div class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-500"></span> System Online
+                    </div>
+                    <button wire:click="loadData" class="text-[10px] font-bold text-indigo-400 uppercase border border-indigo-400/30 px-2 py-1 hover:bg-indigo-400 hover:text-slate-900 transition-none">
+                        Reload Matrix
+                    </button>
+                    <div class="h-4 w-px bg-slate-700 hidden sm:block"></div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-[10px] font-bold text-slate-400 uppercase hover:text-white transition-none">Disconnect</button>
+                    </form>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 pt-2 border-t border-slate-800">
+                <label class="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
+                    <span>Auto-refresh</span>
+                    <select wire:model.live="devPollSeconds" class="bg-slate-800 border border-slate-600 text-slate-200 text-[10px] px-2 py-1 uppercase font-bold rounded-none">
+                        <option value="0">Off</option>
+                        <option value="5">5s</option>
+                        <option value="15">15s</option>
+                        <option value="60">60s</option>
+                    </select>
+                </label>
+                <label class="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
+                    <span>Mot de passe conf.</span>
+                    <input type="password" wire:model="devSensitivePassword" autocomplete="current-password" placeholder="Actions sensibles" class="bg-slate-800 border border-slate-600 text-slate-200 text-[10px] px-2 py-1 w-40 font-mono rounded-none" />
+                </label>
+                <button type="button" wire:click="$set('showCommandPalette', true)" class="text-[10px] font-bold text-amber-400 uppercase border border-amber-400/40 px-2 py-1 hover:bg-amber-400/10 transition-none">
+                    ⌘K Palette
                 </button>
-                <div class="h-4 w-px bg-slate-700"></div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="text-[10px] font-bold text-slate-400 uppercase hover:text-white transition-none">Disconnect</button>
-                </form>
             </div>
         </div>
     </header>
 
     <div class="flex-1 flex overflow-hidden">
         <!-- Sidebar Navigation -->
-        <nav class="w-64 bg-white border-r border-slate-200 p-4 flex flex-col gap-1 overflow-y-auto">
-            @foreach(['sync' => 'Sync Monitor', 'testing' => 'Test Tools', 'users' => 'Users', 'tracking' => 'Tracking Monitor', 'cache' => 'Cache Monitor', 'notifications' => 'Notifications', 'flags' => 'Feature Flags', 'health' => 'System Health', 'shortcuts' => 'Shortcuts', 'env' => 'Env Preview', 'mail' => 'Mail Viewer', 'backups' => 'Backups', 'scheduler' => 'Scheduler', 'sessions' => 'Sessions', 'seeders' => 'Seeders', 'queue' => 'Queue Monitor', 'db' => 'Database Explorer', 'audit' => 'Status Audit', 'debug' => 'Debugger'] as $tab => $label)
-                <button wire:click="$set('activeTab', '{{ $tab }}')" 
-                    class="w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-tight transition-none {{ $activeTab === $tab ? 'bg-slate-900 text-white' : 'text-slate-600 border border-transparent border-b-slate-100 hover:border-slate-300' }}">
-                    {{ $label }}
-                </button>
+        <nav class="w-64 bg-white border-r border-slate-200 p-4 flex flex-col gap-4 overflow-y-auto">
+            @foreach([
+                'Monitoring' => [
+                    'sync' => 'Sync Monitor',
+                    'tracking' => 'Tracking',
+                    'tracking_deep' => 'Tracking deep',
+                    'health' => 'System Health',
+                    'queue' => 'Queue',
+                    'errors' => 'Errors log',
+                    'performance' => 'Performance',
+                ],
+                'Diagnostics' => [
+                    'debug' => 'Debugger',
+                    'notifications' => 'Notifications',
+                    'mail' => 'Mail Viewer',
+                    'cache' => 'Cache',
+                ],
+                'Data' => [
+                    'db' => 'Database',
+                    'seeders' => 'Seeders',
+                    'backups' => 'Backups',
+                    'actionlog' => 'Audit log',
+                    'audit' => 'Status Audit',
+                ],
+                'Tools' => [
+                    'testing' => 'Test / Impersonate',
+                    'users' => 'Users',
+                    'flags' => 'Feature Flags',
+                    'scheduler' => 'Scheduler',
+                    'shortcuts' => 'Artisan',
+                    'webhooks' => 'Webhooks',
+                ],
+                'Security' => [
+                    'sessions' => 'Sessions',
+                    'rate_limits' => 'Rate limiters',
+                    'fcm_tokens' => 'FCM tokens',
+                    'env' => 'Env',
+                ],
+            ] as $section => $tabs)
+                <div>
+                    <div class="px-2 py-1 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{{ $section }}</div>
+                    <div class="flex flex-col gap-0.5">
+                        @foreach($tabs as $tab => $label)
+                            <button wire:click="$set('activeTab', '{{ $tab }}')"
+                                class="w-full text-left px-3 py-2.5 text-[11px] font-bold uppercase tracking-tight transition-none {{ $activeTab === $tab ? 'bg-slate-900 text-white' : 'text-slate-600 border border-transparent hover:border-slate-300' }}">
+                                {{ $label }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
             @endforeach
         </nav>
 
@@ -43,7 +107,7 @@
                             <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Google Sheets Sync</h2>
                             <p class="text-xs text-slate-500 uppercase mt-1">Manual synchronization retry & error logging</p>
                         </div>
-                        <button wire:click="forceSyncAll" class="bg-indigo-600 text-white px-6 py-3 text-xs font-bold uppercase tracking-widest transition-none">
+                        <button wire:click="forceSyncAll" wire:confirm="Relancer la sync Sheets pour toutes les commandes en erreur ?" class="bg-indigo-600 text-white px-6 py-3 text-xs font-bold uppercase tracking-widest transition-none">
                             Execute Force Sync
                         </button>
                     </div>
@@ -69,7 +133,7 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-right">
-                                            <button wire:click="forceSyncAll" class="text-indigo-600 font-black uppercase text-[10px] border-b border-indigo-200">Retry</button>
+                                            <button wire:click="forceSyncAll" wire:confirm="Relancer force sync ?" class="text-indigo-600 font-black uppercase text-[10px] border-b border-indigo-200">Retry</button>
                                         </td>
                                     </tr>
                                 @empty
@@ -448,7 +512,9 @@
                                         <h4 class="font-black text-sm text-slate-900">{{ $info['label'] }}</h4>
                                         <p class="text-[10px] text-slate-400 uppercase font-bold mt-1">{{ $info['desc'] }}</p>
                                     </div>
-                                    <button wire:click="clearCache('{{ $type }}')" 
+                                    <button type="button"
+                                        @if($type === 'all') wire:confirm="Vider tout le cache applicatif ?" @endif
+                                        wire:click="clearCache('{{ $type }}')" 
                                         class="w-full py-3 bg-{{ $info['color'] }}-100 border border-{{ $info['color'] }}-200 text-[10px] font-black uppercase tracking-widest text-{{ $info['color'] }}-900 hover:bg-{{ $info['color'] }}-600 hover:text-white transition-none">
                                         Execute Purge
                                     </button>
@@ -519,6 +585,15 @@
                                 <textarea wire:model="testNotificationBody" rows="3" placeholder="This is a test notification from Dev Dashboard" 
                                     class="w-full bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none resize-none"></textarea>
                             </div>
+                            <div class="flex flex-wrap gap-4">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase w-full">Canaux DevPing</span>
+                                @foreach(['mail' => 'Mail', 'database' => 'Database', 'fcm' => 'FCM'] as $ch => $lab)
+                                    <label class="flex items-center gap-2 text-[10px] font-bold text-slate-700 cursor-pointer">
+                                        <input type="checkbox" wire:model="devPingChannels" value="{{ $ch }}" class="rounded border-slate-300" />
+                                        {{ $lab }}
+                                    </label>
+                                @endforeach
+                            </div>
                             <div>
                                 <button wire:click="testFcmNotification" class="w-full bg-slate-900 text-white px-6 py-3 text-xs font-bold uppercase tracking-widest transition-none hover:bg-indigo-600">
                                     Send Test Notification
@@ -536,7 +611,7 @@
                             <div class="bg-emerald-50 border border-emerald-200 p-4 space-y-2">
                                 <div class="flex justify-between items-start">
                                     <span class="text-[10px] font-black text-emerald-900 uppercase">Notification Sent Successfully</span>
-                                    <span class="text-[9px] px-2 bg-emerald-600 text-white font-mono">FCM</span>
+                                    <span class="text-[9px] px-2 bg-emerald-600 text-white font-mono">DevPing</span>
                                 </div>
                                 <div class="bg-white border border-emerald-200 p-3 space-y-2 text-[10px]">
                                     <div class="flex justify-between">
@@ -559,6 +634,16 @@
                                         <div class="text-slate-400 font-bold uppercase mb-1">Body:</div>
                                         <div class="text-slate-900">{{ $notificationTestResult['body'] ?? 'N/A' }}</div>
                                     </div>
+                                    <div class="border-t border-emerald-200 pt-2">
+                                        <div class="text-slate-400 font-bold uppercase mb-1">Canaux:</div>
+                                        <div class="text-slate-900 font-mono">{{ implode(', ', $notificationTestResult['channels'] ?? []) }}</div>
+                                    </div>
+                                    @if(!empty($notificationTestResult['fcm_payload_preview']))
+                                        <div class="border-t border-emerald-200 pt-2">
+                                            <div class="text-slate-400 font-bold uppercase mb-1">Aperçu FCM</div>
+                                            <pre class="text-[9px] bg-slate-900 text-emerald-300 p-2 overflow-x-auto">{{ json_encode($notificationTestResult['fcm_payload_preview'], JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE) }}</pre>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         @endif
@@ -848,9 +933,34 @@
 
             @if($activeTab === 'health')
                 <div class="space-y-8">
-                    <div class="flex justify-between items-center border-b border-slate-300 pb-3">
+                    <div class="flex justify-between items-center border-b border-slate-300 pb-3 flex-wrap gap-3">
                         <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">System Health & Telemetry</h2>
-                        <button wire:click="loadData" class="text-[10px] font-black uppercase text-indigo-600 border border-indigo-200 px-4 py-2 hover:bg-slate-50 transition-none">Sync Monitors</button>
+                        <div class="flex gap-2 flex-wrap">
+                            <button type="button" wire:click="checkHealth" class="text-[10px] font-black uppercase text-white bg-indigo-600 border border-indigo-600 px-4 py-2 hover:bg-indigo-700 transition-none">Run Diagnostics</button>
+                            <button type="button" wire:click="fetchLogs(); fetchFailedJobs()" class="text-[10px] font-black uppercase text-indigo-600 border border-indigo-200 px-4 py-2 hover:bg-slate-50 transition-none">Refresh Logs</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @foreach($healthStatus as $service => $data)
+                            <div class="bg-white border border-slate-200 p-6 flex flex-col gap-4">
+                                <div class="flex justify-between items-center bg-slate-50 border-b border-slate-100 -m-6 p-6 mb-2">
+                                    <span class="font-black text-xs text-slate-900 uppercase tracking-widest">{{ $service }}</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-3 h-3 {{ $data['ok'] ? 'bg-emerald-500' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' }} animate-pulse"></div>
+                                        <span class="text-[10px] font-black uppercase {{ $data['ok'] ? 'text-emerald-600' : 'text-rose-600' }}">
+                                            {{ $data['ok'] ? 'Operational' : 'Critical' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Report</div>
+                                    <div class="font-mono text-[11px] {{ $data['ok'] ? 'text-slate-600' : 'text-rose-500 font-bold' }} break-all">
+                                        {{ $data['message'] }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -937,13 +1047,16 @@
             
             @if($activeTab === 'sessions')
                 <div class="space-y-6">
-                    <div class="flex justify-between items-center bg-white border border-slate-200 p-6">
+                    <div class="flex justify-between items-center bg-white border border-slate-200 p-6 flex-wrap gap-3">
                         <div>
                             <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Active Sessions Monitor</h2>
                             <p class="text-xs text-slate-500 uppercase mt-1">Inspect and terminate active user sessions</p>
                         </div>
-                        <div class="text-[10px] font-mono text-slate-500">
-                            Driver: {{ config('session.driver') }} • Lifetime: {{ config('session.lifetime') }} min
+                        <div class="flex items-center gap-4 flex-wrap">
+                            <div class="text-[10px] font-mono text-slate-500">
+                                Driver: {{ config('session.driver') }} • Lifetime: {{ config('session.lifetime') }} min
+                            </div>
+                            <button type="button" wire:click="loadSessions" class="bg-indigo-600 text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-none">Refresh Sessions</button>
                         </div>
                     </div>
 
@@ -1029,7 +1142,7 @@
                             <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Captured Emails</h3>
                             <div class="flex gap-2">
                                 <button wire:click="loadCapturedMails" class="text-[9px] font-black text-indigo-600 uppercase border-b border-indigo-200">Refresh</button>
-                                <button wire:click="clearAllMails" class="text-[9px] font-black text-rose-600 uppercase border-b border-rose-200">Clear All</button>
+                                <button wire:click="clearAllMails" wire:confirm="Supprimer tous les mails capturés ?" class="text-[9px] font-black text-rose-600 uppercase border-b border-rose-200">Clear All</button>
                             </div>
                         </div>
                         <div class="flex-1 bg-white border border-slate-200 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
@@ -1078,6 +1191,49 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- Mailable lab (App\Mail discovery + reflection) --}}
+                <div class="mt-8 bg-white border border-slate-200 p-6 space-y-4">
+                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest border-b border-slate-200 pb-2">Mailable lab</h3>
+                    <div class="grid md:grid-cols-2 gap-4 text-[10px]">
+                        <div>
+                            <label class="font-bold text-slate-500 uppercase block mb-1">Classe mailable</label>
+                            <select wire:model.live="selectedMailableClass" class="w-full border border-slate-200 px-2 py-2 text-xs font-mono">
+                                @foreach($availableMailables as $mc)
+                                    <option value="{{ $mc }}">{{ class_basename($mc) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-500 uppercase block mb-1">SourcingOrder (si requis)</label>
+                            <select wire:model="testMailOrderId" class="w-full border border-slate-200 px-2 py-2 text-xs">
+                                <option value="">—</option>
+                                @foreach($testMailOrders as $o)
+                                    <option value="{{ $o->id }}">#{{ $o->id }} {{ Str::limit($o->product_name ?? '', 40) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="font-bold text-slate-500 uppercase block mb-1">Destinataire test</label>
+                            <input wire:model="testEmailRecipient" type="email" placeholder="email@test.com" class="w-full border px-2 py-2 text-xs" />
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button wire:click="previewEmail" class="bg-slate-900 text-white px-4 py-2 text-[10px] font-black uppercase">Prévisualiser</button>
+                        <button wire:click="sendTestEmail" class="bg-indigo-600 text-white px-4 py-2 text-[10px] font-black uppercase">Envoyer test</button>
+                    </div>
+                    @if($emailTestError)
+                        <div class="text-rose-600 text-[10px] font-bold font-mono">{{ $emailTestError }}</div>
+                    @endif
+                    @if($emailTestResult)
+                        <div class="text-emerald-700 text-[10px] font-bold">{{ $emailTestResult }}</div>
+                    @endif
+                    @if($emailPreviewHtml)
+                        <div class="border border-slate-200 bg-slate-50 p-4 max-h-[480px] overflow-y-auto prose prose-sm max-w-none">
+                            {!! $emailPreviewHtml !!}
+                        </div>
+                    @endif
+                </div>
             @endif
 
             @if($activeTab === 'backups')
@@ -1114,6 +1270,11 @@
                                         <td class="px-6 py-4 text-xs text-slate-500">{{ $backup['size'] }}</td>
                                         <td class="px-6 py-4 text-xs text-slate-500">{{ $backup['date'] }}</td>
                                         <td class="px-6 py-4 text-right space-x-2">
+                                            @if(\Illuminate\Support\Str::endsWith($backup['name'], '.sql'))
+                                                <button type="button" wire:click="previewBackupRestore('{{ $backup['name'] }}')" class="inline-flex items-center gap-2 text-[10px] font-black text-amber-700 uppercase border border-amber-200 px-3 py-1.5 hover:bg-amber-50">
+                                                    Restore prep
+                                                </button>
+                                            @endif
                                             <button wire:click="downloadBackup('{{ $backup['name'] }}')" class="inline-flex items-center gap-2 text-[10px] font-black text-indigo-600 uppercase border border-indigo-200 px-3 py-1.5 hover:bg-indigo-50">
                                                 Download
                                             </button>
@@ -1132,10 +1293,27 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-            @endif
 
-            @if($activeTab === 'scheduler')
+                    @if(!empty($backupRestorePreview))
+                        <div class="bg-amber-50 border border-amber-200 p-6 space-y-3 text-[10px]">
+                            <h3 class="font-black uppercase text-amber-900">Pré-restaurer : {{ $backupRestoreName }}</h3>
+                            @if(!empty($backupRestorePreview['error']))
+                                <p class="text-rose-700 font-bold">{{ $backupRestorePreview['error'] }}</p>
+                            @else
+                                <p class="font-mono">Lignes fichier : {{ $backupRestorePreview['lines'] ?? '?' }}</p>
+                                @if(!empty($backupRestorePreview['tables_hint']))
+                                    <p>Tables détectées : {{ implode(', ', $backupRestorePreview['tables_hint']) }}</p>
+                                @endif
+                                <pre class="bg-white border p-3 max-h-40 overflow-y-auto text-[9px]">{{ $backupRestorePreview['preview'] ?? '' }}</pre>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <label class="font-bold uppercase text-amber-900">Tapez RESTORE pour confirmer :</label>
+                                    <input wire:model="backupRestoreConfirmPhrase" class="border px-2 py-1 font-mono uppercase" placeholder="RESTORE" />
+                                    <button type="button" wire:click="executeBackupRestore" class="bg-rose-600 text-white px-4 py-2 font-black uppercase">Exécuter restore</button>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
                 <div class="space-y-6">
                     <div class="flex justify-between items-center bg-white border border-slate-200 p-6">
                         <div>
@@ -1179,60 +1357,6 @@
                                         <td colspan="4" class="px-6 py-12 text-center text-slate-400 text-[10px] font-black uppercase tracking-widest italic">
                                             No scheduled tasks registered.
                                         </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @endif
-
-            @if($activeTab === 'sessions')
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center bg-white border border-slate-200 p-6">
-                        <div>
-                            <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Active Sessions</h2>
-                            <p class="text-xs text-slate-500 uppercase mt-1">Monitor & Terminate User sessions</p>
-                        </div>
-                        <button wire:click="loadSessions" class="bg-indigo-600 text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-indigo-700 transition-none">
-                            Refresh Sessions
-                        </button>
-                    </div>
-
-                    <div class="bg-white border border-slate-200 overflow-hidden text-[10px]">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 font-black text-slate-400 uppercase tracking-widest">
-                                    <th class="px-6 py-4">User</th>
-                                    <th class="px-6 py-4">IP Address</th>
-                                    <th class="px-6 py-4">User Agent</th>
-                                    <th class="px-6 py-4">Last Activity</th>
-                                    <th class="px-6 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-mono text-slate-600">
-                                @forelse($activeSessions as $session)
-                                    <tr class="hover:bg-slate-50 transition-none">
-                                        <td class="px-6 py-4">
-                                            @if($session['user_email'])
-                                                <div class="font-bold text-slate-900 uppercase tracking-tighter">{{ $session['user_name'] }}</div>
-                                                <div class="text-[9px] text-slate-400 truncate w-32">{{ $session['user_email'] }}</div>
-                                            @else
-                                                <span class="text-slate-300 italic uppercase">Guest</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4">{{ $session['ip_address'] }}</td>
-                                        <td class="px-6 py-4 truncate w-48 max-w-xs" title="{{ $session['user_agent'] }}">{{ $session['user_agent'] }}</td>
-                                        <td class="px-6 py-4">{{ date('Y-m-d H:i:s', $session['last_activity']) }}</td>
-                                        <td class="px-6 py-4 text-right">
-                                            <button wire:click="deleteSession('{{ $session['id'] }}')" class="text-rose-600 font-black uppercase border border-rose-200 px-3 py-1 hover:bg-rose-50">
-                                                Terminate
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="px-6 py-12 text-center text-slate-400 font-black uppercase italic">No active sessions.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -1327,42 +1451,6 @@
                 </div>
             @endif
 
-            @if($activeTab === 'health')
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center bg-white border border-slate-200 p-6">
-                        <div>
-                            <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Service Health</h2>
-                            <p class="text-xs text-slate-500 uppercase mt-1">Connectivity & Dependency Diagnostics</p>
-                        </div>
-                        <button wire:click="checkHealth" class="bg-indigo-600 text-white px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-indigo-700 transition-none">
-                            Run Diagnostics
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @foreach($healthStatus as $service => $data)
-                            <div class="bg-white border border-slate-200 p-6 flex flex-col gap-4">
-                                <div class="flex justify-between items-center bg-slate-50 border-b border-slate-100 -m-6 p-6 mb-2">
-                                    <span class="font-black text-xs text-slate-900 uppercase tracking-widest">{{ $service }}</span>
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-3 h-3 {{ $data['ok'] ? 'bg-emerald-500' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' }} animate-pulse"></div>
-                                        <span class="text-[10px] font-black uppercase {{ $data['ok'] ? 'text-emerald-600' : 'text-rose-600' }}">
-                                            {{ $data['ok'] ? 'Operational' : 'Critical' }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Report</div>
-                                    <div class="font-mono text-[11px] {{ $data['ok'] ? 'text-slate-600' : 'text-rose-500 font-bold' }} break-all">
-                                        {{ $data['message'] }}
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
             @if($activeTab === 'db')
                 <div class="flex h-[calc(100vh-16rem)] gap-8">
                     <!-- Schema Navigation -->
@@ -1382,9 +1470,10 @@
                                         <div class="text-[11px] font-black text-slate-900 font-mono break-all">{{ $table }}</div>
                                         <span class="text-[9px] font-mono text-slate-400">[{{ $tableCounts[$table] ?? 0 }}]</span>
                                     </div>
-                                    <div class="flex gap-1">
-                                        <button wire:click="runSqlQuery('SELECT * FROM {{ $table }} LIMIT 50')" class="flex-1 bg-slate-50 border border-slate-200 text-[9px] font-black uppercase py-1 hover:bg-slate-900 hover:text-white transition-none">Data</button>
-                                        <button wire:click="runSqlQuery('DESCRIBE {{ $table }}')" class="flex-1 bg-slate-50 border border-slate-200 text-[9px] font-black uppercase py-1 hover:bg-slate-900 hover:text-white transition-none">Schema</button>
+                                    <div class="flex gap-1 flex-wrap">
+                                        <button wire:click="runSqlQuery('SELECT * FROM {{ $table }} LIMIT 50')" class="flex-1 min-w-[40%] bg-slate-50 border border-slate-200 text-[9px] font-black uppercase py-1 hover:bg-slate-900 hover:text-white transition-none">Data</button>
+                                        <button wire:click="runSqlQuery('DESCRIBE {{ $table }}')" class="flex-1 min-w-[40%] bg-slate-50 border border-slate-200 text-[9px] font-black uppercase py-1 hover:bg-slate-900 hover:text-white transition-none">Schema</button>
+                                        <button type="button" wire:click="loadDbSchemaDetail('{{ $table }}')" class="w-full bg-indigo-50 border border-indigo-200 text-[9px] font-black uppercase py-1 text-indigo-800">INFO / INDEX</button>
                                     </div>
                                 </div>
                             @endforeach
@@ -1394,10 +1483,15 @@
                     <!-- SQL Editor -->
                     <div class="flex-1 flex flex-col gap-6">
                         <div class="flex-none space-y-2">
-                            <div class="flex justify-between items-center">
-                                <div class="flex gap-2">
+                            <div class="flex flex-wrap justify-between items-center gap-3">
+                                <div class="flex flex-wrap gap-2 items-center">
                                     <button wire:click="runSqlQuery('SELECT * FROM tables WHERE id = 1')" class="text-[9px] font-black uppercase text-slate-400 border border-slate-200 px-2 py-1 hover:bg-slate-100 italic transition-none">Template: SELECT</button>
                                     <button wire:click="runSqlQuery('UPDATE tables SET column = value WHERE id = 1')" class="text-[9px] font-black uppercase text-slate-400 border border-slate-200 px-2 py-1 hover:bg-slate-100 italic transition-none">Template: UPDATE</button>
+                                    <button type="button" wire:click="runSqlExplain" class="text-[9px] font-black uppercase text-emerald-700 border border-emerald-200 px-2 py-1 hover:bg-emerald-50 transition-none">EXPLAIN</button>
+                                    <label class="flex items-center gap-2 text-[9px] font-black uppercase text-rose-700 border border-rose-200 px-2 py-1 cursor-pointer">
+                                        <input type="checkbox" wire:model.live="dbAllowWrite" class="rounded border-slate-300" />
+                                        Autoriser écriture SQL
+                                    </label>
                                 </div>
                                 @if($queryHistory)
                                     <select wire:change="runSqlQuery($event.target.value)" class="text-[9px] font-black uppercase border border-slate-200 bg-transparent px-2 py-1 outline-none transition-none">
@@ -1410,7 +1504,8 @@
                             </div>
                             <div class="bg-slate-900 border border-slate-800 p-1">
                                 <textarea wire:model="query" rows="5" class="w-full bg-slate-900 text-indigo-400 font-mono text-xs p-4 outline-none border-0 block resize-none" placeholder="SQL_STATEMENT_HERE:"></textarea>
-                                <div class="bg-slate-800 px-4 py-2 flex justify-end">
+                                <div class="bg-slate-800 px-4 py-2 flex justify-end gap-2 flex-wrap">
+                                    <button type="button" wire:click="runSqlExplain" class="bg-emerald-700 text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-none">EXPLAIN SELECT</button>
                                     <button wire:click="runSqlQuery" class="bg-indigo-600 text-white px-8 py-2 text-xs font-black uppercase tracking-widest transition-none">Execute Query</button>
                                 </div>
                             </div>
@@ -1419,6 +1514,55 @@
                         @if($queryError)
                             <div class="flex-none bg-rose-50 border border-rose-200 p-4 text-rose-600 font-mono text-[10px] font-bold">
                                 ERROR: {{ $queryError }}
+                            </div>
+                        @endif
+
+                        @if(!empty($explainResult))
+                            <div class="bg-emerald-50 border border-emerald-200 p-4 text-[10px] overflow-x-auto">
+                                <div class="font-black uppercase text-emerald-900 mb-2">EXPLAIN</div>
+                                <table class="min-w-full text-left font-mono">
+                                    <thead><tr>
+                                        @foreach(array_keys($explainResult[0] ?? []) as $h)
+                                            <th class="p-1 border border-emerald-200">{{ $h }}</th>
+                                        @endforeach
+                                    </tr></thead>
+                                    <tbody>
+                                        @foreach($explainResult as $er)
+                                            <tr>
+                                                @foreach($er as $cell)
+                                                    <td class="p-1 border border-emerald-100">{{ $cell }}</td>
+                                                @endforeach
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+
+                        @if($dbSchemaFocusTable && (!empty($dbSchemaColumns) || !empty($dbSchemaIndexes)))
+                            <div class="grid md:grid-cols-2 gap-4 text-[10px]">
+                                <div class="bg-white border p-3 max-h-64 overflow-auto">
+                                    <div class="font-black uppercase mb-2">Colonnes — {{ $dbSchemaFocusTable }}</div>
+                                    <table class="w-full">
+                                        @foreach($dbSchemaColumns as $col)
+                                            <tr class="border-b border-slate-100">
+                                                <td class="py-1 pr-2 font-bold">{{ $col['COLUMN_NAME'] ?? '' }}</td>
+                                                <td class="py-1 text-slate-600">{{ $col['COLUMN_TYPE'] ?? '' }} {{ $col['COLUMN_KEY'] ?? '' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </table>
+                                </div>
+                                <div class="bg-white border p-3 max-h-64 overflow-auto">
+                                    <div class="font-black uppercase mb-2">Index</div>
+                                    <table class="w-full">
+                                        @foreach($dbSchemaIndexes as $ix)
+                                            <tr class="border-b border-slate-100">
+                                                <td class="py-1">{{ $ix['INDEX_NAME'] ?? '' }}</td>
+                                                <td class="py-1 font-mono">{{ $ix['COLUMN_NAME'] ?? '' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </table>
+                                </div>
                             </div>
                         @endif
 
@@ -1626,6 +1770,192 @@
                 </div>
             @endif
 
+            @if($activeTab === 'errors')
+                <div class="space-y-6">
+                    <div class="flex flex-wrap justify-between gap-4 border-b border-slate-300 pb-4">
+                        <div>
+                            <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Canal errors (daily)</h2>
+                            <p class="text-xs text-slate-500 uppercase mt-1">Fichier errors-YYYY-MM-DD.log — filtre request_id / texte</p>
+                        </div>
+                        <button type="button" wire:click="loadErrorsDailyLog" class="bg-indigo-600 text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest">Recharger</button>
+                    </div>
+                    <input type="text" wire:model.live.debounce.300ms="errorsLogSearch" placeholder="request_id ou extrait..." class="w-full max-w-xl border border-slate-200 px-3 py-2 text-xs font-mono" />
+                    <div class="bg-slate-900 border border-slate-800 max-h-[70vh] overflow-y-auto text-[10px] font-mono p-4 space-y-1">
+                        @forelse($errorsLogFiltered as $row)
+                            <div @class(['text-rose-400' => $row['level']==='error', 'text-amber-400' => $row['level']==='warning', 'text-slate-300' => $row['level']==='info'])>
+                                @if(!empty($row['request_id']))<span class="text-cyan-400 font-bold">[{{ $row['request_id'] }}]</span> @endif
+                                {{ $row['text'] }}
+                            </div>
+                        @empty
+                            <p class="text-slate-500">Aucune ligne (fichier absent ou filtre trop strict).</p>
+                        @endforelse
+                    </div>
+                </div>
+            @endif
+
+            @if($activeTab === 'actionlog')
+                <div class="space-y-6">
+                    <div class="flex flex-wrap justify-between gap-4 border-b border-slate-300 pb-4">
+                        <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Audit log</h2>
+                        <div class="flex gap-2">
+                            <button wire:click="loadAuditLogsPage" class="bg-slate-900 text-white px-4 py-2 text-[10px] font-black uppercase">Refresh</button>
+                            <button wire:click="exportAuditLogsCsv" class="border border-slate-300 px-4 py-2 text-[10px] font-black uppercase text-indigo-600">Export CSV</button>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 overflow-x-auto max-h-[70vh] overflow-y-auto">
+                        <table class="min-w-full text-[10px]">
+                            <thead class="bg-slate-50 sticky top-0"><tr>
+                                <th class="text-left p-2">Action</th><th class="text-left p-2">User</th><th class="text-left p-2">Target</th><th class="text-left p-2">request_id</th><th class="text-left p-2">Date</th>
+                            </tr></thead>
+                            <tbody>
+                                @foreach($auditLogsPage as $l)
+                                    <tr class="border-t border-slate-100 align-top">
+                                        <td class="p-2 font-bold">{{ $l['action'] }}</td>
+                                        <td class="p-2 font-mono">{{ $l['user'] ?? '—' }}</td>
+                                        <td class="p-2 font-mono">{{ $l['target_type'] }} #{{ $l['target_id'] }}</td>
+                                        <td class="p-2 text-cyan-700">{{ $l['request_id'] ?? '—' }}</td>
+                                        <td class="p-2">{{ $l['created_at'] }}</td>
+                                    </tr>
+                                    @if(!empty($l['payload']))
+                                        <tr class="bg-slate-50"><td colspan="5" class="p-2 font-mono text-slate-600 break-all">{{ json_encode($l['payload']) }}</td></tr>
+                                    @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
+            @if($activeTab === 'webhooks')
+                <div class="space-y-6">
+                    <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter border-b border-slate-300 pb-4">Webhooks</h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white border border-slate-200 p-4 space-y-3">
+                            <h3 class="text-[10px] font-black uppercase text-slate-500">Enregistrer un test</h3>
+                            <input wire:model="webhookTestSource" class="w-full border px-2 py-1 text-xs" placeholder="source (lark, stripe…)" />
+                            <textarea wire:model="webhookTestPayload" class="w-full border px-2 py-1 text-xs font-mono h-32"></textarea>
+                            <button wire:click="storeTestWebhook" class="bg-indigo-600 text-white px-4 py-2 text-[10px] font-black uppercase w-full">Enregistrer</button>
+                        </div>
+                        <div class="text-[10px] text-slate-500">Les replays créent une nouvelle entrée <code class="bg-slate-100 px-1">*_replay</code> pour inspection (brancher les workers séparément si besoin).</div>
+                    </div>
+                    <div class="bg-white border border-slate-200 overflow-auto max-h-[50vh]">
+                        <table class="min-w-full text-[10px]">
+                            <thead class="bg-slate-50"><tr><th class="p-2 text-left">ID</th><th class="p-2 text-left">Src</th><th class="p-2 text-left">Type</th><th class="p-2 text-left">Statut</th><th class="p-2 text-left">Créé</th><th class="p-2"></th></tr></thead>
+                            <tbody>
+                                @foreach($webhookEventsList as $ev)
+                                    <tr class="border-t border-slate-100">
+                                        <td class="p-2 font-mono">{{ $ev['id'] }}</td>
+                                        <td class="p-2">{{ $ev['source'] }}</td>
+                                        <td class="p-2">{{ $ev['event_type'] }}</td>
+                                        <td class="p-2">{{ $ev['status'] }}</td>
+                                        <td class="p-2">{{ $ev['created_at'] }}</td>
+                                        <td class="p-2"><button wire:click="replayWebhookEvent({{ $ev['id'] }})" class="text-indigo-600 font-black uppercase">Replay</button></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
+            @if($activeTab === 'tracking_deep')
+                <div class="space-y-6">
+                    <h2 class="text-xl font-black uppercase border-b border-slate-300 pb-4">Tracking deep</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <input wire:model.defer="trackingDeepFsb" class="border px-3 py-2 text-xs font-mono flex-1 min-w-[200px]" placeholder="FSB ou N° tracking" />
+                        <button wire:click="loadTrackingDeep" class="bg-slate-900 text-white px-4 py-2 text-[10px] font-black uppercase">Charger</button>
+                        <button wire:click="replayTrackingDeepRefresh" class="border border-rose-200 text-rose-700 px-4 py-2 text-[10px] font-black uppercase">Replay (purge cache)</button>
+                    </div>
+                    @if($trackingDeepOrder)
+                        <p class="text-xs font-bold">Commande #{{ $trackingDeepOrder->id }} — tracking réel: {{ $trackingDeepOrder->tracking_number ?? '—' }}</p>
+                    @endif
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white border p-4 max-h-96 overflow-y-auto">
+                            <h3 class="text-[10px] font-black uppercase mb-2">Timeline TrackingLog</h3>
+                            @forelse($trackingTimeline as $ev)
+                                <div class="border-b border-slate-100 py-2 text-[10px] font-mono">
+                                    <div class="font-bold">{{ $ev['at'] }} — {{ $ev['provider'] }} — {{ $ev['status'] }}</div>
+                                    <div class="text-slate-500 break-all">{{ $ev['payload_excerpt'] }}</div>
+                                </div>
+                            @empty
+                                <p class="text-slate-400 text-[10px]">Aucun log pour ce numéro.</p>
+                            @endforelse
+                        </div>
+                        <div class="bg-white border p-4">
+                            <h3 class="text-[10px] font-black uppercase mb-2">p95 latence (7j, ms) si présent dans payload</h3>
+                            @forelse($trackingProviderP95 as $prov => $stat)
+                                <div class="text-[10px] py-1 border-b border-slate-50"><span class="font-bold">{{ $prov }}</span> : p95 {{ $stat['p95_ms'] ?? 'n/a' }} (n={{ $stat['samples'] }})</div>
+                            @empty
+                                <p class="text-slate-400 text-[10px]">Pas d’échantillons avec duration_ms dans les payloads.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if($activeTab === 'performance')
+                <div class="space-y-6">
+                    <div class="flex justify-between border-b border-slate-300 pb-4">
+                        <h2 class="text-xl font-black uppercase">Performance / Redis</h2>
+                        <button wire:click="refreshPerformanceTab" class="bg-indigo-600 text-white px-4 py-2 text-[10px] font-black uppercase">Refresh</button>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-slate-900 text-indigo-200 p-4 text-[10px] font-mono max-h-80 overflow-y-auto">
+                            <div class="text-white font-black mb-2">Top requêtes (cycle Livewire courant)</div>
+                            @foreach($performanceSlowQueries as $q)
+                                <div class="mb-2 border-b border-slate-700 pb-2"><span class="text-amber-300">{{ number_format($q['time'],2) }}ms</span> {{ $q['sql'] }}</div>
+                            @endforeach
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 p-4 text-[10px]">
+                            <div class="font-black uppercase mb-2">N+1 naïf (même SQL ≥40×)</div>
+                            @forelse($performanceN1Hints as $sig => $cnt)
+                                <div class="mb-1 font-mono break-all"><span class="font-bold">{{ $cnt }}×</span> {{ Str::limit($sig, 120) }}</div>
+                            @empty
+                                <span class="text-slate-500">Rien à signaler sur ce cycle.</span>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div class="bg-white border p-4 text-[10px] font-mono max-h-64 overflow-y-auto">
+                        <div class="font-black uppercase mb-2">Redis INFO (extrait)</div>
+                        <pre class="whitespace-pre-wrap">{{ json_encode($redisInfoSnippet, JSON_PRETTY_PRINT) }}</pre>
+                    </div>
+                </div>
+            @endif
+
+            @if($activeTab === 'rate_limits')
+                <div class="space-y-4">
+                    <h2 class="text-xl font-black uppercase border-b border-slate-300 pb-4">Rate limiters (référence app)</h2>
+                    <div class="space-y-3">
+                        @foreach($rateLimiterOverview as $row)
+                            <div class="bg-white border border-slate-200 p-4">
+                                <div class="font-bold text-sm">{{ $row['name'] }}</div>
+                                <div class="text-[10px] text-slate-600">{{ $row['limit'] }}</div>
+                                <div class="text-[9px] text-slate-400 font-mono mt-1">{{ $row['source'] }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            @if($activeTab === 'fcm_tokens')
+                <div class="space-y-6">
+                    <h2 class="text-xl font-black uppercase border-b border-slate-300 pb-4">Jetons FCM</h2>
+                    <input wire:model.live.debounce.300ms="fcmUserSearch" placeholder="Filtrer..." class="border px-3 py-2 text-xs w-full max-w-md" />
+                    <div class="bg-white border divide-y divide-slate-100 max-h-[70vh] overflow-y-auto">
+                        @foreach($this->filteredFcmUsers as $u)
+                            <div class="p-4 flex flex-wrap justify-between gap-2 text-xs">
+                                <div>
+                                    <div class="font-bold">{{ $u->name }}</div>
+                                    <div class="font-mono text-slate-500">{{ $u->email }}</div>
+                                    <div class="font-mono text-[10px] text-slate-400 break-all">{{ Str::limit($u->fcm_token, 48) }}</div>
+                                </div>
+                                <button wire:click="revokeUserFcm({{ $u->id }})" wire:confirm="Révoquer le jeton FCM pour cet utilisateur ?" class="text-rose-600 font-black uppercase text-[10px] border border-rose-200 px-3 py-1 h-fit">Révoquer</button>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             @if($activeTab === 'debug')
                 <div class="space-y-8">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1678,6 +2008,39 @@
             @endif
         </main>
     </div>
+
+    @if($showCommandPalette)
+        <div class="fixed inset-0 z-[200] flex items-start justify-center pt-16 sm:pt-24 bg-slate-900/60 px-4" wire:click.self="$set('showCommandPalette', false)">
+            <div class="bg-white border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden" wire:keydown.escape.window="$set('showCommandPalette', false)">
+                <div class="p-3 border-b border-slate-200 flex justify-between items-center">
+                    <span class="text-[10px] font-black uppercase text-slate-500">Navigation rapide</span>
+                    <button type="button" wire:click="$set('showCommandPalette', false)" class="text-slate-400 hover:text-slate-900 text-xs">✕</button>
+                </div>
+                <input type="text" wire:model.live.debounce.100ms="commandPaletteQuery" class="w-full border-0 border-b border-slate-200 px-4 py-3 text-sm outline-none focus:ring-0" placeholder="Filtrer les onglets…" autofocus />
+                <div class="max-h-72 overflow-y-auto text-[11px]">
+                    @php
+                        $paletteTabs = [
+                            'sync' => 'Sync Monitor', 'tracking' => 'Tracking', 'tracking_deep' => 'Tracking deep',
+                            'health' => 'System Health', 'queue' => 'Queue', 'errors' => 'Errors log', 'performance' => 'Performance',
+                            'debug' => 'Debugger', 'notifications' => 'Notifications', 'mail' => 'Mail Viewer', 'cache' => 'Cache',
+                            'db' => 'Database', 'seeders' => 'Seeders', 'backups' => 'Backups', 'actionlog' => 'Audit log', 'audit' => 'Status Audit',
+                            'testing' => 'Test / Impersonate', 'users' => 'Users', 'flags' => 'Feature Flags', 'scheduler' => 'Scheduler',
+                            'shortcuts' => 'Artisan', 'webhooks' => 'Webhooks', 'sessions' => 'Sessions', 'rate_limits' => 'Rate limiters',
+                            'fcm_tokens' => 'FCM tokens', 'env' => 'Env',
+                        ];
+                        $q = strtolower(trim($commandPaletteQuery ?? ''));
+                    @endphp
+                    @foreach($paletteTabs as $tabKey => $tabLabel)
+                        @if($q === '' || str_contains(strtolower($tabLabel), $q) || str_contains($tabKey, $q))
+                            <button type="button" wire:click="$set('activeTab', '{{ $tabKey }}'); $set('showCommandPalette', false)" class="w-full text-left px-4 py-2.5 hover:bg-slate-100 font-bold uppercase tracking-tight border-b border-slate-50 last:border-0">
+                                {{ $tabLabel }}
+                            </button>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
 
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }

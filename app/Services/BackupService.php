@@ -50,6 +50,72 @@ class BackupService
         return $path;
     }
 
+    /**
+     * Aperçu sommaire d'un dump SQL (premières lignes non vides, nombre de lignes).
+     *
+     * @return array{lines: int, preview: string, tables_hint: array<int, string>}
+     */
+    public function previewSqlFile(string $absolutePath): array
+    {
+        if (! File::exists($absolutePath)) {
+            throw new \InvalidArgumentException('Fichier introuvable.');
+        }
+
+        $content = File::get($absolutePath);
+        $lines = preg_split('/\R/', $content) ?: [];
+        $nonEmpty = array_values(array_filter($lines, fn ($l) => trim((string) $l) !== ''));
+
+        $preview = implode("\n", array_slice($nonEmpty, 0, 15));
+        $tablesHint = [];
+        foreach (array_slice($nonEmpty, 0, 200) as $line) {
+            if (preg_match('/^(CREATE TABLE|INSERT INTO)\s+`?([a-zA-Z0-9_]+)`?/i', $line, $m)) {
+                $tablesHint[] = $m[2];
+            }
+        }
+        $tablesHint = array_values(array_unique($tablesHint));
+
+        return [
+            'lines' => count($lines),
+            'preview' => $preview,
+            'tables_hint' => array_slice($tablesHint, 0, 20),
+        ];
+    }
+
+    /**
+     * Restaure la base MySQL depuis un fichier .sql (mysqldump).
+     * Attention : écrase les données existantes selon le contenu du dump.
+     */
+    public function restoreDatabaseFromSql(string $absolutePath): void
+    {
+        if (! File::exists($absolutePath)) {
+            throw new \InvalidArgumentException('Fichier de sauvegarde introuvable.');
+        }
+
+        if (pathinfo($absolutePath, PATHINFO_EXTENSION) !== 'sql') {
+            throw new \InvalidArgumentException('Seuls les fichiers .sql sont pris en charge.');
+        }
+
+        $database = config('database.connections.mysql.database');
+        $username = config('database.connections.mysql.username');
+        $password = config('database.connections.mysql.password');
+        $host = config('database.connections.mysql.host');
+
+        $command = sprintf(
+            'mysql --user=%s --password=%s --host=%s %s < %s',
+            escapeshellarg($username),
+            escapeshellarg($password),
+            escapeshellarg($host),
+            escapeshellarg($database),
+            escapeshellarg($absolutePath)
+        );
+
+        exec($command, $output, $returnVar);
+
+        if ($returnVar !== 0) {
+            throw new \RuntimeException('Échec mysql restore (code '.$returnVar.'). Vérifiez que mysql est dans le PATH et les droits du compte DB.');
+        }
+    }
+
     public function createFilesBackup(): string
     {
         $filename = 'files_backup_' . date('Y-m-d_H-i-s') . '.zip';

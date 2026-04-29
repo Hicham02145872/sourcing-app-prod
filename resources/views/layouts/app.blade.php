@@ -501,7 +501,16 @@
     </script>
 </head>
 
-    <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900" x-data="{ sidebarOpen: false }" x-cloak>
+    <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 @if(session()->has('dev_impersonator_id')) pt-10 @endif" x-data="{ sidebarOpen: false }" x-cloak>
+        @if(session()->has('dev_impersonator_id'))
+            <div class="fixed top-0 inset-x-0 z-[100] bg-amber-400 text-slate-900 px-4 py-2 flex flex-wrap items-center justify-center gap-4 text-xs font-bold shadow-md">
+                <span class="uppercase tracking-tight">{{ __('Impersonation') }} : {{ auth()->user()->name }} ({{ auth()->user()->email }})</span>
+                <form method="POST" action="{{ route('admin.dev-stop-impersonation') }}" class="inline">
+                    @csrf
+                    <button type="submit" class="underline decoration-2 hover:text-slate-700 uppercase text-[10px] tracking-widest">{{ __('Quitter l’impersonation') }}</button>
+                </form>
+            </div>
+        @endif
     <x-sidebar :role="auth()->user()?->role ?? 'client'" :adminSourcingRequestCount="$adminSourcingRequestCount ?? 0" :clientQuotationCount="$clientQuotationCount ?? 0" />
 
     <x-layout.header />

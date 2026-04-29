@@ -2,16 +2,28 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\RefundRequest;
 use App\Models\SourcingOrder;
 use App\Models\TrackingLog;
 use App\Models\User;
+use App\Models\AuditLog;
+use App\Models\WebhookEvent;
+use App\Models\DevQueryLog;
+use App\Notifications\DevPingNotification;
+use App\Services\BackupService;
+use App\Services\Dev\ArtisanWhitelist;
+use App\Services\Dev\AuditLogger;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 class DevDashboard extends Component
@@ -89,7 +101,7 @@ class DevDashboard extends Component
     public $recentNotifications = [];
 
     // Email Preview
-    public $selectedMailable = 'PaymentReminderMail';
+    public string $selectedMailableClass = \App\Mail\PaymentReminderMail::class;
 
     public $testMailOrderId = '';
 
@@ -135,6 +147,77 @@ class DevDashboard extends Component
 
     public $trackingStats = [];
 
+    /** Auto-refresh (secondes). 0 = désactivé. */
+    public int $devPollSeconds = 0;
+
+    public function updatedDevPollSeconds($value): void
+    {
+        $this->devPollSeconds = max(0, (int) $value);
+    }
+
+    public bool $showCommandPalette = false;
+
+    public string $commandPaletteQuery = '';
+
+    /** SQL : refuser UPDATE/DELETE sauf si true + mot de passe. */
+    public bool $dbAllowWrite = false;
+
+    public string $devSensitivePassword = '';
+
+    public string $errorsLogSearch = '';
+
+    /** Lignes parsées du fichier errors-*.log */
+    public array $errorsLogLines = [];
+
+    public array $auditLogsPage = [];
+
+    public array $webhookEventsList = [];
+
+    public string $webhookTestSource = 'manual';
+
+    public string $webhookTestPayload = '{"test": true}';
+
+    public string $trackingDeepFsb = '';
+
+    public ?SourcingOrder $trackingDeepOrder = null;
+
+    public array $trackingTimeline = [];
+
+    public array $trackingProviderP95 = [];
+
+    public array $availableMailables = [];
+
+    /** Canaux pour DevPing : mail, database, fcm */
+    public array $devPingChannels = ['database', 'fcm'];
+
+    public string $backupRestoreName = '';
+
+    public string $backupRestoreConfirmPhrase = '';
+
+    public array $backupRestorePreview = [];
+
+    public string $fcmUserSearch = '';
+
+    /** Lignes filtrées pour affichage (Errors tab) */
+    public array $errorsLogFiltered = [];
+
+    public array $explainResult = [];
+
+    public ?string $dbSchemaFocusTable = null;
+
+    public array $dbSchemaColumns = [];
+
+    public array $dbSchemaIndexes = [];
+
+    public array $rateLimiterOverview = [];
+
+    public array $performanceSlowQueries = [];
+
+    /** @var array<string, int> */
+    public array $performanceN1Hints = [];
+
+    public array $redisInfoSnippet = [];
+
     public function boot()
     {
         DB::listen(function ($query) {
@@ -143,6 +226,9 @@ class DevDashboard extends Component
                 'bindings' => $query->bindings,
                 'time' => $query->time,
             ];
+            if (count($this->debugQueries) > 400) {
+                array_shift($this->debugQueries);
+            }
         });
     }
 
@@ -157,18 +243,116 @@ class DevDashboard extends Component
         $this->loadRecentNotifications();
         $this->loadEmailOrders();
         $this->loadFeatureFlags();
+        $this->loadAvailableMailables();
     }
 
-    public function captureServerStats()
+    public function updatedActiveTab(string $value): void
     {
+        match ($value) {
+            'errors' => $this->loadErrorsDailyLog(),
+            'actionlog' => $this->loadAuditLogsPage(),
+            'webhooks' => $this->loadWebhookEventsList(),
+            'tracking_deep' => $this->loadTrackingDeep(),
+            'performance' => $this->refreshPerformanceTab(),
+            'rate_limits' => $this->loadRateLimiterOverview(),
+            default => null,
+        };
+    }
+
+    public function captureServerStats(): void
+    {
+        $diskStorage = @disk_free_space(storage_path());
+        $diskBase = @disk_free_space(base_path());
+
+        $dbVersion = null;
+        $dbSizeMb = null;
+        $topTables = [];
+        try {
+            $dbVersion = DB::selectOne('SELECT VERSION() as v')->v ?? null;
+            $dbName = DB::getDatabaseName();
+            $dbSizeMb = round((float) (DB::selectOne(
+                'SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS s FROM information_schema.tables WHERE table_schema = ?',
+                [$dbName]
+            )->s ?? 0), 2);
+            $topTables = DB::select(
+                'SELECT table_name AS name, ROUND((data_length + index_length)/1024/1024,2) AS mb FROM information_schema.tables WHERE table_schema = ? ORDER BY (data_length+index_length) DESC LIMIT 10',
+                [$dbName]
+            );
+        } catch (\Throwable) {
+        }
+
+        $redisMemory = null;
+        try {
+            if (config('database.redis.client') === 'phpredis') {
+                $info = Redis::connection()->info('memory');
+                $redisMemory = is_array($info)
+                    ? ($info['used_memory_human'] ?? json_encode($info))
+                    : (string) $info;
+            } else {
+                $raw = (string) Redis::connection()->executeRaw(['INFO', 'memory']);
+                if (preg_match('/used_memory_human:([^\r\n]+)/', $raw, $m)) {
+                    $redisMemory = trim($m[1]);
+                }
+            }
+        } catch (\Throwable $e) {
+            $redisMemory = 'n/a ('.$e->getMessage().')';
+        }
+
+        $uptimeOs = null;
+        if (PHP_OS_FAMILY === 'Linux' && is_readable('/proc/uptime')) {
+            $uptimeOs = trim((string) file_get_contents('/proc/uptime'));
+        } elseif (PHP_OS_FAMILY === 'Windows') {
+            $uptimeOs = 'Windows (voir Get-Uptime / TaskMgr)';
+        }
+
         $this->serverStats = [
             'php' => PHP_VERSION,
             'laravel' => app()->version(),
             'memory' => round(memory_get_usage() / 1024 / 1024, 2).' MB',
+            'memory_peak' => round(memory_get_peak_usage() / 1024 / 1024, 2).' MB',
             'os' => PHP_OS,
             'db_connection' => config('database.default'),
+            'db_version' => $dbVersion ?? 'n/a',
+            'db_size_mb' => $dbSizeMb !== null ? (string) $dbSizeMb.' MB' : 'n/a',
+            'disk_storage_free' => $diskStorage !== false ? round($diskStorage / 1024 / 1024 / 1024, 2).' GB' : 'n/a',
+            'disk_base_free' => $diskBase !== false ? round($diskBase / 1024 / 1024 / 1024, 2).' GB' : 'n/a',
+            'redis_memory' => $redisMemory ?? 'n/a',
+            'host_uptime' => $uptimeOs ?? 'n/a',
             'env' => app()->environment(),
         ];
+
+        $this->serverStats['db_top_tables'] = collect($topTables ?? [])
+            ->map(fn ($r) => ($r->name ?? '').' '.($r->mb ?? '').' MB')
+            ->implode(' | ');
+    }
+
+    public function pollDevMonitors(): void
+    {
+        $this->captureServerStats();
+        match ($this->activeTab) {
+            'health' => $this->refreshHealthPollChunk(),
+            'queue' => $this->loadQueueJobs(),
+            'tracking' => $this->loadTrackingOrders(),
+            'sessions' => $this->loadSessions(),
+            'sync' => $this->loadSyncErrorsLight(),
+            'performance' => $this->refreshPerformanceTab(),
+            default => null,
+        };
+    }
+
+    protected function refreshHealthPollChunk(): void
+    {
+        $this->fetchLogs();
+        $this->fetchFailedJobs();
+        $this->checkHealth();
+    }
+
+    protected function loadSyncErrorsLight(): void
+    {
+        $this->syncErrors = SourcingOrder::whereNotNull('sheet_sync_error')
+            ->with('user', 'quotation.sourcingRequest')
+            ->latest()
+            ->get();
     }
 
     public function loadData()
@@ -195,7 +379,6 @@ class DevDashboard extends Component
 
         $this->fetchLogs();
         $this->fetchFailedJobs();
-        $this->loadTrackingOrders();
         $this->loadEnvPreview();
         $this->loadCapturedMails();
         $this->loadBackups();
@@ -226,6 +409,10 @@ class DevDashboard extends Component
 
     public function forceSyncAll()
     {
+        if (! $this->devGate(requirePassword: true)) {
+            return;
+        }
+
         $orders = SourcingOrder::whereNotNull('sheet_sync_error')->get();
         $count = 0;
         foreach ($orders as $order) {
@@ -238,6 +425,7 @@ class DevDashboard extends Component
                 Log::error("Manual sync failed for Order #{$order->id}: ".$e->getMessage());
             }
         }
+        AuditLogger::log('force_sync_all', null, null, ['orders_synced' => $count]);
         $this->dispatch('show-success-toast', message: "$count orders synced successfully.");
         $this->loadData();
     }
@@ -245,11 +433,22 @@ class DevDashboard extends Component
     public function impersonate($userId)
     {
         $user = User::find($userId);
-        if ($user) {
-            Auth::login($user);
-
-            return redirect()->route('dashboard');
+        if (! $user) {
+            return;
         }
+
+        if (! session()->has('dev_impersonator_id')) {
+            session()->put('dev_impersonator_id', Auth::id());
+        }
+
+        AuditLogger::log('impersonate', User::class, (int) $user->id, [
+            'target_email' => $user->email,
+            'target_role' => $user->role,
+        ]);
+
+        Auth::login($user);
+
+        return redirect()->route('dashboard');
     }
 
     public function getFilteredUsersProperty()
@@ -327,6 +526,10 @@ class DevDashboard extends Component
 
         $user->password = $this->passwordInputs[$userId];
         $user->save();
+
+        AuditLogger::log('update_user_password', User::class, (int) $user->id, [
+            'target_email' => $user->email,
+        ]);
 
         $this->currentAdminPassword = '';
         $this->passwordInputs[$userId] = '';
@@ -432,12 +635,16 @@ class DevDashboard extends Component
 
     public function clearAllMails()
     {
+        if (! $this->devGate(requirePassword: true)) {
+            return;
+        }
         $directory = storage_path('app/mails');
         if (File::exists($directory)) {
             File::cleanDirectory($directory);
         }
         $this->capturedMails = [];
         $this->selectedMail = null;
+        AuditLogger::log('clear_all_mails', null, null, []);
         $this->dispatch('show-success-toast', message: 'All mails cleared.');
     }
 
@@ -503,12 +710,16 @@ class DevDashboard extends Component
 
     public function runScheduledTask($command)
     {
+        if (! $this->devGate(requirePassword: true)) {
+            return;
+        }
         try {
             // Cleanup command string if it starts with 'php artisan'
             $artisanCmd = str_replace('\'php\' \'artisan\' ', '', $command);
             $artisanCmd = trim($artisanCmd, '\'');
 
             \Illuminate\Support\Facades\Artisan::call($artisanCmd);
+            AuditLogger::log('run_scheduled_task', null, null, ['command' => $artisanCmd]);
             $this->dispatch('show-success-toast', message: "Task '{$artisanCmd}' executed.");
         } catch (\Exception $e) {
             $this->dispatch('show-error-toast', message: 'Execution failed: '.$e->getMessage());
@@ -517,8 +728,13 @@ class DevDashboard extends Component
 
     public function runArtisan($command)
     {
+        if (! $this->devGate(requirePassword: true)) {
+            return;
+        }
         try {
-            Artisan::call($command);
+            app(ArtisanWhitelist::class)->assertAllowed((string) $command);
+            Artisan::call((string) $command);
+            AuditLogger::log('run_artisan', null, null, ['command' => $command]);
             $this->dispatch('show-success-toast', message: "Command '$command' executed.");
         } catch (\Exception $e) {
             $this->dispatch('show-error-toast', message: 'Error: '.$e->getMessage());
@@ -539,7 +755,18 @@ class DevDashboard extends Component
 
     public function deleteSession($id)
     {
+        $row = DB::table('sessions')->where('id', $id)->first();
+        if ($row && $row->user_id) {
+            $u = User::find($row->user_id);
+            if ($u && in_array((string) $u->role, ['super_admin', 'developer'], true)) {
+                if (! $this->devGate(requirePassword: true)) {
+                    return;
+                }
+            }
+        }
+
         DB::table('sessions')->where('id', $id)->delete();
+        AuditLogger::log('delete_session', null, null, ['session_id' => $id]);
         $this->loadSessions();
         $this->dispatch('show-success-toast', message: 'Session terminated.');
     }
@@ -557,9 +784,13 @@ class DevDashboard extends Component
 
     public function runSeeder($seederClass)
     {
+        if (! $this->devGate(requirePassword: true)) {
+            return;
+        }
         $this->seederLoading = $seederClass;
         try {
             Artisan::call('db:seed', ['--class' => $seederClass, '--no-interaction' => true]);
+            AuditLogger::log('run_seeder', null, null, ['class' => $seederClass]);
             $this->dispatch('show-success-toast', message: "Seeder {$seederClass} executed.");
         } catch (\Exception $e) {
             $this->dispatch('show-error-toast', message: 'Seeder failed: '.$e->getMessage());
@@ -707,9 +938,15 @@ class DevDashboard extends Component
 
     public function retryJob($id)
     {
+        if (! $this->devGate(requirePassword: true)) {
+            return;
+        }
         try {
-            Artisan::call("queue:retry $id");
-            $this->dispatch('show-success-toast', message: "Job #$id pushed back to queue.");
+            $cmd = 'queue:retry '.(int) $id;
+            app(ArtisanWhitelist::class)->assertAllowed($cmd);
+            Artisan::call($cmd);
+            AuditLogger::log('queue_retry', null, null, ['failed_job_id' => (int) $id]);
+            $this->dispatch('show-success-toast', message: "Job #{$id} pushed back to queue.");
             $this->fetchFailedJobs();
         } catch (\Exception $e) {
             $this->dispatch('show-error-toast', message: 'Retry failed: '.$e->getMessage());
@@ -718,48 +955,92 @@ class DevDashboard extends Component
 
     public function runSqlQuery($customQuery = null)
     {
-        $this->query = $customQuery ?: $this->query;
+        $this->query = $customQuery !== null ? $customQuery : $this->query;
         $this->queryError = null;
         $this->queryResult = null;
+        $this->explainResult = [];
 
-        if (empty($this->query)) {
+        if (empty(trim((string) $this->query))) {
             return;
         }
 
         try {
-            // Check if it's a query that returns results
-            $trimmedQuery = trim($this->query);
-            $isSelect = stripos($trimmedQuery, 'SELECT') === 0;
-            $isSchema = stripos($trimmedQuery, 'SHOW') === 0 || stripos($trimmedQuery, 'DESCRIBE') === 0;
+            $trimmedQuery = trim((string) $this->query);
+            $upper = strtoupper($trimmedQuery);
+            $isSelect = str_starts_with($upper, 'SELECT');
+            $isSchema = str_starts_with($upper, 'SHOW') || str_starts_with($upper, 'DESCRIBE');
+            $isExplain = str_starts_with($upper, 'EXPLAIN');
+            $isWrite = $this->sqlLooksDestructive($trimmedQuery);
 
-            if ($isSelect || $isSchema) {
-                // Protective Limit for UI performance - only for SELECT queries as DESCRIBE/SHOW don't always support it
-                $limitedQuery = $this->query;
-                if ($isSelect && ! stripos($this->query, 'LIMIT')) {
-                    $limitedQuery = rtrim($this->query, ';').' LIMIT 200';
+            if ($isWrite) {
+                if (! $this->dbAllowWrite) {
+                    $this->queryError = 'Écriture SQL refusée : activez le mode écriture et fournissez votre mot de passe.';
+
+                    return;
+                }
+                if (! $this->devGate(requirePassword: true)) {
+                    return;
+                }
+                DB::statement($trimmedQuery);
+                DevQueryLog::create([
+                    'user_id' => Auth::id(),
+                    'query' => $trimmedQuery,
+                    'is_write' => true,
+                    'rows_affected' => null,
+                    'ip' => request()?->ip(),
+                    'request_id' => request()?->attributes->get('request_id'),
+                ]);
+                AuditLogger::log('run_sql_write', null, null, ['query_preview' => \Illuminate\Support\Str::limit($trimmedQuery, 500)]);
+                $this->queryResult = [['Status' => 'OK', 'Message' => 'Requête exécutée (écriture).']];
+            } elseif ($isSelect || $isSchema || $isExplain) {
+                $limitedQuery = $trimmedQuery;
+                if ($isSelect && ! preg_match('/\bLIMIT\b/i', $limitedQuery)) {
+                    $limitedQuery = rtrim($limitedQuery, ';').' LIMIT 200';
                 }
 
                 $result = DB::select($limitedQuery);
                 $this->queryResult = json_decode(json_encode($result), true);
 
-                if (count($this->queryResult) >= 200 && ! stripos($this->query, 'LIMIT')) {
+                if ($isSelect && count($this->queryResult) >= 200 && ! preg_match('/\bLIMIT\b/i', $trimmedQuery)) {
                     $this->dispatch('show-info-toast', message: 'Results limited to 200 rows for performance.');
                 }
             } else {
-                $affected = DB::statement($this->query);
-                $this->queryResult = [['Status' => 'Success', 'Affected Rows' => $affected]];
+                $this->queryError = 'Seules les requêtes SELECT / SHOW / DESCRIBE / EXPLAIN ou les écritures explicites (mode écriture) sont autorisées.';
+
+                return;
             }
 
-            // Record History
-            if (! in_array($this->query, $this->queryHistory)) {
-                array_unshift($this->queryHistory, $this->query);
+            if (! in_array($trimmedQuery, $this->queryHistory, true)) {
+                array_unshift($this->queryHistory, $trimmedQuery);
                 $this->queryHistory = array_slice($this->queryHistory, 0, 10);
                 session()->put('dev_query_history', $this->queryHistory);
             }
-
         } catch (\Exception $e) {
             $this->queryError = $e->getMessage();
         }
+    }
+
+    public function runSqlExplain(): void
+    {
+        $this->explainResult = [];
+        $this->queryError = null;
+        $q = trim((string) $this->query);
+        if ($q === '' || ! preg_match('/^SELECT\b/i', $q)) {
+            $this->queryError = 'EXPLAIN disponible uniquement pour un SELECT.';
+
+            return;
+        }
+        try {
+            $rows = DB::select('EXPLAIN '.$q);
+            $this->explainResult = json_decode(json_encode($rows), true);
+        } catch (\Exception $e) {
+            $this->queryError = $e->getMessage();
+        }
+    }
+
+    protected function sqlLooksDestructive(string $q): bool
+    {
+        return (bool) preg_match('/^\s*(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|CREATE|REPLACE|GRANT|REVOKE)\b/i', ltrim($q));
     }
 
     public function startEditing($table, $id, $column, $value)
@@ -778,14 +1059,29 @@ class DevDashboard extends Component
             return;
         }
 
+        if (! $this->dbAllowWrite || ! $this->devGate(requirePassword: true)) {
+            $this->dispatch('show-error-toast', message: 'Activez l’écriture SQL + mot de passe pour modifier une cellule.');
+
+            return;
+        }
+
         try {
             DB::table($this->editingCell['table'])
                 ->where('id', $this->editingCell['id'])
                 ->update([$this->editingCell['column'] => $this->editingCell['value']]);
 
+            DevQueryLog::create([
+                'user_id' => Auth::id(),
+                'query' => 'UPDATE '.$this->editingCell['table'].' SET '.$this->editingCell['column'].' WHERE id='.$this->editingCell['id'],
+                'is_write' => true,
+                'ip' => request()?->ip(),
+                'request_id' => request()?->attributes->get('request_id'),
+            ]);
+            AuditLogger::log('db_cell_update', null, null, ['table' => $this->editingCell['table'], 'id' => $this->editingCell['id']]);
+
             $this->dispatch('show-success-toast', message: 'Cell updated successfully.');
             $this->editingCell = null;
-            $this->runSqlQuery(); // Refresh results
+            $this->runSqlQuery();
         } catch (\Exception $e) {
             $this->dispatch('show-error-toast', message: 'Update failed: '.$e->getMessage());
         }
@@ -914,11 +1210,15 @@ class DevDashboard extends Component
 
     public function clearCache($type = 'all')
     {
+        if ($type === 'all' && ! $this->devGate(requirePassword: true)) {
+            return;
+        }
         try {
             switch ($type) {
                 case 'all':
                     Artisan::call('cache:clear');
                     $message = 'All cache cleared successfully';
+                    AuditLogger::log('clear_cache', null, null, ['scope' => 'all']);
                     break;
                 case 'config':
                     Artisan::call('config:clear');
@@ -974,31 +1274,47 @@ class DevDashboard extends Component
                 return;
             }
 
-            if (! $user->fcm_token) {
-                $this->notificationTestError = 'User has no FCM token registered';
+            $channels = array_values(array_unique($this->devPingChannels));
+
+            if ($channels === []) {
+                $this->notificationTestError = 'Sélectionnez au moins un canal (mail / database / fcm).';
 
                 return;
             }
 
-            // Send test notification
+            if (in_array('fcm', $channels, true) && empty($user->fcm_token)) {
+                $this->notificationTestError = 'FCM sélectionné mais aucun jeton pour cet utilisateur';
+
+                return;
+            }
+
             $title = $this->testNotificationTitle ?: 'Test Notification';
             $body = $this->testNotificationBody ?: 'This is a test notification from Dev Dashboard';
 
-            $user->notify(new \App\Notifications\AlternativeSourcingNotification(
+            $user->notify(new DevPingNotification(
                 $title,
                 $body,
-                ['test' => true, 'sent_from' => 'dev_dashboard']
+                ['sent_from' => 'dev_dashboard', 'test' => true],
+                $channels
             ));
+
+            $fcmPreview = [
+                'title' => $title,
+                'body' => $body,
+                'data' => ['type' => 'dev_ping', 'sent_from' => 'dev_dashboard'],
+            ];
 
             $this->notificationTestResult = [
                 'user' => $user->name,
                 'email' => $user->email,
-                'fcm_token' => substr($user->fcm_token, 0, 20).'...',
+                'fcm_token' => $user->fcm_token ? substr((string) $user->fcm_token, 0, 20).'...' : null,
                 'title' => $title,
                 'body' => $body,
+                'channels' => $channels,
+                'fcm_payload_preview' => $fcmPreview,
             ];
 
-            $this->dispatch('show-success-toast', message: 'Test notification sent successfully.');
+            $this->dispatch('show-success-toast', message: 'Notification de test envoyée.');
             $this->loadRecentNotifications();
         } catch (\Exception $e) {
             $this->notificationTestError = $e->getMessage();
@@ -1011,27 +1327,8 @@ class DevDashboard extends Component
         $this->emailPreviewHtml = '';
         $this->emailTestError = null;
 
-        if (empty($this->testMailOrderId)) {
-            $this->emailTestError = 'Please select an order for preview';
-
-            return;
-        }
-
         try {
-            $order = SourcingOrder::find($this->testMailOrderId);
-            if (! $order) {
-                $this->emailTestError = 'Order not found';
-
-                return;
-            }
-
-            $mailable = null;
-            if ($this->selectedMailable === 'PaymentReminderMail') {
-                $mailable = new \App\Mail\PaymentReminderMail($order);
-            } elseif ($this->selectedMailable === 'ProformaInvoiceMail') {
-                $mailable = new \App\Mail\ProformaInvoiceMail($order);
-            }
-
+            $mailable = $this->buildMailableForDev();
             if ($mailable) {
                 $this->emailPreviewHtml = $mailable->render();
             }
@@ -1045,12 +1342,6 @@ class DevDashboard extends Component
         $this->emailTestResult = null;
         $this->emailTestError = null;
 
-        if (empty($this->testMailOrderId)) {
-            $this->emailTestError = 'Please select an order';
-
-            return;
-        }
-
         if (empty($this->testEmailRecipient)) {
             $this->emailTestError = 'Please enter a recipient email';
 
@@ -1058,20 +1349,7 @@ class DevDashboard extends Component
         }
 
         try {
-            $order = SourcingOrder::find($this->testMailOrderId);
-            if (! $order) {
-                $this->emailTestError = 'Order not found';
-
-                return;
-            }
-
-            $mailable = null;
-            if ($this->selectedMailable === 'PaymentReminderMail') {
-                $mailable = new \App\Mail\PaymentReminderMail($order);
-            } elseif ($this->selectedMailable === 'ProformaInvoiceMail') {
-                $mailable = new \App\Mail\ProformaInvoiceMail($order);
-            }
-
+            $mailable = $this->buildMailableForDev();
             if ($mailable) {
                 \Illuminate\Support\Facades\Mail::to($this->testEmailRecipient)->send($mailable);
                 $this->emailTestResult = "Email sent to {$this->testEmailRecipient}";
@@ -1207,12 +1485,503 @@ class DevDashboard extends Component
 
     public function deleteFeatureFlag($id)
     {
+        if (! $this->devGate(requirePassword: true)) {
+            return;
+        }
         $flag = \App\Models\FeatureFlag::find($id);
         if ($flag) {
             app(\App\Services\FeatureFlagService::class)->clearCache($flag->key);
+            AuditLogger::log('delete_feature_flag', \App\Models\FeatureFlag::class, (int) $id, ['key' => $flag->key]);
             $flag->delete();
             $this->loadFeatureFlags();
             $this->dispatch('show-success-toast', message: 'Feature flag deleted.');
+        }
+    }
+
+    protected function devGate(bool $requirePassword): bool
+    {
+        $key = 'dev-dash-ops:'.Auth::id();
+        if (! RateLimiter::attempt($key, 12, fn () => true, 60)) {
+            $this->dispatch('show-error-toast', message: 'Limite de débit (12 actions/min). Réessayez dans une minute.');
+
+            return false;
+        }
+        if ($requirePassword && ! $this->verifyDevSensitivePassword()) {
+            return false;
+        }
+        if ($requirePassword) {
+            $this->devSensitivePassword = '';
+        }
+
+        return true;
+    }
+
+    protected function verifyDevSensitivePassword(): bool
+    {
+        $actor = Auth::user();
+        if (! $actor || ! Hash::check($this->devSensitivePassword, (string) $actor->password)) {
+            $this->dispatch('show-error-toast', message: 'Mot de passe de confirmation invalide.');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public function loadAvailableMailables(): void
+    {
+        $dir = app_path('Mail');
+        $classes = [];
+        foreach (glob($dir.DIRECTORY_SEPARATOR.'*.php') ?: [] as $file) {
+            $short = basename($file, '.php');
+            $fqcn = 'App\\Mail\\'.$short;
+            if (! class_exists($fqcn)) {
+                continue;
+            }
+            try {
+                $ref = new \ReflectionClass($fqcn);
+            } catch (\Throwable) {
+                continue;
+            }
+            if ($ref->isSubclassOf(\Illuminate\Mail\Mailable::class) && ! $ref->isAbstract() && $ref->isInstantiable()) {
+                $classes[] = $fqcn;
+            }
+        }
+        sort($classes);
+        $this->availableMailables = $classes;
+        if ($classes !== [] && ! in_array($this->selectedMailableClass, $classes, true)) {
+            $this->selectedMailableClass = $classes[0];
+        }
+    }
+
+    protected function buildMailableForDev(): ?\Illuminate\Mail\Mailable
+    {
+        if (! class_exists($this->selectedMailableClass)) {
+            return null;
+        }
+        $ref = new \ReflectionClass($this->selectedMailableClass);
+        if (! $ref->isSubclassOf(\Illuminate\Mail\Mailable::class) || ! $ref->isInstantiable()) {
+            return null;
+        }
+        $ctor = $ref->getConstructor();
+        if (! $ctor) {
+            return $ref->newInstance();
+        }
+        $args = [];
+        foreach ($ctor->getParameters() as $param) {
+            $args[] = $this->resolveDevMailConstructorArg($param);
+        }
+
+        return $ref->newInstanceArgs($args);
+    }
+
+    protected function resolveDevMailConstructorArg(\ReflectionParameter $param): object
+    {
+        $type = $param->getType();
+        if (! $type instanceof \ReflectionNamedType || $type->isBuiltin()) {
+            throw new \InvalidArgumentException('Paramètre '.$param->getName().' : type objet attendu.');
+        }
+        $className = $type->getName();
+
+        return match ($className) {
+            SourcingOrder::class => $this->testMailOrderId
+                ? SourcingOrder::findOrFail($this->testMailOrderId)
+                : throw new \InvalidArgumentException('Choisissez une commande pour ce mailable.'),
+            RefundRequest::class => RefundRequest::query()->latest()->firstOrFail(),
+            User::class => User::query()->where('role', 'client')->firstOrFail(),
+            default => throw new \InvalidArgumentException('Type non supporté : '.$className),
+        };
+    }
+
+    public function loadErrorsDailyLog(): void
+    {
+        $date = now()->format('Y-m-d');
+        $path = storage_path('logs/errors-'.$date.'.log');
+        if (! File::exists($path)) {
+            $path = storage_path('logs/errors.log');
+        }
+        if (! File::exists($path)) {
+            $this->errorsLogLines = [];
+            $this->errorsLogFiltered = [];
+
+            return;
+        }
+        $lines = array_slice(explode("\n", File::get($path)), -800);
+        $parsed = [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $level = 'info';
+            if (preg_match('/\.(ERROR|CRITICAL|ALERT)/i', $line)) {
+                $level = 'error';
+            } elseif (preg_match('/\.WARNING/i', $line)) {
+                $level = 'warning';
+            }
+            $reqId = null;
+            if (preg_match('/request_id[\"\'\s:]+([a-zA-Z0-9_-]{8,})/i', $line, $m)) {
+                $reqId = $m[1];
+            }
+            $parsed[] = ['text' => $line, 'level' => $level, 'request_id' => $reqId];
+        }
+        $this->errorsLogLines = $parsed;
+        $this->applyErrorsLogFilter();
+    }
+
+    public function updatedErrorsLogSearch(): void
+    {
+        $this->applyErrorsLogFilter();
+    }
+
+    protected function applyErrorsLogFilter(): void
+    {
+        $q = strtolower(trim($this->errorsLogSearch));
+        $this->errorsLogFiltered = array_values(array_filter($this->errorsLogLines, function ($row) use ($q) {
+            if ($q === '') {
+                return true;
+            }
+            if (! empty($row['request_id']) && str_contains(strtolower((string) $row['request_id']), $q)) {
+                return true;
+            }
+
+            return str_contains(strtolower((string) $row['text']), $q);
+        }));
+    }
+
+    public function loadAuditLogsPage(): void
+    {
+        if (! Schema::hasTable('audit_logs')) {
+            $this->auditLogsPage = [];
+
+            return;
+        }
+        $this->auditLogsPage = AuditLog::query()
+            ->with('user:id,name,email')
+            ->latest()
+            ->limit(150)
+            ->get()
+            ->map(fn (AuditLog $l) => [
+                'id' => $l->id,
+                'action' => $l->action,
+                'user' => $l->user?->email,
+                'target_type' => $l->target_type,
+                'target_id' => $l->target_id,
+                'request_id' => $l->request_id,
+                'ip' => $l->ip,
+                'created_at' => $l->created_at?->format('Y-m-d H:i:s'),
+                'payload' => $l->payload,
+            ])
+            ->toArray();
+    }
+
+    public function exportAuditLogsCsv()
+    {
+        if (! Schema::hasTable('audit_logs')) {
+            $this->dispatch('show-error-toast', message: 'Table audit_logs absente.');
+
+            return;
+        }
+        $this->loadAuditLogsPage();
+        $rows = $this->auditLogsPage;
+        $filename = 'audit_logs_'.now()->format('Y-m-d_His').'.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ];
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['id', 'action', 'user', 'target_type', 'target_id', 'request_id', 'ip', 'created_at', 'payload']);
+            foreach ($rows as $r) {
+                fputcsv($out, [
+                    $r['id'],
+                    $r['action'],
+                    $r['user'],
+                    $r['target_type'],
+                    $r['target_id'],
+                    $r['request_id'],
+                    $r['ip'],
+                    $r['created_at'],
+                    json_encode($r['payload'] ?? []),
+                ]);
+            }
+            fclose($out);
+        }, $filename, $headers);
+    }
+
+    public function loadWebhookEventsList(): void
+    {
+        if (! Schema::hasTable('webhook_events')) {
+            $this->webhookEventsList = [];
+
+            return;
+        }
+        $this->webhookEventsList = WebhookEvent::query()
+            ->latest()
+            ->limit(100)
+            ->get()
+            ->map(fn ($e) => [
+                'id' => $e->id,
+                'source' => $e->source,
+                'event_type' => $e->event_type,
+                'status' => $e->status,
+                'error' => $e->error,
+                'processed_at' => $e->processed_at?->format('Y-m-d H:i:s'),
+                'created_at' => $e->created_at?->format('Y-m-d H:i:s'),
+                'payload' => $e->payload,
+            ])
+            ->toArray();
+    }
+
+    public function storeTestWebhook(): void
+    {
+        if (! Schema::hasTable('webhook_events')) {
+            $this->dispatch('show-error-toast', message: 'Migration webhook_events requise.');
+
+            return;
+        }
+        try {
+            $json = json_decode($this->webhookTestPayload, true);
+            if ($json === null && trim($this->webhookTestPayload) !== '') {
+                $json = ['raw' => $this->webhookTestPayload];
+            }
+            WebhookEvent::create([
+                'source' => $this->webhookTestSource ?: 'manual',
+                'event_type' => 'dev_test',
+                'payload' => $json ?? [],
+                'status' => 'received',
+            ]);
+            AuditLogger::log('webhook_test_ingest', null, null, ['source' => $this->webhookTestSource]);
+            $this->loadWebhookEventsList();
+            $this->dispatch('show-success-toast', message: 'Webhook enregistré.');
+        } catch (\Throwable $e) {
+            $this->dispatch('show-error-toast', message: $e->getMessage());
+        }
+    }
+
+    public function replayWebhookEvent(int $id): void
+    {
+        if (! Schema::hasTable('webhook_events')) {
+            return;
+        }
+        $event = WebhookEvent::find($id);
+        if (! $event) {
+            return;
+        }
+        WebhookEvent::create([
+            'source' => $event->source,
+            'event_type' => ($event->event_type ?? 'replay').'_replay',
+            'payload' => $event->payload,
+            'status' => 'received',
+            'processed_at' => null,
+            'error' => null,
+        ]);
+        AuditLogger::log('webhook_replay', WebhookEvent::class, $id);
+        $this->loadWebhookEventsList();
+        $this->dispatch('show-success-toast', message: 'Replay créé (entrée dupliquée).');
+    }
+
+    public function loadTrackingDeep(): void
+    {
+        $fsb = trim($this->trackingDeepFsb);
+        if ($fsb === '') {
+            $this->trackingDeepOrder = null;
+            $this->trackingTimeline = [];
+            $this->trackingProviderP95 = [];
+
+            return;
+        }
+        $this->trackingDeepOrder = SourcingOrder::resolveFsbNumberToOrder($fsb)
+            ?? SourcingOrder::where('tracking_number', $fsb)->first();
+        $this->trackingTimeline = TrackingLog::where('tracking_number', $fsb)
+            ->orderBy('created_at')
+            ->get()
+            ->map(fn (TrackingLog $l) => [
+                'at' => $l->created_at?->format('Y-m-d H:i:s'),
+                'provider' => $l->provider,
+                'status' => $l->status,
+                'location' => $l->location,
+                'payload_excerpt' => \Illuminate\Support\Str::limit(json_encode($l->payload ?? []), 320),
+            ])
+            ->toArray();
+
+        $logs = TrackingLog::where('created_at', '>=', now()->subDays(7))->get();
+        $latByProvider = [];
+        foreach ($logs as $l) {
+            $p = $l->provider ?: 'unknown';
+            $ms = (int) data_get($l->payload, 'duration_ms', data_get($l->payload, 'elapsed_ms', 0));
+            if ($ms <= 0) {
+                continue;
+            }
+            $latByProvider[$p][] = $ms;
+        }
+        $p95 = [];
+        foreach ($latByProvider as $provider => $arr) {
+            sort($arr);
+            $n = count($arr);
+            $idx = (int) floor(max(0, ($n * 0.95) - 1));
+            $p95[$provider] = [
+                'p95_ms' => $arr[$idx] ?? null,
+                'samples' => $n,
+            ];
+        }
+        $this->trackingProviderP95 = $p95;
+    }
+
+    public function replayTrackingDeepRefresh(): void
+    {
+        $tn = trim($this->trackingDeepFsb);
+        if ($tn === '') {
+            return;
+        }
+        Cache::forget("tracking:{$tn}");
+        Cache::forget("tracking_pending:{$tn}");
+        Cache::forget("tracking_blocked:{$tn}");
+        Cache::forget("tracking_failures:{$tn}");
+        $this->refreshTracking($tn);
+        $this->loadTrackingDeep();
+    }
+
+    public function refreshPerformanceTab(): void
+    {
+        $sorted = collect($this->debugQueries)->sortByDesc('time')->take(25)->values()->all();
+        $this->performanceSlowQueries = $sorted;
+
+        $signatures = collect($this->debugQueries)->map(function ($q) {
+            $sql = preg_replace('/\b\d+\b/', '?', (string) $q['sql']) ?? '';
+
+            return preg_replace('/\s+/', ' ', trim($sql));
+        });
+        $counts = $signatures->countBy()->sortDesc();
+        $this->performanceN1Hints = $counts->filter(fn ($c) => $c >= 40)->take(15)->toArray();
+
+        $this->redisInfoSnippet = [];
+        try {
+            foreach (['memory', 'stats'] as $section) {
+                $info = Redis::connection()->info($section);
+                if (is_array($info)) {
+                    $this->redisInfoSnippet[$section] = array_slice($info, 0, 12);
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->redisInfoSnippet = ['error' => $e->getMessage()];
+        }
+    }
+
+    public function loadRateLimiterOverview(): void
+    {
+        $this->rateLimiterOverview = [
+            [
+                'name' => 'google-sheets (jobs)',
+                'limit' => '50 / minute',
+                'source' => 'AppServiceProvider::RateLimiter::for(google-sheets)',
+            ],
+            [
+                'name' => 'login (Fortify / auth)',
+                'limit' => '5 tentatives / minute (route login)',
+                'source' => 'routes/auth.php throttle:5,1',
+            ],
+            [
+                'name' => 'tracking data client',
+                'limit' => '10 req / minute',
+                'source' => 'routes/web.php tracking routes throttle:10,1',
+            ],
+            [
+                'name' => 'Dev dashboard sensible',
+                'limit' => '12 actions / minute + mot de passe requis',
+                'source' => 'DevDashboard::devGate',
+            ],
+        ];
+    }
+
+    public function getFilteredFcmUsersProperty()
+    {
+        $users = $this->users instanceof \Illuminate\Support\Collection
+            ? $this->users
+            : collect($this->users);
+
+        return $users->filter(function ($u) {
+            if (empty($u->fcm_token)) {
+                return false;
+            }
+            if ($this->fcmUserSearch === '') {
+                return true;
+            }
+            $s = strtolower($this->fcmUserSearch);
+
+            return str_contains(strtolower((string) $u->name), $s)
+                || str_contains(strtolower((string) $u->email), $s);
+        });
+    }
+
+    public function revokeUserFcm(int $userId): void
+    {
+        if (! $this->devGate(requirePassword: true)) {
+            return;
+        }
+        $user = User::find($userId);
+        if ($user) {
+            $user->update(['fcm_token' => null]);
+            AuditLogger::log('fcm_token_revoke', User::class, $userId);
+            $this->users = User::orderBy('name')->get();
+            $this->dispatch('show-success-toast', message: 'Jeton FCM révoqué.');
+        }
+    }
+
+    public function previewBackupRestore(string $name): void
+    {
+        if (! $this->devGate(requirePassword: false)) {
+            return;
+        }
+        $this->backupRestoreName = $name;
+        $this->backupRestoreConfirmPhrase = '';
+        try {
+            $path = storage_path('app/backups/'.$name);
+            $this->backupRestorePreview = (new BackupService)->previewSqlFile($path);
+        } catch (\Throwable $e) {
+            $this->backupRestorePreview = ['error' => $e->getMessage()];
+        }
+    }
+
+    public function executeBackupRestore(): void
+    {
+        if (trim($this->backupRestoreConfirmPhrase) !== 'RESTORE') {
+            $this->dispatch('show-error-toast', message: 'Tapez RESTORE pour confirmer.');
+
+            return;
+        }
+        if (! $this->devGate(requirePassword: true)) {
+            return;
+        }
+        $path = storage_path('app/backups/'.$this->backupRestoreName);
+        try {
+            (new BackupService)->restoreDatabaseFromSql($path);
+            AuditLogger::log('restore_backup', null, null, ['file' => $this->backupRestoreName]);
+            $this->backupRestoreConfirmPhrase = '';
+            $this->dispatch('show-success-toast', message: 'Restauration lancée (vérifiez les données).');
+        } catch (\Throwable $e) {
+            $this->dispatch('show-error-toast', message: $e->getMessage());
+        }
+    }
+
+    public function loadDbSchemaDetail(string $table): void
+    {
+        $this->dbSchemaFocusTable = $table;
+        try {
+            $db = DB::getDatabaseName();
+            $this->dbSchemaColumns = json_decode(json_encode(DB::select(
+                'SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION',
+                [$db, $table]
+            )), true) ?? [];
+            $this->dbSchemaIndexes = json_decode(json_encode(DB::select(
+                'SELECT INDEX_NAME, COLUMN_NAME, NON_UNIQUE, SEQ_IN_INDEX FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? ORDER BY INDEX_NAME, SEQ_IN_INDEX',
+                [$db, $table]
+            )), true) ?? [];
+        } catch (\Throwable $e) {
+            $this->dbSchemaColumns = [];
+            $this->dbSchemaIndexes = [];
+            $this->dispatch('show-error-toast', message: $e->getMessage());
         }
     }
 

@@ -193,6 +193,17 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     });
 });
 
+// Quitter l'impersonation (tout utilisateur authentifié ayant une session dev)
+Route::middleware(['auth', 'verified'])->post('/admin/dev/stop-impersonation', function () {
+    $orig = session()->pull('dev_impersonator_id');
+    if ($orig) {
+        \App\Services\Dev\AuditLogger::log('impersonate_stop', \App\Models\User::class, (int) $orig);
+        auth()->loginUsingId((int) $orig);
+    }
+
+    return redirect()->route('admin.dev-dashboard');
+})->name('admin.dev-stop-impersonation');
+
 // Dev Dashboard & Impersonation (Strictly for Developer role)
 Route::middleware(['auth', 'role:developer', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dev-dashboard', \App\Livewire\Admin\DevDashboard::class)->name('dev-dashboard');
