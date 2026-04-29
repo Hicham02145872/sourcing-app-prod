@@ -1,4 +1,4 @@
-<div class="flex flex-col h-screen bg-slate-50 overflow-hidden" x-data @keydown.window.prevent="if (($event.metaKey || $event.ctrlKey) && ($event.key === 'k' || $event.key === 'K')) { $wire.set('showCommandPalette', true); }" @if($devPollSeconds > 0) wire:poll.{{ $devPollSeconds }}s="pollDevMonitors" @endif>
+<div class="flex flex-col h-screen bg-slate-50 overflow-hidden" x-data @keydown.window="if (($event.metaKey || $event.ctrlKey) && ($event.key === 'k' || $event.key === 'K')) { $event.preventDefault(); $wire.set('showCommandPalette', true); }" @if($devPollSeconds > 0) wire:poll.{{ $devPollSeconds }}s="pollDevMonitors" @endif>
     <!-- Custom Dev Header -->
     <header class="flex-none bg-slate-900 border-b border-slate-800 px-6 py-4">
         <div class="flex flex-col gap-3">
@@ -1862,7 +1862,7 @@
                 <div class="space-y-6">
                     <h2 class="text-xl font-black uppercase border-b border-slate-300 pb-4">Tracking deep</h2>
                     <div class="flex flex-wrap gap-2">
-                        <input wire:model.defer="trackingDeepFsb" class="border px-3 py-2 text-xs font-mono flex-1 min-w-[200px]" placeholder="FSB ou N° tracking" />
+                        <input type="text" wire:model.live.debounce.300ms="trackingDeepFsb" autocomplete="off" class="border px-3 py-2 text-xs font-mono flex-1 min-w-[200px]" placeholder="FSB ou N° tracking" />
                         <button wire:click="loadTrackingDeep" class="bg-slate-900 text-white px-4 py-2 text-[10px] font-black uppercase">Charger</button>
                         <button wire:click="replayTrackingDeepRefresh" class="border border-rose-200 text-rose-700 px-4 py-2 text-[10px] font-black uppercase">Replay (purge cache)</button>
                     </div>
