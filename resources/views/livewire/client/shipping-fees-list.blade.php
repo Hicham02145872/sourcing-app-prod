@@ -126,11 +126,10 @@
 
             @php
                 $fee = $selectedCountry->shippingFee;
-                $hasAir = $fee?->items->contains(fn ($i) => $i->transport_type === 'air' && $i->price_per_kg !== null) ?? false;
-                $hasSea = $fee?->items->contains(fn ($i) => $i->transport_type === 'sea' && $i->price_per_kg !== null) ?? false;
-                $hasTrain = $fee?->items->contains(fn ($i) => $i->transport_type === 'train' && $i->price_per_kg !== null) ?? false;
                 $currentType = $detailTab;
-                $items = $fee?->items->where('transport_type', $currentType)->filter(fn ($i) => $i->price_per_kg !== null) ?? collect();
+                $items = ($fee?->items ?? collect())
+                    ->filter(fn ($i) => strtolower((string) $i->transport_type) === strtolower($currentType))
+                    ->values();
                 $sectionTitle = match ($currentType) {
                     'air' => __('Air freight from China'),
                     'sea' => __('Sea bulk from China'),
@@ -141,28 +140,27 @@
                     'sea' => ['bar' => 'from-[#0BA6DF] to-cyan-500'],
                     default => ['bar' => 'from-emerald-500 to-teal-500'],
                 };
-                $hasAny = $hasAir || $hasSea || $hasTrain;
             @endphp
 
-            @if($hasAny)
+            @if($fee)
                 <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
                     <div class="h-1 bg-gradient-to-r {{ $sectionAccent['bar'] }}"></div>
 
                     <div class="border-b border-slate-100 bg-slate-50/90 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40 sm:px-5">
                         <p class="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 sm:text-left">{{ __('Transport mode') }}</p>
-                        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
-                            <button type="button" wire:click="setDetailTab('air')" @disabled(!$hasAir)
-                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#EF7722]/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'air' ? 'bg-[#EF7722] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#EF7722]/10 dark:bg-slate-800' }}">
+                        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center" role="tablist">
+                            <button type="button" wire:click="setDetailTab('air')" role="tab" aria-selected="{{ $detailTab === 'air' ? 'true' : 'false' }}"
+                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#EF7722]/40 focus-visible:ring-offset-2 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'air' ? 'bg-[#EF7722] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#EF7722]/10 dark:bg-slate-800' }}">
                                 <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                                 <span class="pointer-events-none leading-tight">{{ __('Air freight from China') }}</span>
                             </button>
-                            <button type="button" wire:click="setDetailTab('sea')" @disabled(!$hasSea)
-                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#0BA6DF]/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'sea' ? 'bg-[#0BA6DF] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#0BA6DF]/10 dark:bg-slate-800' }}">
+                            <button type="button" wire:click="setDetailTab('sea')" role="tab" aria-selected="{{ $detailTab === 'sea' ? 'true' : 'false' }}"
+                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#0BA6DF]/40 focus-visible:ring-offset-2 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'sea' ? 'bg-[#0BA6DF] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#0BA6DF]/10 dark:bg-slate-800' }}">
                                 <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18 M12 5V2"/></svg>
                                 <span class="pointer-events-none leading-tight">{{ __('Sea bulk from China') }}</span>
                             </button>
-                            <button type="button" wire:click="setDetailTab('train')" @disabled(!$hasTrain)
-                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'train' ? 'bg-emerald-500 text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-emerald-500/10 dark:bg-slate-800' }}">
+                            <button type="button" wire:click="setDetailTab('train')" role="tab" aria-selected="{{ $detailTab === 'train' ? 'true' : 'false' }}"
+                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'train' ? 'bg-emerald-500 text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-emerald-500/10 dark:bg-slate-800' }}">
                                 <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                                 <span class="pointer-events-none leading-tight">{{ __('Air freight from United Arab Emirates') }}</span>
                             </button>
@@ -202,7 +200,13 @@
                                                 @endif
                                             </td>
                                             <td class="px-4 py-3.5 text-center">
-                                                <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">{{ $item->price_per_kg ? number_format($item->price_per_kg, 2) : '—' }}</span>
+                                                <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                                                    @if($item->price_per_kg !== null && $item->price_per_kg !== '')
+                                                        {{ number_format((float) $item->price_per_kg, 2) }}
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </span>
                                                 <span class="ml-1 text-[10px] font-bold text-slate-400">{{ $selectedCountry->shippingFee->currency ?? 'USD' }}</span>
                                             </td>
                                         </tr>

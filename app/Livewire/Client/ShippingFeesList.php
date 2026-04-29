@@ -55,7 +55,9 @@ class ShippingFeesList extends Component
             return 'air';
         }
         foreach (['air', 'sea', 'train'] as $type) {
-            $has = $fee->items->contains(fn ($i) => $i->transport_type === $type && $i->price_per_kg !== null);
+            $has = $fee->items->contains(
+                fn ($i) => strtolower((string) $i->transport_type) === $type
+            );
             if ($has) {
                 return $type;
             }
