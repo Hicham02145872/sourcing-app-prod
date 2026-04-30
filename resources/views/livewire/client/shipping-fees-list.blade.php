@@ -125,13 +125,6 @@
                     'sea' => ['bar' => 'from-[#0BA6DF] to-cyan-500'],
                     default => ['bar' => 'from-emerald-500 to-teal-500'],
                 };
-                $styleOrder = $shippingItemStyles;
-                $displayItems = $items->sortBy(function ($item) use ($styleOrder) {
-                    $style = trim((string) $item->item_style);
-                    $idx = array_search($style, $styleOrder, true);
-
-                    return [$idx === false ? 999 : $idx, (int) $item->id];
-                })->values();
             @endphp
 
             @if($fee)
@@ -187,48 +180,64 @@
                     </div>
 
                     @if($items->count() > 0)
-                        <div class="overflow-x-auto select-none" wire:key="sf-tbl-wrap-{{ $selectedCountry->id }}-{{ $detailTab }}">
-                            <table class="min-w-full cursor-default divide-y divide-slate-100 dark:divide-slate-700">
+                        @php
+                            $itemsByExactStyle = $items->groupBy(fn ($i) => (string) $i->item_style);
+                            $sortedColumnKeys = $itemsByExactStyle->keys()->sortBy(function ($key) use ($itemsByExactStyle) {
+                                return (int) $itemsByExactStyle->get($key)->min('id');
+                            })->values();
+                        @endphp
+                        <div class="overflow-x-auto pb-2 -mx-1 px-1 select-none" wire:key="sf-tbl-wrap-{{ $selectedCountry->id }}-{{ $detailTab }}">
+                            <table class="min-w-full border-collapse text-sm dark:divide-slate-700">
                                 <thead>
-                                    <tr class="bg-slate-50/90 dark:bg-slate-900/50">
-                                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Category') }}</th>
-                                        <th scope="col" class="px-5 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Delay') }}</th>
-                                        <th scope="col" class="px-5 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Price / ') }}{{ $selectedCountry->shippingFee?->getUnitForTransport($currentType) ?? 'KG' }}</th>
+                                    <tr class="border-b border-slate-100 dark:border-slate-700">
+                                        <th scope="col" class="sticky left-0 z-20 w-10 bg-white dark:bg-slate-800 px-2 py-3 sm:px-3 border-r border-slate-100 dark:border-slate-700"></th>
+                                        @foreach($sortedColumnKeys as $styleKey)
+                                            <th scope="col" class="min-w-[10rem] max-w-[16rem] px-3 py-3 text-center align-bottom text-xs font-bold leading-snug text-slate-900 dark:text-white">
+                                                {{ trim($styleKey) !== '' ? $styleKey : '—' }}
+                                            </th>
+                                        @endforeach
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-                                    @forelse($displayItems as $item)
-                                        <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30" wire:key="sf-row-{{ $item->id }}">
-                                            <td class="px-5 py-3.5 text-left">
-                                                <span class="text-sm font-semibold text-slate-900 dark:text-white">
-                                                    {{ trim((string) $item->item_style) !== '' ? $item->item_style : '—' }}
-                                                </span>
+                                <tbody>
+                                    <tr class="border-b border-slate-100 bg-slate-50/90 dark:border-slate-700 dark:bg-slate-900/40">
+                                        <th scope="row" class="sticky left-0 z-20 bg-slate-50/95 dark:bg-slate-900/95 px-2 py-3 sm:px-3 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap border-r border-slate-100 dark:border-slate-700">{{ __('Delay') }}</th>
+                                        @foreach($sortedColumnKeys as $styleKey)
+                                            @php $cells = $itemsByExactStyle->get($styleKey); @endphp
+                                            <td class="px-3 py-3 align-top text-center border-l border-slate-100/80 dark:border-slate-700/80">
+                                                @foreach($cells as $item)
+                                                    <div class="{{ $cells->count() > 1 ? 'mb-2 last:mb-0' : '' }}" wire:key="sf-delay-{{ $item->id }}">
+                                                        @if($item->estimation_days)
+                                                            <span class="inline-flex rounded-lg bg-orange-50 px-2 py-1 text-[10px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
+                                                                {{ $item->estimation_days }} {{ $item->estimation_unit !== null && $item->estimation_unit !== '' ? $item->estimation_unit : __('days') }}
+                                                            </span>
+                                                        @else
+                                                            <span class="text-slate-300 dark:text-slate-600">—</span>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
                                             </td>
-                                            <td class="px-5 py-3.5 text-center">
-                                                @if($item->estimation_days)
-                                                    <span class="inline-flex rounded-lg bg-orange-50 px-2 py-1 text-[10px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
-                                                        {{ $item->estimation_days }} {{ __($item->estimation_unit ?? 'days') }}
-                                                    </span>
-                                                @else
-                                                    <span class="text-slate-300 dark:text-slate-600">—</span>
-                                                @endif
+                                        @endforeach
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="sticky left-0 z-20 bg-white dark:bg-slate-800 px-2 py-3 sm:px-3 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap border-r border-slate-100 dark:border-slate-700">{{ __('Price / ') }}{{ $selectedCountry->shippingFee?->getUnitForTransport($currentType) ?? 'KG' }}</th>
+                                        @foreach($sortedColumnKeys as $styleKey)
+                                            @php $cells = $itemsByExactStyle->get($styleKey); @endphp
+                                            <td class="px-3 py-3 align-top text-center border-l border-slate-100/80 dark:border-slate-700/80">
+                                                @foreach($cells as $item)
+                                                    <div class="{{ $cells->count() > 1 ? 'mb-2 last:mb-0' : '' }}" wire:key="sf-price-{{ $item->id }}">
+                                                        <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                                                            @if($item->price_per_kg !== null && $item->price_per_kg !== '')
+                                                                {{ number_format((float) $item->price_per_kg, 2) }}
+                                                            @else
+                                                                —
+                                                            @endif
+                                                        </span>
+                                                        <span class="ml-1 text-[10px] font-bold text-slate-400">{{ $selectedCountry->shippingFee->currency ?? 'USD' }}</span>
+                                                    </div>
+                                                @endforeach
                                             </td>
-                                            <td class="px-5 py-3.5 text-center">
-                                                <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">
-                                                    @if($item->price_per_kg !== null && $item->price_per_kg !== '')
-                                                        {{ number_format((float) $item->price_per_kg, 2) }}
-                                                    @else
-                                                        —
-                                                    @endif
-                                                </span>
-                                                <span class="ml-1 text-[10px] font-bold text-slate-400">{{ $selectedCountry->shippingFee->currency ?? 'USD' }}</span>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="3" class="px-5 py-8 text-center text-sm text-slate-500">{{ __('No rates for this transport mode.') }}</td>
-                                        </tr>
-                                    @endforelse
+                                        @endforeach
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

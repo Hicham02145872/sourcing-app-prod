@@ -66,45 +66,6 @@ class ShippingFeesList extends Component
         return 'air';
     }
 
-    /**
-     * @return list<string>
-     */
-    protected function orderedItemStylesForCurrentTab(): array
-    {
-        $fee = $this->selectedCountry?->shippingFee;
-        if (! $fee) {
-            return [];
-        }
-
-        $type = $this->detailTab;
-        $fetched = $fee->items
-            ->filter(fn ($i) => strtolower((string) $i->transport_type) === strtolower($type))
-            ->pluck('item_style')
-            ->map(fn ($s) => trim((string) $s))
-            ->filter(fn ($s) => $s !== '')
-            ->unique()
-            ->values()
-            ->all();
-
-        $defaultOrder = [
-            'Electr & Magnet (No Brand)',
-            'Electr & Magnet (With Brand)',
-            'General Cargo (No Brand)',
-            'General Cargo (With Brand)',
-            'General goods',
-            'Power Bank, Battery, Cosmetic',
-            'Screens, Electr & Mag (No Brand)',
-            'Screens, Electr & Mag (With Brand)',
-            'Health Care Products',
-        ];
-
-        return collect($fetched)->sortBy(function ($style) use ($defaultOrder) {
-            $idx = array_search($style, $defaultOrder, true);
-
-            return $idx === false ? 999 : $idx;
-        })->values()->all();
-    }
-
     public function updatingSearch()
     {
         $this->resetPage();
@@ -128,9 +89,6 @@ class ShippingFeesList extends Component
 
         return view('livewire.client.shipping-fees-list', [
             'countries' => $countries,
-            'shippingItemStyles' => $this->selectedCountry
-                ? $this->orderedItemStylesForCurrentTab()
-                : [],
         ]);
     }
 }
