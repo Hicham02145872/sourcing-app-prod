@@ -112,9 +112,7 @@
             @php
                 $fee = $selectedCountry->shippingFee;
                 $currentType = $detailTab;
-                $items = ($fee?->items ?? collect())
-                    ->filter(fn ($i) => strtolower((string) $i->transport_type) === strtolower($currentType))
-                    ->values();
+                $items = $feeItemsForTab;
                 $sectionTitle = match ($currentType) {
                     'air' => __('Air freight from China'),
                     'sea' => __('Sea bulk from China'),

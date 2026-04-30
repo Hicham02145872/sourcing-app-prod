@@ -4,6 +4,7 @@ namespace App\Livewire\Client;
 
 use App\Models\Country;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -46,6 +47,62 @@ class ShippingFeesList extends Component
     }
 
     /**
+     * Colonnes libellées Dubaï / ÉAU : affichées uniquement sous l'onglet UAE (train),
+     * même si elles sont enregistrées par erreur sous air/sea.
+     */
+    protected function isUaeHubItemStyle(?string $itemStyle): bool
+    {
+        $s = strtolower(trim((string) $itemStyle));
+        if ($s === '') {
+            return false;
+        }
+
+        foreach (['dubai', 'uae', 'emirates', 'united arab'] as $needle) {
+            if (str_contains($s, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Collection  $items
+     */
+    protected function filterItemsForTransportTab($items, string $transportTab): Collection
+    {
+        $transportTab = strtolower($transportTab);
+
+        if ($transportTab === 'train') {
+            $trainRows = $items->filter(
+                fn ($i) => strtolower((string) $i->transport_type) === 'train'
+            );
+            $uaeMisplaced = $items->filter(function ($i) {
+                $t = strtolower((string) $i->transport_type);
+
+                return ($t === 'air' || $t === 'sea') && $this->isUaeHubItemStyle($i->item_style);
+            });
+
+            return $trainRows->merge($uaeMisplaced)->unique('id')->values();
+        }
+
+        return $items
+            ->filter(fn ($i) => strtolower((string) $i->transport_type) === $transportTab)
+            ->filter(fn ($i) => ! $this->isUaeHubItemStyle($i->item_style))
+            ->values();
+    }
+
+    protected function itemsForSelectedCountryTab(): Collection
+    {
+        $fee = $this->selectedCountry?->shippingFee;
+        if (! $fee) {
+            return collect();
+        }
+
+        return $this->filterItemsForTransportTab($fee->items, $this->detailTab);
+    }
+
+    /**
      * @return 'air'|'sea'|'train'
      */
     protected function firstAvailableDetailTab(): string
@@ -55,10 +112,7 @@ class ShippingFeesList extends Component
             return 'air';
         }
         foreach (['air', 'sea', 'train'] as $type) {
-            $has = $fee->items->contains(
-                fn ($i) => strtolower((string) $i->transport_type) === $type
-            );
-            if ($has) {
+            if ($this->filterItemsForTransportTab($fee->items, $type)->isNotEmpty()) {
                 return $type;
             }
         }
@@ -89,6 +143,9 @@ class ShippingFeesList extends Component
 
         return view('livewire.client.shipping-fees-list', [
             'countries' => $countries,
+            'feeItemsForTab' => $this->selectedCountry
+                ? $this->itemsForSelectedCountryTab()
+                : collect(),
         ]);
     }
 }
