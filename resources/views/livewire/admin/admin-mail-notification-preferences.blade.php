@@ -43,10 +43,11 @@
                             @php $key = $type['key']; @endphp
                             <td class="px-2 py-3 text-center align-middle">
                                 <input type="checkbox"
-                                       class="h-4 w-4 rounded border-slate-300 text-[#EF7722] focus:ring-[#EF7722]"
+                                       class="h-4 w-4 rounded border-slate-300 text-[#EF7722] focus:ring-[#EF7722] cursor-pointer transition-all"
+                                       x-data
                                        @checked(in_array($key, $prefs[$member->id] ?? [], true))
-                                       wire:click.prevent="toggle({{ $member->id }}, '{{ $key }}')"
-                                       wire:key="cb-{{ $member->id }}-{{ $key }}"
+                                       @change="$wire.toggle({{ $member->id }}, '{{ $key }}')"
+                                       wire:key="pref-{{ $member->id }}-{{ $key }}"
                                 />
                             </td>
                         @endforeach

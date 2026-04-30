@@ -5,11 +5,8 @@ namespace App\Notifications;
 use App\Models\RefundRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
-use Kreait\Firebase\Messaging\CloudMessage;
-use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
-class RefundRequestCreated extends Notification
+class RefundRequestCreated extends BaseAdminNotification
 {
     use Queueable;
 
@@ -18,15 +15,7 @@ class RefundRequestCreated extends Notification
         $this->afterCommit();
     }
 
-    public function via(object $notifiable): array
-    {
-        $channels = ['mail', 'database'];
-        if ($notifiable->fcm_token) {
-            $channels[] = 'fcm';
-        }
 
-        return $channels;
-    }
 
     public function toMail(object $notifiable): MailMessage
     {

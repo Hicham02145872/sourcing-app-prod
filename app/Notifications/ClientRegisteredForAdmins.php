@@ -5,25 +5,14 @@ namespace App\Notifications;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
-class ClientRegisteredForAdmins extends Notification
+class ClientRegisteredForAdmins extends BaseAdminNotification
 {
     use Queueable;
 
     public function __construct(public User $client)
     {
         $this->afterCommit();
-    }
-
-    public function via(object $notifiable): array
-    {
-        $channels = ['database', 'mail'];
-        if ($notifiable->fcm_token) {
-            $channels[] = 'fcm';
-        }
-
-        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage

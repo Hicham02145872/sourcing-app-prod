@@ -5,11 +5,8 @@ namespace App\Notifications;
 use App\Models\Quotation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
-use Kreait\Firebase\Messaging\CloudMessage;
-use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
-class QuotationRejected extends Notification
+class QuotationRejected extends BaseAdminNotification
 {
     use Queueable;
 
@@ -21,20 +18,7 @@ class QuotationRejected extends Notification
         $this->afterCommit();
     }
 
-    public function via(object $notifiable): array
-    {
 
-        $channels = ['mail', 'database'];
-
-        if ($notifiable->fcm_token) {
-
-            $channels[] = 'fcm';
-
-        }
-
-        return $channels;
-
-    }
 
     public function toMail(object $notifiable): MailMessage
     {

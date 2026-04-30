@@ -5,11 +5,8 @@ namespace App\Notifications;
 use App\Models\SourcingRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
-use Kreait\Firebase\Messaging\CloudMessage;
-use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
-class SourcingRequestCreated extends Notification
+class SourcingRequestCreated extends BaseAdminNotification
 {
     use Queueable;
 
@@ -24,20 +21,7 @@ class SourcingRequestCreated extends Notification
         $this->afterCommit();
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        $channels = ['database', 'mail'];
-        if ($notifiable->fcm_token) {
-            $channels[] = 'fcm';
-        }
 
-        return $channels;
-    }
 
     /**
      * Get the mail representation of the notification.

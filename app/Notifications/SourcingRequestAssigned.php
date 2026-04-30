@@ -5,9 +5,8 @@ namespace App\Notifications;
 use App\Models\SourcingRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
-class SourcingRequestAssigned extends Notification
+class SourcingRequestAssigned extends BaseAdminNotification
 {
     use Queueable;
 
@@ -16,10 +15,7 @@ class SourcingRequestAssigned extends Notification
         $this->afterCommit();
     }
 
-    public function via(object $notifiable): array
-    {
-        return ['mail', 'database', 'fcm'];
-    }
+
 
     public function toMail(object $notifiable): MailMessage
     {

@@ -37,11 +37,15 @@ class AdminMailNotificationPreferences extends Component
 
     public function toggle(int $userId, string $key): void
     {
-        $set = $this->prefs[$userId] ?? [];
+        if (!isset($this->prefs[$userId])) {
+            $this->prefs[$userId] = [];
+        }
+        $set = $this->prefs[$userId];
         if (in_array($key, $set, true)) {
             $this->prefs[$userId] = array_values(array_diff($set, [$key]));
         } else {
-            $this->prefs[$userId] = array_values(array_merge($set, [$key]));
+            $this->prefs[$userId][] = $key;
+            sort($this->prefs[$userId]);
         }
     }
 
