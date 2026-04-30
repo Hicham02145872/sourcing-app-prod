@@ -311,6 +311,13 @@
                                 </svg>
                                 <span>{{ __('New Admin') }}</span>
                             </a>
+                            <a href="{{ route('admin.super-admin.mail-notification-preferences') }}"
+                               class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.super-admin.mail-notification-preferences') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+                                </svg>
+                                <span>{{ __('Admin emails') }}</span>
+                            </a>
                             
                             <a href="{{ route('admin.google-sheets.settings') }}" 
                                class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.google-sheets.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">

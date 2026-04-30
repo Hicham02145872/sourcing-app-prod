@@ -21,6 +21,11 @@ class SuperAdminController extends Controller
         return view('admin.super-admin.create-admin');
     }
 
+    public function mailNotificationPreferences(): View
+    {
+        return view('admin.super-admin.mail-notification-preferences');
+    }
+
     /**
      * Store a newly created admin user.
      */

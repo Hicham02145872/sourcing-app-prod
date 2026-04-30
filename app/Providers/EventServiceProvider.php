@@ -9,10 +9,10 @@ use App\Events\QuotationRejected;
 use App\Events\RefundRequestUpdated;
 use App\Events\SourcingOrderStatusChanged;
 use App\Events\SourcingRequestStatusChanged;
+use App\Listeners\InitializeFsbTracking;
 use App\Listeners\SendQuotationAcceptedNotification;
 use App\Listeners\SendQuotationCreatedNotification;
 use App\Listeners\SendQuotationRejectedNotification;
-use App\Listeners\InitializeFsbTracking;
 use App\Listeners\SendRefundStatusNotification;
 use App\Listeners\SendSourcingOrderStatusUpdatedNotification;
 use App\Listeners\SendSourcingRequestStatusChangeNotification;
@@ -32,6 +32,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         \Illuminate\Auth\Events\Registered::class => [
             \Illuminate\Auth\Listeners\SendEmailVerificationNotification::class,
+            \App\Listeners\NotifyAdminsOfClientRegistration::class,
         ],
         QuotationCreated::class => [
             UpdateSourcingRequestStatusOnQuotationCreated::class,
@@ -78,5 +79,10 @@ class EventServiceProvider extends ServiceProvider
                 Event::listen($event, $listener);
             }
         }
+
+        Event::listen(
+            \Illuminate\Notifications\Events\NotificationSending::class,
+            \App\Listeners\FilterAdminNotificationMailChannel::class
+        );
     }
 }

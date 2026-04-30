@@ -166,6 +166,7 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
         Route::get('/super-admin/create-admin', [App\Http\Controllers\Admin\SuperAdminController::class, 'createAdmin'])->name('super-admin.create-admin');
         Route::post('/super-admin/store-admin', [App\Http\Controllers\Admin\SuperAdminController::class, 'storeAdmin'])->name('super-admin.store-admin');
         Route::get('/super-admin/list-admins', [App\Http\Controllers\Admin\SuperAdminController::class, 'listAdmins'])->name('super-admin.list-admins');
+        Route::get('/super-admin/mail-notification-preferences', [App\Http\Controllers\Admin\SuperAdminController::class, 'mailNotificationPreferences'])->name('super-admin.mail-notification-preferences');
         Route::get('/admins/{id}', [App\Http\Controllers\Admin\SuperAdminController::class, 'showAdmin'])->name('show-admin');
         Route::get('/super-admin/admins/{admin}/edit', [App\Http\Controllers\Admin\SuperAdminController::class, 'editAdmin'])->name('super-admin.edit-admin');
         Route::put('/super-admin/admins/{admin}', [App\Http\Controllers\Admin\SuperAdminController::class, 'updateAdmin'])->name('super-admin.update-admin');

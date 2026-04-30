@@ -26,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'fcm_token',
         'can_delete_clients',
         'profile_photo_path',
+        'admin_mail_notification_keys',
     ];
 
     protected $hidden = [
@@ -40,6 +41,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'verification_email_sent_at' => 'datetime',
             'password' => 'hashed',
             'can_delete_clients' => 'boolean',
+            'admin_mail_notification_keys' => 'array',
         ];
     }
 
