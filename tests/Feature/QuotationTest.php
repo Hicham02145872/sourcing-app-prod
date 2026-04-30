@@ -115,4 +115,54 @@ class QuotationTest extends TestCase
             'status' => 'accepted',
         ]);
     }
+
+    /** @test */
+    public function accepting_an_already_accepted_quotation_redirects_without_error(): void
+    {
+        $client = User::factory()->create(['role' => 'client']);
+        $sourcingRequest = SourcingRequest::factory()->create([
+            'user_id' => $client->id,
+            'status' => 'accepted',
+        ]);
+        $quotation = \App\Models\Quotation::factory()->create([
+            'sourcing_request_id' => $sourcingRequest->id,
+            'status' => 'accepted',
+        ]);
+        $order = \App\Models\SourcingOrder::factory()->create([
+            'user_id' => $client->id,
+            'quotation_id' => $quotation->id,
+            'status' => 'pending_payment',
+        ]);
+
+        $response = $this->actingAs($client)
+            ->post(route('client.quotations.accept', $quotation), ['_token' => Session::token()]);
+
+        $response->assertRedirect(route('client.sourcing-orders.show', $order));
+        $response->assertSessionHas('status', __('This quotation has already been accepted.'));
+    }
+
+    /** @test */
+    public function accepting_when_sourcing_request_is_already_accepted_does_not_throw_transition_exception(): void
+    {
+        $client = User::factory()->create(['role' => 'client']);
+        $sourcingRequest = SourcingRequest::factory()->create([
+            'user_id' => $client->id,
+            'status' => 'accepted',
+        ]);
+        $quotation = \App\Models\Quotation::factory()->create([
+            'sourcing_request_id' => $sourcingRequest->id,
+            'status' => 'sent',
+        ]);
+        $order = \App\Models\SourcingOrder::factory()->create([
+            'user_id' => $client->id,
+            'quotation_id' => $quotation->id,
+            'status' => 'pending_payment',
+        ]);
+
+        $response = $this->actingAs($client)
+            ->post(route('client.quotations.accept', $quotation), ['_token' => Session::token()]);
+
+        $response->assertRedirect(route('client.sourcing-orders.show', $order));
+        $response->assertSessionHas('status', __('This quotation has already been accepted.'));
+    }
 }

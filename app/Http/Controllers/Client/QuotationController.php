@@ -7,7 +7,6 @@ use App\Mail\ProformaInvoiceMail;
 use App\Models\Quotation;
 use App\Models\SourcingOrder;
 use App\Models\SourcingRequest;
-use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +17,41 @@ use Illuminate\View\View;
 
 class QuotationController extends Controller
 {
+    protected function quotationAlreadyAcceptedMessage(): string
+    {
+        return __('This quotation has already been accepted.');
+    }
+
+    protected function redirectAlreadyAccepted(Quotation $quotation, ?SourcingOrder $order = null): RedirectResponse
+    {
+        $order ??= $quotation->order ?? SourcingOrder::query()->where('quotation_id', $quotation->id)->first();
+        $message = $this->quotationAlreadyAcceptedMessage();
+
+        if ($order !== null) {
+            return redirect()->route('client.sourcing-orders.show', $order)->with('status', $message);
+        }
+
+        return redirect()->route('client.sourcing-requests.show', $quotation->sourcingRequest)->with('status', $message);
+    }
+
+    protected function isAlreadyAcceptedClientState(Quotation $quotation): bool
+    {
+        if ($quotation->status === 'accepted') {
+            return true;
+        }
+
+        if ($quotation->order !== null) {
+            return true;
+        }
+
+        $sourcingRequest = $quotation->sourcingRequest;
+        if ($sourcingRequest && $sourcingRequest->status === 'accepted') {
+            return true;
+        }
+
+        return false;
+    }
+
     public function index(string $locale): View
     {
         $this->authorize('viewAny', Quotation::class);
@@ -37,37 +71,54 @@ class QuotationController extends Controller
     {
         $this->authorize('update', $quotation);
 
-        $sourcingOrder = null; // Declare outside transaction
+        $quotation->loadMissing(['order', 'sourcingRequest']);
+
+        if ($this->isAlreadyAcceptedClientState($quotation)) {
+            return $this->redirectAlreadyAccepted($quotation);
+        }
 
         try {
-            $sourcingOrder = DB::transaction(function () use ($quotation) {
-                // Lock the quotation row to prevent race conditions
-                $q = Quotation::where('id', $quotation->id)->lockForUpdate()->firstOrFail();
+            $result = DB::transaction(function () use ($quotation) {
+                $q = Quotation::with(['sourcingRequest'])
+                    ->where('id', $quotation->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-                // Check if the quotation has already been processed (allow pending, approved, sent)
-                if (! in_array($q->status, ['pending', 'approved', 'sent'], true)) {
-                    throw new \Exception('This quotation has already been processed.');
+                $existingOrder = $q->order()->first();
+
+                if ($q->status === 'accepted' || $existingOrder !== null) {
+                    return ['created' => false, 'order' => $existingOrder];
                 }
 
-                // Create a sourcing order
+                if ($q->sourcingRequest->status === 'accepted') {
+                    return [
+                        'created' => false,
+                        'order' => SourcingOrder::query()->where('quotation_id', $q->id)->first(),
+                    ];
+                }
+
+                if (! in_array($q->status, ['pending', 'approved', 'sent'], true)) {
+                    throw new \DomainException(__('This quotation can no longer be accepted.'));
+                }
+
                 $newSourcingOrder = SourcingOrder::create([
                     'user_id' => auth()->user()->id,
                     'quotation_id' => $q->id,
                     'total_amount' => $q->amount,
                     'status' => 'pending_payment',
-                    // Auto-assign to the admin who handled the request
                     'assigned_to_admin_id' => $q->sourcingRequest->assigned_to_admin_id,
                 ]);
-                $newSourcingOrder->load('user'); // Eager load the user relationship
+                $newSourcingOrder->load('user');
 
-                // Update the quotation status
                 $q->update(['status' => 'accepted']);
-
-                // Update the sourcing request status
                 $q->sourcingRequest->transitionTo('accepted', auth()->user());
 
-                return $newSourcingOrder; // Return the created order
+                return ['created' => true, 'order' => $newSourcingOrder];
             });
+        } catch (\DomainException $e) {
+            return redirect()->back()
+                ->withErrors(['generic' => $e->getMessage()])
+                ->with('error', $e->getMessage());
         } catch (\Exception $e) {
             Log::error('Error accepting quotation: '.$e->getMessage());
 
@@ -75,6 +126,14 @@ class QuotationController extends Controller
                 ->withErrors(['generic' => $e->getMessage()])
                 ->with('error', __('Could not accept the quotation.'));
         }
+
+        if (! $result['created']) {
+            $quotation->refresh();
+
+            return $this->redirectAlreadyAccepted($quotation, $result['order']);
+        }
+
+        $sourcingOrder = $result['order'];
 
         event(new \App\Events\QuotationAccepted($quotation));
 
