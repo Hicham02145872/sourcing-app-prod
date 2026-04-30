@@ -5,6 +5,8 @@ namespace App\Notifications;
 use App\Models\SourcingRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
 class SourcingRequestCreated extends BaseAdminNotification
 {
