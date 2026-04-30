@@ -216,7 +216,7 @@
                                         </div>
                                     @endif
                                     <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">
-                                        {{ __('Adjust quantities per destination. Your official quotation total will update automatically to match.') }}
+                                        {{ __('Adjust quantities per destination. Your quotation total, shipping fees, and internal estimates update proportionally to the new total quantity.') }}
                                     </p>
                                     <div class="space-y-3">
                                         @foreach ($sourcingRequest->destinations as $destination)
