@@ -18,8 +18,6 @@ class ShippingFeesList extends Component
     /** @var 'air'|'sea'|'train' */
     public string $detailTab = 'air';
 
-    public ?string $detailItemStyle = null;
-
     protected $queryString = [
         'search' => ['except' => ''],
     ];
@@ -31,14 +29,12 @@ class ShippingFeesList extends Component
             null
         );
         $this->detailTab = $this->firstAvailableDetailTab();
-        $this->resetDetailItemStyleToFirst();
     }
 
     public function closeCountryDetails(): void
     {
         $this->selectedCountry = null;
         $this->detailTab = 'air';
-        $this->detailItemStyle = null;
     }
 
     public function setDetailTab(string $tab): void
@@ -47,13 +43,6 @@ class ShippingFeesList extends Component
             return;
         }
         $this->detailTab = $tab;
-        $this->resetDetailItemStyleToFirst();
-    }
-
-    public function setDetailItemStyleByIndex(int $index): void
-    {
-        $styles = $this->orderedItemStylesForCurrentTab();
-        $this->detailItemStyle = $styles[$index] ?? null;
     }
 
     /**
@@ -114,12 +103,6 @@ class ShippingFeesList extends Component
 
             return $idx === false ? 999 : $idx;
         })->values()->all();
-    }
-
-    protected function resetDetailItemStyleToFirst(): void
-    {
-        $styles = $this->orderedItemStylesForCurrentTab();
-        $this->detailItemStyle = $styles[0] ?? null;
     }
 
     public function updatingSearch()

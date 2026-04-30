@@ -107,7 +107,7 @@
             @endif
         </div>
     @else
-        {{-- Pays sélectionné : catégories (onglets) en haut, puis en-tête pays, puis tableau --}}
+        {{-- Pays sélectionné : modes de transport (onglets), puis tableau des catégories / tarifs --}}
         <div wire:key="sf-detail-{{ $selectedCountry->id }}" class="space-y-6">
             @php
                 $fee = $selectedCountry->shippingFee;
@@ -125,9 +125,13 @@
                     'sea' => ['bar' => 'from-[#0BA6DF] to-cyan-500'],
                     default => ['bar' => 'from-emerald-500 to-teal-500'],
                 };
-                $displayItems = $detailItemStyle !== null
-                    ? $items->filter(fn ($i) => trim((string) $i->item_style) === trim((string) $detailItemStyle))->values()
-                    : $items;
+                $styleOrder = $shippingItemStyles;
+                $displayItems = $items->sortBy(function ($item) use ($styleOrder) {
+                    $style = trim((string) $item->item_style);
+                    $idx = array_search($style, $styleOrder, true);
+
+                    return [$idx === false ? 999 : $idx, (int) $item->id];
+                })->values();
             @endphp
 
             @if($fee)
@@ -182,37 +186,12 @@
                         @endif
                     </div>
 
-                    @if(count($shippingItemStyles) > 0)
-                        <div class="border-b border-slate-100 bg-slate-50/50 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/30 sm:px-5">
-                            <p class="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 sm:text-left">{{ __('Item Style') }}</p>
-                            <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-thin">
-                                @foreach($shippingItemStyles as $idx => $styleLabel)
-                                    @php
-                                        $isStyleActive = $detailItemStyle === $styleLabel;
-                                        $pillClass = $isStyleActive
-                                            ? match ($currentType) {
-                                                'air' => 'border-[#EF7722] bg-[#EF7722] text-white shadow-sm ring-2 ring-[#EF7722]/30 focus-visible:ring-[#EF7722]/50',
-                                                'sea' => 'border-[#0BA6DF] bg-[#0BA6DF] text-white shadow-sm ring-2 ring-[#0BA6DF]/30 focus-visible:ring-[#0BA6DF]/50',
-                                                default => 'border-emerald-500 bg-emerald-500 text-white shadow-sm ring-2 ring-emerald-500/30 focus-visible:ring-emerald-500/50',
-                                            }
-                                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500';
-                                    @endphp
-                                    <button type="button"
-                                            wire:click="setDetailItemStyleByIndex({{ $idx }})"
-                                            wire:key="sf-style-{{ $selectedCountry->id }}-{{ $detailTab }}-{{ $idx }}"
-                                            class="shrink-0 max-w-[min(100%,280px)] cursor-pointer touch-manipulation select-none rounded-full border px-3 py-2 text-left text-[11px] font-bold leading-snug transition outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:px-4 sm:text-xs {{ $pillClass }}">
-                                        {{ $styleLabel }}
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-
                     @if($items->count() > 0)
-                        <div class="overflow-x-auto select-none" wire:key="sf-tbl-wrap-{{ $selectedCountry->id }}-{{ $detailTab }}-{{ $detailItemStyle }}">
+                        <div class="overflow-x-auto select-none" wire:key="sf-tbl-wrap-{{ $selectedCountry->id }}-{{ $detailTab }}">
                             <table class="min-w-full cursor-default divide-y divide-slate-100 dark:divide-slate-700">
                                 <thead>
                                     <tr class="bg-slate-50/90 dark:bg-slate-900/50">
+                                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Category') }}</th>
                                         <th scope="col" class="px-5 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Delay') }}</th>
                                         <th scope="col" class="px-5 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Price / ') }}{{ $selectedCountry->shippingFee?->getUnitForTransport($currentType) ?? 'KG' }}</th>
                                     </tr>
@@ -220,6 +199,11 @@
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
                                     @forelse($displayItems as $item)
                                         <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30" wire:key="sf-row-{{ $item->id }}">
+                                            <td class="px-5 py-3.5 text-left">
+                                                <span class="text-sm font-semibold text-slate-900 dark:text-white">
+                                                    {{ trim((string) $item->item_style) !== '' ? $item->item_style : '—' }}
+                                                </span>
+                                            </td>
                                             <td class="px-5 py-3.5 text-center">
                                                 @if($item->estimation_days)
                                                     <span class="inline-flex rounded-lg bg-orange-50 px-2 py-1 text-[10px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
@@ -242,7 +226,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="2" class="px-5 py-8 text-center text-sm text-slate-500">{{ __('No rates for this transport mode.') }}</td>
+                                            <td colspan="3" class="px-5 py-8 text-center text-sm text-slate-500">{{ __('No rates for this transport mode.') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
