@@ -25,7 +25,7 @@ Route::get('/', function (Request $request) {
         $locale = 'eng';
     }
 
-    return redirect('/' . $locale, 302);
+    return redirect('/'.$locale, 302);
 });
 
 // Locale-prefixed welcome page: /eng  /fr  /ar
@@ -224,6 +224,7 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('{locale}/client'
 
     Route::get('/sourcing-requests/handling', [SourcingRequestController::class, 'handling'])->name('sourcing-requests.handling');
     Route::get('/sourcing-requests/history-requests', [SourcingRequestController::class, 'archived'])->name('sourcing-requests.archived');
+    Route::patch('/sourcing-requests/{sourcing_request}/destination-quantities', [SourcingRequestController::class, 'updateDestinationQuantities'])->name('sourcing-requests.update-destination-quantities');
     Route::resource('sourcing-requests', SourcingRequestController::class);
     Route::post('/sourcing-requests/{sourcingRequest}/duplicate', [SourcingRequestController::class, 'duplicate'])->name('sourcing-requests.duplicate');
     Route::post('/sourcing-requests/{sourcingRequest}/cancel', [SourcingRequestController::class, 'cancel'])->name('sourcing-requests.cancel');

@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSourcingRequestRequest;
+use App\Http\Requests\UpdateClientDestinationQuantitiesRequest;
 use App\Http\Requests\UpdateSourcingRequestRequest;
 use App\Models\Category;
 use App\Models\Country;
 use App\Models\PaymentMethod;
 use App\Models\Service;
 use App\Models\SourcingRequest;
+use App\Models\SourcingRequestDestination;
 use App\Models\User;
 use App\Notifications\SourcingRequestCreated;
+use App\Services\QuotationAmountRecalculationService;
 use App\Services\TimelineService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -94,6 +97,37 @@ class SourcingRequestController extends Controller
         return view('client.sourcing-requests.show', compact('sourcingRequest', 'paymentMethods'));
     }
 
+    public function updateDestinationQuantities(
+        string $locale,
+        SourcingRequest $sourcingRequest,
+        UpdateClientDestinationQuantitiesRequest $request,
+        QuotationAmountRecalculationService $recalculationService,
+    ): RedirectResponse {
+        $sourcingRequest->load('destinations', 'quotation');
+        $quotation = $sourcingRequest->quotation;
+
+        if (! $quotation) {
+            abort(404);
+        }
+
+        $previousTotalQuantity = (int) $sourcingRequest->destinations->sum('quantity');
+
+        DB::transaction(function () use ($request, $sourcingRequest, $quotation, $previousTotalQuantity, $recalculationService) {
+            foreach ($request->validated()['destinations'] as $row) {
+                SourcingRequestDestination::query()
+                    ->where('sourcing_request_id', $sourcingRequest->id)
+                    ->where('id', $row['id'])
+                    ->update(['quantity' => $row['quantity']]);
+            }
+
+            $recalculationService->recalculate($quotation->fresh(), $previousTotalQuantity);
+        });
+
+        return redirect()
+            ->route('client.sourcing-requests.show', $sourcingRequest)
+            ->with('status', __('Quantities updated. Your quotation totals have been recalculated.'));
+    }
+
     /**
      * Display the sourcing request creation form.
      */
@@ -117,7 +151,6 @@ class SourcingRequestController extends Controller
         $this->authorize('create', SourcingRequest::class);
         $validated = $request->validated();
 
-        
         $sourcingRequest = DB::transaction(function () use ($request, $validated) {
             if ($request->hasFile('product_image')) {
                 $validated['product_image'] = $this->imageService->compressAndStore(

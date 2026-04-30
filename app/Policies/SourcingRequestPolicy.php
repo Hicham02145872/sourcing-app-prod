@@ -73,6 +73,35 @@ class SourcingRequestPolicy
     }
 
     /**
+     * Le client peut ajuster les quantités par destination tant qu'un devis existe,
+     * n'est pas accepté / rejeté, et qu'aucune commande n'a été créée.
+     */
+    public function updateDestinationQuantities(User $user, SourcingRequest $sourcingRequest): bool
+    {
+        if ($user->id !== $sourcingRequest->user_id) {
+            return false;
+        }
+
+        $quotation = $sourcingRequest->relationLoaded('quotation')
+            ? $sourcingRequest->quotation
+            : $sourcingRequest->quotation()->first();
+
+        if (! $quotation || $quotation->order) {
+            return false;
+        }
+
+        if (in_array($quotation->status, ['accepted', 'rejected'], true)) {
+            return false;
+        }
+
+        if (in_array($sourcingRequest->status, ['accepted', 'completed', 'cancelled', 'rejected'], true)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Determine whether the user can restore the model.
      */
     public function restore(User $user, SourcingRequest $sourcingRequest): bool

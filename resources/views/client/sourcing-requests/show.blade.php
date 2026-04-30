@@ -202,6 +202,55 @@
                         </div>
 
                         <div class="p-6">
+                            @can('updateDestinationQuantities', $sourcingRequest)
+                                <form method="POST" action="{{ route('client.sourcing-requests.update-destination-quantities', $sourcingRequest) }}" class="space-y-4">
+                                    @csrf
+                                    @method('PATCH')
+                                    @if ($errors->any())
+                                        <div class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 px-4 py-3 text-sm text-red-800 dark:text-red-200">
+                                            <ul class="list-disc list-inside space-y-1">
+                                                @foreach ($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+                                    <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">
+                                        {{ __('Adjust quantities per destination. Your official quotation total will update automatically to match.') }}
+                                    </p>
+                                    <div class="space-y-3">
+                                        @foreach ($sourcingRequest->destinations as $destination)
+                                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600 hover:border-[#EF7722] dark:hover:border-[#FAA533] transition-colors">
+                                                <div class="flex items-center gap-3 flex-1">
+                                                    <span class="fi fi-{{ strtolower($destination->country->code) }} text-xl rounded-sm border border-[#EBEBEB] dark:border-slate-600 shadow-sm"></span>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $destination->country->name }}</p>
+                                                        <p class="text-xs text-slate-600 dark:text-slate-400">{{ $destination->service->name }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2 sm:justify-end">
+                                                    <label class="sr-only" for="qty-{{ $destination->id }}">{{ __('Quantity') }}</label>
+                                                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase whitespace-nowrap">{{ __('Quantity') }}</span>
+                                                    <input type="hidden" name="destinations[{{ $loop->index }}][id]" value="{{ $destination->id }}">
+                                                    <input id="qty-{{ $destination->id }}"
+                                                           type="number"
+                                                           name="destinations[{{ $loop->index }}][quantity]"
+                                                           value="{{ old('destinations.'.$loop->index.'.quantity', $destination->quantity) }}"
+                                                           min="1"
+                                                           step="1"
+                                                           required
+                                                           class="w-24 sm:w-28 rounded-lg border border-[#EBEBEB] dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-center font-bold text-[#EF7722] py-2 focus:ring-2 focus:ring-[#EF7722] focus:border-transparent">
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="pt-2 flex justify-end">
+                                        <button type="submit" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#EF7722] hover:bg-[#e06a15] text-white text-sm font-bold shadow-sm transition-colors">
+                                            {{ __('Update quantities & recalculate quotation') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            @else
                             <div class="space-y-3">
                                 @foreach ($sourcingRequest->destinations as $destination)
                                     <div class="flex items-center justify-between p-4 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600 hover:border-[#EF7722] dark:hover:border-[#FAA533] transition-colors">
@@ -219,6 +268,7 @@
                                     </div>
                                 @endforeach
                             </div>
+                            @endcan
                         </div>
                     </div>
 
