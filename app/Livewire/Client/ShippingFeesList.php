@@ -18,6 +18,8 @@ class ShippingFeesList extends Component
     /** @var 'air'|'sea'|'train' */
     public string $detailTab = 'air';
 
+    public ?string $detailItemStyle = null;
+
     protected $queryString = [
         'search' => ['except' => ''],
     ];
@@ -29,12 +31,14 @@ class ShippingFeesList extends Component
             null
         );
         $this->detailTab = $this->firstAvailableDetailTab();
+        $this->resetDetailItemStyleToFirst();
     }
 
     public function closeCountryDetails(): void
     {
         $this->selectedCountry = null;
         $this->detailTab = 'air';
+        $this->detailItemStyle = null;
     }
 
     public function setDetailTab(string $tab): void
@@ -43,6 +47,13 @@ class ShippingFeesList extends Component
             return;
         }
         $this->detailTab = $tab;
+        $this->resetDetailItemStyleToFirst();
+    }
+
+    public function setDetailItemStyleByIndex(int $index): void
+    {
+        $styles = $this->orderedItemStylesForCurrentTab();
+        $this->detailItemStyle = $styles[$index] ?? null;
     }
 
     /**
@@ -64,6 +75,51 @@ class ShippingFeesList extends Component
         }
 
         return 'air';
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function orderedItemStylesForCurrentTab(): array
+    {
+        $fee = $this->selectedCountry?->shippingFee;
+        if (! $fee) {
+            return [];
+        }
+
+        $type = $this->detailTab;
+        $fetched = $fee->items
+            ->filter(fn ($i) => strtolower((string) $i->transport_type) === strtolower($type))
+            ->pluck('item_style')
+            ->map(fn ($s) => trim((string) $s))
+            ->filter(fn ($s) => $s !== '')
+            ->unique()
+            ->values()
+            ->all();
+
+        $defaultOrder = [
+            'Electr & Magnet (No Brand)',
+            'Electr & Magnet (With Brand)',
+            'General Cargo (No Brand)',
+            'General Cargo (With Brand)',
+            'General goods',
+            'Power Bank, Battery, Cosmetic',
+            'Screens, Electr & Mag (No Brand)',
+            'Screens, Electr & Mag (With Brand)',
+            'Health Care Products',
+        ];
+
+        return collect($fetched)->sortBy(function ($style) use ($defaultOrder) {
+            $idx = array_search($style, $defaultOrder, true);
+
+            return $idx === false ? 999 : $idx;
+        })->values()->all();
+    }
+
+    protected function resetDetailItemStyleToFirst(): void
+    {
+        $styles = $this->orderedItemStylesForCurrentTab();
+        $this->detailItemStyle = $styles[0] ?? null;
     }
 
     public function updatingSearch()
@@ -89,6 +145,9 @@ class ShippingFeesList extends Component
 
         return view('livewire.client.shipping-fees-list', [
             'countries' => $countries,
+            'shippingItemStyles' => $this->selectedCountry
+                ? $this->orderedItemStylesForCurrentTab()
+                : [],
         ]);
     }
 }

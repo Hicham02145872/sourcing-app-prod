@@ -107,23 +107,8 @@
             @endif
         </div>
     @else
-        {{-- Pays sélectionné : onglets Air / Sea / Air UAE + tableau --}}
+        {{-- Pays sélectionné : catégories (onglets) en haut, puis en-tête pays, puis tableau --}}
         <div wire:key="sf-detail-{{ $selectedCountry->id }}" class="space-y-6">
-            <div class="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                <div class="flex items-center gap-4">
-                    <span class="fi fi-{{ strtolower($selectedCountry->code) }} text-3xl rounded-lg shadow-md ring-1 ring-slate-200/80 dark:ring-slate-600"></span>
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ $selectedCountry->name }}</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('Comprehensive Logistics Profile') }}</p>
-                    </div>
-                </div>
-                <button type="button" wire:click="closeCountryDetails"
-                        class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-[#EF7722]/50 hover:text-[#EF7722] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-orange-500/50">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                    {{ __('Change destination') }}
-                </button>
-            </div>
-
             @php
                 $fee = $selectedCountry->shippingFee;
                 $currentType = $detailTab;
@@ -140,33 +125,54 @@
                     'sea' => ['bar' => 'from-[#0BA6DF] to-cyan-500'],
                     default => ['bar' => 'from-emerald-500 to-teal-500'],
                 };
+                $displayItems = $detailItemStyle !== null
+                    ? $items->filter(fn ($i) => trim((string) $i->item_style) === trim((string) $detailItemStyle))->values()
+                    : $items;
             @endphp
 
             @if($fee)
                 <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
                     <div class="h-1 bg-gradient-to-r {{ $sectionAccent['bar'] }}"></div>
-
-                    <div class="border-b border-slate-100 bg-slate-50/90 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/40 sm:px-5">
-                        <p class="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 sm:text-left">{{ __('Transport mode') }}</p>
-                        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center" role="tablist">
+                    <div class="bg-slate-50/90 px-3 py-4 dark:bg-slate-900/40 sm:px-5">
+                        <p class="mb-3 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">{{ __('Transport mode') }}</p>
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3" role="tablist">
                             <button type="button" wire:click="setDetailTab('air')" role="tab" aria-selected="{{ $detailTab === 'air' ? 'true' : 'false' }}"
-                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#EF7722]/40 focus-visible:ring-offset-2 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'air' ? 'bg-[#EF7722] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#EF7722]/10 dark:bg-slate-800' }}">
+                                    class="flex min-h-[48px] w-full cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-3 text-center text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#EF7722]/40 focus-visible:ring-offset-2 dark:border-slate-600 {{ $detailTab === 'air' ? 'bg-[#EF7722] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#EF7722]/10 dark:bg-slate-800' }}">
                                 <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                                 <span class="pointer-events-none leading-tight">{{ __('Air freight from China') }}</span>
                             </button>
                             <button type="button" wire:click="setDetailTab('sea')" role="tab" aria-selected="{{ $detailTab === 'sea' ? 'true' : 'false' }}"
-                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#0BA6DF]/40 focus-visible:ring-offset-2 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'sea' ? 'bg-[#0BA6DF] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#0BA6DF]/10 dark:bg-slate-800' }}">
+                                    class="flex min-h-[48px] w-full cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-3 text-center text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-[#0BA6DF]/40 focus-visible:ring-offset-2 dark:border-slate-600 {{ $detailTab === 'sea' ? 'bg-[#0BA6DF] text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-[#0BA6DF]/10 dark:bg-slate-800' }}">
                                 <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18 M12 5V2"/></svg>
                                 <span class="pointer-events-none leading-tight">{{ __('Sea bulk from China') }}</span>
                             </button>
                             <button type="button" wire:click="setDetailTab('train')" role="tab" aria-selected="{{ $detailTab === 'train' ? 'true' : 'false' }}"
-                                    class="flex min-h-[44px] flex-1 cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 dark:border-slate-600 sm:min-w-0 sm:flex-1 sm:justify-start sm:px-4 {{ $detailTab === 'train' ? 'bg-emerald-500 text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-emerald-500/10 dark:bg-slate-800' }}">
+                                    class="flex min-h-[48px] w-full cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-3 text-center text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 dark:border-slate-600 {{ $detailTab === 'train' ? 'bg-emerald-500 text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-emerald-500/10 dark:bg-slate-800' }}">
                                 <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                                 <span class="pointer-events-none leading-tight">{{ __('Air freight from United Arab Emirates') }}</span>
                             </button>
                         </div>
                     </div>
+                </div>
+            @endif
 
+            <div class="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div class="flex items-center gap-4">
+                    <span class="fi fi-{{ strtolower($selectedCountry->code) }} text-3xl rounded-lg shadow-md ring-1 ring-slate-200/80 dark:ring-slate-600"></span>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ $selectedCountry->name }}</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('Comprehensive Logistics Profile') }}</p>
+                    </div>
+                </div>
+                <button type="button" wire:click="closeCountryDetails"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-[#EF7722]/50 hover:text-[#EF7722] dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-orange-500/50">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    {{ __('Change destination') }}
+                </button>
+            </div>
+
+            @if($fee)
+                <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
                     <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-700 sm:px-6">
                         <h4 class="text-base font-bold text-slate-900 dark:text-white">{{ $sectionTitle }}</h4>
                         @if($currentType === 'train')
@@ -176,21 +182,45 @@
                         @endif
                     </div>
 
+                    @if(count($shippingItemStyles) > 0)
+                        <div class="border-b border-slate-100 bg-slate-50/50 px-3 py-3 dark:border-slate-700 dark:bg-slate-900/30 sm:px-5">
+                            <p class="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 sm:text-left">{{ __('Item Style') }}</p>
+                            <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-thin">
+                                @foreach($shippingItemStyles as $idx => $styleLabel)
+                                    @php
+                                        $isStyleActive = $detailItemStyle === $styleLabel;
+                                        $pillClass = $isStyleActive
+                                            ? match ($currentType) {
+                                                'air' => 'border-[#EF7722] bg-[#EF7722] text-white shadow-sm ring-2 ring-[#EF7722]/30 focus-visible:ring-[#EF7722]/50',
+                                                'sea' => 'border-[#0BA6DF] bg-[#0BA6DF] text-white shadow-sm ring-2 ring-[#0BA6DF]/30 focus-visible:ring-[#0BA6DF]/50',
+                                                default => 'border-emerald-500 bg-emerald-500 text-white shadow-sm ring-2 ring-emerald-500/30 focus-visible:ring-emerald-500/50',
+                                            }
+                                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500';
+                                    @endphp
+                                    <button type="button"
+                                            wire:click="setDetailItemStyleByIndex({{ $idx }})"
+                                            wire:key="sf-style-{{ $selectedCountry->id }}-{{ $detailTab }}-{{ $idx }}"
+                                            class="shrink-0 max-w-[min(100%,280px)] cursor-pointer touch-manipulation select-none rounded-full border px-3 py-2 text-left text-[11px] font-bold leading-snug transition outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:px-4 sm:text-xs {{ $pillClass }}">
+                                        {{ $styleLabel }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
                     @if($items->count() > 0)
-                        <div class="overflow-x-auto select-none" wire:key="sf-tbl-wrap-{{ $selectedCountry->id }}-{{ $detailTab }}">
+                        <div class="overflow-x-auto select-none" wire:key="sf-tbl-wrap-{{ $selectedCountry->id }}-{{ $detailTab }}-{{ $detailItemStyle }}">
                             <table class="min-w-full cursor-default divide-y divide-slate-100 dark:divide-slate-700">
                                 <thead>
                                     <tr class="bg-slate-50/90 dark:bg-slate-900/50">
-                                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Item Style') }}</th>
-                                        <th scope="col" class="px-4 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ __('Delay') }}</th>
-                                        <th scope="col" class="px-4 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ __('Price / ') }}{{ $selectedCountry->shippingFee?->getUnitForTransport($currentType) ?? 'KG' }}</th>
+                                        <th scope="col" class="px-5 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Delay') }}</th>
+                                        <th scope="col" class="px-5 py-3 text-center text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:px-6">{{ __('Price / ') }}{{ $selectedCountry->shippingFee?->getUnitForTransport($currentType) ?? 'KG' }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-                                    @foreach($items as $item)
-                                        <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30">
-                                            <td class="px-5 py-3.5 text-xs font-semibold text-slate-800 dark:text-slate-200 sm:px-6">{{ $item->item_style }}</td>
-                                            <td class="px-4 py-3.5 text-center">
+                                    @forelse($displayItems as $item)
+                                        <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30" wire:key="sf-row-{{ $item->id }}">
+                                            <td class="px-5 py-3.5 text-center">
                                                 @if($item->estimation_days)
                                                     <span class="inline-flex rounded-lg bg-orange-50 px-2 py-1 text-[10px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
                                                         {{ $item->estimation_days }} {{ __($item->estimation_unit ?? 'days') }}
@@ -199,7 +229,7 @@
                                                     <span class="text-slate-300 dark:text-slate-600">—</span>
                                                 @endif
                                             </td>
-                                            <td class="px-4 py-3.5 text-center">
+                                            <td class="px-5 py-3.5 text-center">
                                                 <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">
                                                     @if($item->price_per_kg !== null && $item->price_per_kg !== '')
                                                         {{ number_format((float) $item->price_per_kg, 2) }}
@@ -210,7 +240,11 @@
                                                 <span class="ml-1 text-[10px] font-bold text-slate-400">{{ $selectedCountry->shippingFee->currency ?? 'USD' }}</span>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @empty
+                                        <tr>
+                                            <td colspan="2" class="px-5 py-8 text-center text-sm text-slate-500">{{ __('No rates for this transport mode.') }}</td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
