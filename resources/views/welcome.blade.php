@@ -2,7 +2,8 @@
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="application-name" content="{{ config('app.name', 'Laravel') }}">
     
     <!-- Facebook Pixel -->
     <x-facebook-pixel/>
@@ -11,7 +12,6 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
     <title>FastSourcingBrothers - Simplify Your Sourcing Process</title>
     
     <!-- Font: Inter & Style Script & Montserrat -->
@@ -20,6 +20,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Style+Script&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Detect Safari/iOS — WebGL unreliable on these browsers with Three.js r128
+        window._skipWebGL = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+            || /iPad|iPhone|iPod/.test(navigator.userAgent)
+            || (function() {
+                try {
+                    var c = document.createElement('canvas');
+                    return !window.WebGLRenderingContext
+                        || (!c.getContext('webgl') && !c.getContext('experimental-webgl'));
+                } catch(e) { return true; }
+            })();
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
     
@@ -63,6 +75,21 @@
             left: 0;
             width: 100%;
             height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* CSS fallback background when WebGL is unavailable (Safari/iOS) */
+        body.no-webgl {
+            background: linear-gradient(135deg, #f8fafc 0%, #fef2f2 40%, #fff7ed 100%);
+        }
+        body.no-webgl::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(220,38,38,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(251,191,36,0.06) 0%, transparent 60%);
             z-index: 0;
             pointer-events: none;
         }
@@ -348,11 +375,6 @@
             </div>
 
             <div id="splash-brand"></div>
-
-            <div class="splash-status-container">
-                <div id="splash-status">INITIALIZING GLOBAL NETWORK...</div>
-            </div>
-        </div>
 
         <div class="progress-container">
             <div class="splash-progress-inner"></div>
@@ -951,75 +973,89 @@
 
         document.querySelectorAll('.reveal, .counter').forEach(el => observer.observe(el));
 
-        // --- THREE.JS ANIMATION (Kept Identical) ---
-        const canvas = document.getElementById('three-canvas');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        camera.position.z = 5;
+        // --- THREE.JS ANIMATION ---
+        (function() {
+            function disableWebGL() {
+                var c = document.getElementById('three-canvas');
+                if (c) c.style.display = 'none';
+                document.body.classList.add('no-webgl');
+            }
 
-        // Particles
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 1500;
-        const posArray = new Float32Array(particlesCount * 3);
-        for(let i = 0; i < particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 10;
-        }
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.015,
-            color: 0xdc2626,
-            transparent: true,
-            opacity: 0.5, // Slightly softer opacity for cleaner look
-            blending: THREE.AdditiveBlending
-        });
-        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particlesMesh);
+            if (window._skipWebGL) { disableWebGL(); return; }
 
-        // Shapes
-        const geometry = new THREE.TorusGeometry(1.5, 0.3, 16, 100);
-        const material = new THREE.MeshBasicMaterial({ color: 0xfbbf24, wireframe: true, transparent: true, opacity: 0.12 });
-        const torus = new THREE.Mesh(geometry, material);
-        scene.add(torus);
+            try {
+                const canvas = document.getElementById('three-canvas');
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
-        const geometry2 = new THREE.IcosahedronGeometry(1, 0);
-        const material2 = new THREE.MeshBasicMaterial({ color: 0xdc2626, wireframe: true, transparent: true, opacity: 0.15 });
-        const icosahedron = new THREE.Mesh(geometry2, material2);
-        icosahedron.position.set(2, 1, -2);
-        scene.add(icosahedron);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                camera.position.z = 5;
 
-        const geometry3 = new THREE.OctahedronGeometry(0.8, 0);
-        const material3 = new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true, transparent: true, opacity: 0.15 });
-        const octahedron = new THREE.Mesh(geometry3, material3);
-        octahedron.position.set(-2, -1, -1);
-        scene.add(octahedron);
+                // Particles
+                const particlesGeometry = new THREE.BufferGeometry();
+                const particlesCount = 1500;
+                const posArray = new Float32Array(particlesCount * 3);
+                for(let i = 0; i < particlesCount * 3; i++) {
+                    posArray[i] = (Math.random() - 0.5) * 10;
+                }
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                const particlesMaterial = new THREE.PointsMaterial({
+                    size: 0.015,
+                    color: 0xdc2626,
+                    transparent: true,
+                    opacity: 0.5,
+                    blending: THREE.AdditiveBlending
+                });
+                const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+                scene.add(particlesMesh);
 
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (event) => {
-            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-        });
+                // Shapes
+                const geometry = new THREE.TorusGeometry(1.5, 0.3, 16, 100);
+                const material = new THREE.MeshBasicMaterial({ color: 0xfbbf24, wireframe: true, transparent: true, opacity: 0.12 });
+                const torus = new THREE.Mesh(geometry, material);
+                scene.add(torus);
 
-        function animate() {
-            requestAnimationFrame(animate);
-            torus.rotation.x += 0.001; torus.rotation.y += 0.002;
-            icosahedron.rotation.x += 0.002; icosahedron.rotation.y += 0.001;
-            octahedron.rotation.x += 0.0015; octahedron.rotation.z += 0.0015;
-            particlesMesh.rotation.y += 0.0005;
-            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
-            camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
-            renderer.render(scene, camera);
-        }
-        animate();
+                const geometry2 = new THREE.IcosahedronGeometry(1, 0);
+                const material2 = new THREE.MeshBasicMaterial({ color: 0xdc2626, wireframe: true, transparent: true, opacity: 0.15 });
+                const icosahedron = new THREE.Mesh(geometry2, material2);
+                icosahedron.position.set(2, 1, -2);
+                scene.add(icosahedron);
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+                const geometry3 = new THREE.OctahedronGeometry(0.8, 0);
+                const material3 = new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true, transparent: true, opacity: 0.15 });
+                const octahedron = new THREE.Mesh(geometry3, material3);
+                octahedron.position.set(-2, -1, -1);
+                scene.add(octahedron);
+
+                let mouseX = 0, mouseY = 0;
+                document.addEventListener('mousemove', (event) => {
+                    mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                    mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+                });
+
+                function animate() {
+                    requestAnimationFrame(animate);
+                    torus.rotation.x += 0.001; torus.rotation.y += 0.002;
+                    icosahedron.rotation.x += 0.002; icosahedron.rotation.y += 0.001;
+                    octahedron.rotation.x += 0.0015; octahedron.rotation.z += 0.0015;
+                    particlesMesh.rotation.y += 0.0005;
+                    camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+                    camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
+                    renderer.render(scene, camera);
+                }
+                animate();
+
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            } catch(e) {
+                disableWebGL();
+            }
+        })();
 
         // --- TYPED.JS ANIMATION ---
         document.addEventListener('DOMContentLoaded', function() {
