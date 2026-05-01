@@ -53,4 +53,28 @@ class AdminSourcingRequestStatusUpdated extends BaseAdminNotification
             'click_action' => route('admin.sourcing-requests.show', $this->sourcingRequest->id),
         ];
     }
+
+    /**
+     * Get the FCM representation of the notification.
+     */
+    public function toFcm($notifiable)
+    {
+        $statusLabel = ucfirst(str_replace('_', ' ', $this->sourcingRequest->status));
+        $url = route('admin.sourcing-requests.show', $this->sourcingRequest->id);
+
+        return CloudMessage::withTarget('token', $notifiable->fcm_token)
+            ->withNotification(FirebaseNotification::create(
+                __('Sourcing Request Status Updated'),
+                __('Request #:requestId for \':productName\' is now \':status\'.', [
+                    'requestId' => $this->sourcingRequest->id,
+                    'productName' => $this->sourcingRequest->product_name,
+                    'status' => $statusLabel,
+                ])
+            ))
+            ->withData([
+                'click_action' => $url,
+                'sourcing_request_id' => (string) $this->sourcingRequest->id,
+                'status' => $this->sourcingRequest->status,
+            ]);
+    }
 }
