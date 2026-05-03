@@ -406,24 +406,43 @@
                 brand.appendChild(span);
             }
 
-            // Sync status messages
+            // Sync status messages (robust: stop if element removed)
             var msgIndex = 0;
-            var statusInterval = setInterval(function() {
-                msgIndex = (msgIndex + 1) % statusMessages.length;
-                statusEl.style.opacity = 0;
-                setTimeout(function() {
-                    statusEl.textContent = statusMessages[msgIndex];
-                    statusEl.style.opacity = 1;
-                }, 100);
-            }, 300);
+            var statusInterval = null;
+
+            if (statusEl) {
+                statusInterval = setInterval(function() {
+                    // If element removed, stop interval
+                    if (!statusEl || !document.body.contains(statusEl)) {
+                        if (statusInterval) {
+                            clearInterval(statusInterval);
+                            statusInterval = null;
+                        }
+                        return;
+                    }
+
+                    msgIndex = (msgIndex + 1) % statusMessages.length;
+                    statusEl.style.opacity = 0;
+                    setTimeout(function() {
+                        if (!statusEl || !document.body.contains(statusEl)) return;
+                        statusEl.textContent = statusMessages[msgIndex];
+                        statusEl.style.opacity = 1;
+                    }, 100);
+                }, 300);
+            }
 
             // Dismiss after 1 second
             setTimeout(function() {
                 var s = document.getElementById('splash-screen');
                 if (s) {
-                    clearInterval(statusInterval);
+                    if (statusInterval) {
+                        clearInterval(statusInterval);
+                        statusInterval = null;
+                    }
                     s.classList.add('splash-hidden');
-                    setTimeout(function() { s.remove(); }, 300);
+                    setTimeout(function() { 
+                        if (s && s.parentNode) s.remove(); 
+                    }, 300);
                 }
             }, 1000);
         })();
