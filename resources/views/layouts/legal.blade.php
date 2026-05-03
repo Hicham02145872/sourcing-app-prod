@@ -2,12 +2,11 @@
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
     <title>{{ $title ?? __('legal.common.legal') }} - FastSourcingBrothers</title>
     
     <!-- Font: Inter & Style Script & Montserrat -->
@@ -91,11 +90,6 @@
 
                 <!-- Desktop Menu -->
                 <div class="hidden lg:flex items-center space-x-1">
-                    <a href="{{ route('welcome') }}#how-it-works" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">{{ __('welcome.nav.process') }}</a>
-                    <a href="{{ route('welcome') }}#benefits" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">{{ __('welcome.nav.benefits') }}</a>
-                    <a href="{{ route('welcome') }}#testimonials" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">{{ __('welcome.nav.reviews') }}</a>
-                </div>
-
                 <!-- Auth -->
                 <div class="flex items-center gap-3">
                     @auth
@@ -196,5 +190,9 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
+    <script
+  src="https://js-de.sentry-cdn.com/186f8776f6a895805323cb37cfa44f39.min.js"
+  crossorigin="anonymous"
+></script>
 </body>
 </html>

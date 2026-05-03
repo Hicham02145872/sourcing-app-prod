@@ -1078,5 +1078,9 @@
             });
         });
     </script>
+    <script
+  src="https://js-de.sentry-cdn.com/186f8776f6a895805323cb37cfa44f39.min.js"
+  crossorigin="anonymous"
+></script>
 </body>
 </html>

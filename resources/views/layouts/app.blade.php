@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="application-name" content="{{ config('app.name', 'Laravel') }}">
     <title>{{ isset($title) ? $title . ' - ' . config('app.name', 'Laravel') : config('app.name', 'Laravel') }}</title>
 
     @props([
@@ -16,7 +17,6 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flag-icons@6.6.2/css/flag-icons.min.css" rel="stylesheet" />
@@ -33,10 +33,6 @@
         
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideInRight {
             from { 
                 opacity: 0; 
                 transform: translateX(100%); 
@@ -469,27 +465,6 @@
             window.dispatchEvent(new CustomEvent('notification-received', { detail: payload }));
         });
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                    .then((registration) => {
-                        console.log("✅ Service Worker enregistré");
-                        @auth
-                            // On ne demande pas automatiquement la permission si elle n'est pas déjà accordée
-                            // pour respecter le principe de "Soft Invite".
-                            // Mais si elle est déjà accordée, on rafraîchit le token.
-                            if (Notification.permission === 'granted') {
-                                getToken(messaging, {
-                                    vapidKey: "{{ config('services.firebase.vapid_key', 'BPQOA9LTMjO8gw3dVtLIYQce5giuHlV77aRoRU8MK4EnT6ZN3iIoEip3j2xvdAXwqpCa9ggFmAAE-rEC--MKuGg') }}"
-                                }).then(token => {
-                                    if (token) sendTokenToServer(token);
-                                });
-                            }
-                        @endauth
-                    })
-                    .catch(err => console.error("❌ Erreur Service Worker:", err));
-            });
-        }
     </script>
 <script>
         // On page load or when changing themes, best to add inline in `head` to avoid FOUC
@@ -658,4 +633,8 @@
 
 
     @livewireScripts
+    <script
+  src="https://js-de.sentry-cdn.com/186f8776f6a895805323cb37cfa44f39.min.js"
+  crossorigin="anonymous"
+></script>
 </body>

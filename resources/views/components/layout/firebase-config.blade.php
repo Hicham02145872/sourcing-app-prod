@@ -114,15 +114,4 @@
         window.dispatchEvent(new CustomEvent('notification-received', { detail: payload }));
     });
 
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
-            .then((registration) => {
-                console.log("✅ Service Worker enregistré");
-                @auth
-                    fetchExistingNotifications(); // Fetch existing notifications on auth
-                    requestPermissionAndGetToken();
-                @endauth
-            })
-            .catch(err => console.error("❌ Erreur Service Worker:", err));
-    }
 </script>
