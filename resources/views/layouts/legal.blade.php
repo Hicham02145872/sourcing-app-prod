@@ -14,27 +14,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Style+Script&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <script>
-            tailwind.config = {
-                theme: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    extend: {
-                        colors: {
-                            primary: {
-                                50: '#fef2f2', 100: '#fee2e2', 200: '#fecaca', 300: '#fca5a5',
-                                400: '#f87171', 500: '#ef4444', 600: '#dc2626', 700: '#b91c1c',
-                                800: '#991b1b', 900: '#7f1d1d',
-                            }
-                        }
-                    }
-                }
-            }
-    </script>
     <style>
         body {
             -webkit-font-smoothing: antialiased;
