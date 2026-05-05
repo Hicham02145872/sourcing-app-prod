@@ -86,30 +86,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Before Send
-    |--------------------------------------------------------------------------
-    |
-    | Callback that modifies event payload before sending to Sentry
-    |
-    */
-    'before_send' => function ($event) {
-        return $event;
-    },
-
-    /*
-    |--------------------------------------------------------------------------
-    | Before Breadcrumb
-    |--------------------------------------------------------------------------
-    |
-    | Callback that modifies breadcrumb payload before adding to event
-    |
-    */
-    'before_breadcrumb' => function ($breadcrumb) {
-        return $breadcrumb;
-    },
-
-    /*
-    |--------------------------------------------------------------------------
     | Max Value Length
     |--------------------------------------------------------------------------
     |
