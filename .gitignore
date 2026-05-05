@@ -27,4 +27,7 @@ test-results/
 playwright-tests/
 notify()
 'Sourcing
-"storage/app/firebase_credentials.json" 
+storage/app/firebase_credentials.json
+storage/app/secure/credentials.json
+public/site.webmanifest
+public/firebase-messaging-sw.js
