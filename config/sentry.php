@@ -40,7 +40,7 @@ return [
     | performance monitoring. We recommend adjusting this value in production.
     |
     */
-    'traces_sample_rate' => env('SENTRY_TRACES_SAMPLE_RATE', 0.1),
+    'traces_sample_rate' => (float) env('SENTRY_TRACES_SAMPLE_RATE', 0.1),
 
     /*
     |--------------------------------------------------------------------------
@@ -51,17 +51,7 @@ return [
     | We recommend adjusting this value in production.
     |
     */
-    'profiles_sample_rate' => env('SENTRY_PROFILES_SAMPLE_RATE', 0.1),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Channel
-    |--------------------------------------------------------------------------
-    |
-    | Override which Monolog channel is used to log events
-    |
-    */
-    'channel' => env('LOG_CHANNEL', 'stack'),
+    'profiles_sample_rate' => (float) env('SENTRY_PROFILES_SAMPLE_RATE', 0.1),
 
     /*
     |--------------------------------------------------------------------------
@@ -74,10 +64,6 @@ return [
     'breadcrumbs' => [
         // Capture Laravel logs in breadcrumbs
         'logs' => true,
-
-        // Capture SQL queries in breadcrumbs
-        'sql_queries' => true,
-
         // Capture cache events in breadcrumbs
         'cache' => true,
 
@@ -106,7 +92,9 @@ return [
     | Callback that modifies event payload before sending to Sentry
     |
     */
-    'before_send' => null,
+    'before_send' => function ($event) {
+        return $event;
+    },
 
     /*
     |--------------------------------------------------------------------------
@@ -116,7 +104,9 @@ return [
     | Callback that modifies breadcrumb payload before adding to event
     |
     */
-    'before_breadcrumb' => null,
+    'before_breadcrumb' => function ($breadcrumb) {
+        return $breadcrumb;
+    },
 
     /*
     |--------------------------------------------------------------------------
@@ -179,21 +169,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Include Query String
+    | Send Default PII
     |--------------------------------------------------------------------------
     |
-    | If true, the full URL including the query string will be recorded
+    | If true, the SDK will capture PII (Personally Identifiable Information)
     |
     */
-    'include_query_string' => false,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Database
-    |--------------------------------------------------------------------------
-    |
-    | Capture database queries in the breadcrumbs
-    |
-    */
-    'db_queries' => true,
+    'send_default_pii' => false,
 ];
