@@ -1,0 +1,34 @@
+---
+description: Blade templates and Livewire components conventions
+globs: "resources/views/**/*.blade.php,app/Livewire/**/*.php"
+alwaysApply: false
+---
+
+# Blade & Livewire
+
+## Blade
+- Use Tailwind CSS classes. No inline styles except in PDF templates.
+- All text must use `{{ __('...') }}` for translation.
+- Use components (`<x-component>`) over `@include` where possible.
+- Keep logic out of Blade: use view composers or computed properties.
+
+## Livewire Components
+- Livewire handles UI state only. Delegate business logic to services.
+- Use `wire:loading` for loading states on all actions.
+- Validate with `$this->validate()` rules, not inline checks.
+
+```php
+// BAD: business logic in Livewire
+public function updateStatus($status) {
+    if ($this->order->status === 'paid' && $status === 'shipped') {
+        $this->order->update(['status' => $status]);
+        event(new OrderStatusChanged($this->order));
+    }
+}
+
+// GOOD: delegate to service
+public function updateStatus($status, OrderStatusService $service) {
+    $service->transitionTo($this->order, $status);
+    $this->order->refresh();
+}
+```

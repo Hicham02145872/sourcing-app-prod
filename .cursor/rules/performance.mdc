@@ -1,0 +1,48 @@
+---
+description: Performance best practices for Laravel and PHP
+globs: "**/*.php"
+alwaysApply: false
+---
+
+# Performance & Clean Code
+
+## Database (N+1 and queries)
+
+- **Always eager load** relationships used in loops or views: `->with(['user', 'quotation.sourcingRequest'])`.
+- **Avoid** loading full models when only IDs/counts are needed: use `->select()`, `->exists()`, `->count()`.
+- **Chunk** large iterations: `Model::chunk(100, fn ($items) => ...)` instead of `Model::all()`.
+- **Use indexes** for filtered/sorted columns; avoid `SELECT *` in repositories when only a few columns are needed.
+
+```php
+// BAD: N+1
+foreach (SourcingOrder::all() as $order) {
+    echo $order->user->name; // extra query per order
+}
+
+// GOOD
+SourcingOrder::with('user')->get()->each(fn ($o) => $o->user->name);
+```
+
+## Caching
+
+- Cache expensive computations and external API results with a TTL.
+- Use cache keys that include entity ID/version to avoid stale data: `"order:{$id}:v{$updated_at}"`.
+- Prefer `Cache::remember()` for read-through; invalidate on write (e.g. when order is updated).
+
+## Collections and loops
+
+- Prefer collection methods over raw loops when readable: `->filter()`, `->map()`, `->pluck()`.
+- Avoid repeated array searches: build a keyed array or use `->keyBy('id')` for lookups.
+- Do not load large collections into memory when a cursor/chunk is enough.
+
+## Queue and async
+
+- Put heavy work (emails, PDFs, external APIs, sheet sync) in jobs; keep HTTP requests fast.
+- Use `dispatch()->afterResponse()` or queue from controllers so the response is not delayed.
+- Limit job payload size; pass IDs and re-query in the job instead of serializing huge models.
+
+## General
+
+- Prefer early returns to reduce nesting and improve readability.
+- Keep methods small; extract to private methods or services when logic grows.
+- Use `readonly` and strict types to avoid accidental mutations and improve clarity.

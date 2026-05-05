@@ -1,0 +1,71 @@
+---
+description: SOLID principles and clean code standards for all PHP files
+globs: "**/*.php"
+alwaysApply: false
+---
+
+# SOLID Principles & Clean Code
+
+## Single Responsibility (SRP)
+Each class has ONE reason to change. If a class does multiple things, split it.
+
+```php
+// BAD: controller with business logic
+public function store(Request $request) {
+    $amount = $request->unit_price * $request->quantity + $request->commission;
+    $order = SourcingOrder::create([...]);
+    Mail::to($order->user)->send(new InvoiceMail($order));
+}
+
+// GOOD: controller delegates
+public function store(StoreQuotationRequest $request, QuotationService $service) {
+    $quotation = $service->create($request->validated());
+    return redirect()->route('quotations.show', $quotation);
+}
+```
+
+## Open/Closed (OCP)
+Use interfaces and polymorphism instead of conditionals for extensions.
+
+```php
+// GOOD: SheetIntegrationInterface allows new providers without modifying existing code
+interface SheetIntegrationInterface {
+    public function syncOrder(SourcingOrder $order, ShippingCompany $company): bool;
+}
+```
+
+## Dependency Inversion (DIP)
+Depend on abstractions, inject via constructor.
+
+```php
+// GOOD
+public function __construct(
+    private readonly SourcingOrderRepositoryInterface $orderRepo,
+    private readonly OrderStatusServiceInterface $statusService,
+) {}
+```
+
+## General Rules
+- Max 20 lines per method. Extract private methods or delegate to services.
+- Max 200 lines per controller. If larger, extract a service.
+- No business logic in controllers, models, or listeners.
+- No direct `Model::where()` in controllers. Use repositories.
+- Prefer early returns over nested if/else.
+- Type-hint all method parameters and return types.
+- Use `readonly` properties when possible.
+- No magic strings: use constants or enums.
+
+## Documentation (PHPDoc / Javadoc-style)
+- Add a PHPDoc block to every public class (one-line summary + optional details).
+- Add a PHPDoc block to every public and protected method with:
+  - One-line summary
+  - `@param` for each parameter (type, name, description)
+  - `@return` for return type and brief description
+  - `@throws` for each exception the method can throw
+- See the phpdoc rule for examples.
+
+## Performance
+- Eager load relationships to avoid N+1; chunk large result sets.
+- Prefer cache for expensive or external calls; queue heavy work (emails, PDFs, APIs).
+- Prefer collection methods and early returns; keep methods small.
+- See the performance rule for details.

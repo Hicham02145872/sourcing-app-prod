@@ -1,0 +1,390 @@
+:n units
+17TRACK Global Tracking
+17TRACK has no record of this tracking number yet.
+17TRACK Tracking
+Accept Quotation
+Accepted
+Accepted formats: PDF, JPG, PNG. Max 15MB. Large images will be auto-optimized.
+Action
+Action Required
+Actions
+Active Orders
+Active Quotations
+Activity History
+Activity Timeline
+Add Another Destination
+Additional Notes
+Air (Fast)
+All Categories
+All Events
+All Quotations
+All Requests
+All rights reserved.
+All Statuses
+Alternative Hub
+Alternative Sourcing: 
+Amount
+Amount placeholder
+Amount Requested
+Analyzing transit route...
+Any special requirements?
+Approved
+Archived List
+Archived Requests
+Are you sure you want to cancel this request?
+Arrival Destination Country
+Arrival UAE
+At least one destination is required!
+Attached Evidence
+Authorize & Initialize Order
+Authorized Refund
+Available Payment Methods
+Awaiting administrative authorization
+Back
+Back to dashboard
+Back to List
+Bank transfer preferred
+Bill To
+Browse Quotations
+Cancel
+Cancelled
+Carrier
+Case Reference
+Category
+Category:
+China
+Choose your preferred payment method
+Claim Details
+Claim Submission
+Click on images to view full size. Videos can be played inline.
+Colors, sizes, materials, quality requirements...
+Commercial Invoice
+Commission
+Complete product details and specifications
+Completed
+Confirm permanent rejection of this quote?
+Connecting to carrier network...
+Copy
+Country
+Create First Request
+Created
+Currency
+Current Status
+Customs Clearance Destination Country
+Customs Clearance UAE
+Damaged Product
+Dashboard
+Date
+Date Issued
+Decline
+Decrypting tracking data...
+Delete
+Delete permanently?
+Delivered
+Delivery Address
+Delivery Date
+Delivery Failed
+destination
+Destination #:n
+Destinations
+Detailed Description
+Detailed pricing and cost breakdown
+Details
+Dismiss
+Display ID
+Don\'t show this again
+Download Receipt
+Dubai
+Duplicate
+e.g. 5
+e.g. FSB000043 or carrier number
+e.g. JTE300387065227
+E.g., Wireless Headphones, LED Bulbs...
+Each destination has its own tracking number. Click the button below each parcel to see its status.
+Easily request and track refunds for your delivered orders. Our team reviews every claim to ensure your satisfaction.
+Edit
+Edit Request
+Eligible Delivered Orders
+Eligible Orders
+Enter another number
+Enter your tracking number to see status and delivery progress in real time.
+Entire order amount
+Estimated status
+event
+events
+Example: Seeking a volume discount for 500+ units...
+Export
+Fetching real-time updates...
+Fetching tracking information
+Filter
+Finalizing results...
+For any inquiries regarding this invoice, please contact our accounts department.
+From
+From Dubai to your country, status updates may be entered manually by our team. Progress will appear here as your order moves.
+Full address for this destination
+Full Refund
+g
+Geolocation is not supported by your browser.
+Get Started
+Getting your location...
+Grand Total
+ID
+Images / Videos
+Important Admin Note
+Important: Check your Email
+In Progress
+In Transit
+In Transit China
+In Transit UAE
+Incomplete Order (Missing Items)
+Intercepting logistics signals...
+INVOICE
+Invoice generated electronically on
+Key information at a glance
+Last Activity
+Last location
+Last Location Found
+Last Status
+LAST SYNCED
+Last Update
+Last updated
+Late payments subject to 1.5% monthly interest
+Live tracking
+Local Delivery
+Location
+Location captured successfully!
+Max 15MB
+Member since:
+My Refund Claims
+N/A
+Negotiate
+Negotiation in progress. Our team is reviewing your feedback.
+Negotiation Request
+New
+New Claim
+New Search
+New to our platform?
+No Active Orders
+No Activity Yet
+No archived requests
+No data found
+No orders ready for refund
+No Pending Quotations
+No recent searches
+No requests yet
+No shipment history was found for this tracking number. Check the number or try again later.
+No tracking data
+Not assigned
+Not specified
+Note: You can request up to :remaining :currency (Remaining balance)
+Notes
+of
+Official Commercial Document
+Official Quotation
+On Hold
+Optimizing & Uploading...
+or drag and drop
+Order
+Order Completed
+Order Context
+Order Created
+Order Details
+Order ID
+Order Status
+Order Summary
+Order Value
+Orders
+Other
+Our inspectors have verified that the product matches your requirements. See the actual unit below.
+Out for delivery
+Paid
+Paid Total
+Parsing shipment history...
+Partial Refund
+Payment
+Payment due within 30 days of invoice date
+Payment Proof Rejected
+Payment Proof Submitted
+Payment Required
+Payment Status
+Payment Terms
+Payment Verified
+Pending
+Pending Claims
+Pending Payment
+Pending...
+Photo
+Physical Product Verification
+Please describe the issue in detail. For example, which items are damaged and how.
+Please specify your target terms or budgetary constraints below. Our team will review it promptly.
+Powered by
+Preferred Shipping
+Preparing
+Price Quote
+Print Invoice
+Print Receipt
+Processing Order
+Processing request...
+Product
+Product Description
+Product Details
+Product Information
+Product Link (Alibaba/Amazon/etc)
+Product link placeholder
+Product preview
+Product Quality Verification
+Provider
+Quality Does Not Match Description
+Quantity
+Quantity placeholder
+Querying 17TRACK servers...
+Quotation
+Quotation Details
+Quotations
+Quotations for your sourcing requests will appear here once they are created by our team
+Quote analysis in progress
+Quote Coming Soon
+Quoted
+Ready
+Ready to Accept
+Real-time monitoring via 17TRACK network.
+Reason Category
+Refund Amount
+Refund Approved
+Refund Claim
+Refund Management
+Refund Rejected
+Refund Type
+Refund Valuation
+Refunded
+Refunds
+Refunds can only be requested for orders that have been successfully delivered.
+Rejected
+Remove
+Reported Damaged Quantity
+request
+Request Refund
+Request Summary
+Requests
+Resolution Status
+results
+Review your recent tracking searches and their last known statuses.
+Sea (Economy)
+Search
+Search Date
+Search History
+Search product...
+Searching...
+Select
+Select a category
+Select a reason
+Select location
+Service
+Shipment & Tracking
+Shipment Canceled
+Shipment Delayed
+Shipment location
+Shipment Preparing
+Shipment Returned
+Shipped
+Shipping
+Shipping Company
+Shipping Destinations
+Shipping Method
+Showing
+Significant Shipping Delay
+Source from
+Source Location
+Source URL
+Sourcing Orders
+Sourcing Requests
+spam_warning_message
+Specific items/amount
+Start by creating your first sourcing request
+Statement of Claim
+Status
+Submit Claim
+Submit Payment Proof
+Submit Refund Claim
+Submit Request
+Subtotal
+Support Team Message
+Tax (0%)
+Thank you for your business. We appreciate your trust in our sourcing services.
+This may take a couple of minutes for live carrier data. We will retry automatically.
+This Month
+This Week
+to
+Total
+Total Amount
+TOTAL DUE
+Total Events
+Total Investment
+Total Quantity
+Total Refunded
+Track Again
+Track my shipment
+Track Order
+Track Shipment
+Track this parcel
+Track your shipment
+Track your shipment status
+Tracking Alert
+Tracking History
+TRACKING ID
+Tracking number
+Tracking unavailable
+Tracking update is still in progress. Please try again in a few minutes.
+Try again
+Tutorial
+Unable to retrieve your location.
+Unavailable
+Under Review
+Unit Price
+Unit Weight
+units
+up to 50MB
+Update Request
+Updated
+Upload
+Upload and manage payment proof
+Upload files
+Upload Proof of Payment
+Use your order ID (FSB...) or the tracking number from your carrier.
+Validation Errors
+Verification in Progress
+Verified
+VIDEO
+View
+View Archived
+View Details
+View Document
+View My Orders
+View Product Source
+View Refund Status
+View Source Product
+View Sourcing Requests
+View your cancelled and rejected sourcing requests.
+Visual Evidence
+Waiting for Refund
+Watch a quick 2-minute demo to learn how to source products efficiently.
+Watch Demo
+We are analyzing your request and preparing the official quote.
+We could not locate this number. Please verify or contact support.
+Welcome Back,
+What product are you looking for?
+Wire transfers accepted
+Wrong Product Received
+You have no cancelled or rejected requests.
+You have no refund claims.
+Your accepted quotations will be displayed here for tracking and management
+Your activity timeline is empty. Start by creating requests and orders to see your history here.
+Your centralized dashboard to manage and track the progress of all your sourcing requests.
+Your claim is currently handled by our priority support team. We will notify you of any updates.
+Your Feedback
+Your order has :count parcel(s). Each has a unique tracking number above.
+Your order is being processed.
+Your payment proof is under review. We will proceed with the order once verified.
+Your real tracking number will be available shortly. Automatic updates will start once the number is assigned.
+Your recent tracking searches will appear here.
+Your shipment is being prepared. Live carrier tracking will appear here once assigned.

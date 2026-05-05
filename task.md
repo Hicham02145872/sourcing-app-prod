@@ -1,0 +1,13 @@
+# Google Sheets- [x] Create migration to add `damaged_quantity` to `refund_requests` table.
+- [x] Update `RefundRequest` model to include `damaged_quantity` in `$fillable`.
+- [x] Define new routes in `routes/web.php` for client refund management.
+- [x] Implement `index`, `create` and update `store` methods in `RefundRequestController`.
+- [x] Create client-side views:
+    - [x] `resources/views/client/refund-requests/index.blade.php`
+    - [x] `resources/views/client/refund-requests/create.blade.php`
+- [x] Update `resources/views/components/sidebar.blade.php` to enable the "Refunds" link.
+- [x] Clean up `resources/views/client/sourcing-orders/show.blade.php`:
+    - [x] Remove old refund modal and scripts.
+    - [x] Update placeholder button to a functional link.
+- [x] Implement Admin-side management if requested (currently focused on client submission).
+- [x] Run and verify tests.

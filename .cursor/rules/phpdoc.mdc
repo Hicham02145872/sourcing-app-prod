@@ -1,0 +1,66 @@
+---
+description: PHPDoc (Javadoc-style) documentation for classes and methods
+globs: "**/*.php"
+alwaysApply: false
+---
+
+# PHPDoc Documentation (Javadoc-style)
+
+Document all public classes and public/protected methods with PHPDoc blocks. Use the same style as Java Javadoc: summary, @param, @return, @throws when applicable.
+
+## Class-level
+
+```php
+/**
+ * Handles order status transitions and validation.
+ *
+ * Ensures only allowed status changes are applied and dispatches
+ * SourcingOrderStatusChanged when the status is updated.
+ */
+class OrderStatusService implements OrderStatusServiceInterface
+{
+```
+
+## Method-level (public / protected)
+
+```php
+/**
+ * Transitions the order to a new status if the transition is allowed.
+ *
+ * @param SourcingOrder $order The order to update
+ * @param string $newStatus The target status (e.g. paid, delivered)
+ * @return bool True if the transition was applied
+ * @throws InvalidOrderStatusTransitionException When the transition is not allowed
+ */
+public function transitionTo(SourcingOrder $order, string $newStatus): bool
+{
+```
+
+## Optional parameters and return types
+
+```php
+/**
+ * Finds orders with optional filters and pagination.
+ *
+ * @param array $filters Search filters (status, date_from, date_to)
+ * @param int $perPage Number of items per page (default 15)
+ * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+ */
+public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
+{
+```
+
+## When to document
+
+- Always: Public and protected methods of services, repositories, controllers.
+- Always: Public API methods and non-obvious parameters.
+- Optional: Private methods only if the logic is complex.
+- Always: Class summary for services, repositories, and key domain classes.
+
+## Tags to use
+
+- @param for every parameter (type and name, then description).
+- @return for return type and brief description.
+- @throws for every exception the method can throw.
+- @see for related class or method when relevant.
+- Use array<string, mixed> or list<int> for generic arrays when useful.

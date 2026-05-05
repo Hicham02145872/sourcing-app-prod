@@ -1,0 +1,32 @@
+---
+description: Project context and architecture for FastSourcingBrothers Laravel app
+alwaysApply: true
+---
+
+# Project Context - FastSourcingBrothers
+
+## Stack
+- Laravel 11+ (PHP 8.3), Livewire, Blade, Tailwind CSS
+- MySQL, Redis (cache/queue), Laravel Horizon
+- DomPDF, Imagick, Firebase FCM, Google Sheets API, Lark Sheets API
+
+## Domain
+B2B sourcing platform: clients submit sourcing requests, admins create quotations, clients accept/reject, orders are tracked with FSB virtual tracking numbers, shipped via shipping companies, synced to Lark/Google Sheets.
+
+## Key Entities
+- `SourcingRequest` -> `Quotation` -> `SourcingOrder` (main workflow)
+- `SourcingOrder` has destinations, shipments, media, refund requests
+- `ShippingCompany` linked to Lark/Google sheet integration
+- FSB tracking: virtual tracking numbers per destination (format: `FSB` + padded ID)
+
+## Architecture Target (Repository-Service-Controller)
+- **Controllers**: validate input (FormRequest), delegate to service, return response
+- **Services** (`app/Services/`): all business logic lives here
+- **Repositories** (`app/Repositories/`): data access only (Eloquent queries)
+- **Models**: relationships, accessors, casts, constants only
+- **Listeners**: delegate to services, no inline business logic
+
+## Roles
+- `super_admin`, `admin`, `developer`, `client`
+
+## Respond in French

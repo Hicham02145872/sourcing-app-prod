@@ -1,0 +1,54 @@
+---
+description: Laravel-specific coding conventions and patterns
+globs: "**/*.php"
+alwaysApply: false
+---
+
+# Laravel Conventions
+
+## Controllers
+- Use FormRequest classes for validation, never validate inline.
+- One resource = one controller. Don't mix concerns.
+- Return type: `RedirectResponse`, `View`, `JsonResponse`.
+
+```php
+// GOOD
+public function update(UpdateOrderRequest $request, SourcingOrder $order, OrderService $service): RedirectResponse
+{
+    $service->update($order, $request->validated());
+    return back()->with('success', __('Order updated.'));
+}
+```
+
+## Services
+- Constructor injection for dependencies.
+- Return typed values, throw exceptions on failure.
+- Never return HTTP responses from services.
+
+## Repositories
+- One repository per aggregate root model.
+- Return models or collections, never arrays.
+- All complex queries (filters, search, joins) belong here.
+
+## Eloquent
+- Always eager load relationships: `->with(['user', 'quotation'])`.
+- Use `$model->load()` when model already loaded.
+- Never use `DB::` facade in application code (use Eloquent).
+- Use database transactions for multi-model operations.
+
+## Notifications & Queue
+- All notifications implement `ShouldQueue`.
+- Set `$tries = 3`, `$maxExceptions = 3`, `$backoff = [60, 300, 900]`.
+- Call `$this->afterCommit()` in constructor.
+- Never use `retryUntil()` with long durations.
+
+## Naming
+- Services: `OrderStatusService`, `RefundService`
+- Repositories: `EloquentSourcingOrderRepository`
+- FormRequests: `StoreQuotationRequest`, `UpdateTrackingRequest`
+- Events: past tense (`QuotationAccepted`, `OrderStatusChanged`)
+- Listeners: imperative (`SendQuotationNotification`, `InitializeFsbTracking`)
+
+## Translations
+- All user-facing strings must use `__()` or `@lang()`.
+- Add keys to both `lang/en.json` and `lang/fr.json`.

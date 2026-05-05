@@ -1,0 +1,51 @@
+---
+description: Error handling and logging standards
+globs: "**/*.php"
+alwaysApply: false
+---
+
+# Error Handling & Logging
+
+## Exceptions
+- Never silently catch exceptions. At minimum, log the error.
+- Use specific exception types, not generic `\Exception`.
+- Services throw exceptions. Controllers catch and flash messages.
+
+```php
+// Service
+public function approve(RefundRequest $refund): void
+{
+    if ($refund->amount_requested > $this->getMaxRefundable($refund)) {
+        throw new RefundAmountExceededException($refund);
+    }
+    // ...
+}
+
+// Controller
+try {
+    $service->approve($refund);
+    return back()->with('success', __('Refund approved.'));
+} catch (RefundAmountExceededException $e) {
+    return back()->with('error', $e->getMessage());
+}
+```
+
+## Logging
+- Use structured context arrays, not string interpolation.
+- Use appropriate log levels: `error` for failures, `warning` for recoverable issues, `info` for important events.
+
+```php
+// BAD
+Log::error("Order $id failed: " . $e->getMessage());
+
+// GOOD
+Log::error('Order sync failed', [
+    'order_id' => $order->id,
+    'error' => $e->getMessage(),
+]);
+```
+
+## Queue Jobs
+- Always define `$tries`, `$maxExceptions`, `$backoff`.
+- Implement `failed()` method to log permanent failures.
+- Never use `retryUntil()` with durations longer than 1 hour.
