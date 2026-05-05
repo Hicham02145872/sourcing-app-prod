@@ -19,7 +19,7 @@ return [
     | This value sets the release version that will be sent with events
     |
     */
-    'release' => trim(explode('@', 'v1.0.0@' . trim(file_get_contents(base_path('VERSION')), "\n"))[0], 'v') ?? null,
+    'release' => trim(explode('@', 'v1.0.0@' . (file_exists(base_path('VERSION')) ? trim(file_get_contents(base_path('VERSION')), "\n") : 'dev'))[0], 'v') ?? null,
 
     /*
     |--------------------------------------------------------------------------
