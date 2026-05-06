@@ -466,7 +466,7 @@ class UnifiedTrackingService
         if (str_starts_with($number, '1Z')) {
             return 'ups';
         }
-        if (str_starts_with($number, 'DBC')) {
+        if (str_starts_with($number, 'DBC') || preg_match('/^CHIL\d+$/', $number)) {
             return 'choicexp';
         }
         if (str_starts_with($number, 'ME')) {
