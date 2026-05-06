@@ -31,3 +31,19 @@ storage/app/firebase_credentials.json
 storage/app/secure/credentials.json
 public/site.webmanifest
 public/firebase-messaging-sw.js
+
+# VPS local data - never track
+storage/app/public/
+storage/app/private/
+storage/app/mails/
+storage/app/secure/
+storage/backups/
+storage/app/python_home/
+venv/
+.wdm/
+chromedriver/
+scraper/.wdm/
+google-chrome-stable_current_amd64.deb
+cloudflared.exe
+*.broken-backup
+public/vendor/livewire/
