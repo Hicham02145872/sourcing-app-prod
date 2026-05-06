@@ -11,6 +11,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -45,6 +46,10 @@
                     </defs>
                     <rect width="100%" height="100%" fill="url(#grid)" />
                 </svg>
+            </div>
+            
+            <!-- Content Container -->
+            <div class="relative z-10 flex flex-col justify-between p-12 xl:p-16 text-white w-full">
                 <!-- Logo & Brand -->
                 <div>
                     <a href="/" class="mb-16 text-center block">
@@ -119,8 +124,4 @@
         </div>
     </div>
 </body>
-<script
-  src="https://js-de.sentry-cdn.com/186f8776f6a895805323cb37cfa44f39.min.js"
-  crossorigin="anonymous"
-></script>
 </html>
