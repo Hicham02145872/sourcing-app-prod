@@ -11,7 +11,6 @@
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <title>FastSourcingBrothers - Simplify Your Sourcing Process</title>
     
     <!-- Font: Inter & Style Script & Montserrat -->
@@ -21,16 +20,13 @@
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>
-        // Detect Safari/iOS — WebGL unreliable on these browsers with Three.js r128
-        window._skipWebGL = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-            || /iPad|iPhone|iPod/.test(navigator.userAgent)
-            || (function() {
-                try {
-                    var c = document.createElement('canvas');
-                    return !window.WebGLRenderingContext
-                        || (!c.getContext('webgl') && !c.getContext('experimental-webgl'));
-                } catch(e) { return true; }
-            })();
+        window._skipWebGL = (function() {
+            try {
+                var c = document.createElement('canvas');
+                return !window.WebGLRenderingContext
+                    || (!c.getContext('webgl') && !c.getContext('experimental-webgl'));
+            } catch(e) { return true; }
+        })();
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
