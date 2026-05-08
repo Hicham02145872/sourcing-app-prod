@@ -30,7 +30,7 @@ abstract class BaseAdminNotification extends Notification
         }
 
         // Add FCM if token exists
-        if (!empty($notifiable->fcm_token)) {
+        if (! empty($notifiable->fcm_token) && method_exists($this, 'toFcm')) {
             $channels[] = 'fcm';
         }
 

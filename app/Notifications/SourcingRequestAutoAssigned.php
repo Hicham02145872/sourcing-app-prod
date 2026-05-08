@@ -6,6 +6,8 @@ use App\Models\SourcingRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
 class SourcingRequestAutoAssigned extends Notification
 {
@@ -43,16 +45,17 @@ class SourcingRequestAutoAssigned extends Notification
         ];
     }
 
-    public function toFcm(object $notifiable): array
+    public function toFcm(object $notifiable): CloudMessage
     {
-        return [
-            'title' => '🤖 Nouveau dossier (Auto)',
-            'body' => 'Dossier #'.$this->sourcingRequest->id.' attribué (Charge: '.$this->workload.').',
-            'data' => [
+        return CloudMessage::withTarget('token', $notifiable->fcm_token)
+            ->withNotification(FirebaseNotification::create(
+                '🤖 Nouveau dossier (Auto)',
+                'Dossier #'.$this->sourcingRequest->id.' attribué (Charge: '.$this->workload.').'
+            ))
+            ->withData([
                 'sourcing_request_id' => (string) $this->sourcingRequest->id,
                 'click_action' => 'VIEW_SOURCING_REQUEST',
                 'url' => route('admin.sourcing-requests.show', $this->sourcingRequest),
-            ],
-        ];
+            ]);
     }
 }

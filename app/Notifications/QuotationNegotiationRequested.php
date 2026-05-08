@@ -47,4 +47,23 @@ class QuotationNegotiationRequested extends BaseAdminNotification
             'click_action' => route('admin.sourcing-requests.show', $this->sourcingRequest->id),
         ];
     }
+
+    public function toFcm(object $notifiable): CloudMessage
+    {
+        $url = route('admin.sourcing-requests.show', $this->sourcingRequest->id);
+
+        return CloudMessage::withTarget('token', $notifiable->fcm_token)
+            ->withNotification(FirebaseNotification::create(
+                __('Negotiation Requested'),
+                __('Client requested negotiation for :name (#:id).', [
+                    'name' => $this->sourcingRequest->product_name ?? '',
+                    'id' => $this->sourcingRequest->id,
+                ])
+            ))
+            ->withData([
+                'click_action' => $url,
+                'sourcing_request_id' => (string) $this->sourcingRequest->id,
+                'status' => 'negotiating',
+            ]);
+    }
 }

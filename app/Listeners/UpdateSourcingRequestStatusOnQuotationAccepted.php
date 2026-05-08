@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\QuotationAccepted;
+use Illuminate\Support\Facades\Log;
 
 class UpdateSourcingRequestStatusOnQuotationAccepted
 {
@@ -23,7 +24,18 @@ class UpdateSourcingRequestStatusOnQuotationAccepted
      */
     public function handle(QuotationAccepted $event)
     {
-        $sourcingRequest = $event->quotation->sourcingRequest;
+        $sourcingRequest = $event->quotation?->sourcingRequest;
+
+        if (! $sourcingRequest) {
+            Log::warning('Skipping sourcing request status transition: sourcingRequest is null', [
+                'quotation_id' => $event->quotation?->id,
+                'user_id' => $event->quotation?->user_id,
+                'relation_missing' => 'sourcingRequest',
+            ]);
+
+            return;
+        }
+
         if ($sourcingRequest->status === 'quoted') {
             $sourcingRequest->transitionTo('accepted');
         }

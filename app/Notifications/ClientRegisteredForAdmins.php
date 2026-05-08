@@ -41,16 +41,17 @@ class ClientRegisteredForAdmins extends BaseAdminNotification
         ];
     }
 
-    public function toFcm(object $notifiable): array
+    public function toFcm(object $notifiable): CloudMessage
     {
-        return [
-            'title' => __('New client'),
-            'body' => $this->client->name,
-            'data' => [
+        return CloudMessage::withTarget('token', $notifiable->fcm_token)
+            ->withNotification(FirebaseNotification::create(
+                __('New client'),
+                $this->client->name
+            ))
+            ->withData([
                 'registered_user_id' => (string) $this->client->id,
                 'click_action' => 'VIEW_CLIENTS',
                 'url' => route('admin.users.index'),
-            ],
-        ];
+            ]);
     }
 }

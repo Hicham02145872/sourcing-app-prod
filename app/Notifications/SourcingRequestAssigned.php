@@ -40,16 +40,17 @@ class SourcingRequestAssigned extends BaseAdminNotification
         ];
     }
 
-    public function toFcm(object $notifiable): array
+    public function toFcm(object $notifiable): CloudMessage
     {
-        return [
-            'title' => '📥 Nouveau dossier assigné',
-            'body' => 'Le dossier #'.$this->sourcingRequest->id.' ('.$this->sourcingRequest->product_name.') vous a été assigné.',
-            'data' => [
+        return CloudMessage::withTarget('token', $notifiable->fcm_token)
+            ->withNotification(FirebaseNotification::create(
+                '📥 Nouveau dossier assigné',
+                'Le dossier #'.$this->sourcingRequest->id.' ('.$this->sourcingRequest->product_name.') vous a été assigné.'
+            ))
+            ->withData([
                 'sourcing_request_id' => (string) $this->sourcingRequest->id,
                 'click_action' => 'VIEW_SOURCING_REQUEST',
                 'url' => route('admin.sourcing-requests.show', $this->sourcingRequest),
-            ],
-        ];
+            ]);
     }
 }
