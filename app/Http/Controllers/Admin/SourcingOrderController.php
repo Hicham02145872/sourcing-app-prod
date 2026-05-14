@@ -75,6 +75,9 @@ class SourcingOrderController extends Controller
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('id', 'like', '%'.$search.'%')
+                    ->orWhere('sourcing_request_id', 'like', '%'.$search.'%')
+                    ->orWhere('quotation_id', 'like', '%'.$search.'%')
+                    ->orWhereRaw("CAST((sourcing_orders.id * 5) AS CHAR) LIKE ?", ['%'.$search.'%'])
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('name', 'like', '%'.$search.'%')
                             ->orWhere('email', 'like', '%'.$search.'%');
