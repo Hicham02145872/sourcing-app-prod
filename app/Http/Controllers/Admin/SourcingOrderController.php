@@ -27,21 +27,10 @@ class SourcingOrderController extends Controller
     public function index(Request $request): View
     {
         $this->authorize('viewAny', SourcingOrder::class);
-        $query = SourcingOrder::with('user', 'quotation.sourcingRequest', 'assignedAdmin')
-            ->orderByRaw("CASE
-                WHEN sourcing_orders.status = 'pending_payment'
-                    AND EXISTS (
-                        SELECT 1
-                        FROM quotations
-                        WHERE quotations.id = sourcing_orders.quotation_id
-                          AND quotations.status = 'accepted'
-                    ) THEN 0
-                ELSE 1
-            END")
-            ->orderBy('id', 'desc');
+        $query = SourcingOrder::with('user', 'quotation.sourcingRequest', 'assignedAdmin');
 
         // Scope visibility: Regular admins now see ALL orders (read-only for others)
-        // Sorting handles priority display
+        // Apply admin-priority ordering first so it is a secondary key after pending_payment prioritization
         if (auth()->check()) {
             $userId = auth()->id();
             $query->orderByRaw('CASE 
@@ -50,6 +39,32 @@ class SourcingOrderController extends Controller
                 ELSE 3 
             END', [$userId]);
         }
+
+        // Prioritize by full payment/shipping lifecycle so orders are shown in natural progression
+        $query->orderByRaw("CASE 
+                WHEN sourcing_orders.status = 'pending_payment' THEN 0
+                WHEN sourcing_orders.status = 'paid' THEN 1
+                WHEN sourcing_orders.status = 'shipment_preparing' THEN 2
+                WHEN sourcing_orders.status = 'in_transit_china' THEN 3
+                WHEN sourcing_orders.status = 'arrival_uae' THEN 4
+                WHEN sourcing_orders.status = 'customs_clearance_uae' THEN 5
+                WHEN sourcing_orders.status = 'in_transit_uae' THEN 6
+                WHEN sourcing_orders.status = 'arrival_destination_country' THEN 7
+                WHEN sourcing_orders.status = 'customs_clearance_destination_country' THEN 8
+                WHEN sourcing_orders.status = 'out_for_delivery' THEN 9
+                WHEN sourcing_orders.status = 'delivered' THEN 10
+                WHEN sourcing_orders.status = 'order_completed' THEN 11
+                WHEN sourcing_orders.status = 'delivery_failed' THEN 12
+                WHEN sourcing_orders.status = 'shipment_delayed' THEN 13
+                WHEN sourcing_orders.status = 'shipment_returned' THEN 14
+                WHEN sourcing_orders.status = 'shipment_canceled' THEN 15
+                WHEN sourcing_orders.status = 'waiting_for_refund' THEN 16
+                WHEN sourcing_orders.status = 'refund_approved' THEN 17
+                WHEN sourcing_orders.status = 'refunded' THEN 18
+                WHEN sourcing_orders.status = 'refund_rejected' THEN 19
+                ELSE 999
+            END")
+            ->orderBy('id', 'desc');
 
         // Filter by status
         if ($request->has('status') && $request->status != 'all') {
