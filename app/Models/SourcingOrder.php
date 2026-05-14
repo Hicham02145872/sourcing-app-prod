@@ -53,6 +53,7 @@ class SourcingOrder extends Model
     protected $fillable = [
         'user_id',
         'quotation_id',
+        'sourcing_request_id',
         'total_amount',
         'status',
         'rejection_reason',
@@ -116,6 +117,11 @@ class SourcingOrder extends Model
     public function quotation()
     {
         return $this->belongsTo(Quotation::class);
+    }
+
+    public function sourcingRequest()
+    {
+        return $this->belongsTo(SourcingRequest::class);
     }
 
     public function assignedAdmin()

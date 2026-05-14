@@ -63,6 +63,7 @@
                             <div>
                                 <h3 class="text-sm font-bold uppercase tracking-tight">{{ __('Status') }}: {{ __(str_replace('_', ' ', $refundRequest->status)) }}</h3>
                                 <p class="text-xs opacity-75">{{ __('Requested on') }} {{ $refundRequest->created_at->translatedFormat('M d, Y @ H:i') }}</p>
+                                <p class="text-[10px] font-mono opacity-75 mt-1">{{ __('Request') }} #{{ $refundRequest->sourcing_request_id ?? $refundRequest->sourcingOrder->sourcing_request_id ?? $refundRequest->sourcingOrder->quotation->sourcing_request_id }}</p>
                             </div>
                         </div>
                     </div>

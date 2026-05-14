@@ -104,6 +104,7 @@ class QuotationController extends Controller
                 $newSourcingOrder = SourcingOrder::create([
                     'user_id' => auth()->user()->id,
                     'quotation_id' => $q->id,
+                    'sourcing_request_id' => $q->sourcing_request_id,
                     'total_amount' => $q->amount,
                     'status' => 'pending_payment',
                     'assigned_to_admin_id' => $q->sourcingRequest->assigned_to_admin_id,

@@ -143,7 +143,7 @@ class SourcingRequest extends Model
 
     public function order()
     {
-        return $this->hasOneThrough(SourcingOrder::class, Quotation::class);
+        return $this->hasOne(SourcingOrder::class);
     }
 
     public function canTransitionTo(string $newStatus, ?User $user = null): bool

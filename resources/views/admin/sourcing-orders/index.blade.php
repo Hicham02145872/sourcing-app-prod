@@ -221,6 +221,9 @@
                                                     <div class="text-sm font-medium text-slate-900 truncate" title="{{ $order->quotation->sourcingRequest->product_name }}">
                                                         {{ $order->quotation->sourcingRequest->product_name }}
                                                     </div>
+                                                    <div class="text-[10px] text-slate-400 font-mono">
+                                                        {{ __('Request') }} #{{ $order->sourcing_request_id ?? $order->quotation->sourcing_request_id }}
+                                                    </div>
                                                     <div class="text-[10px] text-slate-400">
                                                         {{ $order->created_at->format('d/m/Y') }}
                                                     </div>

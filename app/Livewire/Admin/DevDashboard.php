@@ -53,6 +53,12 @@ class DevDashboard extends Component
 
     public $logs = '';
 
+    public array $laravelLogSummary = [];
+
+    public array $nginxLogSummary = [];
+
+    public array $nginxLogs = [];
+
     public $queueSize = 0;
 
     public $failedJobs = 0;
@@ -893,36 +899,217 @@ class DevDashboard extends Component
 
     public $failedJobsList = [];
 
+    protected function latestExistingLogPath(array $candidates, array $globPatterns = []): ?string
+    {
+        foreach ($candidates as $candidate) {
+            if (File::exists($candidate)) {
+                return $candidate;
+            }
+        }
+
+        $matches = [];
+        foreach ($globPatterns as $pattern) {
+            foreach ((array) File::glob($pattern) as $file) {
+                if (File::exists($file)) {
+                    $matches[] = $file;
+                }
+            }
+        }
+
+        if (empty($matches)) {
+            return null;
+        }
+
+        usort($matches, function (string $left, string $right) {
+            return (File::lastModified($right) ?? 0) <=> (File::lastModified($left) ?? 0);
+        });
+
+        return $matches[0] ?? null;
+    }
+
+    protected function tailLogFile(string $path, int $limit = 200): array
+    {
+        if (! File::exists($path)) {
+            return [];
+        }
+
+        $content = trim((string) File::get($path));
+        if ($content === '') {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('trim', array_slice(preg_split('/\r\n|\r|\n/', $content) ?: [], -$limit))));
+    }
+
+    protected function parseLaravelLogLine(string $line): array
+    {
+        $level = 'info';
+        if (preg_match('/\.(ERROR|CRITICAL|ALERT|EMERGENCY)/i', $line)) {
+            $level = 'error';
+        } elseif (preg_match('/\.(WARNING|WARN)/i', $line)) {
+            $level = 'warning';
+        }
+
+        $requestId = null;
+        if (preg_match('/request_id["\'\s:]+([a-zA-Z0-9_-]{8,})/i', $line, $match)) {
+            $requestId = $match[1];
+        }
+
+        return [
+            'source' => 'laravel',
+            'level' => $level,
+            'request_id' => $requestId,
+            'text' => $line,
+        ];
+    }
+
+    protected function parseNginxAccessLogLine(string $line): ?array
+    {
+        $pattern = '/^(?<ip>\S+) \S+ \S+ \[(?<timestamp>[^\]]+)\] "(?<method>[A-Z]+) (?<path>.*?) (?<protocol>HTTP\/[0-9.]+)" (?<status>\d{3}|0) (?<bytes>\S+)(?: "(?<referrer>[^"]*)" "(?<agent>[^"]*)")?/';
+        if (! preg_match($pattern, $line, $match)) {
+            return null;
+        }
+
+        $status = (int) ($match['status'] ?? 0);
+        $statusGroup = 'success';
+        $level = 'info';
+        if ($status === 0) {
+            $statusGroup = 'zero';
+            $level = 'error';
+        } elseif ($status >= 500) {
+            $statusGroup = 'server_error';
+            $level = 'error';
+        } elseif ($status >= 400) {
+            $statusGroup = 'client_error';
+            $level = 'warning';
+        } elseif ($status >= 300) {
+            $statusGroup = 'redirect';
+            $level = 'info';
+        }
+
+        return [
+            'source' => 'nginx_access',
+            'level' => $level,
+            'status' => $status,
+            'status_group' => $statusGroup,
+            'method' => $match['method'] ?? 'GET',
+            'path' => $match['path'] ?? '/',
+            'timestamp' => $match['timestamp'] ?? null,
+            'summary' => ($match['method'] ?? 'GET').' '.($match['path'] ?? '/').' '.$status,
+            'text' => $line,
+        ];
+    }
+
+    protected function parseNginxErrorLogLine(string $line): array
+    {
+        $level = 'error';
+        if (preg_match('/\[(notice|info)\]/i', $line)) {
+            $level = 'info';
+        } elseif (preg_match('/\[(warn|warning)\]/i', $line)) {
+            $level = 'warning';
+        }
+
+        return [
+            'source' => 'nginx_error',
+            'level' => $level,
+            'status' => null,
+            'status_group' => $level === 'info' ? 'info' : 'server_error',
+            'method' => null,
+            'path' => null,
+            'timestamp' => null,
+            'summary' => 'Nginx '.$level,
+            'text' => $line,
+        ];
+    }
+
+    public function loadNginxLogs(): void
+    {
+        $accessPath = $this->latestExistingLogPath(
+            [
+                storage_path('logs/nginx-access.log'),
+                storage_path('logs/nginx_access.log'),
+                storage_path('logs/nginx/access.log'),
+                '/var/log/nginx/access.log',
+                '/var/log/nginx/access.log.1',
+            ],
+            [
+                storage_path('logs/nginx-access-*.log'),
+                storage_path('logs/nginx/access*.log'),
+                '/var/log/nginx/access.log*',
+            ]
+        );
+
+        $errorPath = $this->latestExistingLogPath(
+            [
+                storage_path('logs/nginx-error.log'),
+                storage_path('logs/nginx_error.log'),
+                storage_path('logs/nginx/error.log'),
+                '/var/log/nginx/error.log',
+                '/var/log/nginx/error.log.1',
+            ],
+            [
+                storage_path('logs/nginx-error-*.log'),
+                storage_path('logs/nginx/error*.log'),
+                '/var/log/nginx/error.log*',
+            ]
+        );
+
+        $accessEntries = collect($accessPath ? $this->tailLogFile($accessPath, 200) : [])
+            ->map(fn (string $line) => $this->parseNginxAccessLogLine($line))
+            ->filter()
+            ->values();
+
+        $errorEntries = collect($errorPath ? $this->tailLogFile($errorPath, 120) : [])
+            ->map(fn (string $line) => $this->parseNginxErrorLogLine($line))
+            ->values();
+
+        $this->nginxLogs = $accessEntries
+            ->merge($errorEntries)
+            ->take(250)
+            ->values()
+            ->toArray();
+
+        $this->nginxLogSummary = [
+            'success' => $accessEntries->where('status_group', 'success')->count(),
+            'redirect' => $accessEntries->where('status_group', 'redirect')->count(),
+            'client_error' => $accessEntries->where('status_group', 'client_error')->count(),
+            'server_error' => $accessEntries->where('status_group', 'server_error')->count(),
+            'zero_status' => $accessEntries->where('status_group', 'zero')->count(),
+            'error_lines' => $errorEntries->filter(fn (array $row) => in_array($row['level'] ?? 'error', ['warning', 'error'], true))->count(),
+        ];
+    }
+
     public function fetchLogs()
     {
-        $logPath = storage_path('logs/laravel.log');
-        if (! File::exists($logPath)) {
-            $this->parsedLogs = [['text' => 'Log file not found.', 'level' => 'info']];
+        $logPath = $this->latestExistingLogPath(
+            [
+                storage_path('logs/laravel.log'),
+                storage_path('logs/errors.log'),
+                storage_path('logs/errors-'.now()->format('Y-m-d').'.log'),
+            ],
+            [
+                storage_path('logs/laravel-*.log'),
+                storage_path('logs/errors-*.log'),
+            ]
+        );
+        if (! $logPath || ! File::exists($logPath)) {
+            $this->parsedLogs = [['text' => 'Log file not found.', 'level' => 'info', 'source' => 'laravel']];
+            $this->laravelLogSummary = ['info' => 0, 'warning' => 0, 'error' => 0];
+            $this->loadNginxLogs();
 
             return;
         }
 
-        $content = File::get($logPath);
-        $lines = array_slice(explode("\n", trim($content)), -200);
         $this->parsedLogs = [];
+        $this->laravelLogSummary = ['info' => 0, 'warning' => 0, 'error' => 0];
 
-        foreach ($lines as $line) {
-            if (empty(trim($line))) {
-                continue;
-            }
-
-            $level = 'info';
-            if (stripos($line, '.ERROR') !== false || stripos($line, '.CRITICAL') !== false || stripos($line, '.ALERT') !== false) {
-                $level = 'error';
-            } elseif (stripos($line, '.WARNING') !== false) {
-                $level = 'warning';
-            }
-
-            $this->parsedLogs[] = [
-                'text' => $line,
-                'level' => $level,
-            ];
+        foreach ($this->tailLogFile($logPath, 200) as $line) {
+            $entry = $this->parseLaravelLogLine($line);
+            $this->laravelLogSummary[$entry['level']] = ($this->laravelLogSummary[$entry['level']] ?? 0) + 1;
+            $this->parsedLogs[] = $entry;
         }
+
+        $this->loadNginxLogs();
     }
 
     public function fetchFailedJobs()
@@ -1060,7 +1247,7 @@ class DevDashboard extends Component
         }
 
         if (! $this->dbAllowWrite || ! $this->devGate(requirePassword: true)) {
-            $this->dispatch('show-error-toast', message: 'Activez l’écriture SQL + mot de passe pour modifier une cellule.');
+            $this->dispatch('show-error-toast', message: 'Activez lÔÇÖ├®criture SQL + mot de passe pour modifier une cellule.');
 
             return;
         }
@@ -1845,6 +2032,8 @@ class DevDashboard extends Component
 
     public function refreshPerformanceTab(): void
     {
+        $this->fetchLogs();
+
         $sorted = collect($this->debugQueries)->sortByDesc('time')->take(25)->values()->all();
         $this->performanceSlowQueries = $sorted;
 

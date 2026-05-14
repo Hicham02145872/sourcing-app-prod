@@ -114,6 +114,7 @@ class RefundRequestController extends Controller
 
                 $refundRequest = RefundRequest::create([
                     'sourcing_order_id' => $sourcingOrder->id,
+                    'sourcing_request_id' => $sourcingOrder->quotation->sourcing_request_id,
                     'user_id' => auth()->id(),
                     'assigned_to_admin_id' => $sourcingOrder->assigned_to_admin_id,
                     'type' => $validated['type'],

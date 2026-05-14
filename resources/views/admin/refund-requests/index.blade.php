@@ -184,6 +184,7 @@
                                                 </div>
                                                 <div class="ml-4">
                                                     <div class="text-sm font-bold text-slate-900">#{{ $request->sourcingOrder->display_id }}</div>
+                                                    <div class="text-[10px] text-slate-400 font-mono">{{ __('Request') }} #{{ $request->sourcing_request_id ?? $request->sourcingOrder->sourcing_request_id ?? $request->sourcingOrder->quotation->sourcing_request_id }}</div>
                                                     <div class="text-[11px] text-slate-500 font-medium">{{ $request->user->name }}</div>
                                                 </div>
                                             </div>

@@ -970,10 +970,28 @@
                                 <span>Laravel Log Stream</span>
                                 <span class="text-[9px] text-slate-400 font-mono">Last 200 Lines</span>
                             </h3>
-                            <div class="bg-slate-900 border border-slate-800 p-4 h-[500px] overflow-y-auto custom-scrollbar font-mono text-[10px] space-y-1">
+                            <div class="grid grid-cols-3 gap-2 text-[9px] font-black uppercase">
+                                <div class="bg-slate-900 text-white border border-slate-800 p-3">
+                                    <div class="text-slate-400">Info</div>
+                                    <div class="text-lg">{{ $laravelLogSummary['info'] ?? 0 }}</div>
+                                </div>
+                                <div class="bg-amber-50 text-amber-900 border border-amber-200 p-3">
+                                    <div class="text-amber-700">Warnings</div>
+                                    <div class="text-lg">{{ $laravelLogSummary['warning'] ?? 0 }}</div>
+                                </div>
+                                <div class="bg-rose-50 text-rose-900 border border-rose-200 p-3">
+                                    <div class="text-rose-700">Errors</div>
+                                    <div class="text-lg">{{ $laravelLogSummary['error'] ?? 0 }}</div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 p-4 h-[500px] overflow-y-auto custom-scrollbar font-mono text-[10px] space-y-2">
                                 @forelse($parsedLogs as $log)
-                                    <div class="{{ $log['level'] === 'error' ? 'text-rose-500 font-bold' : ($log['level'] === 'warning' ? 'text-amber-500' : 'text-slate-400') }}">
-                                        {{ $log['text'] }}
+                                    <div class="flex items-start gap-2 {{ $log['level'] === 'error' ? 'text-rose-400' : ($log['level'] === 'warning' ? 'text-amber-400' : 'text-slate-300') }}">
+                                        <span class="shrink-0 px-1.5 py-0.5 border {{ $log['level'] === 'error' ? 'border-rose-500 text-rose-300' : ($log['level'] === 'warning' ? 'border-amber-500 text-amber-300' : 'border-slate-600 text-slate-400') }}">{{ strtoupper($log['level'] ?? 'info') }}</span>
+                                        @if(!empty($log['request_id']))
+                                            <span class="shrink-0 px-1.5 py-0.5 border border-cyan-700 text-cyan-300">{{ $log['request_id'] }}</span>
+                                        @endif
+                                        <span class="break-all">{{ $log['text'] }}</span>
                                     </div>
                                 @empty
                                     <div class="text-slate-600 italic">Logs empty / No data stream</div>
@@ -1899,6 +1917,28 @@
                         <h2 class="text-xl font-black uppercase">Performance / Redis</h2>
                         <button wire:click="refreshPerformanceTab" class="bg-indigo-600 text-white px-4 py-2 text-[10px] font-black uppercase">Refresh</button>
                     </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                        <div class="bg-emerald-50 border border-emerald-200 p-4">
+                            <div class="text-[9px] font-black uppercase text-emerald-700">Laravel Info</div>
+                            <div class="text-2xl font-black text-emerald-900">{{ $laravelLogSummary['info'] ?? 0 }}</div>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 p-4">
+                            <div class="text-[9px] font-black uppercase text-amber-700">Laravel Warnings</div>
+                            <div class="text-2xl font-black text-amber-900">{{ $laravelLogSummary['warning'] ?? 0 }}</div>
+                        </div>
+                        <div class="bg-rose-50 border border-rose-200 p-4">
+                            <div class="text-[9px] font-black uppercase text-rose-700">Laravel Errors</div>
+                            <div class="text-2xl font-black text-rose-900">{{ $laravelLogSummary['error'] ?? 0 }}</div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-4 text-white">
+                            <div class="text-[9px] font-black uppercase text-slate-400">Nginx 0 / 4xx / 5xx</div>
+                            <div class="text-lg font-black text-emerald-300">{{ $nginxLogSummary['success'] ?? 0 }} 2xx</div>
+                            <div class="text-[10px] text-amber-300">{{ $nginxLogSummary['client_error'] ?? 0 }} 4xx</div>
+                            <div class="text-[10px] text-rose-300">{{ $nginxLogSummary['server_error'] ?? 0 }} 5xx</div>
+                            <div class="text-[10px] text-cyan-300">{{ $nginxLogSummary['zero_status'] ?? 0 }} status 0</div>
+                        </div>
+                    </div>
+
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="bg-slate-900 text-indigo-200 p-4 text-[10px] font-mono max-h-80 overflow-y-auto">
                             <div class="text-white font-black mb-2">Top requêtes (cycle Livewire courant)</div>
@@ -1909,12 +1949,58 @@
                         <div class="bg-amber-50 border border-amber-200 p-4 text-[10px]">
                             <div class="font-black uppercase mb-2">N+1 naïf (même SQL ≥40×)</div>
                             @forelse($performanceN1Hints as $sig => $cnt)
-                                <div class="mb-1 font-mono break-all"><span class="font-bold">{{ $cnt }}×</span> {{ Str::limit($sig, 120) }}</div>
+                                <div class="mb-1 font-mono break-all"><span class="font-bold">{{ $cnt }}×</span> {{ \Illuminate\Support\Str::limit($sig, 120) }}</div>
                             @empty
                                 <span class="text-slate-500">Rien à signaler sur ce cycle.</span>
                             @endforelse
                         </div>
                     </div>
+
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <section class="bg-white border border-slate-200 p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-xs font-black uppercase tracking-widest">Laravel logs</h3>
+                                <span class="text-[9px] text-slate-400 font-mono">Structured stream</span>
+                            </div>
+                            <div class="bg-slate-950 text-slate-200 p-3 h-[360px] overflow-y-auto custom-scrollbar font-mono text-[10px] space-y-2">
+                                @forelse($parsedLogs as $log)
+                                    <div class="flex items-start gap-2 {{ $log['level'] === 'error' ? 'text-rose-300' : ($log['level'] === 'warning' ? 'text-amber-300' : 'text-slate-300') }}">
+                                        <span class="shrink-0 px-1.5 py-0.5 border {{ $log['level'] === 'error' ? 'border-rose-500' : ($log['level'] === 'warning' ? 'border-amber-500' : 'border-slate-600') }}">{{ strtoupper($log['level'] ?? 'info') }}</span>
+                                        @if(!empty($log['request_id']))
+                                            <span class="shrink-0 px-1.5 py-0.5 border border-cyan-700 text-cyan-300">{{ $log['request_id'] }}</span>
+                                        @endif
+                                        <span class="break-all">{{ $log['text'] }}</span>
+                                    </div>
+                                @empty
+                                    <div class="text-slate-500 italic">No Laravel logs found.</div>
+                                @endforelse
+                            </div>
+                        </section>
+
+                        <section class="bg-white border border-slate-200 p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-xs font-black uppercase tracking-widest">Nginx logs</h3>
+                                <span class="text-[9px] text-slate-400 font-mono">Access + error</span>
+                            </div>
+                            <div class="bg-slate-950 text-slate-200 p-3 h-[360px] overflow-y-auto custom-scrollbar font-mono text-[10px] space-y-2">
+                                @forelse($nginxLogs as $log)
+                                    <div class="flex flex-wrap items-start gap-2 {{ $log['level'] === 'error' ? 'text-rose-300' : ($log['level'] === 'warning' ? 'text-amber-300' : 'text-slate-300') }}">
+                                        <span class="shrink-0 px-1.5 py-0.5 border border-slate-700 text-slate-400">{{ strtoupper(str_replace('_', ' ', $log['source'] ?? 'nginx')) }}</span>
+                                        @if(!empty($log['status']))
+                                            <span class="shrink-0 px-1.5 py-0.5 border {{ ($log['status_group'] ?? '') === 'zero' ? 'border-cyan-600 text-cyan-300' : (($log['status'] >= 500) ? 'border-rose-500 text-rose-300' : (($log['status'] >= 400) ? 'border-amber-500 text-amber-300' : 'border-emerald-500 text-emerald-300')) }}">{{ $log['status'] }}</span>
+                                        @endif
+                                        @if(!empty($log['method']) && !empty($log['path']))
+                                            <span class="shrink-0 px-1.5 py-0.5 border border-slate-700 text-slate-400">{{ $log['method'] }} {{ \Illuminate\Support\Str::limit($log['path'], 48) }}</span>
+                                        @endif
+                                        <span class="break-all">{{ $log['summary'] ?? $log['text'] }}</span>
+                                    </div>
+                                @empty
+                                    <div class="text-slate-500 italic">No Nginx logs found.</div>
+                                @endforelse
+                            </div>
+                        </section>
+                    </div>
+
                     <div class="bg-white border p-4 text-[10px] font-mono max-h-64 overflow-y-auto">
                         <div class="font-black uppercase mb-2">Redis INFO (extrait)</div>
                         <pre class="whitespace-pre-wrap">{{ json_encode($redisInfoSnippet, JSON_PRETTY_PRINT) }}</pre>

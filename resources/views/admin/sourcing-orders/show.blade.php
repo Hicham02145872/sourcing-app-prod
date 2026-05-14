@@ -43,6 +43,9 @@
                                 <span class="mx-1.5">/</span>
                                 <span class="font-medium text-slate-700">{{ $sourcingOrder->quotation->sourcingRequest->product_name ?? __('Unknown product') }}</span>
                             </nav>
+                            <div class="mt-2 text-[10px] text-slate-400 font-mono">
+                                {{ __('Request') }} #{{ $sourcingOrder->sourcing_request_id ?? $sourcingOrder->quotation->sourcing_request_id }}
+                            </div>
                         </div>
                     </div>
                     

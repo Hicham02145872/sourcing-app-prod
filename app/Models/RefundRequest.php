@@ -11,6 +11,7 @@ class RefundRequest extends Model
 
     protected $fillable = [
         'sourcing_order_id',
+        'sourcing_request_id',
         'user_id',
         'assigned_to_admin_id',
         'type',
@@ -38,6 +39,11 @@ class RefundRequest extends Model
     public function sourcingOrder()
     {
         return $this->belongsTo(SourcingOrder::class);
+    }
+
+    public function sourcingRequest()
+    {
+        return $this->belongsTo(SourcingRequest::class);
     }
 
     public function user()

@@ -27,7 +27,18 @@ class SourcingOrderController extends Controller
     public function index(Request $request): View
     {
         $this->authorize('viewAny', SourcingOrder::class);
-        $query = SourcingOrder::with('user', 'quotation.sourcingRequest', 'assignedAdmin')->orderBy('id', 'desc');
+        $query = SourcingOrder::with('user', 'quotation.sourcingRequest', 'assignedAdmin')
+            ->orderByRaw("CASE
+                WHEN sourcing_orders.status = 'pending_payment'
+                    AND EXISTS (
+                        SELECT 1
+                        FROM quotations
+                        WHERE quotations.id = sourcing_orders.quotation_id
+                          AND quotations.status = 'accepted'
+                    ) THEN 0
+                ELSE 1
+            END")
+            ->orderBy('id', 'desc');
 
         // Scope visibility: Regular admins now see ALL orders (read-only for others)
         // Sorting handles priority display
