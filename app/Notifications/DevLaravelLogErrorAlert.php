@@ -3,8 +3,8 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class DevLaravelLogErrorAlert extends Notification
 {
@@ -26,26 +26,15 @@ class DevLaravelLogErrorAlert extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $count = count($this->errors);
-        $recentErrors = array_slice($this->errors, 0, 5);
-
-        $mail = (new MailMessage)
+        return (new MailMessage)
             ->subject('[Dev] Laravel log error detected')
-            ->greeting('Hello,')
-            ->line('An error was detected in the '.$this->logSource.' logs.')
-            ->line('Environment: '.config('app.env'))
-            ->line('Error count: '.$count);
-
-        foreach ($recentErrors as $error) {
-            $mail->line($error['text'] ?? 'Unknown error');
-        }
-
-        $mail->line('Please review the Dev Dashboard for more details.');
-
-        if (config('app.url')) {
-            $mail->action('Open Dev Dashboard', url('/admin/dev-dashboard'));
-        }
-
-        return $mail;
+            ->view('emails.dev-laravel-log-error-alert', [
+                'count' => count($this->errors),
+                'errors' => array_slice($this->errors, 0, 10),
+                'logSource' => $this->logSource,
+                'environment' => config('app.env'),
+                'dashboardUrl' => url('/admin/dev-dashboard'),
+                'appName' => config('app.name', 'Laravel'),
+            ]);
     }
 }

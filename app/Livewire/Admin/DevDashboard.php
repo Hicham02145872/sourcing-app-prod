@@ -55,6 +55,7 @@ class DevDashboard extends Component
     public $logs = '';
 
     public array $laravelLogSummary = [];
+    public bool $laravelLogEmailAlertsEnabled = true;
 
     public array $nginxLogSummary = [];
 
@@ -241,6 +242,7 @@ class DevDashboard extends Component
 
     public function mount()
     {
+        $this->laravelLogEmailAlertsEnabled = (bool) session()->get('dev_laravel_log_email_alerts_enabled', true);
         $this->loadData();
         $this->queryHistory = session()->get('dev_query_history', []);
         $this->captureServerStats();
@@ -254,6 +256,11 @@ class DevDashboard extends Component
     }
 
     public function updatedActiveTab(string $value): void
+    public function updatedLaravelLogEmailAlertsEnabled($value): void
+    {
+        $this->laravelLogEmailAlertsEnabled = (bool) $value;
+        session()->put('dev_laravel_log_email_alerts_enabled', $this->laravelLogEmailAlertsEnabled);
+    }
     {
         match ($value) {
             'errors' => $this->loadErrorsDailyLog(),
@@ -1117,13 +1124,17 @@ class DevDashboard extends Component
 
     protected function sendLaravelLogErrorAlertIfNeeded(string $logPath, array $parsedLogs): void
     {
+        if (! $this->laravelLogEmailAlertsEnabled) {
+            return;
+        }
+
         $user = Auth::user();
         if (! $user || ! method_exists($user, 'isDeveloper') || ! $user->isDeveloper()) {
             return;
         }
 
         $errors = array_values(array_filter($parsedLogs, function (array $entry) {
-            return ($entry['level'] ?? 'info') === 'error';
+            return in_array(($entry['level'] ?? 'info'), ['error', 'critical'], true);
         }));
 
         if (empty($errors)) {

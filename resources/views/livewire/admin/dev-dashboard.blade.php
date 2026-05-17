@@ -33,6 +33,10 @@
                     </select>
                 </label>
                 <label class="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
+                    <input type="checkbox" wire:model.live="laravelLogEmailAlertsEnabled" class="rounded border-slate-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500" />
+                    <span>Laravel log email alerts</span>
+                </label>
+                <label class="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
                     <span>Mot de passe conf.</span>
                     <input type="password" wire:model="devSensitivePassword" autocomplete="current-password" placeholder="Actions sensibles" class="bg-slate-800 border border-slate-600 text-slate-200 text-[10px] px-2 py-1 w-40 font-mono rounded-none" />
                 </label>
@@ -248,25 +252,34 @@
                                             @endif
                                         </td>
                                         <td class="px-4 py-3">
-                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2" x-data="{ showPassword: false }">
                                                 <input
                                                     wire:model.defer="passwordInputs.{{ $user->id }}"
-                                                    type="password"
+                                                    :type="showPassword ? 'text' : 'password'"
                                                     placeholder="New password"
                                                     class="bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none"
                                                 >
                                                 <input
                                                     wire:model.defer="passwordConfirmations.{{ $user->id }}"
-                                                    type="password"
+                                                    :type="showPassword ? 'text' : 'password'"
                                                     placeholder="Confirm password"
                                                     class="bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none"
                                                 >
-                                                <button
-                                                    wire:click="updateUserPassword({{ $user->id }})"
-                                                    class="bg-slate-900 text-white px-3 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-none"
-                                                >
-                                                    Save Password
-                                                </button>
+                                                <div class="flex gap-2">
+                                                    <button
+                                                        type="button"
+                                                        @click="showPassword = !showPassword"
+                                                        class="bg-white border border-slate-200 text-slate-700 px-3 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-none"
+                                                    >
+                                                        <span x-text="showPassword ? 'Hide' : 'Show'"></span>
+                                                    </button>
+                                                    <button
+                                                        wire:click="updateUserPassword({{ $user->id }})"
+                                                        class="bg-slate-900 text-white px-3 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-none"
+                                                    >
+                                                        Save Password
+                                                    </button>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
