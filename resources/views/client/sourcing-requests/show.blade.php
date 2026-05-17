@@ -418,6 +418,42 @@
                                     </div>
                                 @endif
 
+                                @if($sourcingRequest->quotation->comments)
+                                    <div class="mb-8 p-4 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-500 rounded-r-lg shadow-sm">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-6 h-6 text-amber-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <div>
+                                                <p class="text-sm font-bold text-amber-800 dark:text-amber-400 uppercase mb-1">{{ __('Admin Comment') }}</p>
+                                                <p class="text-base text-amber-700 dark:text-amber-300 italic font-medium">
+                                                    "{{ $sourcingRequest->quotation->comments }}"
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if($sourcingRequest->quotation->negotiation_notes || $sourcingRequest->quotation->admin_negotiation_reply)
+                                    <div class="mb-8 p-4 bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-500 rounded-r-lg shadow-sm space-y-3">
+                                        <p class="text-sm font-bold text-blue-800 dark:text-blue-400 uppercase">{{ __('Negotiation Exchange') }}</p>
+
+                                        @if($sourcingRequest->quotation->negotiation_notes)
+                                            <div>
+                                                <p class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase mb-1">{{ __('Your Note') }}</p>
+                                                <p class="text-sm text-blue-700 dark:text-blue-300 italic">"{{ $sourcingRequest->quotation->negotiation_notes }}"</p>
+                                            </div>
+                                        @endif
+
+                                        @if($sourcingRequest->quotation->admin_negotiation_reply)
+                                            <div>
+                                                <p class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase mb-1">{{ __('Admin Reply') }}</p>
+                                                <p class="text-sm text-blue-700 dark:text-blue-300 italic">"{{ $sourcingRequest->quotation->admin_negotiation_reply }}"</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+
                                 {{-- Decision Center --}}
                                 @if($sourcingRequest->quotation->order === null && !in_array($sourcingRequest->quotation->status, ['negotiating', 'rejected', 'accepted']))
                                     <div x-data="{ showNegotiateModal: false }">

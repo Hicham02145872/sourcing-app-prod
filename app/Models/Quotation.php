@@ -36,8 +36,10 @@ class Quotation extends Model
         'estimated_net_profit',
         'weight_unit',
         'negotiation_notes',
+        'admin_negotiation_reply',
         'actual_sourcing_location',
         'sourcing_note',
+        'comments',
         'real_product_image',
     ];
 

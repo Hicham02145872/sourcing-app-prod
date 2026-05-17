@@ -137,6 +137,14 @@
                                     {{ __('This note will be visible to the client to help them understand the change.') }}
                                 </p>
                             </div>
+
+                            <div class="mt-6">
+                                <label for="comments" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Comments') }}</label>
+                                <textarea id="comments" name="comments" rows="3"
+                                    class="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                                    placeholder="{{ __('Add any internal notes or clarifications for this quotation...') }}">{{ old('comments') }}</textarea>
+                                <p class="mt-1 text-[10px] text-slate-400">{{ __('Visible to the client in quotation details.') }}</p>
+                            </div>
                         </div>
                         
                         <!-- Subsection: Real Quality Image -->

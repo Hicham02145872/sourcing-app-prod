@@ -138,6 +138,29 @@
                                     {{ __('This note will be visible to the client to help them understand the change.') }}
                                 </p>
                             </div>
+
+                            <div class="mt-6">
+                                <label for="comments" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Comments') }}</label>
+                                <textarea id="comments" name="comments" rows="3"
+                                    class="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                                    placeholder="{{ __('Add any internal notes or clarifications for this quotation...') }}">{{ old('comments', $quotation->comments) }}</textarea>
+                                <p class="mt-1 text-[10px] text-slate-400">{{ __('Visible to the client in quotation details.') }}</p>
+                            </div>
+
+                            @if($quotation->negotiation_notes)
+                                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <label for="admin_negotiation_reply" class="block text-[10px] font-bold text-blue-700 uppercase mb-2">
+                                        {{ __('Admin Reply To Client Negotiation') }}
+                                    </label>
+                                    <p class="mb-2 text-xs text-blue-700 italic">
+                                        "{{ $quotation->negotiation_notes }}"
+                                    </p>
+                                    <textarea id="admin_negotiation_reply" name="admin_negotiation_reply" rows="3"
+                                        class="block w-full px-3 py-2 text-sm bg-white border border-blue-200 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                                        placeholder="{{ __('Write a clear response to the client note...') }}">{{ old('admin_negotiation_reply', $quotation->admin_negotiation_reply) }}</textarea>
+                                    <p class="mt-1 text-[10px] text-blue-600/80">{{ __('Visible to the client in negotiation details.') }}</p>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Subsection: Real Quality Image -->

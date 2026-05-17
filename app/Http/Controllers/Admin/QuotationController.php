@@ -136,6 +136,7 @@ class QuotationController extends Controller
             'currency' => 'required|string|max:3',
             'actual_sourcing_location' => 'required|string|in:china,dubai',
             'sourcing_note' => 'nullable|string',
+            'comments' => 'nullable|string',
             // Financial estimation fields (optional)
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
@@ -206,6 +207,7 @@ class QuotationController extends Controller
             'estimated_shipping_cost' => $validated['estimated_shipping_cost'] ?? null,
             'estimated_other_costs' => $validated['estimated_other_costs'] ?? null,
             'sourcing_note' => $validated['sourcing_note'] ?? null,
+            'comments' => $validated['comments'] ?? null,
             'real_product_image' => $realProductImagePath,
             // estimated_net_profit will be calculated by QuotationObserver
         ]);
@@ -279,6 +281,8 @@ class QuotationController extends Controller
             'currency' => 'required|string|max:3',
             'actual_sourcing_location' => 'required|string|in:china,dubai',
             'sourcing_note' => 'nullable|string',
+            'comments' => 'nullable|string',
+            'admin_negotiation_reply' => 'nullable|string|max:1000',
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
@@ -333,6 +337,8 @@ class QuotationController extends Controller
             'estimated_shipping_cost' => $validated['estimated_shipping_cost'] ?? null,
             'estimated_other_costs' => $validated['estimated_other_costs'] ?? null,
             'sourcing_note' => $validated['sourcing_note'] ?? null,
+            'comments' => $validated['comments'] ?? null,
+            'admin_negotiation_reply' => $validated['admin_negotiation_reply'] ?? null,
             'real_product_image' => $realProductImagePath,
         ]);
 
