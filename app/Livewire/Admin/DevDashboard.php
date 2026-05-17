@@ -256,11 +256,6 @@ class DevDashboard extends Component
     }
 
     public function updatedActiveTab(string $value): void
-    public function updatedLaravelLogEmailAlertsEnabled($value): void
-    {
-        $this->laravelLogEmailAlertsEnabled = (bool) $value;
-        session()->put('dev_laravel_log_email_alerts_enabled', $this->laravelLogEmailAlertsEnabled);
-    }
     {
         match ($value) {
             'errors' => $this->loadErrorsDailyLog(),
@@ -271,6 +266,12 @@ class DevDashboard extends Component
             'rate_limits' => $this->loadRateLimiterOverview(),
             default => null,
         };
+    }
+
+    public function updatedLaravelLogEmailAlertsEnabled($value): void
+    {
+        $this->laravelLogEmailAlertsEnabled = (bool) $value;
+        session()->put('dev_laravel_log_email_alerts_enabled', $this->laravelLogEmailAlertsEnabled);
     }
 
     public function captureServerStats(): void
