@@ -54,18 +54,33 @@ def create_driver(headless=True):
         service = Service(executable_path=driver_path)
         driver = webdriver.Chrome(service=service, options=options)
     else:
-        try:
-            from webdriver_manager.chrome import ChromeDriverManager
-            driver_install_path = ChromeDriverManager().install()
-            driver = webdriver.Chrome(
-                service=Service(executable_path=driver_install_path), options=options
-            )
-        except Exception:
-            driver = webdriver.Chrome(options=options)
+        driver = webdriver.Chrome(options=options)
 
     driver.execute_script(
         "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
     )
+    try:
+        driver.execute_cdp_cmd("Network.enable", {})
+        driver.execute_cdp_cmd(
+            "Network.setBlockedURLs",
+            {
+                "urls": [
+                    "*.css",
+                    "*.woff",
+                    "*.woff2",
+                    "*.ttf",
+                    "*.otf",
+                    "*.png",
+                    "*.jpg",
+                    "*.jpeg",
+                    "*.gif",
+                    "*.webp",
+                    "*.svg",
+                ]
+            },
+        )
+    except Exception:
+        pass
     return driver
 
 
@@ -126,7 +141,8 @@ def get_ups_status(tracking_number, headless=True):
     try:
         url = f"https://www.ups.com/track?tracknum={tracking_number}"
         driver.get(url)
-        time.sleep(5)
+        wait = WebDriverWait(driver, 15)
+        wait.until(lambda d: d.find_element(By.TAG_NAME, "body").text.strip())
 
         body_text = driver.find_element(By.TAG_NAME, "body").text
 

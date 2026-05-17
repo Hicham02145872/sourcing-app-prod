@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
 
 def analyze_ydl(tracking_number):
     options = Options()
@@ -18,12 +19,34 @@ def analyze_ydl(tracking_number):
         options.binary_location = chrome_binary
 
     driver = webdriver.Chrome(options=options)
+    try:
+        driver.execute_cdp_cmd("Network.enable", {})
+        driver.execute_cdp_cmd(
+            "Network.setBlockedURLs",
+            {
+                "urls": [
+                    "*.css",
+                    "*.woff",
+                    "*.woff2",
+                    "*.ttf",
+                    "*.otf",
+                    "*.png",
+                    "*.jpg",
+                    "*.jpeg",
+                    "*.gif",
+                    "*.webp",
+                    "*.svg",
+                ]
+            },
+        )
+    except Exception:
+        pass
     
     try:
         url = f"https://ydl.itdida.com/query.xhtml?danHao={tracking_number}"
         print(f"--- Analyse de l'URL : {url} ---")
         driver.get(url)
-        time.sleep(5) # On laisse le temps au JS de s'exécuter
+        WebDriverWait(driver, 15).until(lambda d: len(d.find_elements(By.TAG_NAME, "table")) > 0)
 
         # 1. Analyse des tableaux présents
         tables = driver.find_elements(By.TAG_NAME, "table")

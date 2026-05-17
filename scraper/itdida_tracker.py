@@ -8,6 +8,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from typing import List, Dict
 
 class OptimizedOrderTrackerSelenium:
@@ -54,14 +56,31 @@ class OptimizedOrderTrackerSelenium:
             service = Service(executable_path=driver_path)
             self.driver = webdriver.Chrome(service=service, options=options)
         else:
-            try:
-                from webdriver_manager.chrome import ChromeDriverManager
-                driver_install_path = ChromeDriverManager().install()
-                self.driver = webdriver.Chrome(service=Service(executable_path=driver_install_path), options=options)
-            except Exception:
-                self.driver = webdriver.Chrome(options=options)
+            self.driver = webdriver.Chrome(options=options)
 
         self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        try:
+            self.driver.execute_cdp_cmd("Network.enable", {})
+            self.driver.execute_cdp_cmd(
+                "Network.setBlockedURLs",
+                {
+                    "urls": [
+                        "*.css",
+                        "*.woff",
+                        "*.woff2",
+                        "*.ttf",
+                        "*.otf",
+                        "*.png",
+                        "*.jpg",
+                        "*.jpeg",
+                        "*.gif",
+                        "*.webp",
+                        "*.svg",
+                    ]
+                },
+            )
+        except Exception:
+            pass
 
     def get_order_status(self, tracking_number: str) -> Dict:
         if self.driver is None:
@@ -70,16 +89,14 @@ class OptimizedOrderTrackerSelenium:
         base_url = "https://ydl.itdida.com/query.xhtml"
         try:
             self.driver.get(f"{base_url}?danHao={tracking_number}")
-            
-            # WAF and JS Wait
-            time.sleep(10)
+            wait = WebDriverWait(self.driver, 15)
+            wait.until(lambda driver: len(driver.find_elements(By.TAG_NAME, "table")) > 0)
 
             # 1. Expand all rows to see detailed history
             togglers = self.driver.find_elements(By.CLASS_NAME, "ui-row-toggler")
             for t in togglers:
                 try:
                     self.driver.execute_script("arguments[0].click();", t)
-                    time.sleep(1)
                 except:
                     pass
 

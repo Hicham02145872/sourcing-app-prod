@@ -49,22 +49,38 @@ class ChoiceXPTracker:
         if chrome_binary and os.path.exists(chrome_binary):
             options.binary_location = chrome_binary
         
-        # Priority: CHROMEDRIVER_PATH > webdriver-manager > default fallback
+        # Priority: CHROMEDRIVER_PATH > Selenium Manager fallback
         driver_path = os.environ.get('CHROMEDRIVER_PATH')
         if driver_path and os.path.exists(driver_path):
             service = Service(executable_path=driver_path)
             self.driver = webdriver.Chrome(service=service, options=options)
         else:
-            try:
-                from webdriver_manager.chrome import ChromeDriverManager
-                driver_install_path = ChromeDriverManager().install()
-                self.driver = webdriver.Chrome(service=Service(executable_path=driver_install_path), options=options)
-            except Exception as e:
-                # Last resort fallback
-                self.driver = webdriver.Chrome(options=options)
+            self.driver = webdriver.Chrome(options=options)
         
         # Hide automation flag property
         self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        try:
+            self.driver.execute_cdp_cmd("Network.enable", {})
+            self.driver.execute_cdp_cmd(
+                "Network.setBlockedURLs",
+                {
+                    "urls": [
+                        "*.css",
+                        "*.woff",
+                        "*.woff2",
+                        "*.ttf",
+                        "*.otf",
+                        "*.png",
+                        "*.jpg",
+                        "*.jpeg",
+                        "*.gif",
+                        "*.webp",
+                        "*.svg",
+                    ]
+                },
+            )
+        except Exception:
+            pass
 
     def scrape(self, tracking_number):
         if not self.driver:
@@ -82,9 +98,6 @@ class ChoiceXPTracker:
             
             search_btn = self.driver.find_element(By.ID, "searchBtn")
             search_btn.click()
-            
-            time.sleep(2)
-            
             wait.until(EC.presence_of_element_located((By.CLASS_NAME, "cd-timeline-block")))
             
             blocks = self.driver.find_elements(By.CLASS_NAME, "cd-timeline-block")
