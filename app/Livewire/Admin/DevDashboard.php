@@ -10,6 +10,7 @@ use App\Models\AuditLog;
 use App\Models\WebhookEvent;
 use App\Models\DevQueryLog;
 use App\Notifications\DevPingNotification;
+use App\Notifications\DevLaravelLogErrorAlert;
 use App\Services\BackupService;
 use App\Services\Dev\ArtisanWhitelist;
 use App\Services\Dev\AuditLogger;
@@ -1109,7 +1110,53 @@ class DevDashboard extends Component
             $this->parsedLogs[] = $entry;
         }
 
+        $this->sendLaravelLogErrorAlertIfNeeded($logPath, $this->parsedLogs);
+
         $this->loadNginxLogs();
+    }
+
+    protected function sendLaravelLogErrorAlertIfNeeded(string $logPath, array $parsedLogs): void
+    {
+        $user = Auth::user();
+        if (! $user || ! method_exists($user, 'isDeveloper') || ! $user->isDeveloper()) {
+            return;
+        }
+
+        $errors = array_values(array_filter($parsedLogs, function (array $entry) {
+            return ($entry['level'] ?? 'info') === 'error';
+        }));
+
+        if (empty($errors)) {
+            return;
+        }
+
+        $fingerprintSource = $logPath.'|'.implode('||', array_slice(array_map(function (array $entry) {
+            return (string) ($entry['text'] ?? '');
+        }, $errors), 0, 10));
+        $fingerprint = hash('sha256', $fingerprintSource);
+        $cacheKey = 'dev_laravel_log_error_alert:'.$user->id;
+
+        if (Cache::get($cacheKey) === $fingerprint) {
+            return;
+        }
+
+        try {
+            $user->notify(new DevLaravelLogErrorAlert($errors, basename($logPath)));
+            Cache::put($cacheKey, $fingerprint, now()->addMinutes(30));
+            Log::info('Dev Laravel log error alert sent', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error_count' => count($errors),
+                'log_source' => basename($logPath),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Dev Laravel log error alert failed', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error_count' => count($errors),
+                'exception' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function fetchFailedJobs()
