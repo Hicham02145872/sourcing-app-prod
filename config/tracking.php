@@ -170,4 +170,24 @@ return [
         'choicexp' => 'Choice XP',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Selenium HTTP Server (P1.1 — persistent Chrome)
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, AbstractSeleniumTrackingService calls the local Flask server
+    | (scraper/tracking_server.py) instead of spawning a new Python process per
+    | request.  Set TRACKING_SELENIUM_SERVER_ENABLED=true on the VPS after the
+    | server is running and healthy (curl http://127.0.0.1:5001/health).
+    |
+    | If the server is unreachable a ConnectionException is caught and the
+    | request falls back automatically to the legacy process-based mode.
+    |
+    */
+    'selenium_server' => [
+        'enabled'  => env('TRACKING_SELENIUM_SERVER_ENABLED', false),
+        'base_url' => env('TRACKING_SELENIUM_SERVER_URL', 'http://127.0.0.1:5001'),
+        'timeout'  => (int) env('TRACKING_SELENIUM_SERVER_TIMEOUT', 30),
+    ],
+
 ];

@@ -22,11 +22,11 @@ class ChoiceXPTracker:
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--disable-setuid-sandbox")
-            options.add_argument("--remote-debugging-port=9222")
             options.add_argument("--disable-software-rasterizer")
+            options.add_argument("--remote-debugging-pipe")
             options.add_argument("--disable-extensions")
             options.add_argument("--ash-no-coredump")
-            options.add_argument("--user-data-dir=/tmp/chrome-user-data-" + str(time.time()))
+            options.add_argument("--user-data-dir=/tmp/chrome-choicexp")
             options.add_argument("--remote-debugging-pipe")
         
         # Anti-detection options
@@ -141,15 +141,23 @@ class ChoiceXPTracker:
 
         except Exception as e:
             return {"success": False, "error": str(e)}
-        finally:
-            if self.driver:
+
+    def close(self):
+        if self.driver:
+            try:
                 self.driver.quit()
+            except Exception:
+                pass
+            self.driver = None
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ChoiceXP Scraper")
     parser.add_argument("tracking_number", help="The tracking number")
     args = parser.parse_args()
-    
+
     tracker = ChoiceXPTracker(headless=True)
-    result = tracker.scrape(args.tracking_number)
-    print(json.dumps(result, ensure_ascii=False))
+    try:
+        result = tracker.scrape(args.tracking_number)
+        print(json.dumps(result, ensure_ascii=False))
+    finally:
+        tracker.close()

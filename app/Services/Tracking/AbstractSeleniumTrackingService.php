@@ -2,6 +2,7 @@
 
 namespace App\Services\Tracking;
 
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 
@@ -70,12 +71,76 @@ abstract class AbstractSeleniumTrackingService implements TrackingServiceInterfa
     }
 
     /**
-     * Run the Python script and return the parsed result.
+     * Run the Python scraper and return the parsed result.
+     * Uses the persistent HTTP server when enabled, falls back to process mode.
      */
     protected function runScript(string $trackingNumber): array
     {
+        if (config('tracking.selenium_server.enabled')) {
+            return $this->runViaHttpServer($trackingNumber);
+        }
+
+        return $this->runViaProcess($trackingNumber);
+    }
+
+    /**
+     * Call the local Flask tracking server (P1.1 — persistent Chrome).
+     * Falls back to process mode on connection failure so deployments are safe.
+     */
+    protected function runViaHttpServer(string $trackingNumber): array
+    {
+        $provider = $this->getServerProviderKey();
+        $baseUrl  = rtrim(config('tracking.selenium_server.base_url', 'http://127.0.0.1:5001'), '/');
+        $timeout  = (int) config('tracking.selenium_server.timeout', 30);
+        $url      = "{$baseUrl}/track/{$provider}";
+
         try {
-            Log::info("Starting {$this->getProviderName()} tracking for: {$trackingNumber}");
+            Log::info("Starting {$this->getProviderName()} tracking via HTTP server for: {$trackingNumber}");
+
+            $response = Http::timeout($timeout)
+                ->post($url, ['tracking_number' => $trackingNumber]);
+
+            if ($response->failed()) {
+                Log::error("{$this->getProviderName()} HTTP Server returned {$response->status()}: ".$response->body());
+
+                return [
+                    'success' => false,
+                    'error'   => "Selenium server HTTP {$response->status()}: ".$response->body(),
+                ];
+            }
+
+            $decoded = $response->json();
+
+            if (! is_array($decoded)) {
+                Log::error("{$this->getProviderName()} Invalid JSON from server");
+
+                return ['success' => false, 'error' => 'Invalid JSON from tracking server'];
+            }
+
+            return $this->parseScriptOutput($decoded);
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::warning(
+                "{$this->getProviderName()} Selenium server unreachable, falling back to process mode: "
+                .$e->getMessage()
+            );
+
+            return $this->runViaProcess($trackingNumber);
+
+        } catch (\Exception $e) {
+            Log::error("{$this->getProviderName()} HTTP Server Exception: ".$e->getMessage());
+
+            return ['success' => false, 'error' => 'Server exception: '.$e->getMessage()];
+        }
+    }
+
+    /**
+     * Legacy mode: spawn a Python process per request.
+     */
+    protected function runViaProcess(string $trackingNumber): array
+    {
+        try {
+            Log::info("Starting {$this->getProviderName()} tracking (process mode) for: {$trackingNumber}");
 
             $result = Process::env($this->getEnvironment())
                 ->timeout(120)
@@ -85,8 +150,8 @@ abstract class AbstractSeleniumTrackingService implements TrackingServiceInterfa
                 Log::error("{$this->getProviderName()} Script Error: ".$result->errorOutput());
 
                 return [
-                    'success' => false,
-                    'error' => 'Error executing script: '.$result->errorOutput(),
+                    'success'    => false,
+                    'error'      => 'Error executing script: '.$result->errorOutput(),
                     'raw_output' => $result->output(),
                 ];
             }
@@ -100,8 +165,8 @@ abstract class AbstractSeleniumTrackingService implements TrackingServiceInterfa
                 Log::error("{$this->getProviderName()} JSON Parse Error: ".json_last_error_msg());
 
                 return [
-                    'success' => false,
-                    'error' => 'JSON Parse error: '.json_last_error_msg(),
+                    'success'    => false,
+                    'error'      => 'JSON Parse error: '.json_last_error_msg(),
                     'raw_output' => $output,
                 ];
             }
@@ -113,9 +178,18 @@ abstract class AbstractSeleniumTrackingService implements TrackingServiceInterfa
 
             return [
                 'success' => false,
-                'error' => 'Service exception: '.$e->getMessage(),
+                'error'   => 'Service exception: '.$e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Provider key used in the HTTP server route: /track/{key}.
+     * Default: lowercase provider name with spaces removed (e.g. "ChoiceXP" → "choicexp").
+     */
+    protected function getServerProviderKey(): string
+    {
+        return strtolower(str_replace([' ', '-', '_'], '', $this->getProviderName()));
     }
 
     /**

@@ -77,8 +77,9 @@ class UnifiedTrackingService
         Log::info('📡 [UNIFIED SERVICE] Provider detected', ['provider' => $provider]);
 
         // 4. Check if we should queue (Selenium providers)
-        // These providers use browser automation which is resource intensive
-        $seleniumProviders = ['itdida', 'faster', 'choicexp', 'gcc', 'ups'];
+        // Only real browser-automation providers go through the job queue.
+        // Faster/GCC are REST APIs → handled synchronously (no queue, no Chrome).
+        $seleniumProviders = ['itdida', 'choicexp', 'ups'];
 
         if (in_array(strtolower($provider), $seleniumProviders)) {
             // Contrôle de la concurrence globale & par provider

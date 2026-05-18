@@ -1,10 +1,12 @@
 """
 UPS tracking scraper via Selenium.
 Outputs a single JSON object to stdout for consumption by UPSTrackingService.
+
+Class UPSTracker: persistent driver mode (used by tracking_server.py).
+Function get_ups_status(): one-shot mode (used by __main__ / legacy CLI).
 """
 import json
 import re
-import time
 import argparse
 import os
 from selenium import webdriver
@@ -14,7 +16,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 
-def get_environment_options(headless=True):
+def _build_chrome_options(headless=True):
     """Build Chrome options consistent with other scrapers (itdida, choicexp)."""
     options = Options()
     if headless:
@@ -27,8 +29,10 @@ def get_environment_options(headless=True):
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--log-level=3")
+    options.add_argument("--user-data-dir=/tmp/chrome-ups")
     options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     )
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)
@@ -47,8 +51,8 @@ def get_environment_options(headless=True):
     return options
 
 
-def create_driver(headless=True):
-    options = get_environment_options(headless=headless)
+def _create_driver(headless=True):
+    options = _build_chrome_options(headless=headless)
     driver_path = os.environ.get("CHROMEDRIVER_PATH")
     if driver_path and os.path.exists(driver_path):
         service = Service(executable_path=driver_path)
@@ -65,17 +69,8 @@ def create_driver(headless=True):
             "Network.setBlockedURLs",
             {
                 "urls": [
-                    "*.css",
-                    "*.woff",
-                    "*.woff2",
-                    "*.ttf",
-                    "*.otf",
-                    "*.png",
-                    "*.jpg",
-                    "*.jpeg",
-                    "*.gif",
-                    "*.webp",
-                    "*.svg",
+                    "*.css", "*.woff", "*.woff2", "*.ttf", "*.otf",
+                    "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.svg",
                 ]
             },
         )
@@ -88,14 +83,12 @@ def parse_milestone_text(milestone_text):
     """
     Parse a UPS milestone line like:
       "Delivered POME, IT 01/14/2026, 11:03 A.M."
-      "On the Way Roma, Italy 01/14/2026, 5:46 A.M."
     into date (ISO-friendly for frontend), location, and status.
     """
     text = (milestone_text or "").strip()
     if not text:
         return {"date": "", "location": "", "status": text}
 
-    # Date at end: MM/DD/YYYY, H:MM A.M. or P.M.
     date_re = re.search(
         r"(\d{1,2}/\d{1,2}/\d{4}, \d{1,2}:\d{2}\s*[AP]\.?M\.?)",
         text,
@@ -106,7 +99,6 @@ def parse_milestone_text(milestone_text):
     if date_re:
         date_str = date_re.group(1).strip()
         remainder = text[: date_re.start()].strip()
-        # Normalize to ISO-like for JS Date: "01/14/2026, 11:03 A.M." -> "2026-01-14 11:03"
         try:
             parts = date_str.split(",")
             if len(parts) >= 2:
@@ -117,7 +109,6 @@ def parse_milestone_text(milestone_text):
         except Exception:
             pass
 
-    # Location: often "City, Country" at end of remainder
     location = ""
     status = remainder
     loc_match = re.search(r"\s+([^ ]+, [^ ]+)$", remainder)
@@ -128,8 +119,8 @@ def parse_milestone_text(milestone_text):
     return {"date": date_str, "location": location, "status": status or remainder}
 
 
-def get_ups_status(tracking_number, headless=True):
-    driver = create_driver(headless=headless)
+def _scrape_with_driver(driver, tracking_number):
+    """Core scraping logic — reusable by both persistent and one-shot modes."""
     result = {
         "success": False,
         "tracking_number": tracking_number,
@@ -146,7 +137,6 @@ def get_ups_status(tracking_number, headless=True):
 
         body_text = driver.find_element(By.TAG_NAME, "body").text
 
-        # Determine current status from page text
         if "Delivered" in body_text:
             current_status = "Delivered"
         elif "On the Way" in body_text or "In Transit" in body_text:
@@ -156,11 +146,10 @@ def get_ups_status(tracking_number, headless=True):
         elif "Order Processed" in body_text or "Ready for Pickup" in body_text:
             current_status = "Order Processed"
         else:
-            current_status = "In Transit"  # fallback
+            current_status = "In Transit"
 
         result["current_status"] = current_status
 
-        # Build events: main status + details (date/time) then milestones
         events = []
         date_val = ""
         time_val = ""
@@ -189,7 +178,6 @@ def get_ups_status(tracking_number, headless=True):
             pass
 
         if date_val or time_val:
-            # Normalize for frontend (e.g. "Jan 14" "11:03 AM" -> one parseable date)
             combined = f"{date_val} {time_val}".strip()
             try:
                 from datetime import datetime
@@ -203,7 +191,6 @@ def get_ups_status(tracking_number, headless=True):
                 "location": "",
             })
 
-        # Milestones (timeline) – parse each line for date and location
         for i in range(10):
             try:
                 elem_id = f"stApp_ShpmtProg_LVP_milestone_nameKey_{i}"
@@ -220,7 +207,6 @@ def get_ups_status(tracking_number, headless=True):
             except Exception:
                 break
 
-        # If we only have current status and no date, add one event
         if not events and result["current_status"]:
             events.append({
                 "date": "",
@@ -228,10 +214,8 @@ def get_ups_status(tracking_number, headless=True):
                 "location": "",
             })
 
-        # Frontend expects newest first (events[0] = Latest Details)
         events.reverse()
 
-        # Ensure first event has date/location for "Last Update" / "Last Location"
         if events and (not events[0].get("date") or not events[0].get("location")):
             for ev in events:
                 if ev.get("date") or ev.get("location"):
@@ -246,13 +230,41 @@ def get_ups_status(tracking_number, headless=True):
     except Exception as e:
         result["success"] = False
         result["error"] = str(e)
-    finally:
-        try:
-            driver.quit()
-        except Exception:
-            pass
 
     return result
+
+
+class UPSTracker:
+    """Persistent-driver UPS tracker for use with tracking_server.py."""
+
+    def __init__(self, headless=True):
+        self.headless = headless
+        self.driver = None
+
+    def _init_driver(self):
+        self.driver = _create_driver(headless=self.headless)
+
+    def scrape(self, tracking_number):
+        if not self.driver:
+            self._init_driver()
+        return _scrape_with_driver(self.driver, tracking_number)
+
+    def close(self):
+        if self.driver:
+            try:
+                self.driver.quit()
+            except Exception:
+                pass
+            self.driver = None
+
+
+def get_ups_status(tracking_number, headless=True):
+    """One-shot helper: creates a driver, scrapes, quits. Used by __main__."""
+    tracker = UPSTracker(headless=headless)
+    try:
+        return tracker.scrape(tracking_number)
+    finally:
+        tracker.close()
 
 
 if __name__ == "__main__":
