@@ -209,12 +209,16 @@ class UnifiedTrackingService
             }
         }
 
-        // Only cache if successful AND not a virtual result (virtual results become stale when admin assigns real tracking)
+        // Virtual results are never cached (they become stale when admin assigns real tracking).
+        // All other results — successes AND failures — are cached to break the infinite-retry loop:
+        // without failure caching, every Selenium error clears the pending lock but leaves the
+        // cache empty, so the next request immediately dispatches another job ad infinitum.
+        $cacheKey = "tracking:{$trackingNumber}";
+        $ttlByStatus = config('tracking.cache_ttl_by_status', []);
+
         if (($result['success'] ?? false) && empty($result['is_virtual'])) {
-            // Choisir un TTL en fonction du statut
             $baseTtl = (int) config('tracking.cache_ttl', 30);
             $status = strtolower((string) ($result['current_status'] ?? ''));
-            $ttlByStatus = config('tracking.cache_ttl_by_status', []);
 
             $statusKey = null;
             if (str_contains($status, 'livré') || str_contains($status, 'delivered')) {
@@ -227,21 +231,25 @@ class UnifiedTrackingService
                 $statusKey = 'error';
             }
 
-            $cacheTtl = $baseTtl;
-            if ($statusKey && isset($ttlByStatus[$statusKey])) {
-                $cacheTtl = (int) $ttlByStatus[$statusKey];
-            }
+            $cacheTtl = ($statusKey && isset($ttlByStatus[$statusKey]))
+                ? (int) $ttlByStatus[$statusKey]
+                : $baseTtl;
 
-            $cacheKey = "tracking:{$trackingNumber}";
             Cache::put($cacheKey, $result, now()->addMinutes($cacheTtl));
-            Log::info('💾 [UNIFIED SERVICE] Result successfully cached', [
+            Log::info('💾 [UNIFIED SERVICE] Result cached', [
                 'tracking_number' => $trackingNumber,
-                'ttl_minutes' => $cacheTtl
+                'ttl_minutes' => $cacheTtl,
             ]);
-        } else {
-            Log::warning('⚠️ [UNIFIED SERVICE] Result NOT cached due to failure', [
+
+        } elseif (empty($result['is_virtual'])) {
+            // Cache failures with the short error TTL so subsequent requests get the cached
+            // error instead of spawning a new job on every hit.
+            $errorTtl = (int) ($ttlByStatus['error'] ?? config('tracking.cache_ttl_by_status.error', 5));
+            Cache::put($cacheKey, $result, now()->addMinutes($errorTtl));
+            Log::warning('⚠️ [UNIFIED SERVICE] Failure cached to prevent retry loop', [
                 'tracking_number' => $trackingNumber,
-                'error' => $result['error'] ?? 'Unknown error'
+                'error' => $result['error'] ?? 'Unknown error',
+                'ttl_minutes' => $errorTtl,
             ]);
         }
 
