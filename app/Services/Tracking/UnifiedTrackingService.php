@@ -69,6 +69,13 @@ class UnifiedTrackingService
         [$realNumber, $realCarrier, $isAlias, $error] = $this->resolveAlias($trackingNumber, $carrier);
 
         if ($error) {
+            // Cache non-virtual errors briefly so repeated polls (e.g. "no tracking assigned yet")
+            // don't hit the DB on every request. Virtual results are excluded because they depend
+            // on real-time order state that changes without a cache invalidation.
+            if (empty($error['is_virtual'])) {
+                $errorTtl = (int) config('tracking.cache_ttl_by_status.error', 5);
+                Cache::put($cacheKey, $error, now()->addMinutes($errorTtl));
+            }
             return $error;
         }
 

@@ -17,10 +17,22 @@ class RunSeleniumTrackingJob implements ShouldQueue
 
     /**
      * The number of seconds the job can run before timing out.
+     * Must be LESS than the Horizon supervisor's --timeout (200s for selenium-supervisor),
+     * otherwise the worker SIGKILLs the process and refreshTracking() never finishes,
+     * leaving nothing in cache and triggering an infinite dispatch loop.
      *
      * @var int
      */
-    public $timeout = 300; // 5 minutes given Selenium can be slow
+    public $timeout = 180;
+
+    /**
+     * Allow up to 3 attempts before marking as permanently failed.
+     * Without this, the default (usually 1) means a single Chrome timeout kills the job
+     * and never gives WithoutOverlapping a chance to release and retry.
+     *
+     * @var int
+     */
+    public $tries = 3;
 
     /**
      * Create a new job instance.
@@ -29,7 +41,11 @@ class RunSeleniumTrackingJob implements ShouldQueue
         public string $trackingNumber,
         public ?string $carrier = null,
         public ?string $provider = null
-    ) {}
+    ) {
+        // Route to the dedicated selenium queue (handled by selenium-supervisor in horizon.php).
+        // Without this, jobs land on "default" which has a 60s timeout — too short for Chrome boot.
+        $this->onQueue('selenium');
+    }
 
     /**
      * Get the middleware the job should pass through.
@@ -83,5 +99,29 @@ class RunSeleniumTrackingJob implements ShouldQueue
                 'concurrent_provider_after' => $p,
             ]);
         }
+    }
+
+    /**
+     * Called by Laravel when all $tries are exhausted.
+     * Without this, the tracking_pending lock is never cleared, causing the next
+     * request to skip the "already pending" check and dispatch a new job immediately,
+     * re-entering the failure loop indefinitely.
+     */
+    public function failed(\Throwable $exception): void
+    {
+        \Illuminate\Support\Facades\Cache::forget("tracking_pending:{$this->trackingNumber}");
+
+        $errorTtl = (int) config('tracking.cache_ttl_by_status.error', 5);
+        \Illuminate\Support\Facades\Cache::put("tracking:{$this->trackingNumber}", [
+            'success' => false,
+            'error' => 'Tracking service temporarily unavailable. Please try again later.',
+            'source' => 'error',
+            'last_updated_at' => now()->toIso8601String(),
+        ], now()->addMinutes($errorTtl));
+
+        Log::error('Job:RunSeleniumTracking permanently failed', [
+            'number' => $this->trackingNumber,
+            'exception' => $exception->getMessage(),
+        ]);
     }
 }
