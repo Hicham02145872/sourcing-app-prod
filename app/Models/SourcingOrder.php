@@ -392,23 +392,30 @@ class SourcingOrder extends Model
     /**
      * Resolve FSB to order and destination index (0-based) for per-destination tracking.
      *
+     * Encoding: order N dest K → FSB(N+K). Direct order match wins; per-destination
+     * lookup only fires when no order with that exact ID exists. This prevents order 142
+     * (with 2 destinations) from stealing FSB000143 that belongs to order 143.
+     *
      * @return array{order: self, destination_index: int}|null
      */
     public static function resolveFsbNumberToOrderAndDestinationIndex(string $fsbNumber): ?array
     {
         $numeric = (int) substr($fsbNumber, 3);
 
+        // Direct match always wins — FSB000143 = order 143, dest 0.
+        $order = self::with('quotation.sourcingRequest.destinations')->find($numeric);
+        if ($order) {
+            return ['order' => $order, 'destination_index' => 0];
+        }
+
+        // Fallback: per-destination encoding for multi-dest orders where no direct order exists.
+        // FSB(N+K) resolves to order N, destination index K.
         for ($index = 1; $index <= $numeric; $index++) {
             $orderId = $numeric - $index;
             $order = self::with('quotation.sourcingRequest.destinations')->find($orderId);
             if ($order && $order->quotation?->sourcingRequest?->destinations?->count() > $index) {
                 return ['order' => $order, 'destination_index' => $index];
             }
-        }
-
-        $order = self::find($numeric);
-        if ($order) {
-            return ['order' => $order, 'destination_index' => 0];
         }
 
         return null;
