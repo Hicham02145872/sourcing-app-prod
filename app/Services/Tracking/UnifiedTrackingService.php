@@ -131,8 +131,9 @@ class UnifiedTrackingService
 
             Log::info('⏳ [UNIFIED SERVICE] Detected Selenium provider - dispatching job', ['provider' => $provider]);
             
-            // Set pending lock for 2 minutes
-            Cache::put($pendingKey, true, now()->addMinutes(2));
+            // Set pending lock for 4 minutes — must exceed the job $timeout (180s = 3 min) so the
+            // lock doesn't expire mid-run and cause a second job to be dispatched behind the first.
+            Cache::put($pendingKey, true, now()->addMinutes(4));
 
             // Dispatch Job to run in background
             RunSeleniumTrackingJob::dispatch($trackingNumber, $carrier, $provider);
