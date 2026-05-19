@@ -148,7 +148,7 @@ return [
     |
     */
 
-    'memory_limit' => 64,
+    'memory_limit' => 512,
 
     /*
     |--------------------------------------------------------------------------
@@ -169,6 +169,23 @@ return [
                 'balanceCooldown' => 3,
                 'queue' => ['mail', 'default'],
             ],
+
+            // Dedicated supervisor for Selenium scraping jobs (ChoiceXP, ITDIDA, UPS).
+            // Separate from supervisor-1 so slow Chrome jobs never block mail/default.
+            // timeout (200s) MUST exceed RunSeleniumTrackingJob::$timeout (180s),
+            // otherwise the worker SIGKILLs Chrome mid-run and the cache stays empty,
+            // causing the infinite pending dispatch loop.
+            'selenium-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['selenium'],
+                'balance' => 'simple',
+                'minProcesses' => 1,
+                'maxProcesses' => 1,
+                'memory' => 512,
+                'timeout' => 200,
+                'tries' => 3,
+                'nice' => 0,
+            ],
         ],
 
         'staging' => [
@@ -177,6 +194,18 @@ return [
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
                 'queue' => ['mail', 'default'],
+            ],
+
+            'selenium-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['selenium'],
+                'balance' => 'simple',
+                'minProcesses' => 1,
+                'maxProcesses' => 1,
+                'memory' => 512,
+                'timeout' => 200,
+                'tries' => 3,
+                'nice' => 0,
             ],
         ],
 
@@ -187,12 +216,36 @@ return [
                 'balanceCooldown' => 3,
                 'queue' => ['mail', 'default'],
             ],
+
+            'selenium-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['selenium'],
+                'balance' => 'simple',
+                'minProcesses' => 1,
+                'maxProcesses' => 1,
+                'memory' => 512,
+                'timeout' => 200,
+                'tries' => 3,
+                'nice' => 0,
+            ],
         ],
 
         'local' => [
             'supervisor-1' => [
                 'maxProcesses' => 3,
                 'queue' => ['mail', 'default'],
+            ],
+
+            'selenium-supervisor' => [
+                'connection' => 'redis',
+                'queue' => ['selenium'],
+                'balance' => 'simple',
+                'minProcesses' => 1,
+                'maxProcesses' => 1,
+                'memory' => 512,
+                'timeout' => 200,
+                'tries' => 3,
+                'nice' => 0,
             ],
         ],
     ],
