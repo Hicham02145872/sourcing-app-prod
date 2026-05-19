@@ -86,7 +86,7 @@ class QuotationController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
         $query->orderBy($sortBy, $sortDirection);
 
-        $quotations = $query->paginate(10);
+        $quotations = $query->paginate(10)->withQueryString();
 
         return view('admin.quotations.index', compact(
             'quotations',

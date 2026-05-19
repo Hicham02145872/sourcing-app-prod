@@ -174,7 +174,7 @@ class AdminSourcingRequestController extends Controller
             : '0';
         $query->orderByRaw("{$criticalSql} ASC, {$assignmentSql} ASC, sourcing_requests.created_at DESC");
 
-        $sourcingRequests = $query->paginate(10);
+        $sourcingRequests = $query->paginate(10)->withQueryString();
         $admins = \App\Models\User::where('role', 'admin')->get(); // For manual assignment dropdown
 
         return view('admin.sourcing-requests.index', compact('sourcingRequests', 'admins'));

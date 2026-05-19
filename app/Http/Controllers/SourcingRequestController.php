@@ -76,7 +76,7 @@ class SourcingRequestController extends Controller
             $query->where('status', $request->status);
         }
 
-        $sourcingRequests = $query->paginate(10);
+        $sourcingRequests = $query->paginate(10)->withQueryString();
 
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
         $categories = Category::all();
@@ -181,7 +181,16 @@ class SourcingRequestController extends Controller
         $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
 
         foreach ($admins as $admin) {
-            $admin->notify(new SourcingRequestCreated($sourcingRequest));
+            try {
+                $admin->notify(new SourcingRequestCreated($sourcingRequest));
+            } catch (\Throwable $e) {
+                \Log::error('Failed to notify admin about new sourcing request', [
+                    'sourcing_request_id' => $sourcingRequest->id,
+                    'admin_id' => $admin->id,
+                    'admin_email' => $admin->email,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         if ($request->expectsJson()) {
