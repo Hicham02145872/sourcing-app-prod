@@ -16,7 +16,7 @@
 
                         <div>
                             <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
-                                {{ __('Request #') }}{{ $sourcingRequest->display_id }}
+                                {{ __('Request') }} {{ $sourcingRequest->reference_id }}
                                 @php
                                     $statusColors = [
                                         'pending' => 'bg-amber-50 text-amber-700 border-amber-200',
@@ -38,6 +38,14 @@
                                 <span class="mx-1.5">/</span>
                                 <span class="font-medium text-slate-700">{{ Str::limit($sourcingRequest->product_name, 30) }}</span>
                             </nav>
+                            @if($sourcingRequest->order)
+                                <div class="mt-2 text-[10px] text-slate-500">
+                                    <a href="{{ route('admin.sourcing-orders.show', $sourcingRequest->order) }}" class="inline-flex items-center gap-1 text-orange-600 hover:text-orange-700 font-medium">
+                                        {{ __('Sourcing Order created') }} {{ $sourcingRequest->order->reference_id }}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     
@@ -195,6 +203,14 @@
                                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('China Delivery') }}</label>
                                     <div class="text-sm font-bold text-slate-900">{{ number_format($sourcingRequest->quotation->delivery_cost_china, 2) }} {{ $sourcingRequest->quotation->currency }}</div>
                                 </div>
+                                @if($sourcingRequest->quotation->comments)
+                                    <div class="col-span-1 md:col-span-4">
+                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Comments') }}</label>
+                                        <div class="bg-slate-50 border border-slate-100 rounded-md p-3 text-sm text-slate-700 leading-relaxed">
+                                            {{ $sourcingRequest->quotation->comments }}
+                                        </div>
+                                    </div>
+                                @endif
                                 <div class="col-span-1 md:col-span-4 pt-4 border-t border-slate-50">
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm font-bold text-slate-700">{{ __('Total Amount:') }}</span>

@@ -208,7 +208,7 @@
                                         <td class="px-6 py-3 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
                                                 <div class="h-8 w-8 rounded bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 text-xs font-mono">
-                                                    {{ $order->display_id }}
+                                                    {{ $order->reference_id }}
                                                 </div>
                                                 @if($order->quotation->sourcingRequest->product_image)
                                                     <img src="{{ Storage::url($order->quotation->sourcingRequest->product_image) }}" class="h-10 w-10 rounded object-cover border border-slate-200 shrink-0" alt="{{ __('Product') }}">

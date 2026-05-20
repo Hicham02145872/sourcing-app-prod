@@ -590,7 +590,7 @@
 
                                 <div class="flex justify-between items-center p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">
                                     <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase">{{ __('ID') }}</span>
-                                    <span class="text-sm font-bold text-[#EF7722]">#{{ $sourcingRequest->display_id }}</span>
+                                    <span class="text-sm font-bold text-[#EF7722]">{{ $sourcingRequest->reference_id }}</span>
                                 </div>
 
                                 <div class="flex justify-between items-center p-3 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600">

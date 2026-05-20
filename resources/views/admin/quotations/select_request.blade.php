@@ -149,7 +149,7 @@
                                                     @endif
                                                 </div>
                                                 <div>
-                                                    <div class="text-sm font-mono font-medium text-orange-600">#{{ $request->display_id }}</div>
+                                                    <div class="text-sm font-mono font-medium text-orange-600">{{ $request->reference_id }}</div>
                                                     <div class="text-xs text-slate-400">{{ $request->created_at->format('M d, Y') }}</div>
                                                 </div>
                                             </div>

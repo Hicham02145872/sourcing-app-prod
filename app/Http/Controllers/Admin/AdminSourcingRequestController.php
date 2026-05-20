@@ -129,6 +129,7 @@ class AdminSourcingRequestController extends Controller
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('product_name', 'like', '%'.$searchTerm.'%')
+                    ->orWhere('shared_id', 'like', '%'.$searchTerm.'%')
                     ->orWhere('id', 'like', '%'.$searchTerm.'%')
                     ->orWhere('note', 'like', '%'.$searchTerm.'%')
                     ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
@@ -193,7 +194,7 @@ class AdminSourcingRequestController extends Controller
             session()->flash('warning', 'Note: Ce dossier est assigné à un autre administrateur ('.($sourcingRequest->assignedAdmin->name ?? 'Inconnu').'). Mode lecture seule.');
         }
 
-        $sourcingRequest->load('category', 'user', 'destinations.country', 'destinations.service', 'assignedAdmin');
+        $sourcingRequest->load('category', 'user', 'destinations.country', 'destinations.service', 'assignedAdmin', 'order');
 
         return view('admin.sourcing-requests.show', compact('sourcingRequest'));
     }

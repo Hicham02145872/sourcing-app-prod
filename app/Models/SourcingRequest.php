@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\SharedIdService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,12 @@ class SourcingRequest extends Model
 
     protected static function booted()
     {
+        static::creating(function (SourcingRequest $sourcingRequest) {
+            if (empty($sourcingRequest->shared_id)) {
+                $sourcingRequest->shared_id = app(SharedIdService::class)->generate();
+            }
+        });
+
         static::deleting(function ($sourcingRequest) {
             if ($sourcingRequest->product_image) {
                 Storage::disk('public')->delete($sourcingRequest->product_image);
@@ -34,6 +41,7 @@ class SourcingRequest extends Model
     public const CRITICAL_STATUSES_FOR_LIST = ['negotiating'];
 
     protected $fillable = [
+        'shared_id',
         'user_id',
         'product_name',
         'product_url',
@@ -74,6 +82,22 @@ class SourcingRequest extends Model
     public function getDisplayIdAttribute(): int
     {
         return $this->id * 5;
+    }
+
+    /**
+     * Public reference: SBxxxxx for new records, legacy #display_id otherwise.
+     */
+    public function getReferenceIdAttribute(): string
+    {
+        if (! empty($this->shared_id)) {
+            return (string) $this->shared_id;
+        }
+
+        if ($this->id) {
+            return '#'.$this->display_id;
+        }
+
+        return '';
     }
 
     /**

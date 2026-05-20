@@ -167,7 +167,7 @@
                                                     @endif
                                                 </div>
                                                 <div>
-                                                    <div class="text-xs font-semibold text-[#EF7722] mb-0.5">#{{ $order->display_id }}</div>
+                                                    <div class="text-xs font-semibold text-[#EF7722] mb-0.5">{{ $order->reference_id }}</div>
                                                     <div class="text-sm font-bold text-slate-900 dark:text-white">{{ $order->quotation?->sourcingRequest?->category?->name }}</div>
                                                 </div>
                                             </div>

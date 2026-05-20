@@ -16,7 +16,7 @@
 
                         <div>
                             <h1 class="text-lg font-bold text-slate-900 leading-tight flex items-center gap-2">
-                                {{ __('Order') }} #{{ $sourcingOrder->display_id }}
+                                {{ __('Order') }} {{ $sourcingOrder->reference_id }}
                                 @php
                                     $statusColors = [
                                         'pending_payment' => 'bg-amber-50 text-amber-700 border-amber-200',
@@ -43,9 +43,17 @@
                                 <span class="mx-1.5">/</span>
                                 <span class="font-medium text-slate-700">{{ $sourcingOrder->quotation->sourcingRequest->product_name ?? __('Unknown product') }}</span>
                             </nav>
-                            <div class="mt-2 text-[10px] text-slate-400 font-mono">
-                                {{ __('Request') }} #{{ $sourcingOrder->sourcing_request_id ?? $sourcingOrder->quotation->sourcing_request_id }}
-                            </div>
+                            @php
+                                $linkedRequest = $sourcingOrder->sourcingRequest ?? $sourcingOrder->quotation?->sourcingRequest;
+                            @endphp
+                            @if($linkedRequest)
+                                <div class="mt-2 text-[10px] text-slate-500">
+                                    <a href="{{ route('admin.sourcing-requests.show', $linkedRequest) }}" class="inline-flex items-center gap-1 text-orange-600 hover:text-orange-700 font-medium">
+                                        {{ __('Issued from Sourcing Request') }} {{ $linkedRequest->reference_id }}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     

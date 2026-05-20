@@ -210,7 +210,7 @@
                                                     </div>
                                                     <div>
                                                         <div class="flex items-center gap-2">
-                                                            <div class="text-xs font-semibold text-[#EF7722] mb-0.5">#{{ $request->display_id }}</div>
+                                                            <div class="text-xs font-semibold text-[#EF7722] mb-0.5">{{ $request->reference_id }}</div>
                                                             @if($request->status === 'quoted')
                                                                 <span class="px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-black rounded uppercase tracking-tighter animate-pulse">{{ __('New') }}</span>
                                                             @endif

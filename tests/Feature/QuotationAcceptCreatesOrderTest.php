@@ -50,5 +50,7 @@ class QuotationAcceptCreatesOrderTest extends TestCase
         $this->assertNotNull($order, 'SourcingOrder was not created');
         $this->assertEquals($sourcingRequest->id, $order->sourcing_request_id);
         $this->assertEquals($admin->id, $order->assigned_to_admin_id);
+        $this->assertNotEmpty($sourcingRequest->shared_id);
+        $this->assertSame($sourcingRequest->shared_id, $order->shared_id);
     }
 }

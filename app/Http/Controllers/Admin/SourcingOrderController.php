@@ -75,6 +75,7 @@ class SourcingOrderController extends Controller
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('id', 'like', '%'.$search.'%')
+                    ->orWhere('shared_id', 'like', '%'.$search.'%')
                     ->orWhere('sourcing_request_id', 'like', '%'.$search.'%')
                     ->orWhere('quotation_id', 'like', '%'.$search.'%')
                     ->orWhereRaw("CAST((sourcing_orders.id * 5) AS CHAR) LIKE ?", ['%'.$search.'%'])
@@ -117,7 +118,7 @@ class SourcingOrderController extends Controller
     public function show(SourcingOrder $sourcingOrder): View
     {
         $this->authorize('view', $sourcingOrder);
-        $sourcingOrder->load('user', 'media', 'quotation.sourcingRequest.category', 'quotation.sourcingRequest.destinations.country', 'quotation.sourcingRequest.destinations.service');
+        $sourcingOrder->load('user', 'media', 'sourcingRequest', 'quotation.sourcingRequest.category', 'quotation.sourcingRequest.destinations.country', 'quotation.sourcingRequest.destinations.service');
 
         return view('admin.sourcing-orders.show', compact('sourcingOrder'));
     }

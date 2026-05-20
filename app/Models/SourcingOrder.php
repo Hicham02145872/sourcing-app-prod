@@ -12,6 +12,22 @@ class SourcingOrder extends Model
 
     protected static function booted()
     {
+        static::creating(function (SourcingOrder $sourcingOrder) {
+            if (! empty($sourcingOrder->shared_id)) {
+                return;
+            }
+
+            if ($sourcingOrder->sourcing_request_id) {
+                $sharedId = SourcingRequest::query()
+                    ->whereKey($sourcingOrder->sourcing_request_id)
+                    ->value('shared_id');
+
+                if ($sharedId) {
+                    $sourcingOrder->shared_id = $sharedId;
+                }
+            }
+        });
+
         static::deleting(function ($sourcingOrder) {
             if ($sourcingOrder->proof_of_payment_path) {
                 Storage::disk('public')->delete($sourcingOrder->proof_of_payment_path);
@@ -51,6 +67,7 @@ class SourcingOrder extends Model
     ];
 
     protected $fillable = [
+        'shared_id',
         'user_id',
         'quotation_id',
         'sourcing_request_id',
@@ -318,6 +335,22 @@ class SourcingOrder extends Model
     public function getDisplayIdAttribute(): int
     {
         return $this->id * 5;
+    }
+
+    /**
+     * Public reference: SBxxxxx for new records, legacy #display_id otherwise.
+     */
+    public function getReferenceIdAttribute(): string
+    {
+        if (! empty($this->shared_id)) {
+            return (string) $this->shared_id;
+        }
+
+        if ($this->id) {
+            return '#'.$this->display_id;
+        }
+
+        return '';
     }
 
     public function toShippingCompanySheetArray(): array
