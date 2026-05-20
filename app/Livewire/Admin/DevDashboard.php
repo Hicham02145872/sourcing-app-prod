@@ -46,6 +46,8 @@ class DevDashboard extends Component
 
     public $userSearch = '';
 
+    public $impersonationSearch = '';
+
     public $passwordInputs = [];
 
     public $passwordConfirmations = [];
@@ -79,6 +81,8 @@ class DevDashboard extends Component
     public $trackingTestResult = null;
 
     public $trackingTestError = null;
+
+    public $trackingOrderSearch = '';
 
     // Cache Monitor
     public $cacheStats = [];
@@ -449,6 +453,20 @@ class DevDashboard extends Component
     {
         $user = User::find($userId);
         if (! $user) {
+            $this->dispatch('show-error-toast', message: 'User not found.');
+
+            return;
+        }
+
+        if ((int) $user->id === (int) Auth::id()) {
+            $this->dispatch('show-error-toast', message: 'You are already connected with this account.');
+
+            return;
+        }
+
+        if (! $this->canImpersonateUser($user)) {
+            $this->dispatch('show-error-toast', message: 'Impersonation is blocked for protected roles.');
+
             return;
         }
 
@@ -464,6 +482,30 @@ class DevDashboard extends Component
         Auth::login($user);
 
         return redirect()->route('dashboard');
+    }
+
+    protected function canImpersonateUser(User $user): bool
+    {
+        return ! in_array((string) $user->role, ['super_admin', 'developer'], true);
+    }
+
+    public function getFilteredImpersonationUsersProperty()
+    {
+        $users = $this->users instanceof \Illuminate\Support\Collection
+            ? $this->users
+            : collect($this->users);
+
+        $search = strtolower(trim((string) $this->impersonationSearch));
+        if ($search === '') {
+            return $users;
+        }
+
+        return $users->filter(function ($user) use ($search) {
+            return str_contains(strtolower((string) $user->name), $search)
+                || str_contains(strtolower((string) $user->email), $search)
+                || str_contains(strtolower((string) $user->role), $search)
+                || str_contains(strtolower((string) $user->display_id), $search);
+        });
     }
 
     public function getFilteredUsersProperty()
@@ -1345,11 +1387,35 @@ class DevDashboard extends Component
 
     public function loadTrackingOrders()
     {
-        $this->trackingOrders = SourcingOrder::whereNotNull('tracking_number')
+        $orders = SourcingOrder::whereNotNull('tracking_number')
             ->with(['user', 'quotation.sourcingRequest', 'shippingCompany'])
             ->latest('updated_at')
-            ->take(20)
             ->get();
+
+        $trackingNumbers = $orders
+            ->pluck('tracking_number')
+            ->filter(fn ($tn) => is_string($tn) && trim($tn) !== '')
+            ->unique()
+            ->values();
+
+        $latestLogsByTracking = TrackingLog::query()
+            ->whereIn('tracking_number', $trackingNumbers)
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique('tracking_number')
+            ->keyBy('tracking_number');
+
+        $this->trackingOrders = $orders->map(function (SourcingOrder $order) use ($latestLogsByTracking) {
+            $latestLog = $latestLogsByTracking->get((string) $order->tracking_number);
+            $order->setAttribute('fsb_associated', $order->fsb_tracking_number);
+            $order->setAttribute('real_tracking_assigned', $order->hasRealTracking());
+            $order->setAttribute('latest_tracking_status', $latestLog?->status);
+            $order->setAttribute('latest_tracking_provider', $latestLog?->provider);
+            $order->setAttribute('latest_tracking_location', $latestLog?->location);
+            $order->setAttribute('latest_tracking_at', $latestLog?->created_at);
+
+            return $order;
+        });
 
         // Check if any tracking is currently being processed in background
         $this->hasPendingUpdates = false;
@@ -1366,6 +1432,26 @@ class DevDashboard extends Component
                 $this->hasPendingUpdates = true;
             }
         }
+    }
+
+    public function getFilteredTrackingOrdersProperty()
+    {
+        $orders = $this->trackingOrders instanceof \Illuminate\Support\Collection
+            ? $this->trackingOrders
+            : collect($this->trackingOrders);
+
+        $q = strtolower(trim((string) ($this->trackingOrderSearch ?? '')));
+        if ($q === '') {
+            return $orders;
+        }
+
+        return $orders->filter(function ($order) use ($q) {
+            return str_contains(strtolower((string) $order->tracking_number), $q)
+                || str_contains(strtolower((string) ($order->user->name ?? '')), $q)
+                || str_contains(strtolower((string) ($order->user->email ?? '')), $q)
+                || str_contains(strtolower((string) $order->display_id), $q)
+                || str_contains(strtolower((string) ($order->fsb_associated ?? '')), $q);
+        });
     }
 
     public function loadTrackingStats()

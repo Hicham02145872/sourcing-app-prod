@@ -155,9 +155,20 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     <!-- User Switcher -->
                     <section class="space-y-6">
-                        <h2 class="text-lg font-black text-slate-900 uppercase tracking-tighter border-b border-slate-300 pb-3">User Impersonation Matrix</h2>
+                        <div class="border-b border-slate-300 pb-3 space-y-3">
+                            <h2 class="text-lg font-black text-slate-900 uppercase tracking-tighter">User Impersonation Matrix</h2>
+                            <input
+                                wire:model.live.debounce.300ms="impersonationSearch"
+                                type="text"
+                                placeholder="Search user to access account..."
+                                class="w-full bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none"
+                            >
+                            <p class="text-[10px] text-slate-500 uppercase font-bold">
+                                Protected roles (super_admin, developer) are blocked for impersonation.
+                            </p>
+                        </div>
                         <div class="bg-white border border-slate-200 overflow-hidden divide-y divide-slate-100">
-                            @foreach($users as $user)
+                            @forelse($this->filteredImpersonationUsers as $user)
                                 <div class="p-4 flex justify-between items-center bg-white hover:bg-slate-50 transition-none">
                                     <div>
                                         <div class="flex items-center gap-2">
@@ -166,11 +177,21 @@
                                         </div>
                                         <span class="text-[10px] text-slate-400 font-mono">{{ $user->email }}</span>
                                     </div>
-                                    <button wire:click="impersonate({{ $user->id }})" class="bg-slate-900 text-white px-3 py-1.5 text-[9px] font-black uppercase tracking-widest transition-none">
-                                        Access Account
-                                    </button>
+                                    @if(in_array((string) $user->role, ['super_admin', 'developer'], true))
+                                        <span class="px-2 py-1 text-[9px] font-black uppercase bg-rose-100 text-rose-800">Blocked</span>
+                                    @elseif((int) $user->id === (int) auth()->id())
+                                        <span class="px-2 py-1 text-[9px] font-black uppercase bg-slate-100 text-slate-700">Current Account</span>
+                                    @else
+                                        <button wire:click="impersonate({{ $user->id }})" class="bg-slate-900 text-white px-3 py-1.5 text-[9px] font-black uppercase tracking-widest transition-none">
+                                            Access Account
+                                        </button>
+                                    @endif
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="p-8 text-center text-slate-400 text-xs uppercase font-bold tracking-widest">
+                                    No users found for this search
+                                </div>
+                            @endforelse
                         </div>
                     </section>
 
@@ -301,7 +322,7 @@
                     <div class="flex justify-between items-start border-b border-slate-300 pb-6">
                         <div>
                             <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Tracking Monitor</h2>
-                            <p class="text-xs text-slate-500 uppercase mt-1">Real-time tracking status & API testing</p>
+                            <p class="text-xs text-slate-500 uppercase mt-1">Real-time tracking status, FSB association and API testing</p>
                         </div>
                         <div class="flex items-center gap-4">
                             @if($hasPendingUpdates)
@@ -397,25 +418,48 @@
 
                     {{-- Recent Tracking Orders --}}
                     <section class="space-y-4">
-                        <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest border-b border-slate-200 pb-2">Recent Tracking Orders</h3>
+                        <div class="border-b border-slate-200 pb-2 flex justify-between items-center gap-3 flex-wrap">
+                            <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest">All Orders With Tracking Number</h3>
+                            <div class="flex items-center gap-2">
+                                <input
+                                    wire:model.live.debounce.300ms="trackingOrderSearch"
+                                    type="text"
+                                    placeholder="Filter by order / client / tracking / FSB..."
+                                    class="bg-white border border-slate-200 text-[11px] px-3 py-1.5 outline-none focus:border-indigo-500 transition-none w-72"
+                                >
+                                <span class="text-[10px] font-black uppercase text-slate-500">
+                                    {{ count($this->filteredTrackingOrders) }} / {{ count($trackingOrders) }} shown
+                                </span>
+                            </div>
+                        </div>
                         <div class="bg-white border border-slate-200">
                             <table class="w-full border-collapse">
                                 <thead>
                                     <tr class="bg-slate-100 border-b border-slate-200">
                                         <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Order ID</th>
                                         <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Client</th>
+                                        <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">FSB Associated</th>
                                         <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Tracking Number</th>
+                                        <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Real Tracking</th>
                                         <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Carrier</th>
-                                        <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Status</th>
+                                        <th class="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase">Live Tracking Status</th>
                                         <th class="px-4 py-3 text-right text-[10px] font-black text-slate-600 uppercase">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
-                                    @forelse($trackingOrders as $order)
+                                    @forelse($this->filteredTrackingOrders as $order)
                                         <tr class="text-xs hover:bg-slate-50 transition-none">
                                             <td class="px-4 py-3 font-mono text-indigo-600 font-bold">#{{ $order->display_id }}</td>
                                             <td class="px-4 py-3 text-slate-900">{{ $order->user->name }}</td>
+                                            <td class="px-4 py-3 font-mono text-[10px] text-slate-700">{{ $order->fsb_associated }}</td>
                                             <td class="px-4 py-3 font-mono text-slate-600">{{ $order->tracking_number }}</td>
+                                            <td class="px-4 py-3">
+                                                @if($order->real_tracking_assigned)
+                                                    <span class="px-2 py-1 text-[9px] font-black uppercase bg-emerald-100 text-emerald-800">Assigned</span>
+                                                @else
+                                                    <span class="px-2 py-1 text-[9px] font-black uppercase bg-amber-100 text-amber-800">Pending</span>
+                                                @endif
+                                            </td>
                                             <td class="px-4 py-3 text-slate-500">{{ $order->shippingCompany?->name ?? 'N/A' }}</td>
                                             <td class="px-4 py-3">
                                                 @if(\Illuminate\Support\Facades\Cache::has("tracking_pending:{$order->tracking_number}"))
@@ -423,9 +467,16 @@
                                                         Processing...
                                                     </span>
                                                 @else
-                                                    <span class="px-2 py-1 text-[9px] font-black uppercase bg-blue-100 text-blue-800">
-                                                        {{ str_replace('_', ' ', $order->status) }}
-                                                    </span>
+                                                    <div class="space-y-1">
+                                                        <span class="px-2 py-1 text-[9px] font-black uppercase bg-blue-100 text-blue-800">
+                                                            {{ $order->latest_tracking_status ?: 'No live log yet' }}
+                                                        </span>
+                                                        @if($order->latest_tracking_provider || $order->latest_tracking_location)
+                                                            <div class="text-[9px] text-slate-500 font-mono">
+                                                                {{ $order->latest_tracking_provider ?: 'N/A' }} @if($order->latest_tracking_location) • {{ $order->latest_tracking_location }} @endif
+                                                            </div>
+                                                        @endif
+                                                    </div>
                                                 @endif
                                             </td>
                                             <td class="px-4 py-3 text-right space-x-2">
@@ -439,7 +490,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="px-4 py-12 text-center text-slate-400 text-xs uppercase font-bold tracking-widest">No tracking orders found</td>
+                                            <td colspan="8" class="px-4 py-12 text-center text-slate-400 text-xs uppercase font-bold tracking-widest">No tracking orders found</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
