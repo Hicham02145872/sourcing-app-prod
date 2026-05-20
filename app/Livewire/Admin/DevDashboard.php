@@ -486,7 +486,7 @@ class DevDashboard extends Component
 
     protected function canImpersonateUser(User $user): bool
     {
-        return ! in_array((string) $user->role, ['super_admin', 'developer'], true);
+        return ! in_array((string) $user->role, ['developer'], true);
     }
 
     public function getFilteredImpersonationUsersProperty()

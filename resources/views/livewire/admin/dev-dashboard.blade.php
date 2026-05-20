@@ -164,7 +164,7 @@
                                 class="w-full bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none"
                             >
                             <p class="text-[10px] text-slate-500 uppercase font-bold">
-                                Protected roles (super_admin, developer) are blocked for impersonation.
+                                Protected role (developer) is blocked for impersonation.
                             </p>
                         </div>
                         <div class="bg-white border border-slate-200 overflow-hidden divide-y divide-slate-100">
@@ -177,7 +177,7 @@
                                         </div>
                                         <span class="text-[10px] text-slate-400 font-mono">{{ $user->email }}</span>
                                     </div>
-                                    @if(in_array((string) $user->role, ['super_admin', 'developer'], true))
+                                    @if(in_array((string) $user->role, ['developer'], true))
                                         <span class="px-2 py-1 text-[9px] font-black uppercase bg-rose-100 text-rose-800">Blocked</span>
                                     @elseif((int) $user->id === (int) auth()->id())
                                         <span class="px-2 py-1 text-[9px] font-black uppercase bg-slate-100 text-slate-700">Current Account</span>
