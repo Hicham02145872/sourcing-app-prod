@@ -138,7 +138,7 @@
                                                     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
                                                         <div class="flex-1 min-w-0">
                                                             <div class="flex items-center gap-2 mb-0.5">
-                                                                <span class="text-xs font-bold text-[#EF7722]">#{{ $request->quotation ? $request->quotation->display_id : $request->display_id }}</span>
+                                                                <span class="text-xs font-bold text-[#EF7722]">{{ $request->reference_id }}</span>
                                                                 @if($request->quotation)
                                                                     <span class="px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded uppercase tracking-widest animate-pulse">{{ __('Action Required') }}</span>
                                                                 @endif
