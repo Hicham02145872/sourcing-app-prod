@@ -41,6 +41,7 @@ class Quotation extends Model
         'sourcing_note',
         'comments',
         'real_product_image',
+        'supplier_url',
     ];
 
     protected $casts = [

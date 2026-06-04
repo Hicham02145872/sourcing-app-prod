@@ -194,6 +194,21 @@
                                                         class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition-all cursor-pointer bg-white border border-slate-200 p-2 rounded-md">
                                                 </div>
                                             </div>
+                                            <div class="space-y-2 col-span-1 md:col-span-2">
+                                                <label for="supplier_url" class="block text-[10px] font-bold text-slate-600 uppercase">
+                                                    {{ __('Supplier Product Link') }} <span class="text-slate-400 font-normal">({{ __('Internal only') }})</span>
+                                                </label>
+                                                <div class="relative group">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                                    </div>
+                                                    <input type="url" name="supplier_url" id="supplier_url" value="{{ old('supplier_url', $quotation->supplier_url) }}" placeholder="https://item.taobao.com/..."
+                                                        class="w-full pl-9 pr-3 py-2 text-sm bg-white border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 block transition-colors placeholder:text-slate-400">
+                                                </div>
+                                                @error('supplier_url')
+                                                    <p class="text-[10px] text-red-600 mt-1 font-medium">{{ $message }}</p>
+                                                @enderror
+                                            </div>
                                         </div>
                                         <p class="mt-2 text-[10px] text-red-500/80 font-medium italic">
                                             <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

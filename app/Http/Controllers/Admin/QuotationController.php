@@ -142,8 +142,10 @@ class QuotationController extends Controller
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
             'real_product_image' => 'nullable|image|max:10240',
+            'supplier_url' => 'nullable|url|max:2048',
             'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:10240',
         ], [
+            'supplier_url.url' => __('Veuillez entrer une URL valide pour le lien fournisseur.'),
             'real_product_image.max' => __('L\'image ne doit pas dépasser 10 MB. Veuillez choisir un fichier plus petit.'),
             'real_product_image.image' => __('Le fichier doit être une image valide (JPEG, PNG, GIF).'),
             'media_files.*.max' => __('Chaque fichier ne doit pas dépasser 10 MB. Veuillez choisir des fichiers plus petits.'),
@@ -209,6 +211,7 @@ class QuotationController extends Controller
             'sourcing_note' => $validated['sourcing_note'] ?? null,
             'comments' => $validated['comments'] ?? null,
             'real_product_image' => $realProductImagePath,
+            'supplier_url' => $validated['supplier_url'] ?? null,
             // estimated_net_profit will be calculated by QuotationObserver
         ]);
 
@@ -287,10 +290,12 @@ class QuotationController extends Controller
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
             'real_product_image' => 'nullable|image|max:10240',
+            'supplier_url' => 'nullable|url|max:2048',
             'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:10240',
             'delete_media' => 'nullable|array',
             'delete_media.*' => 'exists:quotation_media,id',
         ], [
+            'supplier_url.url' => __('Veuillez entrer une URL valide pour le lien fournisseur.'),
             'real_product_image.max' => __('L\'image ne doit pas dépasser 10 MB. Veuillez choisir un fichier plus petit.'),
             'real_product_image.image' => __('Le fichier doit être une image valide (JPEG, PNG, GIF).'),
             'media_files.*.max' => __('Chaque fichier ne doit pas dépasser 10 MB. Veuillez choisir des fichiers plus petits.'),
@@ -340,6 +345,7 @@ class QuotationController extends Controller
             'comments' => $validated['comments'] ?? null,
             'admin_negotiation_reply' => $validated['admin_negotiation_reply'] ?? null,
             'real_product_image' => $realProductImagePath,
+            'supplier_url' => $validated['supplier_url'] ?? null,
         ]);
 
         // Notify client if sourcing location changed and is different from requested

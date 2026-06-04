@@ -96,6 +96,33 @@
                                         @endif
                                     </p>
                                 </div>
+
+                                @if($quotation->supplier_url)
+                                    <div class="md:col-span-4 p-3 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="p-2 bg-slate-900 rounded text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Supplier Product Link') }}</label>
+                                                <p class="text-xs text-slate-400 truncate max-w-md">{{ $quotation->supplier_url }}</p>
+                                            </div>
+                                        </div>
+                                        <a href="{{ $quotation->supplier_url }}" target="_blank" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
+                                            {{ __('Open Link') }}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 8"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                        </a>
+                                    </div>
+                                @endif
+
+                                @if($quotation->comments)
+                                    <div class="md:col-span-4">
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Comments') }}</label>
+                                        <div class="rounded-lg border border-slate-100 bg-slate-50 p-4 text-sm text-slate-700 leading-relaxed">
+                                            {{ $quotation->comments }}
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
