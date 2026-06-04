@@ -225,8 +225,7 @@ class AdminSourcingRequestController extends Controller
                 ->with('error', __('The status could not be updated.'));
         }
 
-        return redirect()
-            ->route('admin.sourcing-requests.show', $sourcingRequest)
+        return back()
             ->with('status', 'Statut mis à jour avec succès !');
     }
 

@@ -200,7 +200,7 @@ class SourcingOrderController extends Controller
                 ->with('error', __('Could not update order status.'));
         }
 
-        return redirect()->route('admin.sourcing-orders.show', $sourcingOrder)->with('status', 'Sourcing order status updated successfully!');
+        return back()->with('status', 'Sourcing order status updated successfully!');
     }
 
     public function rejectProof(Request $request, SourcingOrder $sourcingOrder): RedirectResponse

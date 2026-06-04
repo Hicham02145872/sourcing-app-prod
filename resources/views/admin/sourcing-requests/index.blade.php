@@ -294,7 +294,7 @@
                                     <!-- Actions -->
                                     <td class="px-6 py-3 whitespace-nowrap text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ route('admin.sourcing-requests.show', $request) }}" 
+                                            <a href="{{ route('admin.sourcing-requests.show', [$request, 'page' => request('page')]) }}" 
                                                class="inline-flex items-center justify-center h-8 w-8 rounded-full text-slate-400 hover:text-orange-600 hover:bg-orange-50 transition-all border border-transparent hover:border-orange-200"
                                                title="{{ __('View') }}">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
