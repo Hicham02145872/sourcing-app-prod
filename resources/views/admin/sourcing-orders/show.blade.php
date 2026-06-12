@@ -69,11 +69,12 @@
                         <div class="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
                         @if($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
-                            <a href="{{ route('admin.sourcing-orders.shipping-label', $sourcingOrder) }}" target="_blank"
-                               class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded transition-colors shadow-sm">
+                            <button type="button"
+                                    @click="$dispatch('open-modal', 'edit-label-{{ $sourcingOrder->id }}')"
+                                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded transition-colors shadow-sm">
                                 <i class="fas fa-tag"></i>
                                 {{ __('Label') }}
-                            </a>
+                            </button>
                         @endif
 
                         <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 text-xs font-medium rounded transition-colors shadow-sm">
@@ -873,5 +874,115 @@
             animation: slide-in 0.3s ease-out forwards;
         }
     </style>
+
+    @if($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+    <x-modal name="edit-label-{{ $sourcingOrder->id }}" :show="false" maxWidth="2xl">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-bold text-slate-900">{{ __('Edit Shipping Label') }}</h2>
+                <button type="button" @click="$dispatch('close-modal', 'edit-label-{{ $sourcingOrder->id }}')" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="label-form-{{ $sourcingOrder->id }}" onsubmit="return saveAndPrintLabel({{ $sourcingOrder->id }})">
+                @csrf
+                @method('PUT')
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Seller Name') }}</label>
+                        <input type="text" name="label_seller_name" id="modal_label_seller_name"
+                               value="{{ $sourcingOrder->label_seller_name }}"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                               placeholder="{{ $sourcingOrder->user->name }}">
+                        <p class="mt-0.5 text-[10px] text-slate-400">{{ __('Default:') }} {{ $sourcingOrder->user->name }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Product Name') }}</label>
+                        <input type="text" name="label_product_name" id="modal_label_product_name"
+                               value="{{ $sourcingOrder->label_product_name }}"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                               placeholder="{{ $sourcingOrder->quotation->sourcingRequest->product_name ?? '' }}">
+                        <p class="mt-0.5 text-[10px] text-slate-400">{{ __('Default:') }} {{ $sourcingOrder->quotation->sourcingRequest->product_name ?? 'N/A' }}</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase mb-3">{{ __('Destinations Addresses') }}</h4>
+                    <div class="space-y-3">
+                        @foreach($sourcingOrder->quotation->sourcingRequest->destinations as $index => $destination)
+                            <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                                <input type="hidden" name="destinations[{{ $index }}][id]" value="{{ $destination->id }}">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="fi fi-{{ strtolower($destination->country->code ?? '') }} border border-slate-200 rounded-sm"></span>
+                                    <span class="text-xs font-semibold text-slate-700">{{ $destination->country->name ?? 'N/A' }}</span>
+                                    <span class="text-[10px] text-slate-400 ml-auto">{{ $destination->service->name ?? '' }}</span>
+                                </div>
+                                <textarea name="destinations[{{ $index }}][label_address]" rows="2"
+                                          class="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                                          placeholder="{{ $destination->address ?? '' }}">{{ $destination->label_address }}</textarea>
+                                <p class="mt-0.5 text-[10px] text-slate-400">{{ __('Default:') }} {{ $destination->address ?? 'N/A' }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+                    <button type="button" @click="$dispatch('close-modal', 'edit-label-{{ $sourcingOrder->id }}')"
+                            class="px-4 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-medium rounded transition-colors">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="submit" id="print-label-btn-{{ $sourcingOrder->id }}"
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors inline-flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        {{ __('Save & Print Label') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </x-modal>
+    @endif
+
+    <script>
+    function saveAndPrintLabel(orderId) {
+        const form = document.getElementById('label-form-' + orderId);
+        const formData = new FormData(form);
+        formData.append('_method', 'PUT');
+
+        const btn = document.getElementById('print-label-btn-' + orderId);
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Saving...';
+
+        fetch('{{ route("admin.sourcing-orders.update-label", $sourcingOrder) }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.open('{{ route("admin.sourcing-orders.shipping-label", ["sourcingOrder" => $sourcingOrder, "format" => "html"]) }}', '_blank');
+                window.dispatchEvent(new CustomEvent('close-modal', { detail: 'edit-label-' + orderId }));
+            } else {
+                alert(data.message || '{{ __("Error saving label") }}');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('{{ __("Error saving label") }}');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+
+        return false;
+    }
+    </script>
     @endpush
 </x-app-layout>

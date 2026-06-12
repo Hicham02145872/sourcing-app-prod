@@ -107,6 +107,8 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::post('sourcing-orders/{sourcingOrder}/sync-to-sheet', [App\Http\Controllers\Admin\SourcingOrderController::class, 'syncToGoogleSheet'])->name('sourcing-orders.sync-to-sheet');
     Route::post('sourcing-orders/{sourcingOrder}/sync-shipping-sheet', [App\Http\Controllers\Admin\SourcingOrderController::class, 'manualSyncToShippingCompanySheet'])->name('sourcing-orders.sync-shipping-sheet');
     Route::get('sourcing-orders/{sourcingOrder}/shipping-label', [App\Http\Controllers\Admin\SourcingOrderController::class, 'showShippingLabel'])->name('sourcing-orders.shipping-label');
+    Route::get('sourcing-orders/{sourcingOrder}/edit-label', [App\Http\Controllers\Admin\SourcingOrderController::class, 'editLabel'])->name('sourcing-orders.edit-label');
+    Route::put('sourcing-orders/{sourcingOrder}/label', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateLabel'])->name('sourcing-orders.update-label');
     Route::get('sourcing-orders/{sourcingOrder}/shipping-label/{destination}', [App\Http\Controllers\Admin\SourcingOrderController::class, 'showShippingLabelForDestination'])->name('sourcing-orders.shipping-label.destination');
     Route::patch('sourcing-orders/{sourcingOrder}/tracking', [App\Http\Controllers\Admin\SourcingOrderController::class, 'updateTracking'])->name('sourcing-orders.update-tracking'); // Added tracking route
     Route::post('sourcing-orders/{sourcingOrder}/media', [App\Http\Controllers\Admin\SourcingOrderController::class, 'uploadMedia'])->name('sourcing-orders.media.store');

@@ -74,7 +74,7 @@
                     </tr>
             <tr>
                 <td class="label">Seller Name</td>
-                <td class="value">{{ $sourcingOrder->user->name }}</td>
+                <td class="value">{{ $sourcingOrder->label_seller_name ?: $sourcingOrder->user->name }}</td>
             </tr>
             <tr>
                 <td class="label">Order ID</td>
@@ -82,7 +82,7 @@
             </tr>
             <tr>
                 <td class="label">Product Name</td>
-                <td class="value">{{ $sourcingOrder->quotation->sourcingRequest->product_name ?? 'N/A' }}</td>
+                <td class="value">{{ $sourcingOrder->label_product_name ?: ($sourcingOrder->quotation->sourcingRequest->product_name ?? 'N/A') }}</td>
             </tr>
             <tr>
                 <td class="label">Quantity</td>
@@ -92,7 +92,7 @@
                 <td class="label">Recipient Address</td>
                 <td class="value" style="font-weight: normal;">
                     <div style="margin-bottom: 5px;">
-                        <strong>{{ $destination->service->name ?? 'Service' }}:</strong> {{ $destination->address ?? 'N/A' }}
+                        <strong>{{ $destination->service->name ?? 'Service' }}:</strong> {{ $destination->label_address ?: ($destination->address ?? 'N/A') }}
                     </div>
                 </td>
             </tr>

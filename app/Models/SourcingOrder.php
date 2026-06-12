@@ -93,6 +93,8 @@ class SourcingOrder extends Model
         'sheet_sync_error',
         'fsb_tracking_created_at',
         'real_tracking_assigned_at',
+        'label_seller_name',
+        'label_product_name',
     ];
 
     /**

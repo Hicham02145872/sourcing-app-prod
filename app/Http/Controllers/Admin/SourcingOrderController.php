@@ -123,6 +123,50 @@ class SourcingOrderController extends Controller
         return view('admin.sourcing-orders.show', compact('sourcingOrder'));
     }
 
+    public function editLabel(SourcingOrder $sourcingOrder): View
+    {
+        $this->authorize('view', $sourcingOrder);
+
+        $sourcingOrder->load('user', 'quotation.sourcingRequest.category', 'quotation.sourcingRequest.destinations.country', 'quotation.sourcingRequest.destinations.service');
+
+        return view('admin.sourcing-orders.edit-label', compact('sourcingOrder'));
+    }
+
+    public function updateLabel(Request $request, SourcingOrder $sourcingOrder): RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $sourcingOrder);
+
+        $validated = $request->validate([
+            'label_seller_name' => ['nullable', 'string', 'max:255'],
+            'label_product_name' => ['nullable', 'string', 'max:255'],
+            'destinations' => ['required', 'array'],
+            'destinations.*.id' => ['required', 'exists:sourcing_request_destinations,id'],
+            'destinations.*.label_address' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $sourcingOrder->update([
+            'label_seller_name' => $validated['label_seller_name'] ?? null,
+            'label_product_name' => $validated['label_product_name'] ?? null,
+        ]);
+
+        foreach ($validated['destinations'] as $destData) {
+            \App\Models\SourcingRequestDestination::where('id', $destData['id'])
+                ->where('sourcing_request_id', $sourcingOrder->quotation->sourcing_request_id)
+                ->update([
+                    'label_address' => $destData['label_address'] ?? null,
+                ]);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Label information updated successfully.']);
+        }
+
+        return redirect()->route('admin.sourcing-orders.shipping-label', [
+            'sourcingOrder' => $sourcingOrder,
+            'format' => 'html',
+        ])->with('status', 'Label information updated successfully.');
+    }
+
     public function showShippingLabel(SourcingOrder $sourcingOrder)
     {
         $this->authorize('view', $sourcingOrder);

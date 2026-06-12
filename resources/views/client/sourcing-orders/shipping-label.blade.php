@@ -68,7 +68,7 @@
                     Seller Name
                 </div>
                 <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
-                    {{ $sourcingOrder->user->name }}
+                    {{ $sourcingOrder->label_seller_name ?: $sourcingOrder->user->name }}
                 </div>
             </div>
 
@@ -88,7 +88,7 @@
                     Product Name
                 </div>
                 <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
-                    {{ $sourcingOrder->quotation->sourcingRequest->product_name ?? 'N/A' }}
+                    {{ $sourcingOrder->label_product_name ?: ($sourcingOrder->quotation->sourcingRequest->product_name ?? 'N/A') }}
                 </div>
             </div>
 
@@ -97,29 +97,23 @@
                 <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
                     Quantity
                 </div>
-                    <!-- Quantity -->
-                    <div class="flex border-b-2 border-black">
-                        <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
-                            Quantity
-                        </div>
-                        <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
-                            {{ $destination->quantity }}
-                        </div>
-                    </div>
+                <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
+                    {{ $destination->quantity }}
+                </div>
+            </div>
 
-                    <!-- Recipient Address -->
-                    <div class="flex">
-                        <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
-                            Recipient Address
-                        </div>
-                        <div class="w-2/3 p-3 font-semibold text-lg flex flex-col justify-center gap-2 break-words">
-                            <div class="mb-1">
-                                <span class="font-bold text-gray-700">{{ $destination->service->name ?? 'Service' }}:</span>
-                                <span>{{ $destination->address ?? 'N/A' }}</span>
-                            </div>
-                        </div>
+            <!-- Recipient Address -->
+            <div class="flex">
+                <div class="w-1/3 border-r-2 border-black p-3 font-bold text-lg flex items-center bg-gray-50">
+                    Recipient Address
+                </div>
+                <div class="w-2/3 p-3 font-semibold text-lg flex flex-col justify-center gap-2 break-words">
+                    <div class="mb-1">
+                        <span class="font-bold text-gray-700">{{ $destination->service->name ?? 'Service' }}:</span>
+                        <span>{{ $destination->label_address ?: ($destination->address ?? 'N/A') }}</span>
                     </div>
                 </div>
+            </div>
 
                 <!-- Footer -->
                 <div class="text-center mt-6">
