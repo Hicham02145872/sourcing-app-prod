@@ -25,7 +25,6 @@
 
             <form method="POST" action="{{ route('client.sourcing-requests.store') }}" enctype="multipart/form-data"
                   x-data="sourcingRequestForm" @submit.prevent="submitForm"
-                  data-locale="{{ $locale }}"
                   data-translation-destination-required="{{ __('At least one destination is required!') }}"
                   data-translation-getting-location="{{ __('Getting your location...') }}"
                   data-translation-location-captured="{{ __('Location captured successfully!') }}"
@@ -601,8 +600,10 @@
                 },
 
                 getFeeUrl(countryId, transport, sourcing) {
-                    const locale = document.querySelector('form').dataset.locale;
-                    return `/${locale}/client/shipping-fees/${countryId}?transport=${transport}&sourcing=${sourcing}`;
+                    const form = document.querySelector('form');
+                    const actionUrl = form.getAttribute('action');
+                    const baseUrl = actionUrl.replace(/sourcing-requests(\/create)?$/, 'shipping-fees');
+                    return `${baseUrl}/${countryId}?transport=${transport}&sourcing=${sourcing}`;
                 },
 
                 async submitForm(event) {
@@ -650,8 +651,11 @@
                     try {
                         const feePromises = destInfos.map((d) =>
                             fetch(this.getFeeUrl(d.countryId, shippingMethod, sourcingLocation))
-                                .then((r) => {
-                                    if (!r.ok) throw new Error('Failed to fetch fees');
+                                .then(async (r) => {
+                                    if (!r.ok) {
+                                        const text = await r.text();
+                                        throw new Error(`HTTP ${r.status}: ${text.substring(0, 200)}`);
+                                    }
                                     return r.json();
                                 })
                                 .then((data) => ({
@@ -662,16 +666,17 @@
 
                         this.feeDestinations = await Promise.all(feePromises);
 
-                        // Check if any destination has no fees
-                        const hasAllFees = this.feeDestinations.every((d) => d.fee !== null || d.items?.length > 0);
-                        if (this.feeDestinations.length === 0 || !this.feeDestinations.some((d) => d.items?.length > 0)) {
-                            // No fees found, submit directly
+                        const hasAnyItems = this.feeDestinations.some((d) => d.items && d.items.length > 0);
+                        if (!hasAnyItems) {
                             this.showFeeModal = false;
                             this.submitFormDirectly(form);
                         }
                     } catch (e) {
                         console.error('Failed to fetch shipping fees:', e);
                         this.showFeeModal = false;
+                        window.dispatchEvent(new CustomEvent('show-error-toast', {
+                            detail: '{{ __("Could not load shipping rates") }}: ' + e.message
+                        }));
                         this.submitFormDirectly(form);
                     } finally {
                         this.loadingFees = false;
