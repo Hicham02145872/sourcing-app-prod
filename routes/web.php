@@ -264,6 +264,7 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('{locale}/client'
 
     // Shipping Fees
     Route::get('/shipping-fees', [App\Http\Controllers\Client\ShippingFeeController::class, 'index'])->name('shipping-fees.index');
+    Route::get('/shipping-fees/{country}', [App\Http\Controllers\Client\ShippingFeeController::class, 'getShippingFee'])->name('shipping-fees.get');
 });
 
 // Anciennes URLs /client/... → /{locale}/client/... (session ou préférence utilisateur)

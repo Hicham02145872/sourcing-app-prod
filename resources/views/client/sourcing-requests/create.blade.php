@@ -25,6 +25,7 @@
 
             <form method="POST" action="{{ route('client.sourcing-requests.store') }}" enctype="multipart/form-data"
                   x-data="sourcingRequestForm" @submit.prevent="submitForm"
+                  data-locale="{{ $locale }}"
                   data-translation-destination-required="{{ __('At least one destination is required!') }}"
                   data-translation-getting-location="{{ __('Getting your location...') }}"
                   data-translation-location-captured="{{ __('Location captured successfully!') }}"
@@ -371,6 +372,12 @@
             };
 
             Alpine.data('sourcingRequestForm', () => ({
+                showFeeModal: false,
+                feeDestinations: [],
+                loadingFees: false,
+                selectedShippingMethod: '',
+                selectedSourcingLocation: '',
+
                 getNewIndex() {
                     const existingInputs = document.querySelectorAll('#destination-fields-container [name^="destinations"]');
                     if (existingInputs.length === 0) return 0;
@@ -474,9 +481,96 @@
                     }
                 },
 
+                getFeeUrl(countryId, transport, sourcing) {
+                    const locale = document.querySelector('form').dataset.locale;
+                    return `/${locale}/client/shipping-fees/${countryId}?transport=${transport}&sourcing=${sourcing}`;
+                },
+
                 async submitForm(event) {
                     event.preventDefault();
                     const form = event.target;
+
+                    // Collect form data
+                    const shippingMethod = form.querySelector('[name="shipping_method"]:checked')?.value;
+                    const sourcingLocation = form.querySelector('[name="sourcing_location"]')?.value;
+
+                    if (!shippingMethod || !sourcingLocation) {
+                        alert('{{ __("Please fill in all required fields.") }}');
+                        return;
+                    }
+
+                    // Get destination blocks
+                    const destBlocks = form.querySelectorAll('.destination-block');
+                    const destInfos = [];
+                    let valid = true;
+
+                    destBlocks.forEach((block) => {
+                        const countrySelect = block.querySelector('[name$="[country_id]"]');
+                        const quantityInput = block.querySelector('[name$="[quantity]"]');
+                        const countryId = countrySelect?.value;
+                        const quantity = quantityInput?.value;
+
+                        if (!countryId) {
+                            valid = false;
+                            return;
+                        }
+                        destInfos.push({ countryId, quantity, block });
+                    });
+
+                    if (!valid) {
+                        alert('{{ __("Please select a country for all destinations.") }}');
+                        return;
+                    }
+
+                    // Fetch shipping fees for all destinations
+                    this.loadingFees = true;
+                    this.showFeeModal = true;
+                    this.selectedShippingMethod = shippingMethod;
+                    this.selectedSourcingLocation = sourcingLocation;
+
+                    try {
+                        const feePromises = destInfos.map((d) =>
+                            fetch(this.getFeeUrl(d.countryId, shippingMethod, sourcingLocation))
+                                .then((r) => {
+                                    if (!r.ok) throw new Error('Failed to fetch fees');
+                                    return r.json();
+                                })
+                                .then((data) => ({
+                                    ...data,
+                                    quantity: d.quantity,
+                                }))
+                        );
+
+                        this.feeDestinations = await Promise.all(feePromises);
+
+                        // Check if any destination has no fees
+                        const hasAllFees = this.feeDestinations.every((d) => d.fee !== null || d.items?.length > 0);
+                        if (this.feeDestinations.length === 0 || !this.feeDestinations.some((d) => d.items?.length > 0)) {
+                            // No fees found, submit directly
+                            this.showFeeModal = false;
+                            this.submitFormDirectly(form);
+                        }
+                    } catch (e) {
+                        console.error('Failed to fetch shipping fees:', e);
+                        this.showFeeModal = false;
+                        this.submitFormDirectly(form);
+                    } finally {
+                        this.loadingFees = false;
+                    }
+                },
+
+                confirmSubmit() {
+                    const form = document.querySelector('form');
+                    this.showFeeModal = false;
+                    this.submitFormDirectly(form);
+                },
+
+                cancelFeeModal() {
+                    this.showFeeModal = false;
+                    this.feeDestinations = [];
+                },
+
+                async submitFormDirectly(form) {
                     const formData = new FormData(form);
                     const action = form.getAttribute('action');
 
@@ -496,7 +590,7 @@
                             }, 1500);
                         } else if (response.status === 422) {
                             window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __("Please check the form for errors.") }}' }));
-                            
+
                             // Clear existing errors
                             document.querySelectorAll('.validation-error').forEach(el => el.remove());
                             document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
@@ -507,19 +601,17 @@
 
                             if (data.errors) {
                                 let hasGlobalErrors = false;
-                                
+
                                 for (const field in data.errors) {
                                     let inputEl = document.querySelector(`[name="${field}"]`);
-                                    
+
                                     if (!inputEl) {
-                                        // Try array syntax (destinations.0.address -> destinations[0][address])
                                         const parts = field.split('.');
                                         if (parts.length > 1) {
                                             const nameSelector = parts[0] + '[' + parts[1] + '][' + parts.slice(2).join('][') + ']';
                                             inputEl = document.querySelector(`[name="${nameSelector}"]`);
                                         }
-                                        
-                                        // Fallback to searching for ID
+
                                         if (!inputEl) {
                                             const idSelector = field.replace(/\./g, '_');
                                             inputEl = document.getElementById(idSelector);
@@ -528,8 +620,7 @@
 
                                     if (inputEl) {
                                         inputEl.classList.add('border-red-500');
-                                        
-                                        // Special handling for hidden/special inputs
+
                                         let errorContainer = inputEl.parentNode;
                                         if (field === 'product_image') {
                                             errorContainer = document.getElementById('image-drop-zone').parentNode;
@@ -542,23 +633,21 @@
                                         errorMsg.textContent = data.errors[field][0];
                                         errorContainer.appendChild(errorMsg);
                                     } else {
-                                        // Add to global errors if no input found
                                         hasGlobalErrors = true;
                                         const li = document.createElement('li');
                                         li.textContent = `${field}: ${data.errors[field][0]}`;
                                         globalErrorsList.appendChild(li);
                                     }
                                 }
-                                
+
                                 if (hasGlobalErrors) {
                                     globalErrors.classList.remove('hidden');
                                     globalErrors.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                 }
-                                
+
                                 console.log('Validation errors:', data.errors);
                             }
                         } else {
-                            // Handle other errors (500, 403, etc.)
                             console.error('Server Error:', response.status, data);
                             let errorMessage = data.message || '{{ __("An unexpected error occurred. Please try again.") }}';
                             if (data.error) {
@@ -697,5 +786,165 @@
             color: white;
         }
     </style>
+
+    /* Fee Modal Styles */
+    .fee-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+    .fee-modal {
+        background: white;
+        border-radius: 1rem;
+        max-width: 48rem;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+    .dark .fee-modal {
+        background: #1e293b;
+        border: 1px solid #334155;
+    }
+    .fee-modal::-webkit-scrollbar {
+        width: 6px;
+    }
+    .fee-modal::-webkit-scrollbar-thumb {
+        background: #EF7722;
+        border-radius: 3px;
+    }
+    @keyframes fee-fade-in {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .fee-modal-animate {
+        animation: fee-fade-in 0.2s ease-out;
+    }
+    </style>
     @endpush
+
+    <!-- Shipping Fee Confirmation Modal -->
+    <div x-show="showFeeModal" x-cloak class="fee-modal-overlay" style="display: none;">
+        <div class="fee-modal fee-modal-animate" @click.outside="cancelFeeModal">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-[#EF7722]/10 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Shipping Fees Summary') }}</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('Review estimated shipping costs before submitting') }}</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="cancelFeeModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <template x-if="loadingFees">
+                    <div class="flex items-center justify-center py-16">
+                        <svg class="w-8 h-8 text-[#EF7722] animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        <span class="ml-3 text-sm text-slate-600 dark:text-slate-400">{{ __('Fetching shipping rates...') }}</span>
+                    </div>
+                </template>
+
+                <template x-if="!loadingFees && feeDestinations.length > 0">
+                    <div class="space-y-6">
+                        <template x-for="(dest, dIdx) in feeDestinations" :key="dIdx">
+                            <div>
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="fi fi-" x-bind:class="'fi-' + (dest.country_code || '').toLowerCase() + ' text-xl rounded-md shadow-sm'"></span>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white" x-text="dest.country_name"></h4>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                                            <span x-text="'{{ __("Source") }}: ' + (dest.sourcing === 'china' ? '{{ __("China") }}' : '{{ __("Dubai") }}')"></span>
+                                            <span class="mx-2">·</span>
+                                            <span x-text="'{{ __("Qty") }}: ' + dest.quantity"></span>
+                                            <span class="mx-2">·</span>
+                                            <span x-text="dest.transport === 'air' ? '{{ __("Air") }}' : '{{ __("Sea") }}'"></span>
+                                            <template x-if="dest.arrival_time">
+                                                <span><span class="mx-2">·</span> <span x-text="'{{ __("Est") }}: ' + dest.arrival_time + ' {{ __("days") }}'"></span></span>
+                                            </template>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <template x-if="dest.items && dest.items.length > 0">
+                                    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600">
+                                        <table class="min-w-full text-sm">
+                                            <thead>
+                                                <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
+                                                    <th class="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('Item Style') }}</th>
+                                                    <th class="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('Price') }} / <span x-text="dest.unit"></span></th>
+                                                    <th class="px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('Delay') }}</th>
+                                                    <th class="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('Est. Total') }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template x-for="(item, iIdx) in dest.items" :key="item.id || iIdx">
+                                                    <tr class="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                                                        <td class="px-4 py-2.5 text-sm font-medium text-slate-900 dark:text-white" x-text="item.item_style"></td>
+                                                        <td class="px-4 py-2.5 text-right font-mono text-sm text-slate-900 dark:text-white">
+                                                            <span x-text="parseFloat(item.price_per_kg).toFixed(2)"></span>
+                                                            <span class="text-[10px] text-slate-400 ml-1" x-text="item.currency"></span>
+                                                        </td>
+                                                        <td class="px-4 py-2.5 text-center">
+                                                            <template x-if="item.estimation_days">
+                                                                <span class="inline-flex items-center rounded-full bg-orange-50 dark:bg-orange-950/40 px-2 py-0.5 text-[10px] font-bold text-orange-700 dark:text-orange-300" x-text="item.estimation_days + ' ' + item.estimation_unit"></span>
+                                                            </template>
+                                                            <template x-if="!item.estimation_days">
+                                                                <span class="text-slate-300 dark:text-slate-600">—</span>
+                                                            </template>
+                                                        </td>
+                                                        <td class="px-4 py-2.5 text-right font-mono text-sm font-bold text-slate-900 dark:text-white">
+                                                            <span x-text="(parseFloat(item.price_per_kg) * parseInt(dest.quantity)).toFixed(2)"></span>
+                                                            <span class="text-[10px] text-slate-400 ml-1" x-text="item.currency"></span>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </template>
+
+                                <template x-if="!dest.items || dest.items.length === 0">
+                                    <div class="rounded-xl border border-dashed border-slate-200 dark:border-slate-600 p-6 text-center">
+                                        <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('No shipping rates available for this destination and transport method.') }}</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <template x-if="!loadingFees">
+                    <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        <button type="button" @click="cancelFeeModal"
+                                class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium rounded-xl transition-colors">
+                            {{ __('Cancel') }}
+                        </button>
+                        <button type="button" @click="confirmSubmit"
+                                class="px-5 py-2.5 bg-[#EF7722] hover:bg-[#FAA533] text-white text-sm font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {{ __('Confirm & Submit') }}
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
 </x-app-layout>

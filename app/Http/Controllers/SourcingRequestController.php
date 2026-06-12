@@ -140,7 +140,7 @@ class SourcingRequestController extends Controller
         $services = \App\Models\Service::all();
 
         // Pass the data to the view
-        return view('client.sourcing-requests.create', compact('categories', 'countries', 'services'));
+        return view('client.sourcing-requests.create', compact('categories', 'countries', 'services', 'locale'));
     }
 
     /**
