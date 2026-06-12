@@ -70,7 +70,7 @@
 
                         @if($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
                             <button type="button"
-                                    @click="$dispatch('open-modal', 'edit-label-{{ $sourcingOrder->id }}')"
+                                    onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'edit-label-{{ $sourcingOrder->id }}' }))"
                                     class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded transition-colors shadow-sm">
                                 <i class="fas fa-tag"></i>
                                 {{ __('Label') }}
