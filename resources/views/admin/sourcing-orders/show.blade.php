@@ -966,7 +966,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.open('{{ route("admin.sourcing-orders.shipping-label", ["sourcingOrder" => $sourcingOrder, "format" => "html"]) }}', '_blank');
+                window.open('{{ route("admin.sourcing-orders.shipping-label", $sourcingOrder) }}', '_blank');
                 window.dispatchEvent(new CustomEvent('close-modal', { detail: 'edit-label-' + orderId }));
             } else {
                 alert(data.message || '{{ __("Error saving label") }}');

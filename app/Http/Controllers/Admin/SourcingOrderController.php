@@ -163,7 +163,6 @@ class SourcingOrderController extends Controller
 
         return redirect()->route('admin.sourcing-orders.shipping-label', [
             'sourcingOrder' => $sourcingOrder,
-            'format' => 'html',
         ])->with('status', 'Label information updated successfully.');
     }
 
