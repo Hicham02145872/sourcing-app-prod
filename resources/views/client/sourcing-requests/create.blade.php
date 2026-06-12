@@ -595,13 +595,12 @@
                             });
                         }, 300);
                     } else {
-                        alert(document.querySelector('form').dataset.translationDestinationRequired);
+                        alert(this.$el.dataset.translationDestinationRequired);
                     }
                 },
 
                 getFeeUrl(countryId, transport, sourcing) {
-                    const form = document.querySelector('form');
-                    const actionUrl = form.getAttribute('action');
+                    const actionUrl = this.$el.getAttribute('action');
                     const baseUrl = actionUrl.replace(/sourcing-requests(\/create)?$/, 'shipping-fees');
                     return `${baseUrl}/${countryId}?transport=${transport}&sourcing=${sourcing}`;
                 },
@@ -684,9 +683,8 @@
                 },
 
                 confirmSubmit() {
-                    const form = document.querySelector('form');
                     this.showFeeModal = false;
-                    this.submitFormDirectly(form);
+                    this.submitFormDirectly(this.$el);
                 },
 
                 cancelFeeModal() {
