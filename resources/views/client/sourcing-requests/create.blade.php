@@ -787,6 +787,7 @@
         }
     </style>
 
+    <style>
     /* Fee Modal Styles */
     .fee-modal-overlay {
         position: fixed;

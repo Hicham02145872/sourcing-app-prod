@@ -120,10 +120,12 @@
                 </span>
             </div>
 
+            @if(!$sourcingOrder->hasMultipleDestinations() && empty($tracking_carrier))
             <div class="mb-3 flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 border border-amber-100">
                 <span class="flex-shrink-0 text-amber-600" aria-hidden="true">→</span>
                 <p class="text-xs text-amber-800">{{ __('Select the carrier used for this shipment so we can detect the correct tracking.') }}</p>
             </div>
+            @endif
 
             @if($sourcingOrder->hasMultipleDestinations())
                 <div class="mb-4">
