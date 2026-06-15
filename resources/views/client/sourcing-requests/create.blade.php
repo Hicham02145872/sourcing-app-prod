@@ -641,45 +641,8 @@
                         return;
                     }
 
-                    // Fetch shipping fees for all destinations
-                    this.loadingFees = true;
-                    this.showFeeModal = true;
-                    this.selectedShippingMethod = shippingMethod;
-                    this.selectedSourcingLocation = sourcingLocation;
-
-                    try {
-                        const feePromises = destInfos.map((d) =>
-                            fetch(this.getFeeUrl(d.countryId, shippingMethod, sourcingLocation))
-                                .then(async (r) => {
-                                    if (!r.ok) {
-                                        const text = await r.text();
-                                        throw new Error(`HTTP ${r.status}: ${text.substring(0, 200)}`);
-                                    }
-                                    return r.json();
-                                })
-                                .then((data) => ({
-                                    ...data,
-                                    quantity: d.quantity,
-                                }))
-                        );
-
-                        this.feeDestinations = await Promise.all(feePromises);
-
-                        const hasAnyItems = this.feeDestinations.some((d) => d.items && d.items.length > 0);
-                        if (!hasAnyItems) {
-                            this.showFeeModal = false;
-                            this.submitFormDirectly(form);
-                        }
-                    } catch (e) {
-                        console.error('Failed to fetch shipping fees:', e);
-                        this.showFeeModal = false;
-                        window.dispatchEvent(new CustomEvent('show-error-toast', {
-                            detail: '{{ __("Could not load shipping rates") }}: ' + e.message
-                        }));
-                        this.submitFormDirectly(form);
-                    } finally {
-                        this.loadingFees = false;
-                    }
+                    // Submit directly without shipping fees modal
+                    this.submitFormDirectly(form);
                 },
 
                 confirmSubmit() {
