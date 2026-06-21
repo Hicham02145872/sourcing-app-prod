@@ -300,6 +300,9 @@
                     </button>
                 </div>
 
+                <!-- Verification Popup -->
+                <x-verification-popup />
+
             <!-- Shipping Fee Confirmation Modal -->
             <div x-show="showFeeModal" x-cloak class="fee-modal-overlay" style="display: none;">
                 <div class="fee-modal fee-modal-animate" @click.outside="cancelFeeModal">
@@ -495,6 +498,7 @@
                 loadingFees: false,
                 selectedShippingMethod: '',
                 selectedSourcingLocation: '',
+                verificationPending: false,
 
                 getNewIndex() {
                     const existingInputs = document.querySelectorAll('#destination-fields-container [name^="destinations"]');
@@ -641,18 +645,29 @@
                         return;
                     }
 
-                    // Submit directly without shipping fees modal
-                    this.submitFormDirectly(form);
+                    // Show verification popup before submitting
+                    this.verificationPending = true;
+                    window.dispatchEvent(new CustomEvent('show-verification-popup'));
                 },
 
                 confirmSubmit() {
                     this.showFeeModal = false;
-                    this.submitFormDirectly(this.$el);
+                    this.verificationPending = true;
+                    window.dispatchEvent(new CustomEvent('show-verification-popup'));
                 },
 
                 cancelFeeModal() {
                     this.showFeeModal = false;
                     this.feeDestinations = [];
+                },
+
+                init() {
+                    window.addEventListener('verification-popup-complete', () => {
+                        if (this.verificationPending) {
+                            this.verificationPending = false;
+                            this.submitFormDirectly(this.$el);
+                        }
+                    });
                 },
 
                 async submitFormDirectly(form) {
@@ -746,6 +761,36 @@
                     }
                 },
 
+            }));
+
+            Alpine.data('verificationPopup', () => ({
+                show: false,
+                countdown: 10,
+                timer: null,
+
+                init() {
+                    window.addEventListener('show-verification-popup', () => {
+                        if (this.show) return;
+                        this.showPopup();
+                    });
+                },
+
+                showPopup() {
+                    this.show = true;
+                    this.countdown = 10;
+                    this.timer = setInterval(() => {
+                        this.countdown--;
+                        if (this.countdown <= 0) {
+                            clearInterval(this.timer);
+                            this.show = false;
+                            window.dispatchEvent(new CustomEvent('verification-popup-complete'));
+                        }
+                    }, 1000);
+                },
+
+                get countdownText() {
+                    return `Closing in ${this.countdown}s...`;
+                }
             }));
 
             document.querySelectorAll('.tom-select-country').forEach(el => {
