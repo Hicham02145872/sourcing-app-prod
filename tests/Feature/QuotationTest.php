@@ -40,6 +40,7 @@ class QuotationTest extends TestCase
             'country_id' => $country->id,
             'service_id' => $service->id,
             'quantity' => 100,
+            'address' => 'Test Address',
         ]);
 
         $quotationData = [

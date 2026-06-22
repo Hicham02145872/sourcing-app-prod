@@ -245,7 +245,7 @@
                 </div>
 
                 <div class="p-6 bg-slate-900 rounded-b-lg">
-                    <button x-on:click.prevent="window.dispatchEvent(new CustomEvent('show-verification-popup'))" wire:loading.attr="disabled" class="w-full py-3.5 bg-orange-600 hover:bg-orange-500 text-white rounded-md text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
+                    <button wire:click="save" wire:loading.attr="disabled" class="w-full py-3.5 bg-orange-600 hover:bg-orange-500 text-white rounded-md text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
                         <span wire:loading.remove wire:target="save">{{ __('Finalize & Create') }}</span>
                         <span wire:loading wire:target="save" class="flex items-center gap-2">
                              <svg class="animate-spin h-3 w-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -257,6 +257,5 @@
         </div>
     </div>
 
-    <x-verification-popup />
-    <div x-data @verification-popup-complete.window="$wire.save()" class="hidden"></div>
+    <div x-data @submit-admin-form.window="$wire.save()" class="hidden"></div>
 </div>

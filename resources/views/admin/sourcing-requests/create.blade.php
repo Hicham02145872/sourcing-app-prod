@@ -28,7 +28,7 @@
                         <a href="{{ route('admin.sourcing-requests.index') }}" class="px-4 py-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50 text-xs font-bold transition-colors">
                             {{ __('Cancel') }}
                         </a>
-                        <button type="button" onclick="window.dispatchEvent(new CustomEvent('show-verification-popup'))" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded transition-colors shadow-sm">
+                        <button type="button" onclick="window.dispatchEvent(new CustomEvent('submit-admin-form'))" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded transition-colors shadow-sm">
                             {{ __('Finalize & Create') }}
                         </button>
                     </div>
@@ -66,35 +66,4 @@
     </style>
     @endpush
 
-    @push('scripts')
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('verificationPopup', () => ({
-                show: false,
-                countdown: 10,
-                timer: null,
-
-                init() {
-                    window.addEventListener('show-verification-popup', () => {
-                        if (this.show) return;
-                        this.show = true;
-                        this.countdown = 10;
-                        this.timer = setInterval(() => {
-                            this.countdown--;
-                            if (this.countdown <= 0) {
-                                clearInterval(this.timer);
-                                this.show = false;
-                                window.dispatchEvent(new CustomEvent('verification-popup-complete'));
-                            }
-                        }, 1000);
-                    });
-                },
-
-                get countdownText() {
-                    return `Closing in ${this.countdown}s...`;
-                }
-            }));
-        });
-    </script>
-    @endpush
 </x-app-layout>

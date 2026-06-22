@@ -20,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\FeatureFlagService::class, function ($app) {
             return new \App\Services\FeatureFlagService;
         });
+
+        $this->app->afterResolving(\Illuminate\Console\Command::class, function ($command, $app) {
+            $command->setLaravel($app);
+        });
     }
 
     /**

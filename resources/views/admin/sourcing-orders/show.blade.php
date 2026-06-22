@@ -363,7 +363,7 @@
 
                             <!-- Shipping Method -->
                              @if ($sourcingOrder->quotation->sourcingRequest->shipping_method)
-                                <div class="col-span-1 md:col-span-2">
+                                <div class="col-span-1">
                                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Shipping Method') }}</label>
                                     <div class="flex items-center gap-2 text-sm text-slate-700">
                                          @if($sourcingOrder->quotation->sourcingRequest->shipping_method === 'air')
@@ -376,6 +376,22 @@
                                     </div>
                                 </div>
                             @endif
+
+                            <!-- Sourcing Location -->
+                            <div class="col-span-1">
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Sourcing Location') }}</label>
+                                <div class="flex items-center gap-2 text-sm text-slate-700 capitalize">
+                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span class="@if($sourcingOrder->quotation && $sourcingOrder->quotation->sourcingRequest && $sourcingOrder->quotation->actual_sourcing_location !== $sourcingOrder->quotation->sourcingRequest->sourcing_location) line-through opacity-50 @endif">
+                                        {{ $sourcingOrder->quotation->sourcingRequest->sourcing_location ?? ($sourcingOrder->quotation->actual_sourcing_location ?? __('Not specified')) }}
+                                    </span>
+                                    @if($sourcingOrder->quotation && $sourcingOrder->quotation->sourcingRequest && $sourcingOrder->quotation->actual_sourcing_location !== $sourcingOrder->quotation->sourcingRequest->sourcing_location)
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-200 capitalize whitespace-nowrap">
+                                            {{ __('Actual: ') }} {{ $sourcingOrder->quotation->actual_sourcing_location }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
 

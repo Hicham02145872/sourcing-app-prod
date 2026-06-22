@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Kreait\Firebase\Contract\Messaging;
 
 class QuotationController extends Controller
 {
@@ -122,7 +121,7 @@ class QuotationController extends Controller
         return view('admin.quotations.create', compact('sourcingRequest'));
     }
 
-    public function store(Request $request, Messaging $messaging): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $this->authorize('create', Quotation::class);
 
@@ -134,7 +133,7 @@ class QuotationController extends Controller
             'weight_unit' => 'required|string|in:g,kg,colis',
             'delivery_cost_china' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
-            'actual_sourcing_location' => 'required|string|in:china,dubai',
+            'actual_sourcing_location' => 'nullable|string|in:china,dubai',
             'sourcing_note' => 'nullable|string',
             'comments' => 'nullable|string',
             // Financial estimation fields (optional)
@@ -144,6 +143,17 @@ class QuotationController extends Controller
             'real_product_image' => 'nullable|image|max:10240',
             'supplier_url' => 'nullable|url|max:2048',
             'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:10240',
+            'quality_options' => 'nullable|array',
+            'quality_options.low.price' => 'nullable|numeric|min:0',
+            'quality_options.medium.price' => 'nullable|numeric|min:0',
+            'quality_options.good.price' => 'nullable|numeric|min:0',
+            'quality_options_images' => 'nullable|array',
+            'quality_options_images.low' => 'nullable|array',
+            'quality_options_images.low.*' => 'nullable|image|max:10240',
+            'quality_options_images.medium' => 'nullable|array',
+            'quality_options_images.medium.*' => 'nullable|image|max:10240',
+            'quality_options_images.good' => 'nullable|array',
+            'quality_options_images.good.*' => 'nullable|image|max:10240',
         ], [
             'supplier_url.url' => __('Veuillez entrer une URL valide pour le lien fournisseur.'),
             'real_product_image.max' => __('L\'image ne doit pas dépasser 10 MB. Veuillez choisir un fichier plus petit.'),
@@ -192,6 +202,49 @@ class QuotationController extends Controller
             );
         }
 
+        // Process Quality Pricing Options
+        $qualityOptionsData = [];
+        if ($request->has('quality_options')) {
+            $rawOptions = $request->input('quality_options');
+            foreach (['low', 'medium', 'good'] as $quality) {
+                if (isset($rawOptions[$quality]['price']) && $rawOptions[$quality]['price'] !== '') {
+                    $price = (float) $rawOptions[$quality]['price'];
+                    
+                    $imagePath = null;
+                    $imagePaths = [];
+                    if ($request->hasFile("quality_options_images.{$quality}")) {
+                        $files = $request->file("quality_options_images.{$quality}");
+                        if (!is_array($files)) {
+                            $files = [$files];
+                        }
+                        foreach ($files as $file) {
+                            $path = $this->imageService->compressAndStore(
+                                $file,
+                                'quotations/quality',
+                                'public',
+                                1200,
+                                80
+                            );
+                            if ($path) {
+                                $imagePaths[] = $path;
+                            }
+                        }
+                        if (!empty($imagePaths)) {
+                            $imagePath = $imagePaths[0];
+                        }
+                    }
+                    
+                    $qualityOptionsData[$quality] = [
+                        'price' => $price,
+                        'image_path' => $imagePath,
+                        'image_paths' => $imagePaths,
+                    ];
+                }
+            }
+        }
+
+        $actualSourcingLocation = strtolower($validated['actual_sourcing_location'] ?? $sourcingRequest->sourcing_location ?? 'china');
+
         $quotation = Quotation::create([
             'sourcing_request_id' => $validated['sourcing_request_id'],
             'assigned_to_admin_id' => $sourcingRequest->assigned_to_admin_id, // Inherit assignment from request
@@ -203,7 +256,7 @@ class QuotationController extends Controller
             'delivery_cost_china' => $validated['delivery_cost_china'],
             'currency' => $validated['currency'],
             'status' => 'pending', // Default status
-            'actual_sourcing_location' => $validated['actual_sourcing_location'],
+            'actual_sourcing_location' => $actualSourcingLocation,
             // Financial estimation fields
             'estimated_product_cost' => $estimatedProductCostTotal,
             'estimated_shipping_cost' => $validated['estimated_shipping_cost'] ?? null,
@@ -212,6 +265,7 @@ class QuotationController extends Controller
             'comments' => $validated['comments'] ?? null,
             'real_product_image' => $realProductImagePath,
             'supplier_url' => $validated['supplier_url'] ?? null,
+            'quality_options' => !empty($qualityOptionsData) ? $qualityOptionsData : null,
             // estimated_net_profit will be calculated by QuotationObserver
         ]);
 
@@ -282,7 +336,7 @@ class QuotationController extends Controller
             'weight_unit' => 'required|string|in:g,kg,colis',
             'delivery_cost_china' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
-            'actual_sourcing_location' => 'required|string|in:china,dubai',
+            'actual_sourcing_location' => 'nullable|string|in:china,dubai',
             'sourcing_note' => 'nullable|string',
             'comments' => 'nullable|string',
             'admin_negotiation_reply' => 'nullable|string|max:1000',
@@ -294,6 +348,17 @@ class QuotationController extends Controller
             'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:10240',
             'delete_media' => 'nullable|array',
             'delete_media.*' => 'exists:quotation_media,id',
+            'quality_options' => 'nullable|array',
+            'quality_options.low.price' => 'nullable|numeric|min:0',
+            'quality_options.medium.price' => 'nullable|numeric|min:0',
+            'quality_options.good.price' => 'nullable|numeric|min:0',
+            'quality_options_images' => 'nullable|array',
+            'quality_options_images.low' => 'nullable|array',
+            'quality_options_images.low.*' => 'nullable|image|max:10240',
+            'quality_options_images.medium' => 'nullable|array',
+            'quality_options_images.medium.*' => 'nullable|image|max:10240',
+            'quality_options_images.good' => 'nullable|array',
+            'quality_options_images.good.*' => 'nullable|image|max:10240',
         ], [
             'supplier_url.url' => __('Veuillez entrer une URL valide pour le lien fournisseur.'),
             'real_product_image.max' => __('L\'image ne doit pas dépasser 10 MB. Veuillez choisir un fichier plus petit.'),
@@ -327,6 +392,74 @@ class QuotationController extends Controller
             );
         }
 
+        // Process Quality Pricing Options for Update
+        $qualityOptionsData = [];
+        if ($request->has('quality_options')) {
+            $rawOptions = $request->input('quality_options');
+            $existingOptions = $quotation->quality_options ?? [];
+            
+            foreach (['low', 'medium', 'good'] as $quality) {
+                if (isset($rawOptions[$quality]['price']) && $rawOptions[$quality]['price'] !== '') {
+                    $price = (float) $rawOptions[$quality]['price'];
+                    
+                    $imagePath = $existingOptions[$quality]['image_path'] ?? null;
+                    $imagePaths = $existingOptions[$quality]['image_paths'] ?? ($imagePath ? [$imagePath] : []);
+                    
+                    if ($request->hasFile("quality_options_images.{$quality}")) {
+                        // Delete old files if new ones are uploaded
+                        if (!empty($imagePaths)) {
+                            foreach ($imagePaths as $path) {
+                                if (Storage::disk('public')->exists($path)) {
+                                    Storage::disk('public')->delete($path);
+                                }
+                            }
+                        } elseif ($imagePath && Storage::disk('public')->exists($imagePath)) {
+                            Storage::disk('public')->delete($imagePath);
+                        }
+                        
+                        $newImagePaths = [];
+                        $files = $request->file("quality_options_images.{$quality}");
+                        if (!is_array($files)) {
+                            $files = [$files];
+                        }
+                        foreach ($files as $file) {
+                            $path = $this->imageService->compressAndStore(
+                                $file,
+                                'quotations/quality',
+                                'public',
+                                1200,
+                                80
+                            );
+                            if ($path) {
+                                $newImagePaths[] = $path;
+                            }
+                        }
+                        $imagePaths = $newImagePaths;
+                        $imagePath = !empty($imagePaths) ? $imagePaths[0] : null;
+                    }
+                    
+                    $qualityOptionsData[$quality] = [
+                        'price' => $price,
+                        'image_path' => $imagePath,
+                        'image_paths' => $imagePaths,
+                    ];
+                } else {
+                    // Price is empty, delete the old files if any
+                    $imagePath = $existingOptions[$quality]['image_path'] ?? null;
+                    $imagePaths = $existingOptions[$quality]['image_paths'] ?? ($imagePath ? [$imagePath] : []);
+                    foreach ($imagePaths as $path) {
+                        if (Storage::disk('public')->exists($path)) {
+                            Storage::disk('public')->delete($path);
+                        }
+                    }
+                    $imagePath = null;
+                    $imagePaths = [];
+                }
+            }
+        }
+
+        $actualSourcingLocation = strtolower($validated['actual_sourcing_location'] ?? $sourcingRequest->sourcing_location ?? 'china');
+
         $quotation->update([
             'amount' => $amount,
             'unit_price' => $validated['unit_price'],
@@ -336,7 +469,7 @@ class QuotationController extends Controller
             'delivery_cost_china' => $validated['delivery_cost_china'],
             'currency' => $validated['currency'],
             'status' => 'pending', // Reset to pending for approval if needed, or set to 'quoted' directly
-            'actual_sourcing_location' => $validated['actual_sourcing_location'],
+            'actual_sourcing_location' => $actualSourcingLocation,
             // Financial estimation fields
             'estimated_product_cost' => $estimatedProductCostTotal,
             'estimated_shipping_cost' => $validated['estimated_shipping_cost'] ?? null,
@@ -346,6 +479,7 @@ class QuotationController extends Controller
             'admin_negotiation_reply' => $validated['admin_negotiation_reply'] ?? null,
             'real_product_image' => $realProductImagePath,
             'supplier_url' => $validated['supplier_url'] ?? null,
+            'quality_options' => !empty($qualityOptionsData) ? $qualityOptionsData : null,
         ]);
 
         // Notify client if sourcing location changed and is different from requested

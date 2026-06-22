@@ -13,12 +13,26 @@ return new class extends Migration
             $table->foreignId('sourcing_request_id')->nullable()->after('sourcing_order_id')->constrained('sourcing_requests')->cascadeOnDelete();
         });
 
-        DB::table('refund_requests')
-            ->join('sourcing_orders', 'sourcing_orders.id', '=', 'refund_requests.sourcing_order_id')
-            ->join('quotations', 'quotations.id', '=', 'sourcing_orders.quotation_id')
-            ->update([
-                'refund_requests.sourcing_request_id' => DB::raw('quotations.sourcing_request_id'),
-            ]);
+        if (DB::getDriverName() === 'sqlite') {
+            DB::table('refund_requests')->get()->each(function ($refund) {
+                $order = DB::table('sourcing_orders')->where('id', $refund->sourcing_order_id)->first();
+                if ($order) {
+                    $quotation = DB::table('quotations')->where('id', $order->quotation_id)->first();
+                    if ($quotation) {
+                        DB::table('refund_requests')
+                            ->where('id', $refund->id)
+                            ->update(['sourcing_request_id' => $quotation->sourcing_request_id]);
+                    }
+                }
+            });
+        } else {
+            DB::table('refund_requests')
+                ->join('sourcing_orders', 'sourcing_orders.id', '=', 'refund_requests.sourcing_order_id')
+                ->join('quotations', 'quotations.id', '=', 'sourcing_orders.quotation_id')
+                ->update([
+                    'refund_requests.sourcing_request_id' => DB::raw('quotations.sourcing_request_id'),
+                ]);
+        }
 
     }
 

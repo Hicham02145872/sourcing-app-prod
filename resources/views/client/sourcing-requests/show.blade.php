@@ -274,6 +274,24 @@
 
                     {{-- Simplified Quotation Section --}}
                     @if ($sourcingRequest->quotation)
+                        @php
+                            $firstQuality = null;
+                            $initialUnitPrice = $sourcingRequest->quotation->unit_price;
+                            $initialAmount = $sourcingRequest->quotation->amount;
+                            
+                            if ($sourcingRequest->quotation->quality_options) {
+                                foreach (['low', 'medium', 'good'] as $k) {
+                                    if (!empty($sourcingRequest->quotation->quality_options[$k]['price'])) {
+                                        $firstQuality = $k;
+                                        $initialUnitPrice = $sourcingRequest->quotation->quality_options[$k]['price'];
+                                        $totalQuantity = $sourcingRequest->destinations->sum('quantity');
+                                        $subtotal = $initialUnitPrice * $totalQuantity;
+                                        $initialAmount = $subtotal + $sourcingRequest->quotation->commission_service + $sourcingRequest->quotation->delivery_cost_china;
+                                        break;
+                                    }
+                                }
+                            }
+                        @endphp
                         <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 overflow-hidden">
                             {{-- Header --}}
                             <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700 flex justify-between items-center">
@@ -307,7 +325,7 @@
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                                     <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Price') }}</p>
-                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->unit_price, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->currency }}</span></p>
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white"><span id="dynamic-unit-price">{{ number_format($initialUnitPrice, 2) }}</span> <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->currency }}</span></p>
                                     </div>
                                     <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Commission') }}</p>
@@ -391,7 +409,7 @@
                                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                         <div>
                                             <p class="text-sm font-bold text-white uppercase tracking-wider mb-1">{{ __('Total Investment') }}</p>
-                                            <p class="text-3xl sm:text-4xl font-extrabold text-white">{{ number_format($sourcingRequest->quotation->amount, 2) }} <span class="text-xl font-bold text-white/90">{{ $sourcingRequest->quotation->currency }}</span></p>
+                                            <p class="text-3xl sm:text-4xl font-extrabold text-white"><span id="dynamic-grand-total">{{ number_format($initialAmount, 2) }}</span> <span class="text-xl font-bold text-white/90">{{ $sourcingRequest->quotation->currency }}</span></p>
                                         </div>
                                         <div class="hidden sm:block">
                                             <svg class="w-12 h-12 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -455,11 +473,104 @@
                                 @endif
 
                                 {{-- Decision Center --}}
-                                @if($sourcingRequest->quotation->order === null && !in_array($sourcingRequest->quotation->status, ['negotiating', 'rejected', 'accepted']))
-                                    <div x-data="{ showNegotiateModal: false }">
+                                @if($sourcingRequest->quotation->order === null && !in_array($sourcingRequest->quotation->status, ['rejected', 'accepted']))
+                                    <div x-data="{ 
+                                        showNegotiateModal: false,
+                                        selectedQuality: '{{ $firstQuality }}',
+                                        totalQuantity: {{ (int)$sourcingRequest->destinations->sum('quantity') }},
+                                        commission: {{ (float)$sourcingRequest->quotation->commission_service }},
+                                        deliveryCost: {{ (float)$sourcingRequest->quotation->delivery_cost_china }},
+                                        qualityPrices: {
+                                            low: {{ (float)($sourcingRequest->quotation->quality_options['low']['price'] ?? 0) }},
+                                            medium: {{ (float)($sourcingRequest->quotation->quality_options['medium']['price'] ?? 0) }},
+                                            good: {{ (float)($sourcingRequest->quotation->quality_options['good']['price'] ?? 0) }}
+                                        },
+                                        init() {
+                                            this.$watch('selectedQuality', value => {
+                                                if (value && this.qualityPrices[value]) {
+                                                    const price = this.qualityPrices[value];
+                                                    const total = (price * this.totalQuantity) + this.commission + this.deliveryCost;
+                                                    document.getElementById('dynamic-unit-price').textContent = price.toFixed(2);
+                                                    document.getElementById('dynamic-grand-total').textContent = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                                }
+                                            });
+                                        }
+                                    }">
+                                        {{-- Negotiation Banner inside Decision Center --}}
+                                        @if($sourcingRequest->quotation->status === 'negotiating')
+                                            <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-lg shadow-sm">
+                                                <div class="flex items-center gap-3">
+                                                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                                                        {{ __('Negotiation in progress. Our team is reviewing your feedback, but you can still accept the current quotation if you decide to proceed.') }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        {{-- Product Quality Options Selector --}}
+                                        @if($sourcingRequest->quotation->quality_options && count(array_filter($sourcingRequest->quotation->quality_options, fn($opt) => !empty($opt['price']))) > 0)
+                                            <div class="mb-8 p-6 bg-slate-50 dark:bg-slate-900/40 border border-[#EBEBEB] dark:border-slate-700 rounded-xl shadow-inner">
+                                                <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                                                    <svg class="w-5 h-5 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                                    </svg>
+                                                    {{ __('Select Product Quality Option') }}
+                                                </h4>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium">
+                                                    {{ __('Choose your preferred quality level below. The pricing and totals will update automatically.') }}
+                                                </p>
+                                                
+                                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    @foreach(['low' => __('Low Quality'), 'medium' => __('Medium Quality'), 'good' => __('Good Quality')] as $key => $label)
+                                                        @if(!empty($sourcingRequest->quotation->quality_options[$key]['price']))
+                                                            @php 
+                                                                $opt = $sourcingRequest->quotation->quality_options[$key]; 
+                                                            @endphp
+                                                            <label class="relative flex flex-col bg-white dark:bg-slate-800 border-2 rounded-xl p-4 cursor-pointer focus:outline-none transition-all hover:border-[#EF7722]/50 shadow-sm"
+                                                                   :class="selectedQuality === '{{ $key }}' ? 'border-[#EF7722] ring-2 ring-[#EF7722]/20' : 'border-[#EBEBEB] dark:border-slate-700'">
+                                                                <input type="radio" name="quality_selector" value="{{ $key }}" class="sr-only" 
+                                                                       :checked="selectedQuality === '{{ $key }}'"
+                                                                       @change="selectedQuality = '{{ $key }}'; document.querySelectorAll('.selected-quality-input').forEach(i => i.value = '{{ $key }}')">
+                                                                
+                                                                {{-- Image preview --}}
+                                                                <div class="aspect-video w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 mb-3 border border-slate-100 dark:border-slate-600 flex items-center justify-center">
+                                                                    @if(!empty($opt['image_path']))
+                                                                        <img src="{{ asset('storage/' . $opt['image_path']) }}" alt="{{ $label }}" class="w-full h-full object-cover">
+                                                                    @else
+                                                                        <div class="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900/50">
+                                                                            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                                            </svg>
+                                                                        </div>
+                                                                    @endif
+                                                                </div>
+
+                                                                {{-- Label & Price --}}
+                                                                <div class="flex flex-col mt-auto">
+                                                                    <span class="block text-sm font-black text-slate-900 dark:text-white">{{ $label }}</span>
+                                                                    <div class="flex justify-between items-end mt-2">
+                                                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                                                            {{ __('Unit Price') }}
+                                                                        </span>
+                                                                        <span class="text-sm font-extrabold text-[#EF7722]">
+                                                                            {{ number_format($opt['price'], 2) }} {{ $sourcingRequest->quotation->currency }}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </label>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <div class="flex flex-col sm:flex-row gap-3">
                                             <form action="{{ route('client.quotations.accept', $sourcingRequest->quotation) }}" method="POST" class="flex-[2]">
                                                 @csrf
+                                                <input type="hidden" name="selected_quality" class="selected-quality-input" :value="selectedQuality">
                                                 <button type="submit" class="w-full h-14 bg-[#EF7722] hover:bg-[#FAA533] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -529,22 +640,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                @elseif($sourcingRequest->quotation->status === 'negotiating')
-                                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-lg">
-                                        <div class="flex items-center gap-3">
-                                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                            <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
-                                                {{ __('Negotiation in progress. Our team is reviewing your feedback.') }}
-                                            </p>
-                                        </div>
-                                        @if($sourcingRequest->quotation->negotiation_notes)
-                                            <div class="mt-3 text-xs text-blue-700 dark:text-blue-400 italic">
-                                                "{{ $sourcingRequest->quotation->negotiation_notes }}"
-                                            </div>
-                                        @endif
                                     </div>
                                 @endif
                             </div>

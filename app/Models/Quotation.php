@@ -42,6 +42,7 @@ class Quotation extends Model
         'comments',
         'real_product_image',
         'supplier_url',
+        'quality_options',
     ];
 
     protected $casts = [
@@ -54,6 +55,7 @@ class Quotation extends Model
         'estimated_shipping_cost' => 'decimal:2',
         'estimated_other_costs' => 'decimal:2',
         'estimated_net_profit' => 'decimal:2',
+        'quality_options' => 'array',
     ];
 
     public function sourcingRequest()

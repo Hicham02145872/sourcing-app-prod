@@ -1438,5 +1438,8 @@
     "ISO Certified": "Certifié ISO",
     "© 2026 Fast Sourcing Brothers LLC. Registered in Wyoming, USA.": "© 2026 Fast Sourcing Brothers LLC. Enregistré au Wyoming, États-Unis.",
     "Password requirements hint": "Au moins 8 caractères : une majuscule, une minuscule, un chiffre et un symbole. Exemple : MonShop2024 !",
-    "Strong password validation message": "Veuillez entrer un mot de passe fort avec majuscule, minuscule, chiffre et symbole."
+    "Strong password validation message": "Veuillez entrer un mot de passe fort avec majuscule, minuscule, chiffre et symbole.",
+    "Important Verification Notice": "Avis de vérification important",
+    "Please verify the quality of the product on Amazon to avoid fake products. Check customer reviews, seller ratings, and buyer photos before finalizing your request.": "Pouvez-vous vérifier la qualité du produit sur Amazon pour éviter les faux produits ? Consultez les avis clients, les évaluations du vendeur et les photos des acheteurs avant de finaliser votre demande.",
+    "Closing in :seconds s...": "Fermeture dans :seconds s..."
 }

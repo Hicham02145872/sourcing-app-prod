@@ -235,6 +235,8 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('{locale}/client'
     Route::post('/quotations/{quotation}/accept', [App\Http\Controllers\Client\QuotationController::class, 'accept'])->name('quotations.accept');
     Route::post('/quotations/{quotation}/reject', [App\Http\Controllers\Client\QuotationController::class, 'reject'])->name('quotations.reject');
     Route::post('/quotations/{quotation}/negotiate', [App\Http\Controllers\Client\QuotationController::class, 'negotiate'])->name('quotations.negotiate');
+    Route::get('/quotations/bulk-payment', [App\Http\Controllers\Client\QuotationController::class, 'bulkPaymentShow'])->name('quotations.bulk-payment');
+    Route::post('/quotations/bulk-pay', [App\Http\Controllers\Client\QuotationController::class, 'bulkPay'])->name('quotations.bulk-pay');
     Route::get('/quotations', [App\Http\Controllers\Client\QuotationController::class, 'index'])->name('quotations.index');
 
     Route::get('/sourcing-orders', [App\Http\Controllers\Client\SourcingOrderController::class, 'index'])->name('sourcing-orders.index');
@@ -265,6 +267,7 @@ Route::middleware(['auth', 'role:client', 'verified'])->prefix('{locale}/client'
     // Shipping Fees
     Route::get('/shipping-fees', [App\Http\Controllers\Client\ShippingFeeController::class, 'index'])->name('shipping-fees.index');
     Route::get('/shipping-fees/{country}', [App\Http\Controllers\Client\ShippingFeeController::class, 'getShippingFee'])->name('shipping-fees.get');
+    Route::get('/shipping-popup-rates/{country}', [App\Http\Controllers\Client\ShippingFeeController::class, 'getRatesForPopup'])->name('shipping-fees.popup-rates');
 });
 
 // Anciennes URLs /client/... → /{locale}/client/... (session ou préférence utilisateur)

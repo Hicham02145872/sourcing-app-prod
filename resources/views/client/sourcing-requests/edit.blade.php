@@ -18,8 +18,9 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('client.sourcing-requests.update', $sourcingRequest) }}" enctype="multipart/form-data"
+            <form id="sourcing-request-form" method="POST" action="{{ route('client.sourcing-requests.update', $sourcingRequest) }}" enctype="multipart/form-data"
                   x-data="sourcingRequestForm" @submit.prevent="submitForm"
+                  data-popup-rates-url="{{ route('client.shipping-fees.popup-rates', ['country' => ':country']) }}"
                   data-translation-destination-required="{{ __('At least one destination is required!') }}">
                 @csrf
                 @method('PUT')
@@ -261,6 +262,225 @@
                         {{ __('Update Request') }}
                     </button>
                 </div>
+                <!-- Shipping Routing Selection Popup (Pop-up) -->
+                <div x-show="showRoutingPopup" x-cloak class="fee-modal-overlay" style="display: none;">
+                    <div class="fee-modal fee-modal-animate max-w-3xl" @click.outside="cancelRoutingPopup">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-[#EF7722]/10 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <span>{{ __('Choose Shipping Routing') }}</span>
+                                            <span class="text-slate-300">|</span>
+                                            <span class="text-base font-medium text-slate-600 dark:text-slate-350">اختيار مسار الشحن</span>
+                                        </h3>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                            {{ __('Please select your preferred shipping routing to') }} 
+                                            <span class="font-bold text-[#EF7722]" x-text="ratesData?.country_name"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <button type="button" @click="cancelRoutingPopup" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+
+                            <!-- Loading State -->
+                            <div x-show="loadingRates" class="flex flex-col items-center justify-center py-16">
+                                <svg class="w-10 h-10 text-[#EF7722] animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                <span class="mt-3 text-sm font-semibold text-slate-600 dark:text-slate-400">{{ __('Loading shipping rates...') }}</span>
+                            </div>
+
+                            <!-- Content State -->
+                            <div x-show="!loadingRates && ratesData" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Option 1: Direct Shipping -->
+                                    <label class="relative flex flex-col p-6 border-2 rounded-2xl cursor-pointer transition-all hover:shadow-md"
+                                           :class="selectedRoute === 'china' ? 'border-[#EF7722] bg-[#EF7722]/5 dark:bg-[#EF7722]/5 shadow-sm' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'">
+                                        <input type="radio" name="popup_route" value="china" x-model="selectedRoute" class="sr-only">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-[#EF7722] flex items-center justify-center">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <span class="block text-sm font-bold text-slate-900 dark:text-white">{{ __('Direct Shipping') }} / شحن مباشر</span>
+                                                    <span class="block text-[10px] text-slate-500 dark:text-slate-400">{{ __('Sourced directly from China') }} / من الصين مباشرة</span>
+                                                </div>
+                                            </div>
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
+                                                 :class="selectedRoute === 'china' ? 'border-[#EF7722] bg-[#EF7722]' : 'border-slate-300 dark:border-slate-600'">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-white" x-show="selectedRoute === 'china'"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-4 flex-1">
+                                            <!-- Trajectory Visual -->
+                                            <div class="flex items-center justify-between gap-2 py-2 px-3 bg-slate-100/70 dark:bg-slate-900/40 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350">
+                                                <div class="flex items-center gap-1.5">
+                                                    <span class="fi fi-cn rounded-sm shadow-sm" style="width: 26px; height: 18px; background-size: cover; vertical-align: middle;"></span>
+                                                    <span>{{ __('CN') }}</span>
+                                                </div>
+                                                <div class="flex-1 flex items-center justify-center relative mx-1">
+                                                    <div class="absolute left-0 right-0 h-[1px] bg-slate-300 dark:bg-slate-700"></div>
+                                                    <div class="relative bg-slate-50 dark:bg-slate-800 px-1 text-slate-400 dark:text-slate-500 font-bold z-10">
+                                                        <template x-if="ratesData?.direct?.transport === 'air'">
+                                                            <svg class="w-3.5 h-3.5 text-[#EF7722]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                                            </svg>
+                                                        </template>
+                                                        <template x-if="ratesData?.direct?.transport === 'sea'">
+                                                            <svg class="w-3.5 h-3.5 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 10h16l-1 5H5l-1-5zM8 19h8"/>
+                                                            </svg>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-1.5">
+                                                    <span :class="'fi fi-' + ratesData?.country_code?.toLowerCase() + ' rounded-sm shadow-sm'" style="width: 26px; height: 18px; background-size: cover; vertical-align: middle;"></span>
+                                                    <span x-text="ratesData?.country_code"></span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Est Time -->
+                                            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-xl text-xs">
+                                                <span class="text-slate-500 dark:text-slate-400">{{ __('Estimated Delivery:') }} / مدة الشحن:</span>
+                                                <span class="font-bold text-slate-800 dark:text-slate-200" x-text="ratesData?.direct?.arrival_time ? ratesData.direct.arrival_time + ' ' + '{{ __("days") }}' : '{{ __("N/A") }}'"></span>
+                                            </div>
+
+                                            <!-- Rates list -->
+                                            <div class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                                                <template x-for="item in ratesData?.direct?.items" :key="item.id">
+                                                    <div class="flex justify-between items-start gap-2 border-b border-slate-100 dark:border-slate-700/50 pb-2 text-xs">
+                                                        <span class="text-slate-600 dark:text-slate-400 font-medium text-left leading-tight" x-text="item.item_style"></span>
+                                                        <span class="font-mono font-bold text-slate-950 dark:text-white whitespace-nowrap">
+                                                            <span x-text="parseFloat(item.price_per_kg).toFixed(2)"></span>
+                                                            <span class="text-[9px] text-slate-400" x-text="ratesData?.currency"></span>
+                                                            <span class="text-[9px] text-slate-400">/</span>
+                                                            <span class="text-[9px] text-slate-450" x-text="ratesData?.direct?.unit"></span>
+                                                        </span>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!ratesData?.direct?.items || ratesData.direct.items.length === 0">
+                                                    <p class="text-xs text-slate-500 dark:text-slate-400 py-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">{{ __('No direct rates indexed.') }}</p>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <!-- Option 2: Indirect Shipping (via Dubai) -->
+                                    <label class="relative flex flex-col p-6 border-2 rounded-2xl cursor-pointer transition-all hover:shadow-md"
+                                           :class="selectedRoute === 'dubai' ? 'border-[#EF7722] bg-[#EF7722]/5 dark:bg-[#EF7722]/5 shadow-sm' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'">
+                                        <input type="radio" name="popup_route" value="dubai" x-model="selectedRoute" class="sr-only">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center text-sm font-bold">
+                                                    🇦🇪
+                                                </div>
+                                                <div>
+                                                    <span class="block text-sm font-bold text-slate-900 dark:text-white">{{ __('Indirect Shipping') }} / شحن غير مباشر</span>
+                                                    <span class="block text-[10px] text-slate-500 dark:text-slate-400">{{ __('Sourced via Dubai Hub') }} / عبر دبي</span>
+                                                </div>
+                                            </div>
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
+                                                 :class="selectedRoute === 'dubai' ? 'border-[#EF7722] bg-[#EF7722]' : 'border-slate-300 dark:border-slate-600'">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-white" x-show="selectedRoute === 'dubai'"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-4 flex-1">
+                                            <!-- Trajectory Visual -->
+                                            <div class="flex items-center justify-between gap-1 py-2 px-3 bg-slate-100/70 dark:bg-slate-900/40 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350">
+                                                <div class="flex items-center gap-1">
+                                                    <span class="fi fi-cn rounded-sm shadow-sm" style="width: 26px; height: 18px; background-size: cover; vertical-align: middle;"></span>
+                                                    <span>{{ __('CN') }}</span>
+                                                </div>
+                                                
+                                                <div class="flex-1 flex items-center justify-center relative mx-0.5 min-w-[15px]">
+                                                    <div class="absolute left-0 right-0 h-[1px] bg-slate-300 dark:bg-slate-700"></div>
+                                                    <div class="relative bg-slate-50 dark:bg-slate-800 px-0.5 text-slate-400 dark:text-slate-500 font-bold z-10">
+                                                        <template x-if="ratesData?.indirect?.transport === 'sea'">
+                                                            <svg class="w-3.5 h-3.5 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 10h16l-1 5H5l-1-5z"/></svg>
+                                                        </template>
+                                                        <template x-if="ratesData?.indirect?.transport !== 'sea'">
+                                                            <svg class="w-3.5 h-3.5 text-[#EF7722]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex items-center gap-1">
+                                                    <span class="fi fi-ae rounded-sm shadow-sm" style="width: 26px; height: 18px; background-size: cover; vertical-align: middle;"></span>
+                                                    <span class="text-[10px] text-emerald-600 font-bold">{{ __('DXB') }}</span>
+                                                </div>
+
+                                                <div class="flex-1 flex items-center justify-center relative mx-0.5 min-w-[15px]">
+                                                    <div class="absolute left-0 right-0 h-[1px] bg-slate-300 dark:bg-slate-700"></div>
+                                                    <div class="relative bg-slate-50 dark:bg-slate-800 px-0.5 text-slate-400 dark:text-slate-500 font-bold z-10">
+                                                        <svg class="w-3.5 h-3.5 text-[#EF7722]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex items-center gap-1">
+                                                    <span :class="'fi fi-' + ratesData?.country_code?.toLowerCase() + ' rounded-sm shadow-sm'" style="width: 26px; height: 18px; background-size: cover; vertical-align: middle;"></span>
+                                                    <span x-text="ratesData?.country_code"></span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Est Time -->
+                                            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-xl text-xs">
+                                                <span class="text-slate-500 dark:text-slate-400">{{ __('Estimated Delivery:') }} / مدة الشحن:</span>
+                                                <span class="font-bold text-slate-800 dark:text-slate-200" x-text="ratesData?.indirect?.arrival_time ? ratesData.indirect.arrival_time + ' ' + '{{ __("days") }}' : '{{ __("N/A") }}'"></span>
+                                            </div>
+
+                                            <!-- Rates list -->
+                                            <div class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                                                <template x-for="item in ratesData?.indirect?.items" :key="item.id">
+                                                    <div class="flex justify-between items-start gap-2 border-b border-slate-100 dark:border-slate-700/50 pb-2 text-xs">
+                                                        <span class="text-slate-600 dark:text-slate-400 font-medium text-left leading-tight" x-text="item.item_style"></span>
+                                                        <span class="font-mono font-bold text-slate-950 dark:text-white whitespace-nowrap">
+                                                            <span x-text="parseFloat(item.price_per_kg).toFixed(2)"></span>
+                                                            <span class="text-[9px] text-slate-400" x-text="ratesData?.currency"></span>
+                                                            <span class="text-[9px] text-slate-400">/</span>
+                                                            <span class="text-[9px] text-slate-450" x-text="ratesData?.indirect?.unit"></span>
+                                                        </span>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!ratesData?.indirect?.items || ratesData.indirect.items.length === 0">
+                                                    <p class="text-xs text-slate-500 dark:text-slate-400 py-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">{{ __('No indirect rates indexed.') }}</p>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+                                    <button type="button" @click="cancelRoutingPopup"
+                                            class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-semibold rounded-xl transition-all">
+                                        {{ __('Cancel') }} / إلغاء
+                                    </button>
+                                    <button type="button" @click="confirmRoutingPopup"
+                                            class="px-5 py-2.5 bg-[#EF7722] hover:bg-[#FAA533] text-white text-sm font-bold rounded-xl transition-all shadow-md hover:shadow-lg inline-flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        {{ __('Confirm & Submit') }} / تأكيد وإرسال
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -322,6 +542,11 @@
             };
 
             Alpine.data('sourcingRequestForm', () => ({
+                showRoutingPopup: false,
+                loadingRates: false,
+                ratesData: null,
+                selectedRoute: '{{ $sourcingRequest->sourcing_location }}',
+
                 getNewIndex() {
                     const existingInputs = document.querySelectorAll('#destination-fields-container [name^="destinations"]');
                     if (existingInputs.length === 0) return 0;
@@ -420,9 +645,114 @@
                     }
                 },
 
+                getPopupRatesUrl(countryId, transport) {
+                    const templateUrl = this.$el.dataset.popupRatesUrl || '{{ route("client.shipping-fees.popup-rates", ["country" => ":country"]) }}';
+                    return templateUrl.replace(':country', countryId) + `?transport=${transport}`;
+                },
+
                 async submitForm(event) {
                     event.preventDefault();
                     const form = event.target;
+
+                    // Collect form data
+                    const shippingMethod = form.querySelector('[name="shipping_method"]:checked')?.value;
+
+                    if (!shippingMethod) {
+                        window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                            detail: '{{ __("Please select a preferred shipping method (Air or Sea).") }}' 
+                        }));
+                        return;
+                    }
+
+                    // Get destination blocks
+                    const destBlocks = form.querySelectorAll('.destination-block');
+                    if (destBlocks.length === 0) {
+                        window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                            detail: '{{ __("Please add at least one destination.") }}' 
+                        }));
+                        return;
+                    }
+
+                    const firstCountrySelect = destBlocks[0].querySelector('[name$="[country_id]"]');
+                    const countryId = firstCountrySelect?.value;
+
+                    if (!countryId) {
+                        window.dispatchEvent(new CustomEvent('show-error-toast', { 
+                            detail: '{{ __("Please select a country for the first destination.") }}' 
+                        }));
+                        return;
+                    }
+
+                    // Open the routing pop-up and fetch rates
+                    this.showRoutingPopup = true;
+                    this.loadingRates = true;
+                    this.ratesData = null;
+
+                    try {
+                        const url = this.getPopupRatesUrl(countryId, shippingMethod);
+                        const response = await fetch(url, {
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            this.ratesData = data;
+                        } else {
+                            // Fallback if country has no rates
+                            const selectedOption = firstCountrySelect?.options[firstCountrySelect.selectedIndex];
+                            const countryName = selectedOption ? selectedOption.text.trim() : '{{ __("Selected Country") }}';
+                            const countryCode = selectedOption ? selectedOption.getAttribute('data-flag') : '';
+                            this.ratesData = {
+                                success: true,
+                                country_name: countryName,
+                                country_code: countryCode ? countryCode.toUpperCase() : '',
+                                currency: 'USD',
+                                direct: { transport: shippingMethod, arrival_time: null, items: [], unit: 'KG' },
+                                indirect: { transport: 'air', arrival_time: null, items: [], unit: 'KG' }
+                            };
+                        }
+                    } catch (err) {
+                        console.error('Error fetching rates:', err);
+                        // Fallback on error
+                        const selectedOption = firstCountrySelect?.options[firstCountrySelect.selectedIndex];
+                        const countryName = selectedOption ? selectedOption.text.trim() : '{{ __("Selected Country") }}';
+                        const countryCode = selectedOption ? selectedOption.getAttribute('data-flag') : '';
+                        this.ratesData = {
+                            success: true,
+                            country_name: countryName,
+                            country_code: countryCode ? countryCode.toUpperCase() : '',
+                            currency: 'USD',
+                            direct: { transport: shippingMethod, arrival_time: null, items: [], unit: 'KG' },
+                            indirect: { transport: 'air', arrival_time: null, items: [], unit: 'KG' }
+                        };
+                    } finally {
+                        this.loadingRates = false;
+                    }
+                },
+
+                confirmRoutingPopup() {
+                    this.showRoutingPopup = false;
+                    
+                    // Set sourcing location
+                    const form = document.getElementById('sourcing-request-form');
+                    const sourcingSelect = form ? form.querySelector('[name="sourcing_location"]') : null;
+                    if (sourcingSelect) {
+                        sourcingSelect.value = this.selectedRoute;
+                        if (sourcingSelect.tomselect) {
+                            sourcingSelect.tomselect.setValue(this.selectedRoute);
+                        }
+                    }
+
+                    if (form) {
+                        this.submitFormDirectly(form);
+                    }
+                },
+
+                cancelRoutingPopup() {
+                    this.showRoutingPopup = false;
+                    this.ratesData = null;
+                },
+
+                async submitFormDirectly(form) {
                     const formData = new FormData(form);
                     const action = form.getAttribute('action');
 
@@ -445,17 +775,57 @@
                             }, 1500);
                         } else if (response.status === 422) {
                             window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __("Please check the form for errors.") }}' }));
+
+                            // Clear existing errors
+                            document.querySelectorAll('.validation-error').forEach(el => el.remove());
+                            document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+
                             if (data.errors) {
                                 for (const field in data.errors) {
-                                    const errorPath = field.replace(/\./g, '-');
-                                    const inputEl = document.querySelector(`[name="${field}"]`);
+                                    let inputEl = document.querySelector(`[name="${field}"]`);
+
+                                    if (!inputEl) {
+                                        const parts = field.split('.');
+                                        if (parts.length > 1) {
+                                            const nameSelector = parts[0] + '[' + parts[1] + '][' + parts.slice(2).join('][') + ']';
+                                            inputEl = document.querySelector(`[name="${nameSelector}"]`);
+                                        }
+
+                                        if (!inputEl) {
+                                            const idSelector = field.replace(/\./g, '_');
+                                            inputEl = document.getElementById(idSelector);
+                                        }
+                                    }
+
                                     if (inputEl) {
                                         inputEl.classList.add('border-red-500');
+
+                                        let errorContainer = inputEl.parentNode;
+                                        if (field === 'product_image') {
+                                            errorContainer = document.getElementById('image-drop-zone').parentNode;
+                                        } else if (field === 'sourcing_location' || field === 'shipping_method') {
+                                            errorContainer = inputEl.closest('div').parentNode;
+                                        }
+
+                                        const errorMsg = document.createElement('p');
+                                        errorMsg.className = 'text-xs text-red-500 mt-1 validation-error';
+                                        errorMsg.textContent = data.errors[field][0];
+                                        errorContainer.appendChild(errorMsg);
                                     }
                                 }
+
+                                console.log('Validation errors:', data.errors);
                             }
+                        } else {
+                            console.error('Server Error:', response.status, data);
+                            let errorMessage = data.message || '{{ __("An unexpected error occurred. Please try again.") }}';
+                            if (data.error) {
+                                errorMessage += ' (' + data.error + ')';
+                            }
+                            window.dispatchEvent(new CustomEvent('show-error-toast', { detail: errorMessage }));
                         }
                     } catch (error) {
+                        console.error('Form submission error:', error);
                         window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __("A network error occurred.") }}' }));
                     }
                 }
@@ -510,6 +880,46 @@
 
         input[type="number"] {
             -moz-appearance: textfield;
+        }
+
+        /* Fee Modal Styles */
+        .fee-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .fee-modal {
+            background: white;
+            border-radius: 1rem;
+            max-width: 48rem;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        }
+        .dark .fee-modal {
+            background: #1e293b;
+            border: 1px solid #334155;
+        }
+        .fee-modal::-webkit-scrollbar {
+            width: 6px;
+        }
+        .fee-modal::-webkit-scrollbar-thumb {
+            background: #EF7722;
+            border-radius: 3px;
+        }
+        @keyframes fee-fade-in {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .fee-modal-animate {
+            animation: fee-fade-in 0.2s ease-out;
         }
     </style>
 </x-app-layout>

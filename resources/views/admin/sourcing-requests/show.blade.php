@@ -140,7 +140,14 @@
                                 <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Sourcing Location') }}</label>
                                 <div class="text-sm text-slate-900 flex items-center gap-1.5">
                                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                    <span class="capitalize">{{ $sourcingRequest->sourcing_location ?? __('Not specified') }}</span>
+                                    <span class="capitalize @if($sourcingRequest->quotation && $sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location) line-through opacity-50 @endif">
+                                        {{ $sourcingRequest->sourcing_location ?? __('Not specified') }}
+                                    </span>
+                                    @if($sourcingRequest->quotation && $sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location)
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-200 capitalize">
+                                            {{ __('Actual Sourcing: ') }} {{ $sourcingRequest->quotation->actual_sourcing_location }}
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
 

@@ -78,7 +78,7 @@ class QuotationController extends Controller
         }
 
         try {
-            $result = DB::transaction(function () use ($quotation) {
+            $result = DB::transaction(function () use ($quotation, $request) {
                 $q = Quotation::with(['sourcingRequest'])
                     ->where('id', $quotation->id)
                     ->lockForUpdate()
@@ -97,21 +97,41 @@ class QuotationController extends Controller
                     ];
                 }
 
-                if (! in_array($q->status, ['pending', 'approved', 'sent'], true)) {
+                if (! in_array($q->status, ['pending', 'approved', 'sent', 'negotiating'], true)) {
                     throw new \DomainException(__('This quotation can no longer be accepted.'));
+                }
+
+                $unitPrice = $q->unit_price;
+                $amount = $q->amount;
+                $realProductImage = $q->real_product_image;
+
+                $selectedQuality = $request->input('selected_quality');
+                if ($selectedQuality && isset($q->quality_options[$selectedQuality])) {
+                    $unitPrice = $q->quality_options[$selectedQuality]['price'];
+                    if (!empty($q->quality_options[$selectedQuality]['image_path'])) {
+                        $realProductImage = $q->quality_options[$selectedQuality]['image_path'];
+                    }
+                    $totalQuantity = $q->sourcingRequest->destinations->sum('quantity');
+                    $subtotal = $unitPrice * $totalQuantity;
+                    $amount = $subtotal + $q->commission_service + $q->delivery_cost_china;
                 }
 
                 $newSourcingOrder = SourcingOrder::create([
                     'user_id' => auth()->user()->id,
                     'quotation_id' => $q->id,
                     'sourcing_request_id' => $q->sourcing_request_id,
-                    'total_amount' => $q->amount,
+                    'total_amount' => $amount,
                     'status' => 'pending_payment',
                     'assigned_to_admin_id' => $q->sourcingRequest->assigned_to_admin_id,
                 ]);
                 $newSourcingOrder->load('user');
 
-                $q->update(['status' => 'accepted']);
+                $q->update([
+                    'status' => 'accepted',
+                    'unit_price' => $unitPrice,
+                    'amount' => $amount,
+                    'real_product_image' => $realProductImage,
+                ]);
                 $q->sourcingRequest->transitionTo('accepted', auth()->user());
 
                 return ['created' => true, 'order' => $newSourcingOrder];
@@ -211,5 +231,181 @@ class QuotationController extends Controller
         Log::info('Client requested negotiation for quotation #'.$quotation->id);
 
         return redirect()->route('client.sourcing-requests.show', $quotation->sourcingRequest)->with('status', 'Negotiation request sent successfully. We will review your request and get back to you.');
+    }
+
+    public function bulkPaymentShow(Request $request, string $locale): View|RedirectResponse
+    {
+        $idsStr = $request->query('ids');
+        if (is_array($idsStr)) {
+            $ids = array_map('intval', $idsStr);
+        } elseif ($idsStr) {
+            $ids = array_map('intval', explode(',', $idsStr));
+        } else {
+            $ids = [];
+        }
+
+        $quotations = Quotation::whereIn('id', $ids)
+            ->whereHas('sourcingRequest', function ($query) {
+                $query->where('user_id', auth()->id());
+            })
+            ->with(['sourcingRequest.category', 'sourcingRequest.destinations.country'])
+            ->get();
+
+        $validQuotations = $quotations->filter(function ($q) {
+            return $q->status !== 'accepted' && $q->status !== 'rejected' && !$q->order()->exists();
+        });
+
+        if ($validQuotations->isEmpty()) {
+            return redirect()->route('client.quotations.index', $locale)
+                ->with('error', __('Please select at least one valid quotation.'));
+        }
+
+        $paymentMethods = \App\Models\PaymentMethod::where('is_active', true)->get();
+
+        return view('client.quotations.bulk-payment', [
+            'quotations' => $validQuotations,
+            'paymentMethods' => $paymentMethods,
+        ]);
+    }
+
+    public function bulkPay(
+        Request $request,
+        string $locale,
+        \App\Services\ImageProcessingService $imageService
+    ): RedirectResponse {
+        $request->validate([
+            'quotation_ids' => 'required|array',
+            'quotation_ids.*' => 'integer',
+            'proof_of_payment' => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
+            'qualities' => 'nullable|array',
+        ]);
+
+        $ids = array_map('intval', $request->input('quotation_ids'));
+        $qualities = $request->input('qualities', []);
+
+        $quotations = Quotation::whereIn('id', $ids)
+            ->whereHas('sourcingRequest', function ($query) {
+                $query->where('user_id', auth()->id());
+            })
+            ->with('sourcingRequest')
+            ->get();
+
+        $validQuotations = $quotations->filter(function ($q) {
+            return $q->status !== 'accepted' && $q->status !== 'rejected' && !$q->order()->exists();
+        });
+
+        if ($validQuotations->isEmpty()) {
+            return redirect()->route('client.quotations.index', $locale)
+                ->with('error', __('No valid quotations found to process.'));
+        }
+
+        $storedPath = null;
+        if ($request->hasFile('proof_of_payment') && $request->file('proof_of_payment')->isValid()) {
+            $storedPath = $imageService->compressAndStore(
+                $request->file('proof_of_payment'),
+                'proofs_of_payment',
+                'local'
+            );
+        }
+
+        if (!$storedPath) {
+            return redirect()->back()
+                ->withErrors(['proof_of_payment' => __('The proof of payment is invalid or failed to upload.')])
+                ->withInput();
+        }
+
+        try {
+            $orders = DB::transaction(function () use ($validQuotations, $storedPath, $qualities) {
+                $createdOrders = [];
+                
+                foreach ($validQuotations as $q) {
+                    $quotation = Quotation::with('sourcingRequest')
+                        ->where('id', $q->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    if ($quotation->status === 'accepted' || $quotation->order()->exists()) {
+                        continue;
+                    }
+
+                    $unitPrice = $quotation->unit_price;
+                    $amount = $quotation->amount;
+                    $realProductImage = $quotation->real_product_image;
+
+                    $selectedQuality = $qualities[$quotation->id] ?? null;
+                    if ($selectedQuality && isset($quotation->quality_options[$selectedQuality])) {
+                        $unitPrice = $quotation->quality_options[$selectedQuality]['price'];
+                        if (!empty($quotation->quality_options[$selectedQuality]['image_path'])) {
+                            $realProductImage = $quotation->quality_options[$selectedQuality]['image_path'];
+                        }
+                        $totalQuantity = $quotation->sourcingRequest->destinations->sum('quantity');
+                        $subtotal = $unitPrice * $totalQuantity;
+                        $amount = $subtotal + $quotation->commission_service + $quotation->delivery_cost_china;
+                    }
+
+                    $order = SourcingOrder::create([
+                        'user_id' => auth()->id(),
+                        'quotation_id' => $quotation->id,
+                        'sourcing_request_id' => $quotation->sourcing_request_id,
+                        'total_amount' => $amount,
+                        'status' => 'paid',
+                        'proof_of_payment_path' => $storedPath,
+                        'assigned_to_admin_id' => $quotation->sourcingRequest->assigned_to_admin_id,
+                    ]);
+
+                    $quotation->update([
+                        'status' => 'accepted',
+                        'unit_price' => $unitPrice,
+                        'amount' => $amount,
+                        'real_product_image' => $realProductImage,
+                    ]);
+                    $quotation->sourcingRequest->transitionTo('accepted', auth()->user());
+
+                    $createdOrders[] = $order;
+                }
+
+                return $createdOrders;
+            });
+
+            if (empty($orders)) {
+                return redirect()->route('client.quotations.index', $locale)
+                    ->with('error', __('Quotations were already accepted or processed.'));
+            }
+
+            foreach ($orders as $order) {
+                event(new \App\Events\QuotationAccepted($order->quotation));
+                event(new \App\Events\SourcingOrderStatusChanged($order));
+                event(new \App\Events\ProofOfPaymentUploadedEvent($order));
+
+                try {
+                    $pdf = Pdf::loadView('pdf.proforma-invoice', compact('order'));
+                    Mail::to(auth()->user()->email)->queue(new ProformaInvoiceMail($order));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send pro-forma invoice for order #'.$order->id.'. Error: '.$e->getMessage());
+                }
+
+                $assignedAdminId = $order->assigned_to_admin_id;
+                $admins = \App\Models\User::where('role', 'super_admin')
+                    ->when($assignedAdminId, function ($query) use ($assignedAdminId) {
+                        $query->orWhere(function ($q) use ($assignedAdminId) {
+                            $q->where('role', 'admin')->where('id', $assignedAdminId);
+                        });
+                    })
+                    ->get();
+
+                foreach ($admins as $admin) {
+                    $admin->notify(new \App\Notifications\ProofOfPaymentUploaded($order));
+                }
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Error processing bulk payment: '.$e->getMessage(), ['exception' => $e]);
+            return redirect()->back()
+                ->with('error', __('An error occurred while processing the bulk payment.'))
+                ->withInput();
+        }
+
+        return redirect()->route('client.quotations.index', $locale)
+            ->with('success', __('Bulk payment submitted successfully! Your orders are now paid and under review.'));
     }
 }

@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             DevUserSeeder::class,
             FeatureFlagSeeder::class,
             AirFreightDDPTableSeeder::class,
+            TestUserSeeder::class,
         ]);
     }
 }

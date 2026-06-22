@@ -1,8 +1,28 @@
 <x-app-layout>
     
 
-    <div class="py-12 bg-slate-50 dark:bg-slate-900 min-h-screen">
+    <div class="py-12 pb-24 bg-slate-50 dark:bg-slate-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-4">
+            @if (session('success'))
+                <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-medium shadow-sm">
+                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if (session('status'))
+                <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-medium shadow-sm">
+                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ session('status') }}</span>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-medium shadow-sm">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
             
             @if ($sourcingRequests->isEmpty())
                 {{-- Empty State --}}
@@ -106,10 +126,36 @@
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 overflow-hidden">
                     <div class="divide-y divide-[#EBEBEB] dark:divide-slate-700">
                         @foreach ($sourcingRequests as $request)
+                            @php
+                                $firstQuality = null;
+                                $initialUnitPrice = $request->quotation ? $request->quotation->unit_price : 0;
+                                $initialAmount = $request->quotation ? $request->quotation->amount : 0;
+                                
+                                if ($request->quotation && $request->quotation->quality_options) {
+                                    foreach (['low', 'medium', 'good'] as $k) {
+                                        if (!empty($request->quotation->quality_options[$k]['price'])) {
+                                            $firstQuality = $k;
+                                            $initialUnitPrice = $request->quotation->quality_options[$k]['price'];
+                                            $totalQuantity = $request->destinations->sum('quantity');
+                                            $subtotal = $initialUnitPrice * $totalQuantity;
+                                            $initialAmount = $subtotal + $request->quotation->commission_service + $request->quotation->delivery_cost_china;
+                                            break;
+                                        }
+                                    }
+                                }
+                            @endphp
                                     <div class="group p-6 hover:bg-[#EF7722]/5 dark:hover:bg-[#EF7722]/10 transition-colors duration-150 {{ $request->quotation ? 'bg-red-50/30 dark:bg-red-900/10 border-l-4 border-red-500 shadow-inner' : '' }}">
                                         <div class="flex flex-col lg:flex-row lg:items-center gap-6">
                                             {{-- Request Info --}}
                                             <div class="flex items-start gap-4 flex-1 min-w-0">
+                                                @if ($request->quotation)
+                                                    <div class="flex items-center justify-center self-center pr-2">
+                                                        <input type="checkbox" name="selected_quotations[]" value="{{ $request->quotation->id }}" 
+                                                               data-amount="{{ $initialAmount }}" 
+                                                               data-currency="{{ $request->quotation->currency }}"
+                                                               class="quotation-checkbox w-6 h-6 text-[#EF7722] border-slate-300 dark:border-slate-600 rounded focus:ring-[#EF7722] focus:ring-2 bg-white dark:bg-slate-700 cursor-pointer">
+                                                    </div>
+                                                @endif
                                                 {{-- Product Image --}}
                                                 <div class="flex-shrink-0 relative">
                                                     <div class="w-16 h-16 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border-2 border-[#EBEBEB] dark:border-slate-600 overflow-hidden shadow-sm">
@@ -215,7 +261,7 @@
                                                     </svg>
                                                     <span class="font-semibold text-slate-600 dark:text-slate-400">{{ __('Total') }}:</span>
                                                     <span class="text-slate-900 dark:text-white font-bold">
-                                                        {{ number_format($request->quotation->amount, 2) }} {{ $request->quotation->currency }}
+                                                        <span id="display-amount-{{ $request->quotation->id }}">{{ number_format($initialAmount, 2) }}</span> {{ $request->quotation->currency }}
                                                     </span>
                                                 </div>
                                                 @endif
@@ -227,7 +273,7 @@
                                                 <div class="grid grid-cols-2 gap-4 text-sm">
                                                     <div>
                                                         <span class="text-slate-600 dark:text-slate-400 font-semibold">{{ __('Unit Price') }}:</span>
-                                                        <span class="font-bold text-slate-900 dark:text-white ml-2">{{ number_format($request->quotation->unit_price, 2) }} {{ $request->quotation->currency }}</span>
+                                                        <span class="font-bold text-slate-900 dark:text-white ml-2"><span id="display-unit-price-{{ $request->quotation->id }}">{{ number_format($initialUnitPrice, 2) }}</span> {{ $request->quotation->currency }}</span>
                                                     </div>
                                                     <div>
                                                         <span class="text-slate-600 dark:text-slate-400 font-semibold">{{ __('Commission') }}:</span>
@@ -235,6 +281,43 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            @endif
+
+                                            {{-- Product Quality Options Selector --}}
+                                            @if($request->quotation && $request->quotation->quality_options && count(array_filter($request->quotation->quality_options, fn($opt) => !empty($opt['price']))) > 0)
+                                                <div class="mt-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-[#EBEBEB] dark:border-slate-700">
+                                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">{{ __('Select Quality') }}</span>
+                                                    <div class="flex flex-wrap gap-2" x-data="{ selectedVal: '{{ $firstQuality }}' }">
+                                                        @foreach(['low' => __('Low'), 'medium' => __('Medium'), 'good' => __('Good')] as $key => $label)
+                                                            @if(!empty($request->quotation->quality_options[$key]['price']))
+                                                                @php 
+                                                                    $opt = $request->quotation->quality_options[$key]; 
+                                                                    $totalQuantity = $request->destinations->sum('quantity');
+                                                                    $subtotal = $opt['price'] * $totalQuantity;
+                                                                    $optAmount = $subtotal + $request->quotation->commission_service + $request->quotation->delivery_cost_china;
+                                                                @endphp
+                                                                <button type="button" 
+                                                                        @click="selectedVal = '{{ $key }}'; 
+                                                                               const checkbox = document.querySelector('input[name=\'selected_quotations[]\'][value=\'{{ $request->quotation->id }}\']');
+                                                                               if (checkbox) {
+                                                                                   checkbox.dataset.amount = '{{ $optAmount }}';
+                                                                               }
+                                                                               document.getElementById('display-unit-price-{{ $request->quotation->id }}').textContent = '{{ number_format($opt['price'], 2) }}';
+                                                                               document.getElementById('display-amount-{{ $request->quotation->id }}').textContent = '{{ number_format($optAmount, 2) }}';
+                                                                               if (typeof window.updateStickyBar === 'function') { window.updateStickyBar(); }
+                                                                               document.getElementById('quality-input-{{ $request->quotation->id }}').value = '{{ $key }}';
+                                                                               const formInput = document.getElementById('form-quality-input-{{ $request->quotation->id }}');
+                                                                               if (formInput) { formInput.value = '{{ $key }}'; }
+                                                                               "
+                                                                        class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all"
+                                                                        :class="selectedVal === '{{ $key }}' ? 'bg-[#EF7722] text-white border-[#EF7722]' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-[#EBEBEB] dark:border-slate-700 hover:border-[#EF7722]/50'">
+                                                                    {{ $label }} ({{ number_format($opt['price'], 2) }} {{ $request->quotation->currency }})
+                                                                </button>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                    <input type="hidden" id="quality-input-{{ $request->quotation->id }}" class="selected-quality-input-field" data-quotation-id="{{ $request->quotation->id }}" value="{{ $firstQuality }}">
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
@@ -252,6 +335,7 @@
                                         @if ($request->quotation)
                                             <form action="{{ route('client.quotations.accept', $request->quotation) }}" method="POST" class="w-full">
                                                 @csrf
+                                                <input type="hidden" name="selected_quality" id="form-quality-input-{{ $request->quotation->id }}" value="{{ $firstQuality }}">
                                                 <button type="submit" 
                                                         class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-bold rounded-lg transition-all duration-200 shadow-sm hover:shadow whitespace-nowrap">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,4 +404,102 @@
             overflow: hidden;
         }
     </style>
+
+    {{-- Sticky Bottom Action Bar --}}
+    <div id="sticky-payment-bar" class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 shadow-2xl transition-all duration-300 transform translate-y-full opacity-0">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-[#EF7722]/10 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-900 dark:text-white">
+                            <span id="selected-count">0</span> {{ __('Quotations Selected') }}
+                        </p>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                            {{ __('Total') }}: <span id="selected-total" class="font-extrabold text-[#EF7722] text-base">0.00</span> <span id="selected-currency" class="font-bold text-slate-700 dark:text-slate-300">USD</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <button id="clear-selections-btn" class="flex-1 sm:flex-initial px-4 py-2.5 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg transition-colors">
+                        {{ __('Clear') }}
+                    </button>
+                    <a id="bulk-pay-btn" href="#" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#EF7722] hover:bg-[#FAA533] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all whitespace-nowrap">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>{{ __('Proceed to Bulk Payment') }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('.quotation-checkbox');
+            const stickyBar = document.getElementById('sticky-payment-bar');
+            const countSpan = document.getElementById('selected-count');
+            const totalSpan = document.getElementById('selected-total');
+            const currencySpan = document.getElementById('selected-currency');
+            const bulkPayBtn = document.getElementById('bulk-pay-btn');
+            const clearBtn = document.getElementById('clear-selections-btn');
+
+            function updateStickyBar() {
+                const checked = Array.from(checkboxes).filter(cb => cb.checked);
+                
+                if (checked.length > 0) {
+                    const count = checked.length;
+                    let total = 0;
+                    let currency = '';
+
+                    checked.forEach(cb => {
+                        total += parseFloat(cb.dataset.amount || 0);
+                        currency = cb.dataset.currency || 'USD';
+                    });
+
+                    countSpan.textContent = count;
+                    totalSpan.textContent = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    currencySpan.textContent = currency;
+
+                    const ids = checked.map(cb => cb.value).join(',');
+                    
+                    // Retrieve quality selections
+                    let qualityQuery = '';
+                    checked.forEach(cb => {
+                        const qualityInput = document.getElementById(`quality-input-${cb.value}`);
+                        if (qualityInput) {
+                            qualityQuery += `&qualities[${cb.value}]=${qualityInput.value}`;
+                        }
+                    });
+
+                    const pathSegments = window.location.pathname.split('/');
+                    const locale = pathSegments[1] || 'eng';
+                    bulkPayBtn.href = `/${locale}/client/quotations/bulk-payment?ids=${ids}${qualityQuery}`;
+
+                    stickyBar.classList.remove('translate-y-full', 'opacity-0');
+                    stickyBar.classList.add('translate-y-0', 'opacity-100');
+                } else {
+                    stickyBar.classList.remove('translate-y-0', 'opacity-100');
+                    stickyBar.classList.add('translate-y-full', 'opacity-0');
+                }
+            }
+
+            // Expose globally so button clicks can update it
+            window.updateStickyBar = updateStickyBar;
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateStickyBar);
+            });
+
+            clearBtn.addEventListener('click', function () {
+                checkboxes.forEach(cb => cb.checked = false);
+                updateStickyBar();
+            });
+        });
+    </script>
 </x-app-layout>
