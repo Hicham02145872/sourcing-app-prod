@@ -78,7 +78,7 @@
             </tr>
             <tr>
                 <td class="label">Order ID</td>
-                <td class="value">#{{ $sourcingOrder->display_id }}</td>
+                <td class="value">{{ $sourcingOrder->reference_id }}</td>
             </tr>
             <tr>
                 <td class="label">Product Name</td>

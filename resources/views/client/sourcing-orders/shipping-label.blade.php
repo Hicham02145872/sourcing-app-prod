@@ -78,7 +78,7 @@
                     Order ID
                 </div>
                 <div class="w-2/3 p-3 font-semibold text-lg flex items-center">
-                    {{ $sourcingOrder->id }}
+                    {{ $sourcingOrder->reference_id }}
                 </div>
             </div>
 
