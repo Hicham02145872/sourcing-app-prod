@@ -85,7 +85,10 @@
                                     </svg>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm font-bold text-blue-800">{{ __('Negotiation Requested by Client') }}</h3>
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-sm font-bold text-blue-800">{{ __('Negotiation Requested by Client') }}</h3>
+                                        <span class="text-[11px] font-semibold text-blue-600">{{ $sourcingRequest->negotiated_at ? $sourcingRequest->negotiated_at->format('M d, Y h:i A') : '' }}</span>
+                                    </div>
                                     <div class="mt-2 text-sm text-blue-700">
                                         <p class="italic">"{{ $sourcingRequest->quotation->negotiation_notes }}"</p>
                                     </div>

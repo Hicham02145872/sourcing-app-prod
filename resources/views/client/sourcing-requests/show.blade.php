@@ -61,16 +61,24 @@
                             </div>
                         </div>
 
-                        {{-- Last Updated --}}
+                        {{-- Event Date --}}
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-[#0BA6DF]/10 dark:bg-[#0BA6DF]/20 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5 text-[#0BA6DF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Last Updated') }}</p>
-                                <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->updated_at->diffForHumans() }}</p>
+                                @if($sourcingRequest->status === 'negotiating' && $sourcingRequest->negotiated_at)
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Negotiation Date') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->negotiated_at->format('M d, Y') }}</p>
+                                @elseif($sourcingRequest->status === 'accepted' && $sourcingRequest->accepted_at)
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Payment Date') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->accepted_at->format('M d, Y') }}</p>
+                                @else
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Request Date') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->created_at->format('M d, Y') }}</p>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -458,7 +466,10 @@
 
                                         @if($sourcingRequest->quotation->negotiation_notes)
                                             <div>
-                                                <p class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase mb-1">{{ __('Your Note') }}</p>
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <p class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase">{{ __('Your Note') }}</p>
+                                                    <span class="text-[10px] font-bold text-blue-600/70">{{ $sourcingRequest->negotiated_at ? $sourcingRequest->negotiated_at->format('M d, Y h:i A') : '' }}</span>
+                                                </div>
                                                 <p class="text-sm text-blue-700 dark:text-blue-300 italic">"{{ $sourcingRequest->quotation->negotiation_notes }}"</p>
                                             </div>
                                         @endif
@@ -707,8 +718,14 @@
                             </div>
 
                             <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700 text-center text-xs text-slate-500 dark:text-slate-400">
-                                <p class="mb-1">{{ __('Created') }} {{ $sourcingRequest->created_at->format('M d, Y') }}</p>
-                                <p>{{ __('Updated') }} {{ $sourcingRequest->updated_at->diffForHumans() }}</p>
+                                @if($sourcingRequest->status === 'negotiating' && $sourcingRequest->negotiated_at)
+                                    <p class="mb-1">{{ __('Negotiated on') }} {{ $sourcingRequest->negotiated_at->format('M d, Y') }}</p>
+                                @elseif($sourcingRequest->status === 'accepted' && $sourcingRequest->accepted_at)
+                                    <p class="mb-1">{{ __('Paid on') }} {{ $sourcingRequest->accepted_at->format('M d, Y') }}</p>
+                                @else
+                                    <p class="mb-1">{{ __('Created on') }} {{ $sourcingRequest->created_at->format('M d, Y') }}</p>
+                                @endif
+                                <p>{{ __('Last updated') }} {{ $sourcingRequest->updated_at->diffForHumans() }}</p>
                             </div>
 
                             {{-- Action Buttons --}}

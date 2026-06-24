@@ -40,6 +40,14 @@ class SourcingOrder extends Model
                 $media->delete();
             });
         });
+
+        static::updating(function (SourcingOrder $sourcingOrder) {
+            if ($sourcingOrder->isDirty('status')) {
+                $timestamps = $sourcingOrder->status_timestamps ?? [];
+                $timestamps[$sourcingOrder->status] = now()->toDateTimeString();
+                $sourcingOrder->status_timestamps = $timestamps;
+            }
+        });
     }
 
     public const STATUSES = [
@@ -95,6 +103,7 @@ class SourcingOrder extends Model
         'real_tracking_assigned_at',
         'label_seller_name',
         'label_product_name',
+        'status_timestamps',
     ];
 
     /**
@@ -126,6 +135,7 @@ class SourcingOrder extends Model
         'refund_amount' => 'decimal:2',
         'fsb_tracking_created_at' => 'datetime',
         'real_tracking_assigned_at' => 'datetime',
+        'status_timestamps' => 'array',
     ];
 
     public function user()

@@ -24,6 +24,14 @@ class SourcingRequest extends Model
                 Storage::disk('public')->delete($sourcingRequest->product_image);
             }
         });
+
+        static::updating(function (SourcingRequest $sourcingRequest) {
+            if ($sourcingRequest->isDirty('status')) {
+                $timestamps = $sourcingRequest->status_timestamps ?? [];
+                $timestamps[$sourcingRequest->status] = now()->toDateTimeString();
+                $sourcingRequest->status_timestamps = $timestamps;
+            }
+        });
     }
 
     public const STATUSES = [
@@ -57,10 +65,12 @@ class SourcingRequest extends Model
         'sourcing_location',
         'assigned_to_admin_id',
         'assigned_at',
+        'status_timestamps',
     ];
 
     protected $casts = [
         'assigned_at' => 'datetime',
+        'status_timestamps' => 'array',
     ];
 
     public function assignedAdmin()
@@ -237,6 +247,13 @@ class SourcingRequest extends Model
         }
 
         $this->status = $newStatus;
+        
+        if ($newStatus === 'negotiating') {
+            $this->negotiated_at = now();
+        } elseif ($newStatus === 'accepted') {
+            $this->accepted_at = now();
+        }
+        
         $this->save();
 
         \Illuminate\Support\Facades\Log::debug('DEBUG: SourcingRequestStatusChanged event DISPATCHED from SourcingRequest model', [
