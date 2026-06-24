@@ -369,18 +369,8 @@
                                         <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">{{ __('Financial Pricing') }}</h4>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        <div>
-                                            <label for="unit_price" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">{{ __('Unit Price') }} <span class="text-red-500">*</span></label>
-                                            <div class="relative rounded-xl shadow-sm">
-                                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <span class="text-slate-400 text-sm font-bold currency-symbol">$</span>
-                                                </div>
-                                                <input type="number" step="0.01" name="unit_price" id="unit_price" required placeholder="0.00"
-                                                    class="pl-10 block w-full px-4 py-2.5 text-sm bg-slate-50 hover:bg-slate-100/50 border border-slate-200 text-slate-900 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold">
-                                            </div>
-                                            <p class="mt-1 text-[10px] text-slate-400">{{ __('Price per unit excluding fees') }}</p>
-                                        </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-1 gap-5">
+                                        <input type="hidden" name="unit_price" id="unit_price" value="0">
 
                                         <div>
                                             <label for="commission_service" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">{{ __('Service Commission') }} <span class="text-red-500">*</span></label>
@@ -608,7 +598,6 @@
         // Calculate estimated profit in real-time
         function calculateEstimatedProfit() {
             const totalQuantity = {{ $sourcingRequest->destinations->sum('quantity') }};
-            const unitPrice = parseFloat(document.querySelector('[name="unit_price"]')?.value || 0);
             const commission = parseFloat(document.querySelector('[name="commission_service"]')?.value || 0);
             const deliveryCost = parseFloat(document.querySelector('[name="delivery_cost_china"]')?.value || 0);
             
@@ -630,9 +619,8 @@
                 }
             }
 
-            // Calculate TOTALS
             // Revenue = Total
-            const totalRevenue = (unitPrice * totalQuantity) + commission + deliveryCost;
+            const totalRevenue = commission + deliveryCost;
             
             // Costs = (Unit Cost * Qty) + Shipping + Others
             const totalCosts = estimatedTotalProductCost + shippingCost + otherCosts;
@@ -716,7 +704,7 @@
             }
 
             // Attach listeners to pricing fields
-            ['unit_price', 'commission_service', 'delivery_cost_china'].forEach(name => {
+            ['commission_service', 'delivery_cost_china'].forEach(name => {
                 const field = document.querySelector(`[name="${name}"]`);
                 if (field) {
                     field.addEventListener('input', calculateEstimatedProfit);

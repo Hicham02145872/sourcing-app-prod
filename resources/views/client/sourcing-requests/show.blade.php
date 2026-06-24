@@ -579,9 +579,29 @@
                                         @endif
 
                                         <div class="flex flex-col sm:flex-row gap-3">
-                                            <form action="{{ route('client.quotations.accept', $sourcingRequest->quotation) }}" method="POST" class="flex-[2]">
+                                            <form action="{{ route('client.quotations.accept', $sourcingRequest->quotation) }}" method="POST" enctype="multipart/form-data" class="flex-[2]">
                                                 @csrf
                                                 <input type="hidden" name="selected_quality" class="selected-quality-input" :value="selectedQuality">
+                                                
+                                                <div class="mb-4">
+                                                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('Upload Proof of Payment') }}</label>
+                                                    <input type="file" 
+                                                           name="proof_of_payment" 
+                                                           accept="image/*,application/pdf"
+                                                           class="block w-full text-sm text-slate-600 dark:text-slate-400
+                                                                  file:mr-4 file:py-2 file:px-4
+                                                                  file:rounded-lg file:border-0
+                                                                  file:text-sm file:font-semibold
+                                                                  file:bg-[#EF7722] file:text-white
+                                                                  hover:file:bg-[#FAA533]
+                                                                  file:cursor-pointer file:transition-colors
+                                                                  border-2 border-dashed border-[#EBEBEB] dark:border-slate-600 rounded-lg p-2"
+                                                           required/>
+                                                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400 italic">
+                                                        {{ __('Accepted formats: PDF, JPG, PNG. Max 15MB.') }}
+                                                    </p>
+                                                </div>
+
                                                 <button type="submit" class="w-full h-14 bg-[#EF7722] hover:bg-[#FAA533] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>

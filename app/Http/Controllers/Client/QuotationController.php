@@ -67,9 +67,13 @@ class QuotationController extends Controller
         return view('client.quotations.index', compact('sourcingRequests'));
     }
 
-    public function accept(Request $request, string $locale, Quotation $quotation): RedirectResponse
+    public function accept(Request $request, string $locale, Quotation $quotation, \App\Services\ImageProcessingService $imageService): RedirectResponse
     {
         $this->authorize('update', $quotation);
+
+        $request->validate([
+            'proof_of_payment' => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
+        ]);
 
         $quotation->loadMissing(['order', 'sourcingRequest']);
 
@@ -77,8 +81,23 @@ class QuotationController extends Controller
             return $this->redirectAlreadyAccepted($quotation);
         }
 
+        $storedPath = null;
+        if ($request->hasFile('proof_of_payment') && $request->file('proof_of_payment')->isValid()) {
+            $storedPath = $imageService->compressAndStore(
+                $request->file('proof_of_payment'),
+                'proofs_of_payment',
+                'local'
+            );
+        }
+
+        if (!$storedPath) {
+            return redirect()->back()
+                ->withErrors(['proof_of_payment' => __('The proof of payment is invalid or failed to upload.')])
+                ->withInput();
+        }
+
         try {
-            $result = DB::transaction(function () use ($quotation, $request) {
+            $result = DB::transaction(function () use ($quotation, $request, $storedPath) {
                 $q = Quotation::with(['sourcingRequest'])
                     ->where('id', $quotation->id)
                     ->lockForUpdate()
@@ -121,7 +140,8 @@ class QuotationController extends Controller
                     'quotation_id' => $q->id,
                     'sourcing_request_id' => $q->sourcing_request_id,
                     'total_amount' => $amount,
-                    'status' => 'pending_payment',
+                    'status' => 'paid',
+                    'proof_of_payment_path' => $storedPath,
                     'assigned_to_admin_id' => $q->sourcingRequest->assigned_to_admin_id,
                 ]);
                 $newSourcingOrder->load('user');
@@ -157,6 +177,21 @@ class QuotationController extends Controller
         $sourcingOrder = $result['order'];
 
         event(new \App\Events\QuotationAccepted($quotation));
+        event(new \App\Events\SourcingOrderStatusChanged($sourcingOrder));
+        event(new \App\Events\ProofOfPaymentUploadedEvent($sourcingOrder));
+
+        $assignedAdminId = $sourcingOrder->assigned_to_admin_id;
+        $admins = \App\Models\User::where('role', 'super_admin')
+            ->when($assignedAdminId, function ($query) use ($assignedAdminId) {
+                $query->orWhere(function ($q) use ($assignedAdminId) {
+                    $q->where('role', 'admin')->where('id', $assignedAdminId);
+                });
+            })
+            ->get();
+
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\ProofOfPaymentUploaded($sourcingOrder));
+        }
 
         // Generate and send pro-forma invoice
         try {
