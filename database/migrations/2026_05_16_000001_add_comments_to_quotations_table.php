@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('quotations', function (Blueprint $table) {
-            $table->text('comments')->nullable()->after('sourcing_note');
-        });
+        if (!Schema::hasColumn('quotations', 'comments')) {
+            Schema::table('quotations', function (Blueprint $table) {
+                $table->text('comments')->nullable()->after('sourcing_note');
+            });
+        }
     }
 
     /**
