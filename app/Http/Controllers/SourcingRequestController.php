@@ -355,6 +355,7 @@ class SourcingRequestController extends Controller
 
         DB::transaction(function () use ($sourcingRequest) {
             $newSourcingRequest = $sourcingRequest->replicate();
+            $newSourcingRequest->shared_id = null;
             $newSourcingRequest->status = 'pending';
             $newSourcingRequest->assigned_to_admin_id = null;
             $newSourcingRequest->assigned_at = null;
