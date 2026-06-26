@@ -31,16 +31,11 @@ class SourcingRequestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(string $locale): View
+    public function index(string $locale): RedirectResponse
     {
         $this->authorize('viewAny', SourcingRequest::class);
-        $sourcingRequests = auth()->user()->sourcingRequests()
-            ->whereNotIn('status', ['cancelled', 'rejected'])
-            ->with(['category', 'destinations.country', 'destinations.service'])
-            ->latest()
-            ->get();
 
-        return view('client.sourcing-requests.index', compact('sourcingRequests'));
+        return redirect()->route('client.sourcing-requests.handling');
     }
 
     public function archived(string $locale): View
@@ -153,10 +148,11 @@ class SourcingRequestController extends Controller
 
         $sourcingRequest = DB::transaction(function () use ($request, $validated) {
             if ($request->hasFile('product_image')) {
-                $validated['product_image'] = $this->imageService->compressAndStore(
+                $result = $this->imageService->compressAndStore(
                     $request->file('product_image'),
                     'product_images'
                 );
+                $validated['product_image'] = $result->path;
             }
 
             $sourcingRequest = $request->user()->sourcingRequests()->create([
@@ -234,10 +230,11 @@ class SourcingRequestController extends Controller
                     if ($sourcingRequest->product_image) {
                         Storage::disk('public')->delete($sourcingRequest->product_image);
                     }
-                    $validated['product_image'] = $this->imageService->compressAndStore(
+                    $result = $this->imageService->compressAndStore(
                         $request->file('product_image'),
                         'product_images'
                     );
+                    $validated['product_image'] = $result->path;
                 }
 
                 $sourcingRequest->update([

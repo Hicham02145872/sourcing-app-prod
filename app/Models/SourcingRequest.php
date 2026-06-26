@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\DeleteCloudinaryAsset;
 use App\Services\SharedIdService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +23,9 @@ class SourcingRequest extends Model
         static::deleting(function ($sourcingRequest) {
             if ($sourcingRequest->product_image) {
                 Storage::disk('public')->delete($sourcingRequest->product_image);
+            }
+            if ($sourcingRequest->cloudinary_public_id) {
+                DeleteCloudinaryAsset::dispatch($sourcingRequest->cloudinary_public_id);
             }
         });
 
@@ -70,6 +74,8 @@ class SourcingRequest extends Model
 
     protected $casts = [
         'assigned_at' => 'datetime',
+        'negotiated_at' => 'datetime',
+        'accepted_at' => 'datetime',
         'status_timestamps' => 'array',
     ];
 

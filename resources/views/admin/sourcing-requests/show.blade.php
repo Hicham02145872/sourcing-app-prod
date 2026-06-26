@@ -87,7 +87,7 @@
                                 <div class="ml-3">
                                     <div class="flex items-center justify-between">
                                         <h3 class="text-sm font-bold text-blue-800">{{ __('Negotiation Requested by Client') }}</h3>
-                                        <span class="text-[11px] font-semibold text-blue-600">{{ $sourcingRequest->negotiated_at ? $sourcingRequest->negotiated_at->format('M d, Y h:i A') : '' }}</span>
+                                        <span class="text-[11px] font-semibold text-blue-600">{{ $sourcingRequest->negotiated_at?->format('M d, Y h:i A') ?? '' }}</span>
                                     </div>
                                     <div class="mt-2 text-sm text-blue-700">
                                         <p class="italic">"{{ $sourcingRequest->quotation->negotiation_notes }}"</p>
@@ -273,7 +273,7 @@
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-1">
                         @if($sourcingRequest->product_image)
                             <div class="relative group aspect-square rounded overflow-hidden bg-slate-100 cursor-pointer">
-                                <img src="{{ asset('storage/' . $sourcingRequest->product_image) }}" 
+                                <img src="{{ media_url($sourcingRequest->product_image) }}" 
                                      alt="{{ $sourcingRequest->product_name }}" 
                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
@@ -286,7 +286,7 @@
                         @endif
                         @if($sourcingRequest->product_image)
                             <div class="mt-2 text-center">
-                                <a href="{{ asset('storage/' . $sourcingRequest->product_image) }}" target="_blank" class="text-xs text-blue-600 hover:underline">{{ __('View full size') }}</a>
+                                <a href="{{ media_url($sourcingRequest->product_image) }}" target="_blank" class="text-xs text-blue-600 hover:underline">{{ __('View full size') }}</a>
                             </div>
                         @endif
                     </div>

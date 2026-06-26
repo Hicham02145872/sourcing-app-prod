@@ -71,10 +71,10 @@
                             <div>
                                 @if($sourcingRequest->status === 'negotiating' && $sourcingRequest->negotiated_at)
                                     <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Negotiation Date') }}</p>
-                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->negotiated_at->format('M d, Y') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->negotiated_at?->format('M d, Y') }}</p>
                                 @elseif($sourcingRequest->status === 'accepted' && $sourcingRequest->accepted_at)
                                     <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Payment Date') }}</p>
-                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->accepted_at->format('M d, Y') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->accepted_at?->format('M d, Y') }}</p>
                                 @else
                                     <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Request Date') }}</p>
                                     <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->created_at->format('M d, Y') }}</p>
@@ -108,7 +108,7 @@
                                 <div class="sm:col-span-1">
                                     <div class="relative w-full aspect-square bg-[#EBEBEB] dark:bg-slate-700 rounded-lg overflow-hidden border border-[#EBEBEB] dark:border-slate-600 shadow-sm">
                                         @if ($sourcingRequest->product_image)
-                                            <img src="{{ asset('storage/' . $sourcingRequest->product_image) }}" 
+                                            <img src="{{ media_url($sourcingRequest->product_image) }}" 
                                                  alt="{{ $sourcingRequest->product_name }}" 
                                                  class="w-full h-full object-cover">
                                         @else
@@ -360,15 +360,15 @@
                                                     @if($media->isImage())
                                                         {{-- Image Display --}}
                                                         <div class="aspect-square">
-                                                            <img src="{{ asset('storage/' . $media->file_path) }}" 
+                                                            <img src="{{ media_url($media->file_path) }}" 
                                                                  alt="Product verification {{ $loop->iteration }}" 
                                                                  class="w-full h-full object-cover cursor-pointer"
-                                                                 onclick="openMediaModal('{{ asset('storage/' . $media->file_path) }}', 'image')">
+                                                                 onclick="openMediaModal('{{ media_url($media->file_path) }}', 'image')">
                                                         </div>
                                                     @elseif($media->isVideo())
                                                         {{-- Video Display --}}
                                                         <div class="aspect-square bg-black relative">
-                                                            <video src="{{ asset('storage/' . $media->file_path) }}" 
+                                                            <video src="{{ media_url($media->file_path) }}" 
                                                                    class="w-full h-full object-cover"
                                                                    controls
                                                                    preload="metadata">
@@ -403,7 +403,7 @@
                                                 </p>
                                             </div>
                                             <div class="w-full md:w-32 aspect-square rounded-lg overflow-hidden border-2 border-white dark:border-slate-700 shadow-sm">
-                                                <img src="{{ asset('storage/' . $sourcingRequest->quotation->real_product_image) }}" 
+                                                <img src="{{ media_url($sourcingRequest->quotation->real_product_image) }}" 
                                                      alt="Verified Product" 
                                                      class="w-full h-full object-cover transition-transform hover:scale-110 cursor-pointer"
                                                      onclick="window.open(this.src, '_blank')">
@@ -468,7 +468,7 @@
                                             <div>
                                                 <div class="flex items-center justify-between mb-1">
                                                     <p class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase">{{ __('Your Note') }}</p>
-                                                    <span class="text-[10px] font-bold text-blue-600/70">{{ $sourcingRequest->negotiated_at ? $sourcingRequest->negotiated_at->format('M d, Y h:i A') : '' }}</span>
+                                                    <span class="text-[10px] font-bold text-blue-600/70">{{ $sourcingRequest->negotiated_at?->format('M d, Y h:i A') ?? '' }}</span>
                                                 </div>
                                                 <p class="text-sm text-blue-700 dark:text-blue-300 italic">"{{ $sourcingRequest->quotation->negotiation_notes }}"</p>
                                             </div>
@@ -549,7 +549,7 @@
                                                                 {{-- Image preview --}}
                                                                 <div class="aspect-video w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 mb-3 border border-slate-100 dark:border-slate-600 flex items-center justify-center">
                                                                     @if(!empty($opt['image_path']))
-                                                                        <img src="{{ asset('storage/' . $opt['image_path']) }}" alt="{{ $label }}" class="w-full h-full object-cover">
+                                                                        <img src="{{ media_url($opt['image_path']) }}" alt="{{ $label }}" class="w-full h-full object-cover">
                                                                     @else
                                                                         <div class="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900/50">
                                                                             <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -739,9 +739,9 @@
 
                             <div class="pt-4 border-t border-[#EBEBEB] dark:border-slate-700 text-center text-xs text-slate-500 dark:text-slate-400">
                                 @if($sourcingRequest->status === 'negotiating' && $sourcingRequest->negotiated_at)
-                                    <p class="mb-1">{{ __('Negotiated on') }} {{ $sourcingRequest->negotiated_at->format('M d, Y') }}</p>
+                                    <p class="mb-1">{{ __('Negotiated on') }} {{ $sourcingRequest->negotiated_at?->format('M d, Y') }}</p>
                                 @elseif($sourcingRequest->status === 'accepted' && $sourcingRequest->accepted_at)
-                                    <p class="mb-1">{{ __('Paid on') }} {{ $sourcingRequest->accepted_at->format('M d, Y') }}</p>
+                                    <p class="mb-1">{{ __('Paid on') }} {{ $sourcingRequest->accepted_at?->format('M d, Y') }}</p>
                                 @else
                                     <p class="mb-1">{{ __('Created on') }} {{ $sourcingRequest->created_at->format('M d, Y') }}</p>
                                 @endif
