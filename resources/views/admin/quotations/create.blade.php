@@ -103,7 +103,7 @@
                             <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">{{ __('Requested Product Image') }}</label>
                             @if($sourcingRequest->product_image)
                                 <div class="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-50 max-h-80 flex items-center justify-center shadow-inner">
-                                    <img src="{{ asset('storage/' . $sourcingRequest->product_image) }}" 
+                                    <img src="{{ media_url($sourcingRequest->product_image) }}" 
                                          class="w-full h-auto object-cover max-h-80 transition-transform duration-500 group-hover:scale-105">
                                     <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                         <span class="px-3 py-1.5 bg-white/90 backdrop-blur text-xs font-semibold rounded-lg text-slate-700 shadow-sm">

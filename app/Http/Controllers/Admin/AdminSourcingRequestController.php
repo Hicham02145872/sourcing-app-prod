@@ -64,16 +64,15 @@ class AdminSourcingRequestController extends Controller
                     $user->notify(new \App\Notifications\ClientAccountCreated($plainPassword));
                 }
 
-                // 2. Handle Product Image
                 $imagePath = null;
                 if ($request->hasFile('product_image')) {
-                    $imagePath = $this->imageService->compressAndStore(
+                    $result = $this->imageService->compressAndStore(
                         $request->file('product_image'),
                         'sourcing-requests'
                     );
+                    $imagePath = $result->path;
                 }
 
-                // 3. Create Sourcing Request
                 $sourcingRequest = SourcingRequest::create([
                     'user_id' => $userId,
                     'product_name' => $request->product_name,

@@ -21,7 +21,7 @@ class CountryController extends Controller
             $query->where('name', 'like', '%'.$search.'%')->orWhere('code', 'like', '%'.$search.'%');
         }
 
-        $countries = $query->orderBy('created_at', 'desc')->paginate(10);
+        $countries = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
         return view('admin.countries.index', compact('countries'));
     }

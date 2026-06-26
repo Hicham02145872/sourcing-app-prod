@@ -145,13 +145,13 @@
                                                         $extension = pathinfo($path, PATHINFO_EXTENSION);
                                                         $isVideo = in_array(strtolower($extension), ['mp4', 'mov', 'avi', 'webm']);
                                                     @endphp
-                                                    <div class="group relative aspect-square rounded-lg border border-[#EBEBEB] dark:border-slate-700 bg-slate-50 dark:bg-slate-800 overflow-hidden cursor-pointer hover:border-[#EF7722] transition-all duration-200" onclick="openMediaModal('{{ asset('storage/' . $path) }}', '{{ $isVideo ? 'video' : 'image' }}')">
+                                                    <div class="group relative aspect-square rounded-lg border border-[#EBEBEB] dark:border-slate-700 bg-slate-50 dark:bg-slate-800 overflow-hidden cursor-pointer hover:border-[#EF7722] transition-all duration-200" onclick="openMediaModal('{{ media_url($path) }}', '{{ $isVideo ? 'video' : 'image' }}')">
                                                         @if($isVideo)
                                                             <div class="w-full h-full flex items-center justify-center text-slate-400">
                                                                 <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                                             </div>
                                                         @else
-                                                            <img src="{{ asset('storage/' . $path) }}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
+                                                            <img src="{{ media_url($path) }}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
                                                         @endif
                                                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                                                     </div>
@@ -178,7 +178,7 @@
                                     
                                     @if($refundRequest->refund_proof_path)
                                         <div class="mt-6 pt-6 border-t border-white/10 text-center">
-                                            <a href="{{ asset('storage/' . $refundRequest->refund_proof_path) }}" target="_blank" class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/70 hover:text-white transition-colors">
+                                            <a href="{{ media_url($refundRequest->refund_proof_path) }}" target="_blank" class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/70 hover:text-white transition-colors">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                                 {{ __('Download Receipt') }}
                                             </a>

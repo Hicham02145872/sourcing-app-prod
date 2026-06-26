@@ -157,7 +157,7 @@
                                         <div class="flex items-center gap-3">
                                             <div class="h-10 w-10 flex-shrink-0 rounded bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
                                                 @if ($method->logo_path)
-                                                    <img src="{{ asset('storage/' . $method->logo_path) }}" alt="" class="h-full w-full object-cover">
+                                                    <img src="{{ media_url($method->logo_path) }}" alt="" class="h-full w-full object-cover">
                                                 @else
                                                     <span class="text-xs font-bold text-slate-400">{{ substr($method->name, 0, 1) }}</span>
                                                 @endif

@@ -190,7 +190,7 @@
                                 <div class="flex items-center gap-2">
                                     <div class="w-7 h-7 rounded-full overflow-hidden border border-blue-100 bg-blue-50 flex items-center justify-center text-[10px] font-bold text-blue-600 shadow-sm flex-shrink-0">
                                         @if ($sample->profile_photo_path)
-                                            <img class="h-full w-full object-cover" src="{{ Storage::url($sample->profile_photo_path) }}" alt="{{ $sample->name }}" />
+                                            <img class="h-full w-full object-cover" src="{{ media_url($sample->profile_photo_path) }}" alt="{{ $sample->name }}" />
                                         @else
                                             {{ substr($sample->name, 0, 1) }}
                                         @endif
@@ -223,7 +223,7 @@
                                 <div class="flex items-center gap-2">
                                     <div class="w-7 h-7 rounded-full overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-400 shadow-sm flex-shrink-0">
                                         @if ($sample->profile_photo_path)
-                                            <img class="h-full w-full object-cover" src="{{ Storage::url($sample->profile_photo_path) }}" alt="{{ $sample->name }}" />
+                                            <img class="h-full w-full object-cover" src="{{ media_url($sample->profile_photo_path) }}" alt="{{ $sample->name }}" />
                                         @else
                                             {{ substr($sample->name, 0, 1) }}
                                         @endif

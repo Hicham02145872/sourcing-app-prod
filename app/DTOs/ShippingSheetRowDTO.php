@@ -28,7 +28,7 @@ class ShippingSheetRowDTO
 
         $imageFormula = '';
         if ($sourcingRequest->product_image) {
-            $imageUrl = asset('storage/'.$sourcingRequest->product_image);
+            $imageUrl = media_url($sourcingRequest->product_image);
             $imageFormula = '=IMAGE("'.$imageUrl.'")';
         }
 

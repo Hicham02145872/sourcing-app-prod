@@ -60,7 +60,13 @@ class SourcingRequestController extends Controller
             ->latest();
 
         if ($request->has('search') && $request->search != '') {
-            $query->where('product_name', 'like', '%'.$request->search.'%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('product_name', 'like', '%'.$search.'%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('email', 'like', '%'.$search.'%');
+                    });
+            });
         }
 
         if ($request->has('category') && $request->category != '') {

@@ -7,7 +7,7 @@
         <div class="relative inline-block group/avatar">
             <div class="w-32 h-32 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden bg-slate-100 dark:bg-slate-700">
                 @if($user->profile_photo_path)
-                    <img src="{{ Storage::url($user->profile_photo_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                    <img src="{{ media_url($user->profile_photo_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                 @else
                     <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=EF7722&color=fff&size=200" alt="{{ $user->name }}" class="w-full h-full object-cover">
                 @endif

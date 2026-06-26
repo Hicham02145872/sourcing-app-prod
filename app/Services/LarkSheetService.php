@@ -596,7 +596,7 @@ class LarkSheetService implements \App\Contracts\SheetIntegrationInterface
         $quotation = $order->quotation;
 
         $quantity = $destination ? $destination->quantity : $sr->destinations->sum('quantity');
-        $imageUrl = $sr->product_image ? '=IMAGE("'.asset('storage/'.$sr->product_image).'", 1)' : '';
+        $imageUrl = $sr->product_image ? '=IMAGE("'.media_url($sr->product_image).'", 1)' : '';
 
         $labelImageUrl = ShippingLabelImageService::getImageUrl($order, $destination);
         $shippingLabelCell = $labelImageUrl ? '=IMAGE("'.$labelImageUrl.'", 1)' : '';

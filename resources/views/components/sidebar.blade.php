@@ -358,7 +358,7 @@
         <div class="flex items-center gap-3 px-1 mb-3">
             <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
                 @if (Auth::user()?->profile_photo_path)
-                    <img class="h-full w-full object-cover" src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" />
+                    <img class="h-full w-full object-cover" src="{{ media_url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" />
                 @else
                     <div class="h-full w-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                         <span class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()?->name ?? 'G', 0, 1)) }}</span>

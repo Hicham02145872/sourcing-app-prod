@@ -308,7 +308,7 @@
                                                 <div class="flex items-center gap-3">
                                                     <div class="w-10 h-10 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border border-[#EBEBEB] dark:border-slate-600 overflow-hidden flex-shrink-0">
                                                         @if ($request->product_image)
-                                                            <img src="{{ asset('storage/' . $request->product_image) }}"
+                                                            <img src="{{ media_url($request->product_image) }}"
                                                                  alt="{{ $request->product_name }}"
                                                                  class="w-full h-full object-cover">
                                                         @else

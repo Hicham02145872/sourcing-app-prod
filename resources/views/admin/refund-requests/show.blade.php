@@ -138,8 +138,8 @@
                                 <!-- 1. Original Request Image -->
                                 <div class="space-y-3">
                                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">{{ __('Original Wanted') }}</label>
-                                    <div class="relative aspect-square rounded-xl border-2 border-slate-100 bg-slate-50 overflow-hidden group cursor-pointer" onclick="openMediaModal('{{ $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image ? asset('storage/' . $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image) : asset('assets/images/placeholder.png') }}', 'image')">
-                                        <img src="{{ $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image ? asset('storage/' . $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image) : asset('assets/images/placeholder.png') }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <div class="relative aspect-square rounded-xl border-2 border-slate-100 bg-slate-50 overflow-hidden group cursor-pointer" onclick="openMediaModal('{{ $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image ? media_url($refundRequest->sourcingOrder->quotation->sourcingRequest->product_image) : asset('assets/images/placeholder.png') }}', 'image')">
+                                        <img src="{{ $refundRequest->sourcingOrder->quotation->sourcingRequest->product_image ? media_url($refundRequest->sourcingOrder->quotation->sourcingRequest->product_image) : asset('assets/images/placeholder.png') }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                                         <div class="absolute inset-x-0 bottom-0 bg-black/60 p-2 opacity-0 group-hover:opacity-100 transition-opacity text-center">
                                             <span class="text-white text-[9px] font-black uppercase tracking-widest">{{ __('Enlarge Original') }}</span>
                                         </div>
@@ -156,7 +156,7 @@
                                             $firstImageMedia = $refundRequest->sourcingOrder->quotation->media->where('file_type', 'image')->first();
                                             $realImage = $firstImageMedia ? $firstImageMedia->file_path : null;
                                         }
-                                        $realImageUrl = $realImage ? asset('storage/' . $realImage) : null;
+                                        $realImageUrl = $realImage ? media_url($realImage) : null;
                                     @endphp
                                     <div class="relative aspect-square rounded-xl border-2 border-slate-100 bg-slate-50 overflow-hidden group cursor-pointer" @if($realImageUrl) onclick="openMediaModal('{{ $realImageUrl }}', 'image')" @endif>
                                         @if($realImageUrl)
@@ -178,7 +178,7 @@
                                     <label class="text-[10px] font-bold text-red-400 uppercase tracking-wider block text-center">{{ __('Reported Damage') }}</label>
                                     @php
                                         $firstEvidence = $refundRequest->evidence_paths[0] ?? null;
-                                        $evidenceUrl = $firstEvidence ? asset('storage/' . $firstEvidence) : null;
+                                        $evidenceUrl = $firstEvidence ? media_url($firstEvidence) : null;
                                         $isVid = $firstEvidence && in_array(strtolower(pathinfo($firstEvidence, PATHINFO_EXTENSION)), ['mp4', 'mov', 'avi', 'webm']);
                                     @endphp
                                     <div class="relative aspect-square rounded-xl border-2 border-red-100 bg-red-50/30 overflow-hidden group cursor-pointer" @if($evidenceUrl) onclick="openMediaModal('{{ $evidenceUrl }}', '{{ $isVid ? 'video' : 'image' }}')" @endif>
@@ -220,14 +220,14 @@
                                             $extension = pathinfo($path, PATHINFO_EXTENSION);
                                             $isVideo = in_array(strtolower($extension), ['mp4', 'mov', 'avi', 'webm']);
                                         @endphp
-                                        <div class="group relative aspect-square rounded-xl border border-slate-100 bg-slate-50 overflow-hidden cursor-pointer hover:border-orange-500 transition-all duration-200" onclick="openMediaModal('{{ asset('storage/' . $path) }}', '{{ $isVideo ? 'video' : 'image' }}')">
+                                        <div class="group relative aspect-square rounded-xl border border-slate-100 bg-slate-50 overflow-hidden cursor-pointer hover:border-orange-500 transition-all duration-200" onclick="openMediaModal('{{ media_url($path) }}', '{{ $isVideo ? 'video' : 'image' }}')">
                                             @if($isVideo)
                                                 <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
                                                     <svg class="w-10 h-10 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                                     <span class="text-[9px] font-black uppercase tracking-tighter">{{ __('Play Video') }}</span>
                                                 </div>
                                             @else
-                                                <img src="{{ asset('storage/' . $path) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                                <img src="{{ media_url($path) }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                                             @endif
                                             <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
@@ -366,7 +366,7 @@
                                 @if($refundRequest->refund_proof_path)
                                     <div>
                                         <dt class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{{ __('Refund Receipt') }}</dt>
-                                        <a href="{{ asset('storage/' . $refundRequest->refund_proof_path) }}" target="_blank" class="flex items-center gap-3 p-3 border border-slate-200 rounded bg-slate-50 hover:bg-slate-100 transition-colors text-slate-600">
+                                        <a href="{{ media_url($refundRequest->refund_proof_path) }}" target="_blank" class="flex items-center gap-3 p-3 border border-slate-200 rounded bg-slate-50 hover:bg-slate-100 transition-colors text-slate-600">
                                             <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                             <span class="text-xs font-bold">{{ __('Download Evidence') }}</span>
                                         </a>

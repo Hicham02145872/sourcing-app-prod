@@ -95,7 +95,7 @@ class SourcingOrderStatusUpdated extends Notification
         ]);
 
         $sourcingRequest = $this->sourcingOrder->quotation->sourcingRequest;
-        $imageUrl = $sourcingRequest->product_image ? asset('storage/'.$sourcingRequest->product_image) : null;
+        $imageUrl = $sourcingRequest->product_image ? media_url($sourcingRequest->product_image) : null;
 
         $title = __(':emoji Order Status: :status', ['emoji' => $emoji, 'status' => $statusLabel]);
         $body = $this->getStatusBody($this->sourcingOrder->status, $statusLabel);

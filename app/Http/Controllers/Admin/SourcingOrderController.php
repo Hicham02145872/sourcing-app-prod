@@ -109,7 +109,7 @@ class SourcingOrderController extends Controller
             }
         }
 
-        $sourcingOrders = $query->paginate(10);
+        $sourcingOrders = $query->paginate(10)->withQueryString();
         $admins = \App\Models\User::where('role', 'admin')->get();
 
         return view('admin.sourcing-orders.index', compact('sourcingOrders', 'admins'));
@@ -487,10 +487,11 @@ class SourcingOrderController extends Controller
         ]);
 
         if ($request->hasFile('refund_proof')) {
-            $validated['refund_proof_path'] = $this->imageService->compressAndStore(
+            $result = $this->imageService->compressAndStore(
                 $request->file('refund_proof'),
                 'refund-proofs'
             );
+            $validated['refund_proof_path'] = $result->path;
         }
 
         $sourcingOrder->update($validated);

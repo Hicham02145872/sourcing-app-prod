@@ -60,7 +60,7 @@
                                     {{-- Image --}}
                                     <div class="w-16 h-16 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg border-2 border-[#EBEBEB] dark:border-slate-600 overflow-hidden flex-shrink-0 shadow-sm">
                                         @if ($quotation->sourcingRequest->product_image)
-                                            <img src="{{ asset('storage/' . $quotation->sourcingRequest->product_image) }}" alt="{{ $quotation->sourcingRequest->product_name }}" class="w-full h-full object-cover">
+                                            <img src="{{ media_url($quotation->sourcingRequest->product_image) }}" alt="{{ $quotation->sourcingRequest->product_name }}" class="w-full h-full object-cover">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center bg-[#EF7722]/10 dark:bg-[#EF7722]/20">
                                                 <span class="text-base font-black text-[#EF7722]">

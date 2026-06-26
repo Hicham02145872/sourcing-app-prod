@@ -82,15 +82,15 @@ class SourcingOrderController extends Controller
         Log::debug('uploadProofOfPayment method called', ['method' => $request->method(), 'request' => $request->all()]);
 
         if ($request->hasFile('proof_of_payment') && $request->file('proof_of_payment')->isValid()) {
-            $path = $this->imageService->compressAndStore(
+            $result = $this->imageService->compressAndStore(
                 $request->file('proof_of_payment'),
                 'proofs_of_payment',
                 'local'
             );
 
-            Log::debug('File stored', ['path' => $path]);
+            Log::debug('File stored', ['path' => $result->path]);
             $sourcingOrder->update([
-                'proof_of_payment_path' => $path,
+                'proof_of_payment_path' => $result->path,
                 'status' => 'paid',
             ]);
 

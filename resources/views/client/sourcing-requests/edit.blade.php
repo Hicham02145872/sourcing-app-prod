@@ -95,7 +95,7 @@
                                 <div class="relative w-32 h-32 bg-slate-50 dark:bg-slate-700 rounded-lg overflow-hidden border-2 border-dashed border-[#EBEBEB] dark:border-slate-600 group hover:border-[#EF7722] transition-all cursor-pointer shadow-sm">
                                     <img id="product_image_preview" 
                                          class="w-full h-full object-cover" 
-                                         src="{{ $sourcingRequest->product_image ? asset('storage/' . $sourcingRequest->product_image) : '' }}" 
+                                         src="{{ $sourcingRequest->product_image ? media_url($sourcingRequest->product_image) : '' }}" 
                                          alt="{{ __('Product preview') }}" />
                                     <div id="placeholder" 
                                          class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 group-hover:text-[#EF7722] transition-colors {{ $sourcingRequest->product_image ? 'opacity-0' : '' }}">

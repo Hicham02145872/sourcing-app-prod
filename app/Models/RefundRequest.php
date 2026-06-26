@@ -2,12 +2,35 @@
 
 namespace App\Models;
 
+use App\Jobs\DeleteCloudinaryAsset;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class RefundRequest extends Model
 {
     use HasFactory;
+
+    protected static function booted()
+    {
+        static::deleting(function ($refund) {
+            if ($refund->refund_proof_path && !str_starts_with($refund->refund_proof_path, 'http')) {
+                Storage::disk('public')->delete($refund->refund_proof_path);
+            }
+            if ($refund->cloudinary_public_id) {
+                DeleteCloudinaryAsset::dispatch($refund->cloudinary_public_id);
+            }
+            $evidencePaths = $refund->evidence_paths ?? [];
+            foreach ($evidencePaths as $evidencePath) {
+                if (str_starts_with($evidencePath, 'http')) {
+                    // We can't delete Cloudinary assets by URL without public ID
+                    // This is a known limitation for array fields without individual public ID tracking
+                    continue;
+                }
+                Storage::disk('public')->delete($evidencePath);
+            }
+        });
+    }
 
     protected $fillable = [
         'sourcing_order_id',

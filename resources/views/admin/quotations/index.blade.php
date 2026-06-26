@@ -193,7 +193,7 @@
                                             <div class="flex items-center gap-3">
                                                 <div class="w-10 h-10 bg-slate-100 rounded border border-slate-200 overflow-hidden flex-shrink-0">
                                                     @if ($quotation->sourcingRequest->product_image)
-                                                        <img src="{{ asset('storage/' . $quotation->sourcingRequest->product_image) }}"
+                                                        <img src="{{ media_url($quotation->sourcingRequest->product_image) }}"
                                                              alt="{{ $quotation->sourcingRequest->product_name }}"
                                                              class="w-full h-full object-cover">
                                                     @else

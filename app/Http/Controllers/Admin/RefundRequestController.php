@@ -24,6 +24,18 @@ class RefundRequestController extends Controller
             });
         }
 
+        // Search by shared_id, user name/email
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', '%'.$search.'%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('email', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
         // Apply Filters
         if ($request->filled('status')) {
             $query->where('status', $request->status);

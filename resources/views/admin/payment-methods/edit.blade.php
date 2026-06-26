@@ -96,7 +96,7 @@
                                         <div class="flex-shrink-0">
                                             <div id="logo-preview" class="w-20 h-20 bg-slate-100 dark:bg-slate-700 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center overflow-hidden transition-all hover:border-[#EF7722]">
                                                 @if($paymentMethod->logo_path)
-                                                    <img src="{{ asset('storage/' . $paymentMethod->logo_path) }}" alt="{{ $paymentMethod->name }}" class="w-full h-full object-contain p-1">
+                                                    <img src="{{ media_url($paymentMethod->logo_path) }}" alt="{{ $paymentMethod->name }}" class="w-full h-full object-contain p-1">
                                                 @else
                                                     <svg class="w-8 h-8 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -306,7 +306,7 @@
                             
                             <div class="p-6">
                                 <div class="flex items-center justify-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                                    <img src="{{ asset('storage/' . $paymentMethod->logo_path) }}" alt="{{ $paymentMethod->name }}" class="max-w-full h-24 object-contain">
+                                    <img src="{{ media_url($paymentMethod->logo_path) }}" alt="{{ $paymentMethod->name }}" class="max-w-full h-24 object-contain">
                                 </div>
                             </div>
                         </div>

@@ -34,21 +34,19 @@ class ProfileController extends Controller
         // Update the user's profile information
         $request->user()->fill($request->validated());
 
-        // Handle Profile Photo Upload
         if ($request->hasFile('photo')) {
-            $path = $this->imageService->compressAndStore(
+            $result = $this->imageService->compressAndStore(
                 $request->file('photo'),
                 'profile-photos',
                 'public',
-                500 // Max width for avatars
+                500
             );
 
-            // Delete old photo if exists
             if ($request->user()->profile_photo_path) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($request->user()->profile_photo_path);
             }
 
-            $request->user()->profile_photo_path = $path;
+            $request->user()->profile_photo_path = $result->path;
         }
         // If the user is changing their email, reset the email verification status
         $oldEmail = $request->user()->email;

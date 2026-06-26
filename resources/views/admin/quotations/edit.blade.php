@@ -85,7 +85,7 @@
                         <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-4">
                             <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('Requested Product Image') }}</label>
                             @if($quotation->sourcingRequest->product_image)
-                                <img src="{{ asset('storage/' . $quotation->sourcingRequest->product_image) }}" class="w-full h-auto rounded border border-slate-200 object-cover max-h-64">
+                                <img src="{{ media_url($quotation->sourcingRequest->product_image) }}" class="w-full h-auto rounded border border-slate-200 object-cover max-h-64">
                             @else
                                 <div class="h-32 bg-slate-50 border border-dashed border-slate-200 rounded flex items-center justify-center text-slate-400">
                                     {{ __('No image uploaded') }}
@@ -289,7 +289,7 @@
                                     <div id="image-preview-container" class="{{ $quotation->real_product_image ? '' : 'hidden' }}">
                                         <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">{{ __('Preview') }}</p>
                                         <div class="h-24 w-24 rounded-lg border-2 border-red-200 border-dashed overflow-hidden bg-white shadow-sm">
-                                            <img id="image-preview" src="{{ $quotation->real_product_image ? asset('storage/' . $quotation->real_product_image) : '#' }}" alt="Preview" class="h-full w-full object-cover">
+                                            <img id="image-preview" src="{{ $quotation->real_product_image ? media_url($quotation->real_product_image) : '#' }}" alt="Preview" class="h-full w-full object-cover">
                                         </div>
                                     </div>
 
@@ -300,15 +300,15 @@
                                                 @foreach($quotation->media as $media)
                                                     <div class="relative group aspect-square rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
                                                         @if($media->file_type === 'video')
-                                                            <video src="{{ asset('storage/' . $media->file_path) }}" class="w-full h-full object-cover" muted></video>
+                                                            <video src="{{ media_url($media->file_path) }}" class="w-full h-full object-cover" muted></video>
                                                             <div class="absolute inset-0 flex items-center justify-center bg-black/30">
                                                                 <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                                             </div>
                                                         @else
-                                                            <img src="{{ asset('storage/' . $media->file_path) }}" class="w-full h-full object-cover">
+                                                            <img src="{{ media_url($media->file_path) }}" class="w-full h-full object-cover">
                                                         @endif
                                                         <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                                            <a href="{{ asset('storage/' . $media->file_path) }}" target="_blank" class="p-1 rounded bg-white text-slate-700 hover:text-orange-600 shadow" title="{{ __('View') }}">
+                                                            <a href="{{ media_url($media->file_path) }}" target="_blank" class="p-1 rounded bg-white text-slate-700 hover:text-orange-600 shadow" title="{{ __('View') }}">
                                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                             </a>
                                                             <label class="p-1 rounded bg-white text-red-600 hover:bg-red-50 cursor-pointer shadow flex items-center justify-center" title="{{ __('Delete') }}">
@@ -364,8 +364,8 @@
                                                     class="block w-full text-xs text-slate-500 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800 bg-white border border-slate-200 p-1 rounded-md">
                                                 @if(isset($quotation->quality_options[$key]['image_path']))
                                                     <div class="mt-2 flex items-center gap-2">
-                                                        <img src="{{ asset('storage/' . $quotation->quality_options[$key]['image_path']) }}" class="w-12 h-12 object-cover rounded border border-slate-200">
-                                                        <a href="{{ asset('storage/' . $quotation->quality_options[$key]['image_path']) }}" target="_blank" class="text-xs text-blue-600 hover:underline">{{ __('View') }}</a>
+                                                        <img src="{{ media_url($quotation->quality_options[$key]['image_path']) }}" class="w-12 h-12 object-cover rounded border border-slate-200">
+                                                        <a href="{{ media_url($quotation->quality_options[$key]['image_path']) }}" target="_blank" class="text-xs text-blue-600 hover:underline">{{ __('View') }}</a>
                                                     </div>
                                                 @endif
                                             </div>

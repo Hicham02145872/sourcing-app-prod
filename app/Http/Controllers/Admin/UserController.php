@@ -17,8 +17,8 @@ class UserController extends Controller
 
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', $search.'%')
-                    ->orWhere('email', 'like', $search.'%');
+                $q->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%');
             });
         }
 
@@ -46,7 +46,7 @@ class UserController extends Controller
             'sourcingOrders' => function ($q) {
                 $q->latest()->select('id', 'user_id', 'status', 'total_amount', 'created_at', 'quotation_id');
             },
-        ])->paginate(10);
+        ])->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return response()->json([

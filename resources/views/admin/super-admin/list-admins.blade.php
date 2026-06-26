@@ -115,7 +115,7 @@
                                         <div class="flex items-center gap-3">
                                             <div class="h-8 w-8 rounded-full overflow-hidden border border-slate-200 shadow-sm flex-shrink-0">
                                                 @if ($admin->profile_photo_path)
-                                                    <img class="h-full w-full object-cover" src="{{ Storage::url($admin->profile_photo_path) }}" alt="{{ $admin->name }}" />
+                                                    <img class="h-full w-full object-cover" src="{{ media_url($admin->profile_photo_path) }}" alt="{{ $admin->name }}" />
                                                 @else
                                                     <div class="h-full w-full bg-orange-100 flex items-center justify-center text-orange-600 text-[10px] font-bold uppercase transition-transform group-hover:scale-110">
                                                         {{ strtoupper(substr($admin->name, 0, 1)) }}

@@ -83,11 +83,12 @@ class QuotationController extends Controller
 
         $storedPath = null;
         if ($request->hasFile('proof_of_payment') && $request->file('proof_of_payment')->isValid()) {
-            $storedPath = $imageService->compressAndStore(
+            $result = $imageService->compressAndStore(
                 $request->file('proof_of_payment'),
                 'proofs_of_payment',
                 'local'
             );
+            $storedPath = $result->path;
         }
 
         if (!$storedPath) {
@@ -336,11 +337,12 @@ class QuotationController extends Controller
 
         $storedPath = null;
         if ($request->hasFile('proof_of_payment') && $request->file('proof_of_payment')->isValid()) {
-            $storedPath = $imageService->compressAndStore(
+            $result = $imageService->compressAndStore(
                 $request->file('proof_of_payment'),
                 'proofs_of_payment',
                 'local'
             );
+            $storedPath = $result->path;
         }
 
         if (!$storedPath) {

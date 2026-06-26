@@ -15,9 +15,15 @@ class ClientDashboardController extends Controller
             ->whereNotIn('status', ['cancelled', 'rejected']) // Exclude archived
             ->with('category', 'destinations.country', 'destinations.service');
 
-        // Search by product name
+        // Search by product name or email
         if ($request->has('search') && $request->search) {
-            $query->where('product_name', 'like', '%'.$request->search.'%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('product_name', 'like', '%'.$search.'%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('email', 'like', '%'.$search.'%');
+                    });
+            });
         }
 
         // Filter by category

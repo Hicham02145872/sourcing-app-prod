@@ -89,7 +89,7 @@ class QuotationCreated extends Notification
         ]);
 
         $sourcingRequest = $this->quotation->sourcingRequest;
-        $imageUrl = $sourcingRequest->product_image ? asset('storage/'.$sourcingRequest->product_image) : null;
+        $imageUrl = $sourcingRequest->product_image ? media_url($sourcingRequest->product_image) : null;
 
         $title = __('📄 New Quotation: :amount :currency', [
             'amount' => $this->quotation->amount,

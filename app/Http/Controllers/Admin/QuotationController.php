@@ -193,16 +193,16 @@ class QuotationController extends Controller
 
         $realProductImagePath = null;
         if ($request->hasFile('real_product_image')) {
-            $realProductImagePath = $this->imageService->compressAndStore(
+            $result = $this->imageService->compressAndStore(
                 $request->file('real_product_image'),
                 'quotations/real_images',
                 'public',
                 1200,
                 80
             );
+            $realProductImagePath = $result->path;
         }
 
-        // Process Quality Pricing Options
         $qualityOptionsData = [];
         if ($request->has('quality_options')) {
             $rawOptions = $request->input('quality_options');
@@ -218,15 +218,15 @@ class QuotationController extends Controller
                             $files = [$files];
                         }
                         foreach ($files as $file) {
-                            $path = $this->imageService->compressAndStore(
+                            $result = $this->imageService->compressAndStore(
                                 $file,
                                 'quotations/quality',
                                 'public',
                                 1200,
                                 80
                             );
-                            if ($path) {
-                                $imagePaths[] = $path;
+                            if ($result->path) {
+                                $imagePaths[] = $result->path;
                             }
                         }
                         if (!empty($imagePaths)) {
@@ -269,15 +269,17 @@ class QuotationController extends Controller
             // estimated_net_profit will be calculated by QuotationObserver
         ]);
 
-        // Handle multiple media files (compress images, store videos as-is)
         if ($request->hasFile('media_files')) {
             $sortOrder = 0;
             foreach ($request->file('media_files') as $file) {
                 $mime = $file->getMimeType();
                 $isVideo = str_starts_with($mime, 'video/');
-                $path = $isVideo
-                    ? $file->store('quotations/media', 'public')
-                    : $this->imageService->compressAndStore($file, 'quotations/media', 'public', 1200, 80);
+                if ($isVideo) {
+                    $path = $file->store('quotations/media', 'public');
+                } else {
+                    $result = $this->imageService->compressAndStore($file, 'quotations/media', 'public', 1200, 80);
+                    $path = $result->path;
+                }
                 $fileType = $isVideo ? 'video' : 'image';
 
                 $quotation->media()->create([
@@ -383,13 +385,14 @@ class QuotationController extends Controller
             if ($realProductImagePath && Storage::disk('public')->exists($realProductImagePath)) {
                 Storage::disk('public')->delete($realProductImagePath);
             }
-            $realProductImagePath = $this->imageService->compressAndStore(
+            $result = $this->imageService->compressAndStore(
                 $request->file('real_product_image'),
                 'quotations/real_images',
                 'public',
                 1200,
                 80
             );
+            $realProductImagePath = $result->path;
         }
 
         // Process Quality Pricing Options for Update
@@ -423,15 +426,15 @@ class QuotationController extends Controller
                             $files = [$files];
                         }
                         foreach ($files as $file) {
-                            $path = $this->imageService->compressAndStore(
+                            $result = $this->imageService->compressAndStore(
                                 $file,
                                 'quotations/quality',
                                 'public',
                                 1200,
                                 80
                             );
-                            if ($path) {
-                                $newImagePaths[] = $path;
+                            if ($result->path) {
+                                $newImagePaths[] = $result->path;
                             }
                         }
                         $imagePaths = $newImagePaths;
@@ -506,9 +509,12 @@ class QuotationController extends Controller
             foreach ($request->file('media_files') as $file) {
                 $mime = $file->getMimeType();
                 $isVideo = str_starts_with($mime, 'video/');
-                $path = $isVideo
-                    ? $file->store('quotations/media', 'public')
-                    : $this->imageService->compressAndStore($file, 'quotations/media', 'public', 1200, 80);
+                if ($isVideo) {
+                    $path = $file->store('quotations/media', 'public');
+                } else {
+                    $result = $this->imageService->compressAndStore($file, 'quotations/media', 'public', 1200, 80);
+                    $path = $result->path;
+                }
                 $fileType = $isVideo ? 'video' : 'image';
 
                 $quotation->media()->create([

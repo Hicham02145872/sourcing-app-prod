@@ -85,7 +85,7 @@ class TrackingNumberAdded extends Notification
         $notification = FirebaseNotification::create($title, $body);
 
         $sourcingRequest = $this->sourcingOrder->quotation->sourcingRequest;
-        $imageUrl = $sourcingRequest->product_image ? asset('storage/'.$sourcingRequest->product_image) : null;
+        $imageUrl = $sourcingRequest->product_image ? media_url($sourcingRequest->product_image) : null;
 
         return CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification($notification)

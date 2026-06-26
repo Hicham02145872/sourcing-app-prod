@@ -100,11 +100,11 @@ class RefundRequestController extends Controller
                 $evidencePaths = [];
                 if ($request->hasFile('evidence')) {
                     foreach ($request->file('evidence') as $file) {
-                        $path = $this->imageService->compressAndStore(
+                        $result = $this->imageService->compressAndStore(
                             $file,
                             'refund-evidence'
                         );
-                        $evidencePaths[] = $path;
+                        $evidencePaths[] = $result->path;
                     }
                 }
 

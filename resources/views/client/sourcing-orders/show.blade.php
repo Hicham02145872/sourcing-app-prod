@@ -236,7 +236,7 @@
                                     <div class="relative group">
                                         <div class="w-24 h-24 sm:w-32 sm:h-32 bg-[#EBEBEB] dark:bg-slate-700 border-2 border-[#EBEBEB] dark:border-slate-600 rounded-lg overflow-hidden shadow-sm mx-auto">
                                             @if ($sourcingOrder->quotation->sourcingRequest->product_image)
-                                                <img src="{{ asset('storage/' . $sourcingOrder->quotation->sourcingRequest->product_image) }}" 
+                                                <img src="{{ media_url($sourcingOrder->quotation->sourcingRequest->product_image) }}" 
                                                      alt="{{ $sourcingOrder->quotation->sourcingRequest->product_name }}" 
                                                      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                             @else
@@ -373,7 +373,7 @@
                                             <div class="flex items-center gap-3">
                                                 @if($paymentMethod->logo_path)
                                                     <div class="w-10 h-10 rounded-full border border-[#EBEBEB] bg-white p-1.5 shadow-sm flex items-center justify-center">
-                                                        <img src="{{ asset('storage/' . $paymentMethod->logo_path) }}" alt="{{ $paymentMethod->name }}" class="w-full h-full object-contain">
+                                                        <img src="{{ media_url($paymentMethod->logo_path) }}" alt="{{ $paymentMethod->name }}" class="w-full h-full object-contain">
                                                     </div>
                                                 @else
                                                     <div class="w-10 h-10 flex items-center justify-center rounded-full border border-[#EBEBEB] bg-[#EBEBEB] shadow-sm">

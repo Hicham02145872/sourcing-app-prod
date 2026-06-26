@@ -110,7 +110,7 @@ class SourcingRequestStatusUpdated extends Notification
             'sourcingRequest' => $this->sourcingRequest->id,
         ]);
 
-        $imageUrl = $this->sourcingRequest->product_image ? asset('storage/'.$this->sourcingRequest->product_image) : null;
+        $imageUrl = $this->sourcingRequest->product_image ? media_url($this->sourcingRequest->product_image) : null;
 
         $message = CloudMessage::withTarget('token', $notifiable->fcm_token)
             ->withNotification(FirebaseNotification::create(

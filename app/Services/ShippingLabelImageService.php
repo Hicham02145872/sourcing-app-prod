@@ -17,7 +17,7 @@ class ShippingLabelImageService
             : "shipping-labels/label-{$order->id}.png";
 
         if (Storage::disk('public')->exists($filename)) {
-            return asset('storage/'.$filename);
+            return media_url($filename);
         }
 
         return self::generateImage($order, $destination, $filename);
@@ -66,7 +66,7 @@ class ShippingLabelImageService
             Storage::disk('public')->makeDirectory('shipping-labels');
             Storage::disk('public')->put($filename, $png);
 
-            return asset('storage/'.$filename);
+            return media_url($filename);
         } catch (\Exception $e) {
             Log::error('ShippingLabelImageService: Failed to generate image', [
                 'order_id' => $order->id,

@@ -6,7 +6,7 @@
             <div class="flex items-center">
                 <div class="flex-shrink-0 h-10 w-10">
                     @if ($user->profile_photo_path)
-                        <img class="h-10 w-10 rounded-full object-cover border border-slate-200 shadow-sm transition-transform group-hover:scale-105" src="{{ Storage::url($user->profile_photo_path) }}" alt="{{ $user->name }}" />
+                        <img class="h-10 w-10 rounded-full object-cover border border-slate-200 shadow-sm transition-transform group-hover:scale-105" src="{{ media_url($user->profile_photo_path) }}" alt="{{ $user->name }}" />
                     @else
                         <div class="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm border border-orange-200 shadow-sm transition-transform group-hover:scale-105">
                             {{ strtoupper(substr($user->name, 0, 1)) }}

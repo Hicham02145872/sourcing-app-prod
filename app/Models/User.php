@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Jobs\DeleteCloudinaryAsset;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -33,6 +35,18 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token',
     ];
+
+    protected static function booted()
+    {
+        static::deleting(function ($user) {
+            if ($user->profile_photo_path && !str_starts_with($user->profile_photo_path, 'http')) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+            if ($user->cloudinary_public_id) {
+                DeleteCloudinaryAsset::dispatch($user->cloudinary_public_id);
+            }
+        });
+    }
 
     protected function casts(): array
     {

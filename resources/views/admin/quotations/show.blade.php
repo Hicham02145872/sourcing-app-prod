@@ -8,7 +8,7 @@
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-4 md:py-0 gap-4">
                     <div class="flex items-center gap-2">
                         <!-- Back Button -->
-                        <a href="{{ route('admin.quotations.index') }}" class="group inline-flex items-center justify-center h-8 w-8 rounded-full bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 hover:border-orange-200 transition-colors" title="{{ __('Back') }}">
+                        <a href="{{ url()->previous() }}" class="group inline-flex items-center justify-center h-8 w-8 rounded-full bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 hover:border-orange-200 transition-colors" title="{{ __('Back') }}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
                         </a>
                         
@@ -21,7 +21,7 @@
                             <nav class="hidden sm:flex text-xs text-slate-500 mt-0.5" aria-label="Breadcrumb">
                                 <a href="{{ route('admin.dashboard') }}" class="hover:text-orange-600 transition-colors">{{ __('Dashboard') }}</a>
                                 <span class="mx-1.5 text-slate-300">/</span>
-                                <a href="{{ route('admin.quotations.index') }}" class="hover:text-orange-600 transition-colors">{{ __('Quotations') }}</a>
+                                <a href="{{ url()->previous() }}" class="hover:text-orange-600 transition-colors">{{ __('Quotations') }}</a>
                                 <span class="mx-1.5 text-slate-300">/</span>
                                 <span class="font-medium text-slate-700">{{ __('Details') }}</span>
                             </nav>
@@ -242,7 +242,7 @@
                                         <div>
                                             <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-center md:text-left">{{ __('Product Visual') }}</label>
                                             <div class="rounded-lg border border-slate-200 p-2 bg-slate-50 flex justify-center md:justify-start">
-                                                <img src="{{ asset('storage/' . $quotation->sourcingRequest->product_image) }}" alt="Product" class="max-h-48 rounded shadow-sm">
+                                                <img src="{{ media_url($quotation->sourcingRequest->product_image) }}" alt="Product" class="max-h-48 rounded shadow-sm">
                                             </div>
                                         </div>
                                     @endif

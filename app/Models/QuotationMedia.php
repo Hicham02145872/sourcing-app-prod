@@ -2,12 +2,22 @@
 
 namespace App\Models;
 
+use App\Jobs\DeleteCloudinaryAsset;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class QuotationMedia extends Model
 {
     use HasFactory;
+
+    protected static function booted()
+    {
+        static::deleting(function ($media) {
+            if ($media->cloudinary_public_id) {
+                DeleteCloudinaryAsset::dispatch($media->cloudinary_public_id);
+            }
+        });
+    }
 
     protected $table = 'quotation_media';
 
@@ -32,7 +42,7 @@ class QuotationMedia extends Model
      */
     public function getUrlAttribute(): string
     {
-        return asset('storage/'.$this->file_path);
+        return media_url($this->file_path);
     }
 
     /**

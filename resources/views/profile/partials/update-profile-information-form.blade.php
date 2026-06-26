@@ -27,7 +27,7 @@
             <div class="shrink-0 relative group">
                 @if($user->profile_photo_path)
                     <img class="h-20 w-20 object-cover rounded-full border-2 border-slate-200 dark:border-slate-700 shadow-sm" 
-                         src="{{ Storage::url($user->profile_photo_path) }}" 
+                         src="{{ media_url($user->profile_photo_path) }}" 
                          alt="{{ $user->name }}" />
                 @else
                     <div class="h-20 w-20 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-2xl font-bold text-orange-600 border-2 border-orange-200 dark:border-orange-800 shadow-sm">

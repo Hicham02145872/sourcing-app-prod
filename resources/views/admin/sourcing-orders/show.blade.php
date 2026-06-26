@@ -8,7 +8,7 @@
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-4 md:py-0 gap-4">
                     <div class="flex items-center gap-2">
                         <!-- Back Button -->
-                        <a href="{{ route('admin.sourcing-orders.index', ['page' => request('page')]) }}" class="group inline-flex items-center justify-center h-8 w-8 rounded-full bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 hover:border-orange-200 transition-colors">
+                        <a href="{{ url()->previous() }}" class="group inline-flex items-center justify-center h-8 w-8 rounded-full bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 hover:border-orange-200 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
                         </a>
                         
@@ -39,7 +39,7 @@
                                 </span>
                             </h1>
                             <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">
-                                <a href="{{ route('admin.sourcing-orders.index', ['page' => request('page')]) }}" class="hover:text-slate-700">{{ __('Order List') }}</a>
+                                <a href="{{ url()->previous() }}" class="hover:text-slate-700">{{ __('Order List') }}</a>
                                 <span class="mx-1.5">/</span>
                                 <span class="font-medium text-slate-700">{{ $sourcingOrder->quotation->sourcingRequest->product_name ?? __('Unknown product') }}</span>
                             </nav>
@@ -528,7 +528,7 @@
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-1">
                         @if($sourcingOrder->quotation->sourcingRequest->product_image)
                             <div class="relative group aspect-square rounded overflow-hidden bg-slate-100 cursor-pointer">
-                                <img src="{{ asset('storage/' . $sourcingOrder->quotation->sourcingRequest->product_image) }}" 
+                                <img src="{{ media_url($sourcingOrder->quotation->sourcingRequest->product_image) }}" 
                                      alt="Product" 
                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                             </div>

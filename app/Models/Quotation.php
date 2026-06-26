@@ -2,12 +2,36 @@
 
 namespace App\Models;
 
+use App\Jobs\DeleteCloudinaryAsset;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Quotation extends Model
 {
     use HasFactory;
+
+    protected static function booted()
+    {
+        static::deleting(function ($quotation) {
+            if ($quotation->real_product_image && !str_starts_with($quotation->real_product_image, 'http')) {
+                Storage::disk('public')->delete($quotation->real_product_image);
+            }
+            if ($quotation->cloudinary_public_id) {
+                DeleteCloudinaryAsset::dispatch($quotation->cloudinary_public_id);
+            }
+            $qualityOptions = $quotation->quality_options ?? [];
+            foreach ($qualityOptions as $option) {
+                if (!empty($option['image_path'])) {
+                    if (str_starts_with($option['image_path'], 'http')) {
+                        DeleteCloudinaryAsset::dispatch($quotation->cloudinary_public_id);
+                    } else {
+                        Storage::disk('public')->delete($option['image_path']);
+                    }
+                }
+            }
+        });
+    }
 
     public const STATUSES = [
         'pending', // Initial state after creation by admin

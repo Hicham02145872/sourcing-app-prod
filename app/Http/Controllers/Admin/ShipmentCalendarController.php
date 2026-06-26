@@ -179,7 +179,7 @@ class ShipmentCalendarController extends Controller
                     'isCompleted' => $isCompleted,
                     'isCurrent' => $isCurrent,
                     'productName' => $productName,
-                    'productImage' => $productImage ? asset('storage/'.$productImage) : null,
+                    'productImage' => $productImage ? media_url($productImage) : null,
                     'sourcingLocation' => $sourcingLocation,
                 ],
                 'classNames' => [

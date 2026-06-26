@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\DeleteCloudinaryAsset;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -32,10 +33,12 @@ class SourcingOrder extends Model
             if ($sourcingOrder->proof_of_payment_path) {
                 Storage::disk('public')->delete($sourcingOrder->proof_of_payment_path);
             }
+            if ($sourcingOrder->cloudinary_public_id) {
+                DeleteCloudinaryAsset::dispatch($sourcingOrder->cloudinary_public_id);
+            }
             if ($sourcingOrder->refund_proof_path) {
                 Storage::disk('public')->delete($sourcingOrder->refund_proof_path);
             }
-            // Delete associated media records (which will trigger their own deleting events for physical files)
             $sourcingOrder->media()->each(function ($media) {
                 $media->delete();
             });
@@ -337,7 +340,7 @@ class SourcingOrder extends Model
             'tracking_number' => $this->tracking_number,
             'admin_assigned' => $this->assignedAdmin?->name ?? 'N/A',
             'net_profit' => $this->net_profit_or_loss,
-            'product_image' => $this->quotation->sourcingRequest->product_image ? asset('storage/'.$this->quotation->sourcingRequest->product_image) : '',
+            'product_image' => $this->quotation->sourcingRequest->product_image ? media_url($this->quotation->sourcingRequest->product_image) : '',
         ];
     }
 
@@ -377,7 +380,7 @@ class SourcingOrder extends Model
             'client_name' => $this->user->name,
             'address' => $this->quotation->sourcingRequest->address ?? 'N/A', // Using address from sourcing request
             'phone' => $this->quotation->sourcingRequest->phone_number ?? 'N/A',
-            'product_image' => $this->quotation->sourcingRequest->product_image ? '=IMAGE("'.asset('storage/'.$this->quotation->sourcingRequest->product_image).'")' : '',
+            'product_image' => $this->quotation->sourcingRequest->product_image ? '=IMAGE("'.media_url($this->quotation->sourcingRequest->product_image).'")' : '',
             'weight' => '', // Placeholder
             'notes' => '', // Placeholder
         ];

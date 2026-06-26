@@ -6,10 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\PaymentMethod;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PaymentMethodController extends Controller
 {
+    public function __construct(
+        protected \App\Services\ImageProcessingService $imageService
+    ) {}
+
     public function index(Request $request): View
     {
         $query = PaymentMethod::query();
@@ -18,7 +23,7 @@ class PaymentMethodController extends Controller
             $query->where('name', 'like', '%'.$search.'%');
         }
 
-        $paymentMethods = $query->paginate(10);
+        $paymentMethods = $query->paginate(10)->withQueryString();
 
         return view('admin.payment-methods.index', compact('paymentMethods'));
     }
@@ -64,7 +69,12 @@ class PaymentMethodController extends Controller
 
         $logoPath = null;
         if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('payment_method_logos', 'public');
+            $result = $this->imageService->compressAndStore(
+                $request->file('logo'),
+                'payment_method_logos',
+                'public'
+            );
+            $logoPath = $result->path;
         }
 
         PaymentMethod::create([
@@ -118,9 +128,17 @@ class PaymentMethodController extends Controller
         $logoPath = $paymentMethod->logo_path;
         if ($request->hasFile('logo')) {
             if ($logoPath) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($logoPath);
+                Storage::disk('public')->delete($logoPath);
+                if ($paymentMethod->cloudinary_public_id) {
+                    \App\Jobs\DeleteCloudinaryAsset::dispatch($paymentMethod->cloudinary_public_id);
+                }
             }
-            $logoPath = $request->file('logo')->store('payment_method_logos', 'public');
+            $result = $this->imageService->compressAndStore(
+                $request->file('logo'),
+                'payment_method_logos',
+                'public'
+            );
+            $logoPath = $result->path;
         }
 
         $paymentMethod->update([
