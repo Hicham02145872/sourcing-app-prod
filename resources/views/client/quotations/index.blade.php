@@ -306,8 +306,6 @@
                                                                                document.getElementById('display-amount-{{ $request->quotation->id }}').textContent = '{{ number_format($optAmount, 2) }}';
                                                                                if (typeof window.updateStickyBar === 'function') { window.updateStickyBar(); }
                                                                                document.getElementById('quality-input-{{ $request->quotation->id }}').value = '{{ $key }}';
-                                                                               const formInput = document.getElementById('form-quality-input-{{ $request->quotation->id }}');
-                                                                               if (formInput) { formInput.value = '{{ $key }}'; }
                                                                                "
                                                                         class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all"
                                                                         :class="selectedVal === '{{ $key }}' ? 'bg-[#EF7722] text-white border-[#EF7722]' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-[#EBEBEB] dark:border-slate-700 hover:border-[#EF7722]/50'">
@@ -333,17 +331,13 @@
                                             <span>{{ __('View Details') }}</span>
                                         </a>
                                         @if ($request->quotation)
-                                            <form action="{{ route('client.quotations.accept', $request->quotation) }}" method="POST" class="w-full">
-                                                @csrf
-                                                <input type="hidden" name="selected_quality" id="form-quality-input-{{ $request->quotation->id }}" value="{{ $firstQuality }}">
-                                                <button type="submit" 
-                                                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-bold rounded-lg transition-all duration-200 shadow-sm hover:shadow whitespace-nowrap">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                    </svg>
-                                                    <span>{{ __('Accept Quotation') }}</span>
-                                                </button>
-                                            </form>
+                                            <a href="{{ route('client.sourcing-requests.show', $request) }}"
+                                               class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-bold rounded-lg transition-all duration-200 shadow-sm hover:shadow whitespace-nowrap">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <span>{{ __('Accept Quotation') }}</span>
+                                            </a>
                                         @endif
                                     </div>
                                 </div>
