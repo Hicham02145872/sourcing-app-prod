@@ -331,7 +331,8 @@
                                             <span>{{ __('View Details') }}</span>
                                         </a>
                                         @if ($request->quotation)
-                                            <a href="{{ route('client.sourcing-requests.show', $request) }}"
+                                            <a href="#" x-data="{}"
+                                               @click.prevent="const q = document.getElementById('quality-input-{{ $request->quotation->id }}'); window.location.href = '{{ route('client.sourcing-requests.show', $request) }}' + (q && q.value ? '?quality=' + q.value : '')"
                                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#EF7722] hover:bg-[#FAA533] dark:bg-[#EF7722] dark:hover:bg-[#FAA533] text-white text-sm font-bold rounded-lg transition-all duration-200 shadow-sm hover:shadow whitespace-nowrap">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>

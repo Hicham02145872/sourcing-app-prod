@@ -286,17 +286,24 @@
                             $firstQuality = null;
                             $initialUnitPrice = $sourcingRequest->quotation->unit_price;
                             $initialAmount = $sourcingRequest->quotation->amount;
+                            $requestedQuality = request('quality');
                             
                             if ($sourcingRequest->quotation->quality_options) {
                                 foreach (['low', 'medium', 'good'] as $k) {
                                     if (!empty($sourcingRequest->quotation->quality_options[$k]['price'])) {
-                                        $firstQuality = $k;
-                                        $initialUnitPrice = $sourcingRequest->quotation->quality_options[$k]['price'];
-                                        $totalQuantity = $sourcingRequest->destinations->sum('quantity');
-                                        $subtotal = $initialUnitPrice * $totalQuantity;
-                                        $initialAmount = $subtotal + $sourcingRequest->quotation->commission_service + $sourcingRequest->quotation->delivery_cost_china;
-                                        break;
+                                        if ($firstQuality === null) {
+                                            $firstQuality = $k;
+                                        }
+                                        if ($requestedQuality === $k) {
+                                            $firstQuality = $k;
+                                        }
                                     }
+                                }
+                                if ($firstQuality) {
+                                    $initialUnitPrice = $sourcingRequest->quotation->quality_options[$firstQuality]['price'];
+                                    $totalQuantity = $sourcingRequest->destinations->sum('quantity');
+                                    $subtotal = $initialUnitPrice * $totalQuantity;
+                                    $initialAmount = $subtotal + $sourcingRequest->quotation->commission_service + $sourcingRequest->quotation->delivery_cost_china;
                                 }
                             }
                         @endphp
