@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
 
@@ -11,21 +10,6 @@ class ImageProcessingService
 {
     public function compressAndStore(UploadedFile $file, string $directory, string $disk = 'public', int $maxWidth = 1200, int $quality = 75): ImageResult
     {
-        if (config('cloudinary.cloud_url') || env('CLOUDINARY_URL')) {
-            try {
-                $result = cloudinary()->uploadApi()->upload($file->getRealPath(), [
-                    'folder' => $directory,
-                ]);
-
-                return new ImageResult(
-                    path: $result['secure_url'],
-                    publicId: $result['public_id'],
-                );
-            } catch (\Exception $e) {
-                Log::error('Cloudinary upload failed, falling back to local: ' . $e->getMessage());
-            }
-        }
-
         $mimeType = $file->getMimeType();
         $isImage = str_starts_with($mimeType, 'image/') && ! str_contains($mimeType, 'svg');
 
