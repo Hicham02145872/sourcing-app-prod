@@ -47,3 +47,19 @@ google-chrome-stable_current_amd64.deb
 cloudflared.exe
 *.broken-backup
 public/vendor/livewire/
+
+# Cloudinary WIP - not ready
+app/Console/Commands/MigrateImagesToCloudinary.php
+app/Jobs/DeleteCloudinaryAsset.php
+app/Services/ImageResult.php
+config/cloudinary.php
+database/migrations/*cloudinary*
+CLOUDINARY_MIGRATION_PLAN.md
+tests/Unit/DeleteCloudinaryAsset*
+tests/Unit/ImageProcessingService*
+tests/Unit/ImageResult*
+tests/Unit/MediaUrlHelper*
+shipping-fees-analysis.md
+storage/debug_image_result.php
+*.backup
+scraper/__pycache__/
