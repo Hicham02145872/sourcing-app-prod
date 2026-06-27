@@ -49,6 +49,7 @@
                         <tr>
                             <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Country') }}</th>
                             <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Transportation Status') }}</th>
+                            <th scope="col" class="px-6 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Currency') }}</th>
                             <th scope="col" class="px-6 py-4 text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
@@ -109,6 +110,10 @@
                                     </div>
                                 </td>
 
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-bold text-slate-600">{{ $country->shippingFee->currency ?? '—' }}</span>
+                                </td>
+
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                     <a href="{{ route('admin.shipping-fees.edit', $country->id) }}" 
                                        wire:navigate
@@ -122,7 +127,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center">
+                                <td colspan="9" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center opacity-40">
                                         <svg class="w-10 h-10 text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>

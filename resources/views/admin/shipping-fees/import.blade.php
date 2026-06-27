@@ -53,13 +53,24 @@
                 </div>
                 <form action="{{ route('admin.shipping-fees.import.run') }}" method="post" enctype="multipart/form-data" class="p-6 space-y-6">
                     @csrf
-                    <div>
-                        <label for="file" class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">{{ __('Fichier .xlsx ou .xls') }}</label>
-                        <input type="file" name="file" id="file" accept=".xlsx,.xls" required
-                               class="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-orange-50 file:text-orange-700 file:font-bold file:uppercase file:tracking-wider file:text-xs">
-                        @error('file')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="file" class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">{{ __('Fichier .xlsx ou .xls') }}</label>
+                            <input type="file" name="file" id="file" accept=".xlsx,.xls" required
+                                   class="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-orange-50 file:text-orange-700 file:font-bold file:uppercase file:tracking-wider file:text-xs">
+                            @error('file')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="currency" class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">{{ __('Currency') }}</label>
+                            <select name="currency" id="currency"
+                                    class="block w-full text-sm text-slate-700 border border-slate-200 rounded-lg py-2.5 px-3 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500">
+                                @foreach(config('currencies', []) as $code => $label)
+                                    <option value="{{ $code }}" {{ $code === 'USD' ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="flex items-center gap-4">
                         <button type="submit" class="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors">

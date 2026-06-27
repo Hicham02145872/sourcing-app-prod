@@ -24,6 +24,13 @@ class ShippingFeesFromAirFreightDDPImport implements ToCollection
 
     protected int $skipped = 0;
 
+    protected string $currency = 'USD';
+
+    public function setCurrency(string $currency): void
+    {
+        $this->currency = $currency;
+    }
+
     /** @var array<int, string> Map column index => field name */
     protected array $columnMap = [];
 
@@ -99,7 +106,7 @@ class ShippingFeesFromAirFreightDDPImport implements ToCollection
                 }
                 $shippingFee = $country->shippingFee ?? ShippingFee::create([
                     'country_id' => $country->id,
-                    'currency' => 'USD',
+                    'currency' => $this->currency,
                     'unit' => 'kg',
                     'air_unit' => 'kg',
                     'sea_unit' => 'CBM',

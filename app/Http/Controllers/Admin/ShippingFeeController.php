@@ -29,9 +29,11 @@ class ShippingFeeController extends Controller
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls|max:10240',
+            'currency' => 'nullable|string|size:3',
         ]);
 
         $import = new ShippingFeesFromAirFreightDDPImport;
+        $import->setCurrency($request->input('currency', 'USD'));
         Excel::import($import, $request->file('file'));
 
         return redirect()
