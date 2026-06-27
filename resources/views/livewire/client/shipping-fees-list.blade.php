@@ -224,8 +224,13 @@
                                                 @foreach($cells as $item)
                                                     <div class="{{ $cells->count() > 1 ? 'mb-2 last:mb-0' : '' }}" wire:key="sf-price-{{ $item->id }}">
                                                         <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">
-                                                            @if($item->price_per_kg !== null && $item->price_per_kg !== '')
-                                                                {{ number_format((float) $item->price_per_kg, 2) }}
+                                                            @php
+                                                                $displayPrice = $currentType === 'train'
+                                                                    ? ($item->price_per_kg_dubai ?? $item->price_per_kg)
+                                                                    : $item->price_per_kg;
+                                                            @endphp
+                                                            @if($displayPrice !== null && $displayPrice !== '')
+                                                                {{ number_format((float) $displayPrice, 2) }}
                                                             @else
                                                                 —
                                                             @endif

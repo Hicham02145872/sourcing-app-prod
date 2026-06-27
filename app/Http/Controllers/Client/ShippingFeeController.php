@@ -33,6 +33,7 @@ class ShippingFeeController extends Controller
                 'id' => $item->id,
                 'item_style' => $item->item_style,
                 'price_per_kg' => $item->price_per_kg,
+                'price_per_kg_dubai' => $item->price_per_kg_dubai,
                 'currency' => $fee->currency ?? 'USD',
                 'unit' => $fee->getUnitForTransport($transportType),
                 'estimation_days' => $item->estimation_days,
@@ -110,6 +111,7 @@ class ShippingFeeController extends Controller
             'id' => $item->id,
             'item_style' => $item->item_style,
             'price_per_kg' => $item->price_per_kg,
+            'price_per_kg_dubai' => $item->price_per_kg_dubai,
             'estimation_days' => $item->estimation_days,
             'estimation_unit' => $item->estimation_unit ?? 'days',
         ]);
@@ -118,6 +120,7 @@ class ShippingFeeController extends Controller
             'id' => $item->id,
             'item_style' => $item->item_style,
             'price_per_kg' => $item->price_per_kg,
+            'price_per_kg_dubai' => $item->price_per_kg_dubai,
             'estimation_days' => $item->estimation_days,
             'estimation_unit' => $item->estimation_unit ?? 'days',
         ]);

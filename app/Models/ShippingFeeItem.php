@@ -15,6 +15,7 @@ class ShippingFeeItem extends Model
         'transport_type',
         'item_style',
         'price_per_kg',
+        'price_per_kg_dubai',
         'estimation_days',
         'estimation_unit',
     ];
