@@ -529,8 +529,8 @@
                     </div>
                 </div>
 
-                <!-- Verification Popup -->
-                <x-verification-popup :auto-show="true" />
+                <!-- Product Warning Popup -->
+                <x-product-warning-popup :auto-show="true" />
 
 
             <!-- Shipping Fee Confirmation Modal -->
