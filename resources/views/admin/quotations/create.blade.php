@@ -379,7 +379,7 @@
                                                                             </div>
                                                                         </div>
                                                                         <button type="button" @click.stop="removePreview(idx)"
-                                                                            class="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                                                            class="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center opacity-70 hover:opacity-100 transition-all">
                                                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                                                                         </button>
                                                                     </div>
@@ -478,7 +478,7 @@
                                                                 </div>
                                                             </div>
                                                             <button type="button" @click.stop="removePreview(idx)"
-                                                                class="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                                                class="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center opacity-70 hover:opacity-100 transition-all">
                                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                                                             </button>
                                                         </div>
