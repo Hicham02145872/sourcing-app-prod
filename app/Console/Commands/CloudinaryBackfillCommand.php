@@ -77,14 +77,18 @@ class CloudinaryBackfillCommand extends Command
             return null;
         }
 
-        $contents = $disk->get($path);
-
         try {
-            Storage::disk('cloudinary')->put($path, $contents);
             $info = pathinfo($path);
-            $dirname = str_replace('\\', '/', $info['dirname']);
+            $dirname = str_replace('\\', '/', $info['dirname'] ?? '');
             $dirname = $dirname === '.' ? '' : $dirname;
-            return $dirname ? $dirname.'/'.$info['filename'] : $info['filename'];
+            $publicId = $dirname ? $dirname.'/'.$info['filename'] : $info['filename'];
+
+            cloudinary()->uploadApi()->upload(
+                $disk->path($path),
+                ['public_id' => $publicId, 'overwrite' => true]
+            );
+
+            return $publicId;
         } catch (\Exception $e) {
             $this->error("  Upload failed for {$path}: {$e->getMessage()}");
             Log::warning('Cloudinary backfill upload failed', [

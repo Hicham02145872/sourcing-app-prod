@@ -33,7 +33,7 @@ class ImageProcessingService
 
             $publicId = null;
             if ($this->cloudinaryConfigured()) {
-                $publicId = $this->uploadToCloudinary($path, (string) $encoded);
+                $publicId = $this->uploadToCloudinary($path, $disk);
             }
 
             return new ImageResult(path: $path, publicId: $publicId);
@@ -48,14 +48,19 @@ class ImageProcessingService
         return ! empty(config('filesystems.disks.cloudinary.url'));
     }
 
-    private function uploadToCloudinary(string $path, string $contents): ?string
+    private function uploadToCloudinary(string $path, string $disk): ?string
     {
         try {
-            Storage::disk('cloudinary')->put($path, $contents);
             $info = pathinfo($path);
-            $dirname = str_replace('\\', '/', $info['dirname']);
+            $dirname = str_replace('\\', '/', $info['dirname'] ?? '');
             $dirname = $dirname === '.' ? '' : $dirname;
             $publicId = $dirname ? $dirname.'/'.$info['filename'] : $info['filename'];
+
+            cloudinary()->uploadApi()->upload(
+                Storage::disk($disk)->path($path),
+                ['public_id' => $publicId, 'overwrite' => true]
+            );
+
             return $publicId;
         } catch (\Exception $e) {
             Log::warning('Cloudinary upload failed, falling back to local disk', [
