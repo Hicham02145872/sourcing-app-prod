@@ -47,6 +47,7 @@ class RefundRequest extends Model
         'admin_notes',
         'evidence_paths',
         'refund_proof_path',
+        'cloudinary_public_id',
     ];
 
     protected $casts = [

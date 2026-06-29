@@ -463,6 +463,14 @@
                                     </label>
                                 </div>
 
+                                <!-- Delivery Content (Properties, Defects, Notices) -->
+                                <div x-show="selectedRoute === 'china'">
+                                    <x-delivery-content delivery-type="direct" />
+                                </div>
+                                <div x-show="selectedRoute === 'dubai'">
+                                    <x-delivery-content delivery-type="indirect" />
+                                </div>
+
                                 <!-- Buttons -->
                                 <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
                                     <button type="button" @click="cancelRoutingPopup"

@@ -163,6 +163,12 @@
                                                         <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $shippingCo?->name ?: __('Not assigned') }}</p>
                                                     </div>
                                                 </div>
+                                                @if($dest->label_address || $dest->address)
+                                                    <div class="mt-3 p-3 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600">
+                                                        <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{{ __('Delivery Address') }}</p>
+                                                        <p class="text-sm text-slate-900 dark:text-white">{{ $dest->label_address ?: $dest->address }}</p>
+                                                    </div>
+                                                @endif
                                                 @if($canTrackDest)
                                                     <div class="mt-4">
                                                         <a href="{{ route('client.tracking.index', ['number' => $destFsbNumber]) }}" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto min-h-[44px] px-5 py-3 bg-[#EF7722] hover:bg-[#d66616] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2">
@@ -192,6 +198,13 @@
                                             <p class="text-base font-bold text-slate-900 dark:text-white">{{ $sourcingOrder->shippingCompany?->name ?: ($sourcingOrder->tracking_carrier ?? __('Not assigned')) }}</p>
                                         </div>
                                     </div>
+                                    @php $singleDest = $sourcingOrder->quotation->sourcingRequest->destinations->first(); @endphp
+                                    @if($singleDest && ($singleDest->label_address || $singleDest->address))
+                                        <div class="mt-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
+                                            <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{{ __('Delivery Address') }}</p>
+                                            <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $singleDest->label_address ?: $singleDest->address }}</p>
+                                        </div>
+                                    @endif
                                     @if(($sourcingOrder->status === 'paid' || $sourcingOrder->fsb_tracking_created_at) && !$sourcingOrder->hasRealTracking())
                                         <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">{{ __('Your shipment is being prepared. Live carrier tracking will appear here once assigned.') }}</p>
                                     @endif

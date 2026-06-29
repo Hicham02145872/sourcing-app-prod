@@ -174,7 +174,7 @@
                                             <input wire:model="itemsData.{{ $type }}.{{ $index }}.item_style" 
                                                    type="text" 
                                                    @disabled($isDeleted)
-                                                   class="w-full text-sm font-bold bg-transparent border-none focus:ring-0 p-0 transition-colors {{ $isDeleted ? 'text-slate-400 line-through' : 'text-slate-700 group-hover:text-slate-900' }}" 
+                                                   class="w-full text-sm font-bold text-slate-800 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-300 focus:border-slate-300 outline-none transition-all {{ $isDeleted ? 'text-slate-400 line-through bg-slate-50' : '' }}" 
                                                    placeholder="{{ __('Describe style...') }}">
                                         </div>
                                     </td>
@@ -185,9 +185,21 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 bg-orange-50/20">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <span class="text-xs font-bold text-slate-400">{{ $currency }}</span>
-                                            <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg_dubai" @disabled($isDeleted) type="number" step="0.01" class="w-32 text-center text-sm font-bold text-orange-700 bg-white border border-orange-100 rounded-lg py-2 focus:ring-2 focus:ring-orange-300 focus:border-orange-300 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through" placeholder="-">
+                                        <div class="flex flex-col items-center justify-center gap-1.5">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="text-[10px] font-bold text-orange-500 uppercase">{{ __('China') }}→{{ __('Dubai') }}</span>
+                                            </div>
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="text-xs font-bold text-slate-400">{{ $currency }}</span>
+                                                <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg_china_to_dubai" @disabled($isDeleted) type="number" step="0.01" class="w-28 text-center text-sm font-bold text-orange-700 bg-white border border-orange-100 rounded-lg py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-300 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through" placeholder="-">
+                                            </div>
+                                            <div class="flex items-center justify-center gap-2 mt-1">
+                                                <span class="text-[10px] font-bold text-orange-500 uppercase">{{ __('Dubai') }}→{{ __('Africa') }}</span>
+                                            </div>
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="text-xs font-bold text-slate-400">{{ $currency }}</span>
+                                                <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg_dubai_to_africa" @disabled($isDeleted) type="number" step="0.01" class="w-28 text-center text-sm font-bold text-orange-700 bg-white border border-orange-100 rounded-lg py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-300 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through" placeholder="-">
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">

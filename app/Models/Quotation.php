@@ -67,6 +67,7 @@ class Quotation extends Model
         'real_product_image',
         'supplier_url',
         'quality_options',
+        'cloudinary_public_id',
     ];
 
     protected $casts = [

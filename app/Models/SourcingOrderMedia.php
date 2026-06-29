@@ -25,6 +25,7 @@ class SourcingOrderMedia extends Model
         'file_path',
         'file_type',
         'file_name',
+        'cloudinary_public_id',
     ];
 
     public function sourcingOrder()

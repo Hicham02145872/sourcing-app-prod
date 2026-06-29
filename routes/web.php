@@ -136,6 +136,10 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
     Route::put('quotations/{quotation}/approve', [App\Http\Controllers\Admin\QuotationController::class, 'approve'])->name('quotations.approve');
     Route::put('quotations/{quotation}/reject', [App\Http\Controllers\Admin\QuotationController::class, 'reject'])->name('quotations.reject');
 
+    // Quotation Media Management
+    Route::delete('quotation-media/{medium}', [App\Http\Controllers\Admin\QuotationMediaController::class, 'destroy'])->name('quotation-media.destroy');
+    Route::delete('quotations/{quotation}/featured-photo', [App\Http\Controllers\Admin\QuotationMediaController::class, 'destroyFeatured'])->name('quotations.featured-photo.destroy');
+
     Route::get('/social-media-links', [SocialMediaLinkController::class, 'edit'])->name('social-media-links.edit');
     Route::put('/social-media-links', [SocialMediaLinkController::class, 'update'])->name('social-media-links.update');
 
@@ -190,6 +194,9 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
 
         // Shipping Companies Management (Super Admin Only)
         Route::get('/shipping-companies', [App\Http\Controllers\Admin\ShippingCompanyController::class, 'index'])->name('shipping-companies.index');
+
+        // Delivery Content Management (Super Admin Only)
+        Route::get('/delivery-content', \App\Livewire\Admin\DeliveryContentManager::class)->name('delivery-content.index');
 
         // Tracking Logs (toujours visible)
         Route::get('/tracking-logs', [App\Http\Controllers\Admin\TrackingLogController::class, 'index'])->name('tracking-logs.index');

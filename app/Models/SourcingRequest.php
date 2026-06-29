@@ -70,6 +70,7 @@ class SourcingRequest extends Model
         'assigned_to_admin_id',
         'assigned_at',
         'status_timestamps',
+        'cloudinary_public_id',
     ];
 
     protected $casts = [

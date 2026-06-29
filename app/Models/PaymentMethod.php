@@ -28,6 +28,7 @@ class PaymentMethod extends Model
         'logo_path',
         'details',
         'is_active',
+        'cloudinary_public_id',
     ];
 
     protected $casts = [

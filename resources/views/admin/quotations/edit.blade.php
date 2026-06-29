@@ -124,7 +124,7 @@
                         <!-- Client Profile -->
                         <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-5">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">{{ __('Client Profile') }}</h3>
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3 mb-4">
                                 <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold border border-orange-200">
                                     {{ substr($quotation->sourcingRequest->user->name, 0, 1) }}
                                 </div>
@@ -133,6 +133,24 @@
                                     <p class="text-xs text-slate-500 truncate">{{ $quotation->sourcingRequest->user->email }}</p>
                                 </div>
                             </div>
+                            @if($quotation->sourcingRequest->destinations->isNotEmpty())
+                                <div class="pt-3 border-t border-slate-100">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{{ __('Delivery Addresses') }}</p>
+                                    <div class="space-y-1.5">
+                                        @foreach($quotation->sourcingRequest->destinations as $dest)
+                                            <div class="flex items-start gap-2 p-1.5 bg-slate-50 rounded-lg">
+                                                <div class="h-5 w-5 rounded bg-slate-100 flex items-center justify-center text-slate-400 mt-0.5 shrink-0">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <p class="text-[11px] font-bold text-slate-700">{{ $dest->country->name }}</p>
+                                                    <p class="text-[10px] text-slate-500 leading-tight">{{ $dest->label_address ?: $dest->address }}</p>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -288,35 +306,45 @@
                                     </div>
                                     <div id="image-preview-container" class="{{ $quotation->real_product_image ? '' : 'hidden' }}">
                                         <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">{{ __('Preview') }}</p>
-                                        <div class="h-24 w-24 rounded-lg border-2 border-red-200 border-dashed overflow-hidden bg-white shadow-sm">
-                                            <img id="image-preview" src="{{ $quotation->real_product_image ? media_url($quotation->real_product_image) : '#' }}" alt="Preview" class="h-full w-full object-cover">
+                                        <div class="flex items-start gap-3">
+                                            <x-photo-viewer src="{{ media_url($quotation->real_product_image) }}" alt="Preview">
+                                                <div class="h-24 w-24 rounded-lg border-2 border-red-200 border-dashed overflow-hidden bg-white shadow-sm cursor-pointer hover:opacity-90 transition-opacity">
+                                                    <img id="image-preview" src="{{ $quotation->real_product_image ? media_url($quotation->real_product_image) : '#' }}" alt="Preview" class="h-full w-full object-cover">
+                                                </div>
+                                            </x-photo-viewer>
+                                            @if($quotation->real_product_image)
+                                                <button type="button"
+                                                    class="mt-1 inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                                                    onclick="if(confirm('{{ __('Delete this featured photo?') }}')) { fetch('{{ route('admin.quotations.featured-photo.destroy', $quotation) }}', { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }).then(r => { if(r.ok) location.reload(); }); }">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    {{ __('Delete') }}
+                                                </button>
+                                            @endif
                                         </div>
                                     </div>
 
                                     @if($quotation->media->isNotEmpty())
                                         <div class="mt-6 border-t border-slate-100 pt-4">
-                                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">{{ __('Existing Media (Select to delete)') }}</label>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">{{ __('Existing Media') }}</label>
                                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                                 @foreach($quotation->media as $media)
                                                     <div class="relative group aspect-square rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
                                                         @if($media->file_type === 'video')
-                                                            <video src="{{ media_url($media->file_path) }}" class="w-full h-full object-cover" muted></video>
-                                                            <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                                                            <video src="{{ media_url($media->file_path) }}" class="w-full h-full object-cover" muted controls></video>
+                                                            <div class="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
                                                                 <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                                             </div>
                                                         @else
-                                                            <img src="{{ media_url($media->file_path) }}" class="w-full h-full object-cover">
+                                                            <x-photo-viewer src="{{ $media->url }}" alt="{{ __('Real product photo') }}">
+                                                                <img src="{{ media_url($media->file_path) }}" class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity">
+                                                            </x-photo-viewer>
                                                         @endif
-                                                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                                            <a href="{{ media_url($media->file_path) }}" target="_blank" class="p-1 rounded bg-white text-slate-700 hover:text-orange-600 shadow" title="{{ __('View') }}">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                            </a>
-                                                            <label class="p-1 rounded bg-white text-red-600 hover:bg-red-50 cursor-pointer shadow flex items-center justify-center" title="{{ __('Delete') }}">
-                                                                <input type="checkbox" name="delete_media[]" value="{{ $media->id }}" class="sr-only peer" onchange="this.parentElement.classList.toggle('bg-red-500', this.checked); this.parentElement.classList.toggle('text-white', this.checked)">
-                                                                <svg class="w-4 h-4 peer-checked:hidden text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                                <svg class="w-4 h-4 hidden peer-checked:block text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                                            </label>
-                                                        </div>
+                                                        <button type="button"
+                                                            class="absolute top-1 right-1 z-10 p-1 rounded bg-white/90 hover:bg-red-500 hover:text-white text-red-500 shadow transition-all opacity-0 group-hover:opacity-100"
+                                                            title="{{ __('Delete') }}"
+                                                            onclick="if(confirm('{{ __('Delete this media?') }}')) { fetch('{{ route('admin.quotation-media.destroy', $media) }}', { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }).then(r => { if(r.ok) this.closest('.aspect-square').remove(); }); }">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                        </button>
                                                     </div>
                                                 @endforeach
                                             </div>

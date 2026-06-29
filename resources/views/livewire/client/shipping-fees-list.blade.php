@@ -224,15 +224,39 @@
                                                 @foreach($cells as $item)
                                                     <div class="{{ $cells->count() > 1 ? 'mb-2 last:mb-0' : '' }}" wire:key="sf-price-{{ $item->id }}">
                                                         <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">
-                                                            @php
-                                                                $displayPrice = $currentType === 'train'
-                                                                    ? ($item->price_per_kg_dubai ?? $item->price_per_kg)
-                                                                    : $item->price_per_kg;
-                                                            @endphp
-                                                            @if($displayPrice !== null && $displayPrice !== '')
-                                                                {{ number_format((float) $displayPrice, 2) }}
+                                                            @if($currentType === 'train')
+                                                                @php
+                                                                    $chinaToDubai = $item->price_per_kg_china_to_dubai ?? null;
+                                                                    $dubaiToAfrica = $item->price_per_kg_dubai_to_africa ?? null;
+                                                                @endphp
+                                                                @if($chinaToDubai !== null || $dubaiToAfrica !== null)
+                                                                    <div class="flex flex-col items-center gap-0.5">
+                                                                        <div class="text-[10px] font-semibold text-orange-600 uppercase">{{ __('China') }}→{{ __('Dubai') }}
+                                                                            <span class="text-slate-900">{{ number_format((float) $chinaToDubai, 2) }}</span>
+                                                                        </div>
+                                                                        <div class="text-[10px] font-semibold text-orange-600 uppercase">{{ __('Dubai') }}→{{ __('Africa') }}
+                                                                            <span class="text-slate-900">{{ number_format((float) $dubaiToAfrica, 2) }}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                @else
+                                                                    @php
+                                                                        $displayPrice = $item->price_per_kg_dubai ?? $item->price_per_kg;
+                                                                    @endphp
+                                                                    @if($displayPrice !== null && $displayPrice !== '')
+                                                                        {{ number_format((float) $displayPrice, 2) }}
+                                                                    @else
+                                                                        —
+                                                                    @endif
+                                                                @endif
                                                             @else
-                                                                —
+                                                                @php
+                                                                    $displayPrice = $item->price_per_kg;
+                                                                @endphp
+                                                                @if($displayPrice !== null && $displayPrice !== '')
+                                                                    {{ number_format((float) $displayPrice, 2) }}
+                                                                @else
+                                                                    —
+                                                                @endif
                                                             @endif
                                                         </span>
                                                         <span class="ml-1 text-[10px] font-bold text-slate-400">{{ $selectedCountry->shippingFee->currency ?? 'USD' }}</span>

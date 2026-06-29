@@ -304,6 +304,8 @@ class QuotationController extends Controller
     {
         $this->authorize('view', $quotation);
 
+        $quotation->load('sourcingRequest.user', 'sourcingRequest.destinations.country');
+
         return view('admin.quotations.show', compact('quotation'));
     }
 
@@ -348,8 +350,7 @@ class QuotationController extends Controller
             'real_product_image' => 'nullable|image|max:10240',
             'supplier_url' => 'nullable|url|max:2048',
             'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:10240',
-            'delete_media' => 'nullable|array',
-            'delete_media.*' => 'exists:quotation_media,id',
+
             'quality_options' => 'nullable|array',
             'quality_options.low.price' => 'nullable|numeric|min:0',
             'quality_options.medium.price' => 'nullable|numeric|min:0',
@@ -488,17 +489,6 @@ class QuotationController extends Controller
         // Notify client if sourcing location changed and is different from requested
         if ($quotation->wasChanged('actual_sourcing_location') && $quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location) {
             $sourcingRequest->user->notify(new \App\Notifications\AlternativeSourcingNotification($quotation));
-        }
-
-        // Handle media deletion
-        if ($request->has('delete_media')) {
-            foreach ($request->delete_media as $mediaId) {
-                $media = $quotation->media()->find($mediaId);
-                if ($media) {
-                    Storage::disk('public')->delete($media->file_path);
-                    $media->delete();
-                }
-            }
         }
 
         // Handle new media files (compress images, store videos as-is)

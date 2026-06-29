@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
 
@@ -30,10 +31,38 @@ class ImageProcessingService
 
             Storage::disk($disk)->put($path, (string) $encoded);
 
-            return new ImageResult(path: $path);
+            $publicId = null;
+            if ($this->cloudinaryConfigured()) {
+                $publicId = $this->uploadToCloudinary($path, (string) $encoded);
+            }
+
+            return new ImageResult(path: $path, publicId: $publicId);
         } catch (\Exception $e) {
             $path = $file->store($directory, $disk);
             return new ImageResult(path: $path);
+        }
+    }
+
+    private function cloudinaryConfigured(): bool
+    {
+        return ! empty(config('filesystems.disks.cloudinary.url'));
+    }
+
+    private function uploadToCloudinary(string $path, string $contents): ?string
+    {
+        try {
+            Storage::disk('cloudinary')->put($path, $contents);
+            $info = pathinfo($path);
+            $dirname = str_replace('\\', '/', $info['dirname']);
+            $dirname = $dirname === '.' ? '' : $dirname;
+            $publicId = $dirname ? $dirname.'/'.$info['filename'] : $info['filename'];
+            return $publicId;
+        } catch (\Exception $e) {
+            Log::warning('Cloudinary upload failed, falling back to local disk', [
+                'path' => $path,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
         }
     }
 }

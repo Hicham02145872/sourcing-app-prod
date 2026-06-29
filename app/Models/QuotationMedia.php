@@ -26,6 +26,7 @@ class QuotationMedia extends Model
         'file_path',
         'file_type',
         'sort_order',
+        'cloudinary_public_id',
     ];
 
     protected $casts = [

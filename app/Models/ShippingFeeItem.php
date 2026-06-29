@@ -16,6 +16,8 @@ class ShippingFeeItem extends Model
         'item_style',
         'price_per_kg',
         'price_per_kg_dubai',
+        'price_per_kg_china_to_dubai',
+        'price_per_kg_dubai_to_africa',
         'estimation_days',
         'estimation_unit',
     ];

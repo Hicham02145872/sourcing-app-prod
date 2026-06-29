@@ -553,7 +553,7 @@ class SourcingOrderController extends Controller
 
         $request->validate([
             'files.*' => 'required|file|mimes:jpeg,png,jpg,gif,webp,mp4,mov,avi,wmv,mkv,webm|max:102400', // 100MB max
-            'files' => 'required|array|min:1|max:10', // Max 10 files at once
+            'files' => 'required|array|min:1', // Unlimited files
         ], $messages);
 
         if ($request->hasFile('files')) {
@@ -563,14 +563,14 @@ class SourcingOrderController extends Controller
                 $type = str_starts_with($mimeType, 'video') ? 'video' : 'image';
 
                 // Store file (compressed if image)
-                $path = $this->imageService->compressAndStore(
+                $result = $this->imageService->compressAndStore(
                     $file,
                     'sourcing-order-media'
                 );
 
                 // Create DB record
                 $sourcingOrder->media()->create([
-                    'file_path' => $path,
+                    'file_path' => $result->path,
                     'file_name' => $file->getClientOriginalName(),
                     'file_type' => $type,
                 ]);

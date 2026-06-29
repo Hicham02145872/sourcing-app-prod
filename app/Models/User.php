@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'can_delete_clients',
         'profile_photo_path',
         'admin_mail_notification_keys',
+        'cloudinary_public_id',
     ];
 
     protected $hidden = [

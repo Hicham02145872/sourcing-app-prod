@@ -34,6 +34,8 @@ class ShippingFeeController extends Controller
                 'item_style' => $item->item_style,
                 'price_per_kg' => $item->price_per_kg,
                 'price_per_kg_dubai' => $item->price_per_kg_dubai,
+                'price_per_kg_china_to_dubai' => $item->price_per_kg_china_to_dubai,
+                'price_per_kg_dubai_to_africa' => $item->price_per_kg_dubai_to_africa,
                 'currency' => $fee->currency ?? 'USD',
                 'unit' => $fee->getUnitForTransport($transportType),
                 'estimation_days' => $item->estimation_days,
@@ -112,6 +114,8 @@ class ShippingFeeController extends Controller
             'item_style' => $item->item_style,
             'price_per_kg' => $item->price_per_kg,
             'price_per_kg_dubai' => $item->price_per_kg_dubai,
+            'price_per_kg_china_to_dubai' => $item->price_per_kg_china_to_dubai,
+            'price_per_kg_dubai_to_africa' => $item->price_per_kg_dubai_to_africa,
             'estimation_days' => $item->estimation_days,
             'estimation_unit' => $item->estimation_unit ?? 'days',
         ]);
@@ -121,6 +125,8 @@ class ShippingFeeController extends Controller
             'item_style' => $item->item_style,
             'price_per_kg' => $item->price_per_kg,
             'price_per_kg_dubai' => $item->price_per_kg_dubai,
+            'price_per_kg_china_to_dubai' => $item->price_per_kg_china_to_dubai,
+            'price_per_kg_dubai_to_africa' => $item->price_per_kg_dubai_to_africa,
             'estimation_days' => $item->estimation_days,
             'estimation_unit' => $item->estimation_unit ?? 'days',
         ]);

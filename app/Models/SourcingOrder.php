@@ -107,6 +107,7 @@ class SourcingOrder extends Model
         'label_seller_name',
         'label_product_name',
         'status_timestamps',
+        'cloudinary_public_id',
     ];
 
     /**
