@@ -313,8 +313,8 @@
                                                     </div>
                                                     <div x-data="{ 
                                                             previews: [],
+                                                            dragging: false,
                                                             handleFiles(files) {
-                                                                this.previews = [];
                                                                 for (let i = 0; i < files.length; i++) {
                                                                     const file = files[i];
                                                                     if (file.size > 10485760) {
@@ -327,28 +327,61 @@
                                                                     reader.onload = (e) => {
                                                                         this.previews.push({
                                                                             name: file.name,
-                                                                            src: e.target.result
+                                                                            src: e.target.result,
+                                                                            file: file
                                                                         });
                                                                     };
                                                                     reader.readAsDataURL(file);
                                                                 }
+                                                            },
+                                                            removePreview(idx) {
+                                                                this.previews.splice(idx, 1);
+                                                                this.syncFiles();
+                                                            },
+                                                            syncFiles() {
+                                                                const dt = new DataTransfer();
+                                                                this.previews.forEach(p => dt.items.add(p.file));
+                                                                this.$refs.fileInput.files = dt.files;
+                                                            },
+                                                            openViewer(src) {
+                                                                this.$dispatch('open-viewer', { src });
                                                             }
                                                          }" 
                                                          class="space-y-2">
                                                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{{ __('Photos') }}</label>
-                                                        <input type="file" name="quality_options_images[{{ $key }}][]" accept="image/*" multiple
-                                                            @change="handleFiles($event.target.files)"
-                                                            class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-wider file:bg-slate-900 file:text-white hover:file:bg-slate-850 bg-white border border-slate-200 p-1.5 rounded-xl transition-all cursor-pointer">
+
+                                                        <!-- Drop zone -->
+                                                        <div @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="handleFiles($event.dataTransfer.files); dragging = false"
+                                                             @click="$refs.fileInput.click()"
+                                                             :class="dragging ? 'border-orange-400 bg-orange-50' : 'border-slate-200 bg-white hover:bg-slate-50'"
+                                                             class="border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-200">
+                                                            <svg class="w-8 h-8 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                                            </svg>
+                                                            <p class="text-xs font-medium text-slate-500 mt-2" x-text="dragging ? '{{ __('Drop files here...') }}' : '{{ __('Click or drag & drop photos') }}'"></p>
+                                                            <p class="text-[10px] text-slate-400 mt-0.5">{{ __('JPEG, PNG, GIF — max 10MB each') }}</p>
+                                                        </div>
+
+                                                        <input type="file" x-ref="fileInput" name="quality_options_images[{{ $key }}][]" accept="image/*" multiple
+                                                            @change="handleFiles($event.target.files)" class="hidden">
                                                         
-                                                        <!-- Preview thumbnails -->
+                                                        <!-- Preview with delete & view -->
                                                         <template x-if="previews.length > 0">
-                                                            <div class="flex flex-wrap gap-2 pt-1">
+                                                            <div class="flex flex-wrap gap-3 pt-1">
                                                                 <template x-for="(preview, idx) in previews" :key="idx">
-                                                                    <div class="relative h-10 w-10 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-slate-50 group">
-                                                                        <img :src="preview.src" class="h-full w-full object-cover">
-                                                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                                                                            <span class="text-[6px] text-white font-bold truncate px-0.5" x-text="preview.name"></span>
+                                                                    <div class="relative group w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-slate-50 flex-shrink-0">
+                                                                        <div @click="openViewer(preview.src)" class="cursor-pointer w-full h-full">
+                                                                            <img :src="preview.src" class="w-full h-full object-cover">
+                                                                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                                                                <svg class="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                                                                                </svg>
+                                                                            </div>
                                                                         </div>
+                                                                        <button type="button" @click.stop="removePreview(idx)"
+                                                                            class="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                        </button>
                                                                     </div>
                                                                 </template>
                                                             </div>
@@ -357,6 +390,102 @@
                                                 </div>
                                             </div>
                                         @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- Subsection: Featured Photo & Media -->
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-red-50 text-red-600">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        </span>
+                                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">{{ __('Featured Photo & Media') }}</h4>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div x-data="{ preview: null, dragging: false, handleFile(files) {
+                                            const file = files[0];
+                                            if (!file) return;
+                                            if (file.size > 10485760) { window.dispatchEvent(new CustomEvent('show-error-toast', { detail: '{{ __('Le fichier dépasse 10 MB.') }}' })); return; }
+                                            const reader = new FileReader();
+                                            reader.onload = (e) => { this.preview = e.target.result; };
+                                            reader.readAsDataURL(file);
+                                        }, removePreview() { this.preview = null; this.$refs.fileInput.value = ''; }, openViewer(src) { this.$dispatch('open-viewer', { src }); } }" class="space-y-2">
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Featured Product Photo') }}</label>
+                                            <div @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="handleFile($event.dataTransfer.files); dragging = false"
+                                                 @click="$refs.fileInput.click()"
+                                                 :class="dragging ? 'border-orange-400 bg-orange-50' : 'border-slate-200 bg-white hover:bg-slate-50'"
+                                                 class="border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all duration-200">
+                                                <template x-if="!preview">
+                                                    <div>
+                                                        <svg class="w-10 h-10 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                        </svg>
+                                                        <p class="text-xs font-medium text-slate-500 mt-2" x-text="dragging ? '{{ __('Drop here...') }}' : '{{ __('Click or drag & drop') }}'"></p>
+                                                        <p class="text-[10px] text-slate-400 mt-0.5">{{ __('JPEG, PNG, GIF — max 10MB') }}</p>
+                                                    </div>
+                                                </template>
+                                                <template x-if="preview">
+                                                    <div class="relative inline-block">
+                                                        <img :src="preview" class="max-h-40 rounded-lg shadow-sm object-contain mx-auto">
+                                                        <div class="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors rounded-lg flex items-center justify-center">
+                                                            <button type="button" @click.stop="openViewer(preview)" class="text-white opacity-0 hover:opacity-100 transition-opacity"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg></button>
+                                                        </div>
+                                                        <button type="button" @click.stop="removePreview"
+                                                            class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center transition-all">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <input type="file" x-ref="fileInput" name="real_product_image" accept="image/*" @change="handleFile($event.target.files)" class="hidden">
+                                        </div>
+
+                                        <div x-data="{ previews: [], dragging: false, handleFiles(files) {
+                                            for (let i = 0; i < files.length; i++) {
+                                                const file = files[i];
+                                                if (file.size > 10485760) { window.dispatchEvent(new CustomEvent('show-error-toast', { detail: `'${file.name}' {{ __('dépasse 10 MB.') }}` })); continue; }
+                                                const reader = new FileReader();
+                                                reader.onload = (e) => { this.previews.push({ name: file.name, src: e.target.result, file }); };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }, removePreview(idx) {
+                                            this.previews.splice(idx, 1);
+                                            const dt = new DataTransfer();
+                                            this.previews.forEach(p => dt.items.add(p.file));
+                                            this.$refs.fileInput.files = dt.files;
+                                        }, openViewer(src) { this.$dispatch('open-viewer', { src }); } }" class="space-y-2">
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Additional Media') }} <span class="text-slate-400 font-normal lowercase">({{ __('images & videos') }})</span></label>
+                                            <div @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="handleFiles($event.dataTransfer.files); dragging = false"
+                                                 @click="$refs.fileInput.click()"
+                                                 :class="dragging ? 'border-orange-400 bg-orange-50' : 'border-slate-200 bg-white hover:bg-slate-50'"
+                                                 class="border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-200">
+                                                <svg class="w-8 h-8 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                                </svg>
+                                                <p class="text-xs font-medium text-slate-500 mt-2" x-text="dragging ? '{{ __('Drop files here...') }}' : '{{ __('Click or drag & drop') }}'"></p>
+                                                <p class="text-[10px] text-slate-400 mt-0.5">{{ __('Images & videos — max 10MB each') }}</p>
+                                            </div>
+                                            <input type="file" x-ref="fileInput" name="media_files[]" accept="image/*,video/*" multiple @change="handleFiles($event.target.files)" class="hidden">
+                                            <template x-if="previews.length > 0">
+                                                <div class="flex flex-wrap gap-3 pt-1">
+                                                    <template x-for="(preview, idx) in previews" :key="idx">
+                                                        <div class="relative group w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-slate-50 flex-shrink-0">
+                                                            <div @click="openViewer(preview.src)" class="cursor-pointer w-full h-full">
+                                                                <img :src="preview.src" class="w-full h-full object-cover">
+                                                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                                                    <svg class="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                                                                </div>
+                                                            </div>
+                                                            <button type="button" @click.stop="removePreview(idx)"
+                                                                class="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -574,6 +703,25 @@
         </div>
     </div>
 
+    {{-- Global photo viewer modal --}}
+    <div x-data="{ viewerOpen: false, viewerSrc: '' }"
+         @open-viewer.window="viewerSrc = $event.detail.src; viewerOpen = true"
+         @keydown.window.escape="viewerOpen = false">
+        <template x-teleport="body">
+            <div x-show="viewerOpen" x-cloak
+                 class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4"
+                 @click="viewerOpen = false">
+                <div class="relative max-w-[90vw] max-h-[90vh]" @click.stop>
+                    <button type="button" @click="viewerOpen = false"
+                        class="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center text-slate-700 hover:text-slate-900 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                    <img :src="viewerSrc" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl object-contain">
+                </div>
+            </div>
+        </template>
+    </div>
+
     @push('scripts')
     <script>
         // Currency signs map
@@ -734,17 +882,21 @@
             if (quotationForm) {
                 quotationForm.addEventListener('submit', function(e) {
                     const maxFileSize = 10485760; // 10MB
-                    const qualityKeys = ['low', 'medium', 'good'];
-                    for (const key of qualityKeys) {
-                        const fileInput = document.querySelector(`input[name="quality_options_images[${key}][]"]`);
-                        if (fileInput && fileInput.files.length) {
-                            for (let i = 0; i < fileInput.files.length; i++) {
-                                const file = fileInput.files[i];
+                    const fileInputs = [
+                        { selector: 'input[name="real_product_image"]', label: '{{ __('Featured Photo') }}' },
+                        ...['low', 'medium', 'good'].map(k => ({ selector: `input[name="quality_options_images[${k}][]"]`, label: `{{ __('Qualité') }} ${k}` })),
+                        { selector: 'input[name="media_files[]"]', label: '{{ __('Media') }}' },
+                    ];
+                    for (const { selector, label } of fileInputs) {
+                        const input = document.querySelector(selector);
+                        if (input && input.files.length) {
+                            for (let i = 0; i < input.files.length; i++) {
+                                const file = input.files[i];
                                 if (file.size > maxFileSize) {
                                     e.preventDefault();
                                     const fileSizeMB = (file.size / 1048576).toFixed(2);
                                     window.dispatchEvent(new CustomEvent('show-error-toast', { 
-                                        detail: `{{ __('Le fichier') }} "${file.name}" ({{ __('Qualité') }} ${key}) {{ __('dépasse 10 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir des fichiers plus petits.') }}` 
+                                        detail: `"${file.name}" (${label}) {{ __('dépasse 10 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir des fichiers plus petits.') }}`
                                     }));
                                     return false;
                                 }
