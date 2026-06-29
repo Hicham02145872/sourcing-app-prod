@@ -174,7 +174,7 @@
                                             <input wire:model="itemsData.{{ $type }}.{{ $index }}.item_style" 
                                                    type="text" 
                                                    @disabled($isDeleted)
-                                                   class="w-full text-sm font-bold text-slate-800 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-300 focus:border-slate-300 outline-none transition-all {{ $isDeleted ? 'text-slate-400 line-through bg-slate-50' : '' }}" 
+                                                   class="flex-1 min-w-0 text-sm font-bold text-slate-800 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-300 focus:border-slate-300 outline-none transition-all {{ $isDeleted ? 'text-slate-400 line-through bg-slate-50' : '' }}" 
                                                    placeholder="{{ __('Describe style...') }}">
                                         </div>
                                     </td>

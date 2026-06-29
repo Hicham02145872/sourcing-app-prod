@@ -190,7 +190,7 @@
                                     <tr class="border-b border-slate-100 dark:border-slate-700">
                                         <th scope="col" class="sticky left-0 z-20 w-10 bg-white dark:bg-slate-800 px-2 py-3 sm:px-3 border-r border-slate-100 dark:border-slate-700"></th>
                                         @foreach($sortedColumnKeys as $styleKey)
-                                            <th scope="col" class="min-w-[10rem] max-w-[16rem] px-3 py-3 text-center align-bottom text-xs font-bold leading-snug text-slate-900 dark:text-white">
+                                            <th scope="col" class="min-w-[14rem] max-w-[22rem] px-3 py-3 text-center align-bottom text-xs font-bold leading-snug text-slate-900 dark:text-white">
                                                 {{ trim($styleKey) !== '' ? $styleKey : '—' }}
                                             </th>
                                         @endforeach
