@@ -45,127 +45,144 @@
                 @method('PUT')
                 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <!-- Left Column: Sourcing Request Details -->
+                    <!-- Left Column: Sourcing Request Details (cols: 5) -->
+                    @php $sourcingRequest = $quotation->sourcingRequest; @endphp
                     <div class="lg:col-span-5 space-y-6">
-                        <!-- Product Specs -->
+                        
+                        <!-- Product Specs Card -->
                         <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                                <h3 class="text-sm font-semibold text-slate-900">{{ __('Product Specifications') }}</h3>
+                            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">{{ __('Product Specifications') }}</h3>
+                                <span class="h-2 w-2 rounded-full bg-orange-500"></span>
                             </div>
-                            <div class="p-6 space-y-4 text-sm">
+                            <div class="p-6 space-y-5 text-sm">
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">{{ __('Product Name') }}</label>
-                                    <div class="font-semibold text-slate-800">{{ $quotation->sourcingRequest->product_name }}</div>
+                                    <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">{{ __('Product Name') }}</label>
+                                    <div class="text-base font-bold text-slate-800 leading-snug">{{ $sourcingRequest->product_name }}</div>
                                 </div>
-                                @if($quotation->sourcingRequest->product_url)
+                                
+                                @if($sourcingRequest->product_url)
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">{{ __('Reference Link') }}</label>
-                                    <a href="{{ $quotation->sourcingRequest->product_url }}" target="_blank" class="text-blue-600 hover:underline truncate block">
-                                        {{ $quotation->sourcingRequest->product_url }}
+                                    <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">{{ __('Reference Link') }}</label>
+                                    <a href="{{ $sourcingRequest->product_url }}" target="_blank" 
+                                       class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100/80 text-blue-600 hover:text-blue-700 font-medium rounded-lg text-xs transition-all border border-blue-100 max-w-full overflow-hidden truncate">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                        <span class="truncate block">{{ $sourcingRequest->product_url }}</span>
                                     </a>
                                 </div>
                                 @endif
-                                <div class="grid grid-cols-2 gap-4">
+                                
+                                <div class="grid grid-cols-2 gap-6 pt-2 border-t border-slate-100">
                                     <div>
-                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">{{ __('Category') }}</label>
-                                        <div>{{ $quotation->sourcingRequest->category?->name ?? __('Unclassified') }}</div>
+                                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">{{ __('Category') }}</label>
+                                        <div class="font-semibold text-slate-700 bg-slate-100/60 px-2.5 py-1 rounded-md inline-block text-xs">{{ $sourcingRequest->category?->name ?? __('Unclassified') }}</div>
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">{{ __('Requested Location') }}</label>
-                                        <div class="capitalize">{{ $quotation->sourcingRequest->sourcing_location }}</div>
+                                        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">{{ __('Requested Location') }}</label>
+                                        <div class="font-semibold text-slate-700 capitalize flex items-center gap-1.5 text-xs">
+                                            <span class="inline-block w-2 h-2 rounded-full bg-slate-400"></span>
+                                            {{ $sourcingRequest->sourcing_location }}
+                                        </div>
                                     </div>
                                 </div>
-                                @if($quotation->sourcingRequest->note)
-                                <div>
-                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">{{ __('Client Notes') }}</label>
-                                    <div class="p-2.5 bg-slate-50 rounded border border-slate-150 text-slate-700 italic">
-                                        {{ $quotation->sourcingRequest->note }}
+                                
+                                @if($sourcingRequest->note)
+                                <div class="pt-2 border-t border-slate-100">
+                                    <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">{{ __('Client Notes') }}</label>
+                                    <div class="p-4 bg-orange-50/30 rounded-xl border border-orange-100/60 text-slate-700 italic relative leading-relaxed text-xs">
+                                        <span class="absolute right-3 bottom-1.5 text-orange-200 select-none text-2xl font-serif leading-none">”</span>
+                                        {{ $sourcingRequest->note }}
                                     </div>
                                 </div>
                                 @endif
                             </div>
                         </div>
 
-                        <!-- Product Image -->
-                        <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-4">
-                            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('Requested Product Image') }}</label>
-                            @if($quotation->sourcingRequest->product_image)
-                                <img src="{{ media_url($quotation->sourcingRequest->product_image) }}" class="w-full h-auto rounded border border-slate-200 object-cover max-h-64">
-                            @else
-                                <div class="h-32 bg-slate-50 border border-dashed border-slate-200 rounded flex items-center justify-center text-slate-400">
-                                    {{ __('No image uploaded') }}
-                                </div>
-                            @endif
-                        </div>
-
-                        <!-- Destinations -->
-                        <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                                <h3 class="text-sm font-semibold text-slate-900">{{ __('Destinations & Quantities') }}</h3>
-                            </div>
-                            <table class="min-w-full divide-y divide-slate-100">
-                                <thead class="bg-slate-50">
-                                    <tr>
-                                        <th class="px-6 py-2 text-left text-[10px] font-bold text-slate-500 uppercase">{{ __('Country') }}</th>
-                                        <th class="px-6 py-2 text-left text-[10px] font-bold text-slate-500 uppercase">{{ __('Service') }}</th>
-                                        <th class="px-6 py-2 text-right text-[10px] font-bold text-slate-500 uppercase">{{ __('Qty') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100 bg-white">
-                                    @foreach($quotation->sourcingRequest->destinations as $dest)
-                                    <tr>
-                                        <td class="px-6 py-2 text-sm text-slate-800">
-                                            <span class="fi fi-{{ strtolower($dest->country->code) }} mr-1"></span>
-                                            {{ $dest->country->name }}
-                                        </td>
-                                        <td class="px-6 py-2 text-sm text-slate-600">{{ $dest->service->name }}</td>
-                                        <td class="px-6 py-2 text-sm text-right font-mono text-slate-800">{{ $dest->quantity }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Client Profile -->
+                        <!-- Product Image Card -->
                         <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-5">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">{{ __('Client Profile') }}</h3>
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold border border-orange-200">
-                                    {{ substr($quotation->sourcingRequest->user->name, 0, 1) }}
-                                </div>
-                                <div class="overflow-hidden">
-                                    <h4 class="text-sm font-bold text-slate-900 truncate">{{ $quotation->sourcingRequest->user->name }}</h4>
-                                    <p class="text-xs text-slate-500 truncate">{{ $quotation->sourcingRequest->user->email }}</p>
-                                </div>
-                            </div>
-                            @if($quotation->sourcingRequest->destinations->isNotEmpty())
-                                <div class="pt-3 border-t border-slate-100">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{{ __('Delivery Addresses') }}</p>
-                                    <div class="space-y-1.5">
-                                        @foreach($quotation->sourcingRequest->destinations as $dest)
-                                            <div class="flex items-start gap-2 p-1.5 bg-slate-50 rounded-lg">
-                                                <div class="h-5 w-5 rounded bg-slate-100 flex items-center justify-center text-slate-400 mt-0.5 shrink-0">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-[11px] font-bold text-slate-700">{{ $dest->country->name }}</p>
-                                                    <p class="text-[10px] text-slate-500 leading-tight">{{ $dest->label_address ?: $dest->address }}</p>
-                                                </div>
-                                            </div>
-                                        @endforeach
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">{{ __('Requested Product Image') }}</label>
+                            @if($sourcingRequest->product_image)
+                                <div class="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-50 max-h-80 flex items-center justify-center shadow-inner">
+                                    <img src="{{ media_url($sourcingRequest->product_image) }}" 
+                                         class="w-full h-auto object-cover max-h-80 transition-transform duration-500 group-hover:scale-105">
+                                    <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <span class="px-3 py-1.5 bg-white/90 backdrop-blur text-xs font-semibold rounded-lg text-slate-700 shadow-sm">
+                                            {{ __('Zoom View') }}
+                                        </span>
                                     </div>
                                 </div>
+                            @else
+                                <div class="h-36 bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-400 gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span class="text-xs font-medium">{{ __('No image uploaded') }}</span>
+                                </div>
                             @endif
+                        </div>
+
+                        <!-- Destinations Card -->
+                        <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">{{ __('Destinations & Quantities') }}</h3>
+                                <span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-extrabold rounded-md shadow-sm">
+                                    {{ $sourcingRequest->destinations->count() }} {{ __('Routes') }}
+                                </span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-slate-100">
+                                    <thead class="bg-slate-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('Country') }}</th>
+                                            <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('Service') }}</th>
+                                            <th class="px-6 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('Qty') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 bg-white">
+                                        @foreach($sourcingRequest->destinations as $dest)
+                                        <tr class="hover:bg-slate-50/50 transition-colors">
+                                            <td class="px-6 py-3.5 text-sm text-slate-800 font-semibold">
+                                                <span class="fi fi-{{ strtolower($dest->country->code) }} w-5 h-4 inline-block align-middle rounded-sm shadow-sm mr-2 border border-slate-100"></span>
+                                                <span class="align-middle">{{ $dest->country->name }}</span>
+                                            </td>
+                                            <td class="px-6 py-3.5 text-sm text-slate-500">
+                                                <span class="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-md border border-slate-200/60">
+                                                    {{ $dest->service->name }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-3.5 text-sm text-right font-mono font-bold text-slate-800">
+                                                {{ number_format($dest->quantity) }}
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Client Profile Card -->
+                        <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-5">
+                            <h3 class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-4">{{ __('Client Profile') }}</h3>
+                            <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <div class="h-11 w-11 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 text-orange-700 flex items-center justify-center font-extrabold text-base border border-orange-200 shadow-sm">
+                                    {{ substr($sourcingRequest->user->name, 0, 1) }}
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="text-sm font-bold text-slate-900 truncate">{{ $sourcingRequest->user->name }}</h4>
+                                    <p class="text-xs text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                        {{ $sourcingRequest->user->email }}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Right Column: Sourcing Quotation Form -->
                     <div class="lg:col-span-7 space-y-6">
                         <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50">
-                                <h3 class="text-sm font-semibold text-slate-900">{{ __('Quotation Details') }}</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">{{ __('Update the financial and logistical data as requested.') }}</p>
-                    </div>
+                            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50">
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">{{ __('Quotation Details') }}</h3>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ __('Update the financial and logistical data as requested.') }}</p>
+                            </div>
 
                     <div class="p-6 space-y-8">
                         
@@ -260,78 +277,7 @@
                                                     </div>
                                                 </template>
                                             </div>
-                                            <div class="space-y-2" x-data="{
-                                                mediaPreviews: [],
-                                                handleMediaFiles(files) {
-                                                    for (let i = 0; i < files.length; i++) {
-                                                        const file = files[i];
-                                                        if (file.size > 20971520) {
-                                                            window.dispatchEvent(new CustomEvent('show-error-toast', {
-                                                                detail: `{{ __('Le fichier') }} '${file.name}' {{ __('dépasse 20 MB. Veuillez choisir des fichiers plus petits.') }}`
-                                                            }));
-                                                            continue;
-                                                        }
-                                                        const isVideo = file.type.startsWith('video/');
-                                                        if (isVideo) {
-                                                            const url = URL.createObjectURL(file);
-                                                            this.mediaPreviews.push({
-                                                                name: file.name,
-                                                                src: url,
-                                                                file: file,
-                                                                isVideo: true
-                                                            });
-                                                        } else {
-                                                            const reader = new FileReader();
-                                                            reader.onload = (e) => {
-                                                                this.mediaPreviews.push({
-                                                                    name: file.name,
-                                                                    src: e.target.result,
-                                                                    file: file,
-                                                                    isVideo: false
-                                                                });
-                                                            };
-                                                            reader.readAsDataURL(file);
-                                                        }
-                                                    }
-                                                },
-                                                removeMediaPreview(idx) {
-                                                    const preview = this.mediaPreviews[idx];
-                                                    if (preview.isVideo && preview.src.startsWith('blob:')) {
-                                                        URL.revokeObjectURL(preview.src);
-                                                    }
-                                                    this.mediaPreviews.splice(idx, 1);
-                                                    const dt = new DataTransfer();
-                                                    this.mediaPreviews.forEach(p => dt.items.add(p.file));
-                                                    this.$refs.mediaInput.files = dt.files;
-                                                }
-                                            }">
-                                                <label for="media_files" class="block text-[10px] font-bold text-slate-600 uppercase">
-                                                    {{ __('Update Additional Media') }}
-                                                </label>
-                                                <div class="relative group">
-                                                    <input type="file" x-ref="mediaInput" name="media_files[]" id="media_files" accept="image/*,video/*" multiple
-                                                        @change="handleMediaFiles($event.target.files)"
-                                                        class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition-all cursor-pointer bg-white border border-slate-200 p-2 rounded-md">
-                                                </div>
-                                                <template x-if="mediaPreviews.length > 0">
-                                                    <div class="flex flex-wrap gap-2 pt-1">
-                                                        <template x-for="(preview, idx) in mediaPreviews" :key="idx">
-                                                            <div class="relative group w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-slate-50 flex-shrink-0">
-                                                                <template x-if="preview.isVideo">
-                                                                    <video :src="preview.src" class="w-full h-full object-cover" muted></video>
-                                                                </template>
-                                                                <template x-if="!preview.isVideo">
-                                                                    <img :src="preview.src" class="w-full h-full object-cover">
-                                                                </template>
-                                                                <button type="button" @click.stop="removeMediaPreview(idx)"
-                                                                    class="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center opacity-70 hover:opacity-100 transition-all">
-                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                                </button>
-                                                            </div>
-                                                        </template>
-                                                    </div>
-                                                </template>
-                                            </div>
+
                                             <div class="space-y-2 col-span-1 md:col-span-2">
                                                 <label for="supplier_url" class="block text-[10px] font-bold text-slate-600 uppercase">
                                                     {{ __('Supplier Product Link') }} <span class="text-slate-400 font-normal">({{ __('Internal only') }})</span>
@@ -399,58 +345,26 @@
                                         </div>
                                     </div>
 
-                                    @if($quotation->media->isNotEmpty())
-                                        <div class="mt-6 border-t border-slate-100 pt-4">
-                                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">{{ __('Existing Media') }}</label>
-                                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                                @foreach($quotation->media as $media)
-                                                    <div class="relative group aspect-square rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
-                                                        @if($media->file_type === 'video')
-                                                            <video src="{{ media_url($media->file_path) }}" class="w-full h-full object-cover" muted controls></video>
-                                                            <div class="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                                                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                                            </div>
-                                                        @else
-                                                            <x-photo-viewer src="{{ $media->url }}" alt="{{ __('Real product photo') }}">
-                                                                <img src="{{ media_url($media->file_path) }}" class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity">
-                                                            </x-photo-viewer>
-                                                        @endif
-                                                        <button type="button"
-                                                            class="absolute top-1 right-1 z-10 p-1 rounded bg-white/90 hover:bg-red-500 hover:text-white text-red-500 shadow transition-all opacity-0 group-hover:opacity-100"
-                                                            title="{{ __('Delete') }}"
-                                                            onclick="if(confirm('{{ __('Delete this media?') }}')) { fetch('{{ route('admin.quotation-media.destroy', $media) }}', { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }).then(r => { if(r.ok) this.closest('.aspect-square').remove(); }); }">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                        </button>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
+
                                 </div>
                             </div>
                         </div>
 
                         @php
+                            $qualityOptionsData = is_array($quotation->quality_options) ? $quotation->quality_options : [];
                             $qualityPriceValues = [];
-                            $qOptions = is_array($quotation->quality_options) ? $quotation->quality_options : [];
+                            $qualityExistingImages = [];
                             foreach (['low', 'medium', 'good'] as $q) {
-                                $qualityPriceValues[$q] = $qOptions[$q]['price'] ?? '';
+                                $qualityPriceValues[$q] = $qualityOptionsData[$q]['price'] ?? '';
+                                $path = $qualityOptionsData[$q]['image_path'] ?? null;
+                                $paths = $qualityOptionsData[$q]['image_paths'] ?? ($path ? [$path] : []);
+                                $qualityExistingImages[$q] = $paths;
                             }
                         @endphp
                         @include('admin.quotations.partials.quality-options', [
                             'qualityPriceValues' => $qualityPriceValues,
+                            'qualityExistingImages' => $qualityExistingImages,
                         ])
-                        <div class="mb-6">
-                            @foreach(['low', 'medium', 'good'] as $key)
-                                @if(isset($quotation->quality_options[$key]['image_path']))
-                                    <div class="mt-1 flex items-center gap-2">
-                                        <span class="text-[10px] font-bold text-slate-500 uppercase">{{ __(ucfirst($key)) }}:</span>
-                                        <img src="{{ media_url($quotation->quality_options[$key]['image_path']) }}" class="w-12 h-12 object-cover rounded border border-slate-200">
-                                        <a href="{{ media_url($quotation->quality_options[$key]['image_path']) }}" target="_blank" class="text-xs text-blue-600 hover:underline">{{ __('View') }}</a>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
 
                         @include('admin.quotations.partials.financial-pricing', [
                             'showUnitPrice' => true,

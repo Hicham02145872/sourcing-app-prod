@@ -130,7 +130,7 @@ class QuotationController extends Controller
             'estimated_other_costs' => 'nullable|numeric|min:0',
             'real_product_image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
             'supplier_url' => 'nullable|url|max:2048',
-            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
+
             'quality_options' => 'nullable|array',
             'quality_options.low.price' => 'nullable|numeric|min:0',
             'quality_options.medium.price' => 'nullable|numeric|min:0',
@@ -146,8 +146,7 @@ class QuotationController extends Controller
             'supplier_url.url' => __('Veuillez entrer une URL valide pour le lien fournisseur.'),
             'real_product_image.max' => __('L\'image ou la vidéo ne doit pas dépasser 20 MB.'),
             'real_product_image.mimes' => __('Le fichier doit être une image (JPEG, PNG, GIF) ou une vidéo (MP4, MOV, AVI).'),
-            'media_files.*.max' => __('Chaque fichier ne doit pas dépasser 20 MB. Veuillez choisir des fichiers plus petits.'),
-            'media_files.*.mimes' => __('Les fichiers doivent être des images (JPEG, PNG, GIF) ou des vidéos (MP4, MOV, AVI).'),
+
         ]);
 
         // Get the sourcing request and load its destinations
@@ -269,26 +268,7 @@ class QuotationController extends Controller
             // estimated_net_profit will be calculated by QuotationObserver
         ]);
 
-        if ($request->hasFile('media_files')) {
-            $sortOrder = 0;
-            foreach ($request->file('media_files') as $file) {
-                $mime = $file->getMimeType();
-                $isVideo = str_starts_with($mime, 'video/');
-                if ($isVideo) {
-                    $path = $file->store('quotations/media', 'public');
-                } else {
-                    $result = $this->imageService->compressAndStore($file, 'quotations/media', 'public', 1200, 80);
-                    $path = $result->path;
-                }
-                $fileType = $isVideo ? 'video' : 'image';
 
-                $quotation->media()->create([
-                    'file_path' => $path,
-                    'file_type' => $fileType,
-                    'sort_order' => $sortOrder++,
-                ]);
-            }
-        }
 
         event(new \App\Events\QuotationCreated($quotation));
 
@@ -352,7 +332,7 @@ class QuotationController extends Controller
                 'estimated_other_costs' => 'nullable|numeric|min:0',
                 'real_product_image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
                 'supplier_url' => 'nullable|url|max:2048',
-                'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
+
 
                 'quality_options' => 'nullable|array',
                 'quality_options.low.price' => 'nullable|numeric|min:0',
@@ -369,8 +349,7 @@ class QuotationController extends Controller
                 'supplier_url.url' => __('Veuillez entrer une URL valide pour le lien fournisseur.'),
                 'real_product_image.max' => __('L\'image ou la vidéo ne doit pas dépasser 20 MB.'),
                 'real_product_image.mimes' => __('Le fichier doit être une image (JPEG, PNG, GIF) ou une vidéo (MP4, MOV, AVI).'),
-                'media_files.*.max' => __('Chaque fichier ne doit pas dépasser 20 MB. Veuillez choisir des fichiers plus petits.'),
-                'media_files.*.mimes' => __('Les fichiers doivent être des images (JPEG, PNG, GIF) ou des vidéos (MP4, MOV, AVI).'),
+
             ]);
 
             $sourcingRequest = $quotation->sourcingRequest;
@@ -432,19 +411,24 @@ class QuotationController extends Controller
                         $imagePath = $existingOptions[$quality]['image_path'] ?? null;
                         $imagePaths = $existingOptions[$quality]['image_paths'] ?? ($imagePath ? [$imagePath] : []);
                         
-                        if ($request->hasFile("quality_options_images.{$quality}")) {
-                            // Delete old files if new ones are uploaded
-                            if (!empty($imagePaths)) {
-                                foreach ($imagePaths as $path) {
-                                    if (Storage::disk('public')->exists($path)) {
-                                        Storage::disk('public')->delete($path);
-                                    }
-                                }
-                            } elseif ($imagePath && Storage::disk('public')->exists($imagePath)) {
-                                Storage::disk('public')->delete($imagePath);
+                        // Handle deletions
+                        if ($request->has("delete_quality_images.{$quality}")) {
+                            $deletedPaths = $request->input("delete_quality_images.{$quality}");
+                            if (!is_array($deletedPaths)) {
+                                $deletedPaths = [$deletedPaths];
                             }
-                            
-                            $newImagePaths = [];
+                            foreach ($deletedPaths as $dPath) {
+                                if (in_array($dPath, $imagePaths)) {
+                                    if (Storage::disk('public')->exists($dPath)) {
+                                        Storage::disk('public')->delete($dPath);
+                                    }
+                                    $imagePaths = array_diff($imagePaths, [$dPath]);
+                                }
+                            }
+                            $imagePaths = array_values($imagePaths); // Re-index array
+                        }
+
+                        if ($request->hasFile("quality_options_images.{$quality}")) {
                             $files = $request->file("quality_options_images.{$quality}");
                             if (!is_array($files)) {
                                 $files = [$files];
@@ -453,7 +437,7 @@ class QuotationController extends Controller
                                 if (str_starts_with($file->getMimeType(), 'video/')) {
                                     $path = $file->store('quotations/quality', 'public');
                                     if ($path) {
-                                        $newImagePaths[] = $path;
+                                        $imagePaths[] = $path;
                                     }
                                 } else {
                                     $result = $this->imageService->compressAndStore(
@@ -464,13 +448,13 @@ class QuotationController extends Controller
                                         80
                                     );
                                     if ($result->path) {
-                                        $newImagePaths[] = $result->path;
+                                        $imagePaths[] = $result->path;
                                     }
                                 }
                             }
-                            $imagePaths = $newImagePaths;
-                            $imagePath = !empty($imagePaths) ? $imagePaths[0] : null;
                         }
+                        
+                        $imagePath = !empty($imagePaths) ? $imagePaths[0] : null;
                         
                         $qualityOptionsData[$quality] = [
                             'price' => $price,
@@ -519,29 +503,7 @@ class QuotationController extends Controller
                 }
             }
 
-            // Handle new media files
-            if ($request->hasFile('media_files')) {
-                $maxSortOrder = $quotation->media()->max('sort_order') ?? -1;
-                $sortOrder = $maxSortOrder + 1;
 
-                foreach ($request->file('media_files') as $file) {
-                    $mime = $file->getMimeType();
-                    $isVideo = str_starts_with($mime, 'video/');
-                    if ($isVideo) {
-                        $path = $file->store('quotations/media', 'public');
-                    } else {
-                        $result = $this->imageService->compressAndStore($file, 'quotations/media', 'public', 1200, 80);
-                        $path = $result->path;
-                    }
-                    $fileType = $isVideo ? 'video' : 'image';
-
-                    $quotation->media()->create([
-                        'file_path' => $path,
-                        'file_type' => $fileType,
-                        'sort_order' => $sortOrder++,
-                    ]);
-                }
-            }
 
             // Transition sourcing request back to quoted if it was negotiating
             if ($sourcingRequest->status === 'negotiating') {
