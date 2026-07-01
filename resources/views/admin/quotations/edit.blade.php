@@ -2,32 +2,37 @@
     <!-- Main Container: Slate background for enterprise feel -->
     <div class="min-h-screen bg-slate-50/80 font-sans text-slate-900 pb-12">
         
-        <!-- Top Navigation / Breadcrumb Area -->
+        <!-- Top Navigation / Breadcrumb Area with soft shadow and backdrop blur -->
         <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-4 md:py-0 gap-4">
-                    <div class="flex items-center gap-2">
-                        <span class="inline-flex items-center justify-center h-8 w-8 rounded bg-orange-100 text-orange-600">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-20 py-4 md:py-0 gap-4">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/20">
                             <!-- Pen/Document Icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </span>
                         <div>
-                            <h1 class="text-lg font-bold text-slate-900 leading-tight">{{ __('Update Quotation') }}</h1>
-                            <nav class="flex text-xs text-slate-500" aria-label="Breadcrumb">
-                                <span class="hover:text-slate-700">{{ __('Dashboard') }}</span>
-                                <span class="mx-1.5">/</span>
-                                <span class="hover:text-slate-700">{{ __('Quotations') }}</span>
-                                <span class="mx-1.5">/</span>
-                                <span class="font-medium text-slate-700">{{ __('Update Quote #') }}{{ $quotation->display_id }}</span>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">{{ __('Update Quotation') }}</h1>
+                                <span class="px-2 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-600 rounded border border-slate-200 uppercase tracking-wider">
+                                    {{ __('Quote ID') }}: #{{ $quotation->display_id }}
+                                </span>
+                            </div>
+                            <nav class="flex items-center text-xs text-slate-500 mt-1" aria-label="Breadcrumb">
+                                <span class="hover:text-slate-700 transition-colors cursor-pointer">{{ __('Dashboard') }}</span>
+                                <span class="mx-2 text-slate-300">/</span>
+                                <span class="hover:text-slate-700 transition-colors cursor-pointer">{{ __('Quotations') }}</span>
+                                <span class="mx-2 text-slate-300">/</span>
+                                <span class="font-semibold text-orange-600">{{ __('Edit Quote') }}</span>
                             </nav>
                         </div>
                     </div>
                     
                     <!-- Global Actions -->
                     <div class="flex items-center gap-3">
-                        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded border border-blue-200">
-                            <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-blue-500"></span>
-                            <span class="text-xs font-semibold text-blue-600">{{ __('Editing Mode') }}</span>
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 border border-blue-100 rounded-lg text-blue-700 shadow-sm shadow-blue-500/5">
+                            <span class="inline-flex items-center justify-center w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+                            <span class="text-xs font-bold uppercase tracking-wider">{{ __('Editing Mode') }}</span>
                         </div>
                     </div>
                 </div>
@@ -198,23 +203,71 @@
                             <div class="p-4 bg-red-50/50 border border-red-100 rounded-lg">
                                 <div class="flex flex-col md:flex-row items-center gap-6">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                            <div class="space-y-2">
+                                            <div class="space-y-2" x-data="{
+                                                featuredPreview: null,
+                                                handleFeaturedFile(files) {
+                                                    if(files.length === 0) return;
+                                                    const file = files[0];
+                                                    if (file.size > 20971520) { // 20MB
+                                                        window.dispatchEvent(new CustomEvent('show-error-toast', {
+                                                            detail: `{{ __('Le fichier dépasse 20 MB.') }}`
+                                                        }));
+                                                        return;
+                                                    }
+                                                    const isVideo = file.type.startsWith('video/');
+                                                    if (isVideo) {
+                                                        const url = URL.createObjectURL(file);
+                                                        this.featuredPreview = { src: url, file: file, isVideo: true, name: file.name };
+                                                    } else {
+                                                        const reader = new FileReader();
+                                                        reader.onload = (e) => {
+                                                            this.featuredPreview = { src: e.target.result, file: file, isVideo: false, name: file.name };
+                                                        };
+                                                        reader.readAsDataURL(file);
+                                                    }
+                                                    const dt = new DataTransfer();
+                                                    dt.items.add(file);
+                                                    this.$refs.featuredInput.files = dt.files;
+                                                },
+                                                removeFeatured() {
+                                                    if (this.featuredPreview && this.featuredPreview.isVideo && this.featuredPreview.src.startsWith('blob:')) {
+                                                        URL.revokeObjectURL(this.featuredPreview.src);
+                                                    }
+                                                    this.featuredPreview = null;
+                                                    this.$refs.featuredInput.value = '';
+                                                }
+                                            }">
                                                 <label for="real_product_image" class="block text-[10px] font-bold text-red-600 uppercase">
                                                     {{ __('Featured Product Photo') }} <span class="text-red-400 font-normal">({{ __('Shows on dashboard/refunds') }})</span>
                                                 </label>
                                                 <div class="relative group">
-                                                    <input type="file" name="real_product_image" id="real_product_image" accept="image/*"
+                                                    <input type="file" x-ref="featuredInput" name="real_product_image" id="real_product_image" accept="image/*,video/*"
+                                                        @change="handleFeaturedFile($event.target.files)"
                                                         class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800 transition-all cursor-pointer bg-white border border-slate-200 p-2 rounded-md">
                                                 </div>
+                                                <template x-if="featuredPreview">
+                                                    <div class="relative mt-2 w-24 h-24 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+                                                        <template x-if="featuredPreview.isVideo">
+                                                            <video :src="featuredPreview.src" class="w-full h-full object-cover" muted></video>
+                                                        </template>
+                                                        <template x-if="!featuredPreview.isVideo">
+                                                            <img :src="featuredPreview.src" class="w-full h-full object-cover">
+                                                        </template>
+                                                        <button type="button" @click.stop="removeFeatured()"
+                                                            class="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center opacity-70 hover:opacity-100 transition-all">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                        </button>
+                                                    </div>
+                                                </template>
                                             </div>
                                             <div class="space-y-2" x-data="{
                                                 mediaPreviews: [],
                                                 handleMediaFiles(files) {
                                                     for (let i = 0; i < files.length; i++) {
                                                         const file = files[i];
-                                                        if (file.size > 10485760) {
+                                                        if (file.size > 20971520) {
                                                             window.dispatchEvent(new CustomEvent('show-error-toast', {
-                                                                detail: `{{ __('Le fichier') }} '${file.name}' {{ __('dépasse 10 MB. Veuillez choisir des fichiers plus petits.') }}`
+                                                                detail: `{{ __('Le fichier') }} '${file.name}' {{ __('dépasse 20 MB. Veuillez choisir des fichiers plus petits.') }}`
                                                             }));
                                                             continue;
                                                         }
@@ -299,7 +352,7 @@
                                             <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
-                                            {{ __('Téléchargez des photos et vidéos supplémentaires. Les médias existants peuvent être gérés ci-dessous. Taille maximale : 10 MB par fichier. Glisser-déposer supporté.') }}
+                                            {{ __('Téléchargez des photos et vidéos supplémentaires. Les médias existants peuvent être gérés ci-dessous. Taille maximale : 20 MB par fichier. Glisser-déposer supporté.') }}
                                         </p>
                                         <div id="quotation-file-size-error" class="mt-3 p-3 rounded-lg bg-red-100 border border-red-300 text-red-800 text-sm font-medium {{ $errors->has('real_product_image') || $errors->has('media_files') ? '' : 'hidden' }}" role="alert">
                                             <div class="flex items-start gap-2">
@@ -312,7 +365,7 @@
                                                     @elseif($errors->has('media_files'))
                                                         <strong>{{ __('Erreur :') }}</strong> {{ $errors->first('media_files') }}
                                                     @else
-                                                        <strong>{{ __('Erreur :') }}</strong> {{ __('Un ou plusieurs fichiers dépassent 10 MB. Veuillez choisir des fichiers plus petits.') }}
+                                                        <strong>{{ __('Erreur :') }}</strong> {{ __('Un ou plusieurs fichiers dépassent 20 MB. Veuillez choisir des fichiers plus petits.') }}
                                                     @endif
                                                 </div>
                                             </div>
@@ -321,11 +374,20 @@
                                     <div id="image-preview-container" class="{{ $quotation->real_product_image ? '' : 'hidden' }}">
                                         <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">{{ __('Preview') }}</p>
                                         <div class="flex items-start gap-3">
-                                            <x-photo-viewer src="{{ media_url($quotation->real_product_image) }}" alt="Preview">
-                                                <div class="h-24 w-24 rounded-lg border-2 border-red-200 border-dashed overflow-hidden bg-white shadow-sm cursor-pointer hover:opacity-90 transition-opacity">
-                                                    <img id="image-preview" src="{{ $quotation->real_product_image ? media_url($quotation->real_product_image) : '#' }}" alt="Preview" class="h-full w-full object-cover">
+                                            @php
+                                                $isRealVideo = $quotation->real_product_image && in_array(strtolower(pathinfo($quotation->real_product_image, PATHINFO_EXTENSION)), ['mp4', 'mov', 'avi', 'webm']);
+                                            @endphp
+                                            @if($isRealVideo)
+                                                <div class="h-24 w-24 rounded-lg border-2 border-red-200 border-dashed overflow-hidden bg-black shadow-sm flex items-center justify-center relative">
+                                                    <video src="{{ media_url($quotation->real_product_image) }}" class="w-full h-full object-cover" muted controls></video>
                                                 </div>
-                                            </x-photo-viewer>
+                                            @else
+                                                <x-photo-viewer src="{{ media_url($quotation->real_product_image) }}" alt="Preview">
+                                                    <div class="h-24 w-24 rounded-lg border-2 border-red-200 border-dashed overflow-hidden bg-white shadow-sm cursor-pointer hover:opacity-90 transition-opacity">
+                                                        <img id="image-preview" src="{{ $quotation->real_product_image ? media_url($quotation->real_product_image) : '#' }}" alt="Preview" class="h-full w-full object-cover">
+                                                    </div>
+                                                </x-photo-viewer>
+                                            @endif
                                             @if($quotation->real_product_image)
                                                 <button type="button"
                                                     class="mt-1 inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
@@ -370,8 +432,9 @@
 
                         @php
                             $qualityPriceValues = [];
+                            $qOptions = is_array($quotation->quality_options) ? $quotation->quality_options : [];
                             foreach (['low', 'medium', 'good'] as $q) {
-                                $qualityPriceValues[$q] = $quotation->quality_options[$q]['price'] ?? '';
+                                $qualityPriceValues[$q] = $qOptions[$q]['price'] ?? '';
                             }
                         @endphp
                         @include('admin.quotations.partials.quality-options', [
@@ -411,15 +474,15 @@
 
                     </div>
                     
-                    <!-- Footer Actions -->
-                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
+                    <!-- Footer Actions with elegant border and spacing -->
+                    <div class="px-6 py-5 bg-slate-50 border-t border-slate-200/80 flex items-center justify-end gap-3 rounded-b-2xl">
                         <a href="{{ route('admin.sourcing-requests.show', $quotation->sourcing_request_id) }}" 
-                           class="px-4 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-medium rounded transition-colors shadow-sm">
+                           class="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-sm">
                             {{ __('Cancel') }}
                         </a>
                         <button type="submit" 
-                            class="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors shadow-sm flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md shadow-slate-900/10 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                             {{ __('Update Quotation') }}
                         </button>
                     </div>
@@ -428,18 +491,18 @@
         </div>
     </form>
 
-            <!-- Info Box -->
-            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                         <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+            <!-- Important Information footer banner -->
+            <div class="mt-8 rounded-lg border border-blue-200 bg-blue-50/50 p-5 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 p-1 bg-blue-100 rounded-lg text-blue-600">
+                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                         </svg>
                     </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-blue-800">{{ __('Important Information') }}</h3>
-                        <div class="mt-2 text-sm text-blue-700">
-                            <ul class="list-disc pl-5 space-y-1">
+                    <div>
+                        <h3 class="text-sm font-bold text-blue-900">{{ __('Important Information') }}</h3>
+                        <div class="mt-2 text-xs text-blue-700/95 leading-relaxed">
+                            <ul class="list-disc pl-5 space-y-1.5">
                                 <li>{{ __('Updating this quotation will notify the client.') }}</li>
                                 <li>{{ __('The status will be reset to "Quoted".') }}</li>
                                 <li>{{ __('Negotiation notes will be preserved for history.') }}</li>
@@ -590,8 +653,8 @@
         const previewContainer = document.getElementById('image-preview-container');
         const previewImage = document.getElementById('image-preview');
         const fileSizeErrorEl = document.getElementById('quotation-file-size-error');
-        const maxFileSize = 10485760; // 10MB (10 * 1024 * 1024)
-        const fileSizeErrorMsg = '{{ __("Un ou plusieurs fichiers dépassent 10 MB. Veuillez choisir des fichiers plus petits.") }}';
+        const maxFileSize = 20971520; // 10MB (10 * 1024 * 1024)
+        const fileSizeErrorMsg = '{{ __("Un ou plusieurs fichiers dépassent 20 MB. Veuillez choisir des fichiers plus petits.") }}';
 
         if (mediaInput) {
             mediaInput.addEventListener('change', function() {
@@ -605,7 +668,7 @@
                                 fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                             }
                             window.dispatchEvent(new CustomEvent('show-error-toast', { 
-                                detail: `{{ __('Le fichier') }} "${files[i].name}" {{ __('est trop volumineux') }} (${fileSizeMB} MB). {{ __('Taille maximale : 10 MB.') }}` 
+                                detail: `{{ __('Le fichier') }} "${files[i].name}" {{ __('est trop volumineux') }} (${fileSizeMB} MB). {{ __('Taille maximale : 20 MB.') }}` 
                             }));
                             this.value = '';
                             if (previewContainer && !previewImage.src.includes('storage/')) {
@@ -642,7 +705,7 @@
                         fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); 
                     }
                     window.dispatchEvent(new CustomEvent('show-error-toast', { 
-                        detail: `{{ __('Le fichier image principal dépasse 10 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir un fichier plus petit.') }}` 
+                        detail: `{{ __('Le fichier image principal dépasse 20 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir un fichier plus petit.') }}` 
                     }));
                     return false;
                 }
@@ -656,7 +719,7 @@
                                 fileSizeErrorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); 
                             }
                             window.dispatchEvent(new CustomEvent('show-error-toast', { 
-                                detail: `{{ __('Le fichier') }} "${mediaInput.files[i].name}" {{ __('dépasse 10 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir un fichier plus petit.') }}` 
+                                detail: `{{ __('Le fichier') }} "${mediaInput.files[i].name}" {{ __('dépasse 20 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir un fichier plus petit.') }}` 
                             }));
                             return false;
                         }

@@ -42,24 +42,40 @@
                             handleFiles(files) {
                                 for (let i = 0; i < files.length; i++) {
                                     const file = files[i];
-                                    if (file.size > 10485760) {
+                                    if (file.size > 20971520) {
                                         window.dispatchEvent(new CustomEvent('show-error-toast', { 
-                                            detail: `{{ __('Le fichier') }} '${file.name}' {{ __('dépasse 10 MB. Veuillez choisir des fichiers plus petits.') }}`
+                                            detail: `{{ __('Le fichier') }} '${file.name}' {{ __('dépasse 20 MB. Veuillez choisir des fichiers plus petits.') }}`
                                         }));
                                         continue;
                                     }
-                                    const reader = new FileReader();
-                                    reader.onload = (e) => {
+                                    const isVideo = file.type.startsWith('video/');
+                                    if (isVideo) {
+                                        const url = URL.createObjectURL(file);
                                         this.previews.push({
                                             name: file.name,
-                                            src: e.target.result,
-                                            file: file
+                                            src: url,
+                                            file: file,
+                                            isVideo: true
                                         });
-                                    };
-                                    reader.readAsDataURL(file);
+                                    } else {
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => {
+                                            this.previews.push({
+                                                name: file.name,
+                                                src: e.target.result,
+                                                file: file,
+                                                isVideo: false
+                                            });
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
                                 }
                             },
                             removePreview(idx) {
+                                const preview = this.previews[idx];
+                                if (preview.isVideo && preview.src.startsWith('blob:')) {
+                                    URL.revokeObjectURL(preview.src);
+                                }
                                 this.previews.splice(idx, 1);
                                 this.syncFiles();
                             },
@@ -68,12 +84,14 @@
                                 this.previews.forEach(p => dt.items.add(p.file));
                                 this.$refs.fileInput.files = dt.files;
                             },
-                            openViewer(src) {
-                                this.$dispatch('open-viewer', { src });
+                            openViewer(src, isVideo = false) {
+                                if (!isVideo) {
+                                    this.$dispatch('open-viewer', { src });
+                                }
                             }
                          }" 
                          class="space-y-2">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{{ __('Photos') }}</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{{ __('Photos/Videos') }}</label>
 
                         <div @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="handleFiles($event.dataTransfer.files); dragging = false"
                              @click="$refs.fileInput.click()"
@@ -82,24 +100,31 @@
                             <svg class="w-8 h-8 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                             </svg>
-                            <p class="text-xs font-medium text-slate-500 mt-2" x-text="dragging ? '{{ __('Drop files here...') }}' : '{{ __('Click or drag & drop photos') }}'"></p>
-                            <p class="text-[10px] text-slate-400 mt-0.5">{{ __('JPEG, PNG, GIF — max 10MB each') }}</p>
+                            <p class="text-xs font-medium text-slate-500 mt-2" x-text="dragging ? '{{ __('Drop files here...') }}' : '{{ __('Click or drag & drop photos/videos') }}'"></p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">{{ __('Image or Video — max 20MB each') }}</p>
                         </div>
 
-                        <input type="file" x-ref="fileInput" name="quality_options_images[{{ $key }}][]" accept="image/*" multiple
+                        <input type="file" x-ref="fileInput" name="quality_options_images[{{ $key }}][]" accept="image/*,video/*" multiple
                             @change="handleFiles($event.target.files)" class="hidden">
                         
                         <template x-if="previews.length > 0">
                             <div class="flex flex-wrap gap-3 pt-1">
                                 <template x-for="(preview, idx) in previews" :key="idx">
                                     <div class="relative group w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-slate-50 flex-shrink-0">
-                                        <div @click="openViewer(preview.src)" class="cursor-pointer w-full h-full">
-                                            <img :src="preview.src" class="w-full h-full object-cover">
-                                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                                                <svg class="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                                                </svg>
-                                            </div>
+                                        <div @click="openViewer(preview.src, preview.isVideo)" class="w-full h-full" :class="preview.isVideo ? '' : 'cursor-pointer'">
+                                            <template x-if="preview.isVideo">
+                                                <video :src="preview.src" class="w-full h-full object-cover" muted controls></video>
+                                            </template>
+                                            <template x-if="!preview.isVideo">
+                                                <img :src="preview.src" class="w-full h-full object-cover">
+                                            </template>
+                                            <template x-if="!preview.isVideo">
+                                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                                    <svg class="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                                                    </svg>
+                                                </div>
+                                            </template>
                                         </div>
                                         <button type="button" @click.stop="removePreview(idx)"
                                             class="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center opacity-70 hover:opacity-100 transition-all">

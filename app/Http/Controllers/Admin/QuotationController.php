@@ -128,25 +128,25 @@ class QuotationController extends Controller
             'estimated_product_cost' => 'nullable|numeric|min:0',
             'estimated_shipping_cost' => 'nullable|numeric|min:0',
             'estimated_other_costs' => 'nullable|numeric|min:0',
-            'real_product_image' => 'nullable|image|max:10240',
+            'real_product_image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
             'supplier_url' => 'nullable|url|max:2048',
-            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:10240',
+            'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
             'quality_options' => 'nullable|array',
             'quality_options.low.price' => 'nullable|numeric|min:0',
             'quality_options.medium.price' => 'nullable|numeric|min:0',
             'quality_options.good.price' => 'nullable|numeric|min:0',
             'quality_options_images' => 'nullable|array',
             'quality_options_images.low' => 'nullable|array',
-            'quality_options_images.low.*' => 'nullable|image|max:10240',
+            'quality_options_images.low.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
             'quality_options_images.medium' => 'nullable|array',
-            'quality_options_images.medium.*' => 'nullable|image|max:10240',
+            'quality_options_images.medium.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
             'quality_options_images.good' => 'nullable|array',
-            'quality_options_images.good.*' => 'nullable|image|max:10240',
+            'quality_options_images.good.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
         ], [
             'supplier_url.url' => __('Veuillez entrer une URL valide pour le lien fournisseur.'),
-            'real_product_image.max' => __('L\'image ne doit pas dépasser 10 MB. Veuillez choisir un fichier plus petit.'),
-            'real_product_image.image' => __('Le fichier doit être une image valide (JPEG, PNG, GIF).'),
-            'media_files.*.max' => __('Chaque fichier ne doit pas dépasser 10 MB. Veuillez choisir des fichiers plus petits.'),
+            'real_product_image.max' => __('L\'image ou la vidéo ne doit pas dépasser 20 MB.'),
+            'real_product_image.mimes' => __('Le fichier doit être une image (JPEG, PNG, GIF) ou une vidéo (MP4, MOV, AVI).'),
+            'media_files.*.max' => __('Chaque fichier ne doit pas dépasser 20 MB. Veuillez choisir des fichiers plus petits.'),
             'media_files.*.mimes' => __('Les fichiers doivent être des images (JPEG, PNG, GIF) ou des vidéos (MP4, MOV, AVI).'),
         ]);
 
@@ -181,14 +181,19 @@ class QuotationController extends Controller
 
         $realProductImagePath = null;
         if ($request->hasFile('real_product_image')) {
-            $result = $this->imageService->compressAndStore(
-                $request->file('real_product_image'),
-                'quotations/real_images',
-                'public',
-                1200,
-                80
-            );
-            $realProductImagePath = $result->path;
+            $file = $request->file('real_product_image');
+            if (str_starts_with($file->getMimeType(), 'video/')) {
+                $realProductImagePath = $file->store('quotations/real_images', 'public');
+            } else {
+                $result = $this->imageService->compressAndStore(
+                    $file,
+                    'quotations/real_images',
+                    'public',
+                    1200,
+                    80
+                );
+                $realProductImagePath = $result->path;
+            }
         }
 
         $qualityOptionsData = [];
@@ -206,15 +211,22 @@ class QuotationController extends Controller
                             $files = [$files];
                         }
                         foreach ($files as $file) {
-                            $result = $this->imageService->compressAndStore(
-                                $file,
-                                'quotations/quality',
-                                'public',
-                                1200,
-                                80
-                            );
-                            if ($result->path) {
-                                $imagePaths[] = $result->path;
+                            if (str_starts_with($file->getMimeType(), 'video/')) {
+                                $path = $file->store('quotations/quality', 'public');
+                                if ($path) {
+                                    $imagePaths[] = $path;
+                                }
+                            } else {
+                                $result = $this->imageService->compressAndStore(
+                                    $file,
+                                    'quotations/quality',
+                                    'public',
+                                    1200,
+                                    80
+                                );
+                                if ($result->path) {
+                                    $imagePaths[] = $result->path;
+                                }
                             }
                         }
                         if (!empty($imagePaths)) {
@@ -338,9 +350,9 @@ class QuotationController extends Controller
                 'estimated_product_cost' => 'nullable|numeric|min:0',
                 'estimated_shipping_cost' => 'nullable|numeric|min:0',
                 'estimated_other_costs' => 'nullable|numeric|min:0',
-                'real_product_image' => 'nullable|image|max:10240',
+                'real_product_image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
                 'supplier_url' => 'nullable|url|max:2048',
-                'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:10240',
+                'media_files.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
 
                 'quality_options' => 'nullable|array',
                 'quality_options.low.price' => 'nullable|numeric|min:0',
@@ -348,16 +360,16 @@ class QuotationController extends Controller
                 'quality_options.good.price' => 'nullable|numeric|min:0',
                 'quality_options_images' => 'nullable|array',
                 'quality_options_images.low' => 'nullable|array',
-                'quality_options_images.low.*' => 'nullable|image|max:10240',
+                'quality_options_images.low.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
                 'quality_options_images.medium' => 'nullable|array',
-                'quality_options_images.medium.*' => 'nullable|image|max:10240',
+                'quality_options_images.medium.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
                 'quality_options_images.good' => 'nullable|array',
-                'quality_options_images.good.*' => 'nullable|image|max:10240',
+                'quality_options_images.good.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
             ], [
                 'supplier_url.url' => __('Veuillez entrer une URL valide pour le lien fournisseur.'),
-                'real_product_image.max' => __('L\'image ne doit pas dépasser 10 MB. Veuillez choisir un fichier plus petit.'),
-                'real_product_image.image' => __('Le fichier doit être une image valide (JPEG, PNG, GIF).'),
-                'media_files.*.max' => __('Chaque fichier ne doit pas dépasser 10 MB. Veuillez choisir des fichiers plus petits.'),
+                'real_product_image.max' => __('L\'image ou la vidéo ne doit pas dépasser 20 MB.'),
+                'real_product_image.mimes' => __('Le fichier doit être une image (JPEG, PNG, GIF) ou une vidéo (MP4, MOV, AVI).'),
+                'media_files.*.max' => __('Chaque fichier ne doit pas dépasser 20 MB. Veuillez choisir des fichiers plus petits.'),
                 'media_files.*.mimes' => __('Les fichiers doivent être des images (JPEG, PNG, GIF) ou des vidéos (MP4, MOV, AVI).'),
             ]);
 
@@ -392,14 +404,19 @@ class QuotationController extends Controller
                 if ($realProductImagePath && Storage::disk('public')->exists($realProductImagePath)) {
                     Storage::disk('public')->delete($realProductImagePath);
                 }
-                $result = $this->imageService->compressAndStore(
-                    $request->file('real_product_image'),
-                    'quotations/real_images',
-                    'public',
-                    1200,
-                    80
-                );
-                $realProductImagePath = $result->path;
+                $file = $request->file('real_product_image');
+                if (str_starts_with($file->getMimeType(), 'video/')) {
+                    $realProductImagePath = $file->store('quotations/real_images', 'public');
+                } else {
+                    $result = $this->imageService->compressAndStore(
+                        $file,
+                        'quotations/real_images',
+                        'public',
+                        1200,
+                        80
+                    );
+                    $realProductImagePath = $result->path;
+                }
             }
 
             // Process Quality Pricing Options for Update
@@ -433,15 +450,22 @@ class QuotationController extends Controller
                                 $files = [$files];
                             }
                             foreach ($files as $file) {
-                                $result = $this->imageService->compressAndStore(
-                                    $file,
-                                    'quotations/quality',
-                                    'public',
-                                    1200,
-                                    80
-                                );
-                                if ($result->path) {
-                                    $newImagePaths[] = $result->path;
+                                if (str_starts_with($file->getMimeType(), 'video/')) {
+                                    $path = $file->store('quotations/quality', 'public');
+                                    if ($path) {
+                                        $newImagePaths[] = $path;
+                                    }
+                                } else {
+                                    $result = $this->imageService->compressAndStore(
+                                        $file,
+                                        'quotations/quality',
+                                        'public',
+                                        1200,
+                                        80
+                                    );
+                                    if ($result->path) {
+                                        $newImagePaths[] = $result->path;
+                                    }
                                 }
                             }
                             $imagePaths = $newImagePaths;
