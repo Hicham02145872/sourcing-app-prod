@@ -72,6 +72,7 @@
                                         isVideo: isVideo
                                     });
                                 }
+                                this.previews = [...this.previews];
                                 this.syncFiles();
                             },
                             removePreview(idx) {
@@ -80,12 +81,14 @@
                                     URL.revokeObjectURL(preview.src);
                                 }
                                 this.previews.splice(idx, 1);
+                                this.previews = [...this.previews];
                                 this.syncFiles();
                             },
                             removeExisting(idx) {
                                 const path = this.existingMedia[idx];
                                 this.removedMedia.push(path);
                                 this.existingMedia.splice(idx, 1);
+                                this.existingMedia = [...this.existingMedia];
                             },
                             syncFiles() {
                                 const dt = new DataTransfer();
