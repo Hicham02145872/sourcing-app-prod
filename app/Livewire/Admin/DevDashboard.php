@@ -984,12 +984,48 @@ class DevDashboard extends Component
             return [];
         }
 
-        $content = trim((string) File::get($path));
-        if ($content === '') {
+        $fileSize = File::size($path);
+        if ($fileSize === 0) {
             return [];
         }
 
-        return array_values(array_filter(array_map('trim', array_slice(preg_split('/\r\n|\r|\n/', $content) ?: [], -$limit))));
+        $handle = fopen($path, 'r');
+        if (! $handle) {
+            return [];
+        }
+
+        $lines = [];
+        $chunkSize = max(8192, $limit * 120);
+        $offset = max(0, $fileSize - $chunkSize);
+
+        while (true) {
+            $lines = [];
+            fseek($handle, $offset);
+            if ($offset > 0) {
+                fgets($handle);
+            }
+
+            while (! feof($handle)) {
+                $line = fgets($handle);
+                if ($line === false) {
+                    break;
+                }
+                $line = trim($line);
+                if ($line !== '') {
+                    $lines[] = $line;
+                }
+            }
+
+            if (count($lines) >= $limit || $offset === 0) {
+                break;
+            }
+
+            $offset = max(0, $offset - $chunkSize);
+        }
+
+        fclose($handle);
+
+        return array_slice($lines, -$limit);
     }
 
     protected function parseLaravelLogLine(string $line): array
