@@ -11,19 +11,6 @@
 
     <p class="text-xs text-slate-500 leading-relaxed">{{ __('Define alternative pricing based on product quality. Client can choose one of these levels.') }}</p>
 
-<div class="space-y-4">
-    <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
-        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-orange-50 text-orange-600">
-            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-            </svg>
-        </span>
-        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">{{ __('Quality Pricing Options') }}</h4>
-        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-bold rounded-md uppercase tracking-wider">{{ __('Optional') }}</span>
-    </div>
-
-    <p class="text-xs text-slate-500 leading-relaxed">{{ __('Define alternative pricing based on product quality. Client can choose one of these levels.') }}</p>
-
     <div class="grid grid-cols-1 gap-4">
         @foreach(['low' => ['label' => __('Low Quality (Qualité Faible)'), 'color' => 'amber'], 'medium' => ['label' => __('Medium Quality (Qualité Moyenne)'), 'color' => 'blue'], 'good' => ['label' => __('Good Quality (Qualité Bonne)'), 'color' => 'emerald']] as $key => $info)
             @php 
@@ -149,7 +136,8 @@
                                             </template>
                                         </div>
                                         <button type="button" @click.stop="removeExisting(idx)"
-                                            class="absolute top-1 right-1 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center transition-all">
+                                            class="absolute z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center transition-all"
+                                            style="top: 4px; right: 4px;">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                                         </button>
                                     </div>
@@ -173,7 +161,8 @@
                                             </template>
                                         </div>
                                         <button type="button" @click.stop="removePreview(idx)"
-                                            class="absolute top-1 right-1 z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center transition-all">
+                                            class="absolute z-10 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow flex items-center justify-center transition-all"
+                                            style="top: 4px; right: 4px;">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                                         </button>
                                     </div>
