@@ -11,24 +11,6 @@
 
     <p class="text-xs text-slate-500 leading-relaxed">{{ __('Define alternative pricing based on product quality. Client can choose one of these levels.') }}</p>
 
-    <div class="grid grid-cols-1 gap-4">
-        @foreach(['low' => ['label' => __('Low Quality (Qualité Faible)'), 'color' => 'amber'], 'medium' => ['label' => __('Medium Quality (Qualité Moyenne)'), 'color' => 'blue'], 'good' => ['label' => __('Good Quality (Qualité Bonne)'), 'color' => 'emerald']] as $key => $info)
-            @php 
-                $color = $info['color'];
-                $colorClass = $color === 'amber' ? 'bg-amber-500' : ($color === 'blue' ? 'bg-blue-500' : 'bg-emerald-500');
-                $borderClass = $color === 'amber' ? 'border-amber-100 hover:border-amber-200 bg-amber-50/5' : ($color === 'blue' ? 'border-blue-100 hover:border-blue-200 bg-blue-50/5' : 'border-emerald-100 hover:border-emerald-200 bg-emerald-50/5');
-            @endphp
-            <div class="border rounded-lg p-4 transition-all {{ $borderClass }} space-y-3.5 shadow-sm">
-                <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full {{ $colorClass }} shadow-sm"></span>
-                    {{ $info['label'] }}
-                </h5>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{{ __('Unit Price') }}</label>
-                        <div class="relative rounded-xl shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                <span class="text-slate-400 text-xs font-semibold currency-symbol">$</span>
 <div class="space-y-4">
     <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
         <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-orange-50 text-orange-600">
