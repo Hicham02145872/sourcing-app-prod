@@ -17,12 +17,18 @@ class FeatureFlagSeeder extends Seeder
                 'key' => 'tracking',
                 'name' => 'Shipment Tracking',
                 'status' => 'visible',
-                'roles' => [], // Empty roles means public access (within authentication)
+                'roles' => [],
             ],
             [
                 'key' => 'refunds',
                 'name' => 'Refund Claims',
-                'status' => 'coming_soon', // Setting to coming_soon to demonstrate the new fallback logic
+                'status' => 'coming_soon',
+                'roles' => [],
+            ],
+            [
+                'key' => 'shipping_fees_popup',
+                'name' => 'Shipping Fees Pop-up',
+                'status' => 'visible',
                 'roles' => [],
             ],
         ];

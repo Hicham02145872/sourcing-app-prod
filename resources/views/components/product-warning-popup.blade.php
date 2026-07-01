@@ -27,10 +27,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
         </button>
-        <div class="mx-auto w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-4">
-            <svg class="w-8 h-8 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86l-8.07 14c-.66 1.15.17 2.57 1.42 2.57h16.72c1.25 0 2.08-1.42 1.42-2.57l-8.07-14c-.66-1.15-2.23-1.15-2.89 0z"/>
-            </svg>
+        <div class="mx-auto w-36 h-36 mb-4 flex items-center justify-center">
+            <img src="{{ asset('images/logos/popup-fake-product.svg') }}" alt="Fake product warning" class="w-full h-full object-contain">
         </div>
         <h3 class="text-lg font-bold text-slate-900 dark:text-white text-center mb-4">
             ⚠️ {{ __('Avertissement concernant les produits proposés') }}

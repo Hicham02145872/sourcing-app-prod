@@ -23,8 +23,10 @@
                 </div>
             </div>
 
+            @php $shippingFeePopupEnabled = app(\App\Services\FeatureFlagService::class)->isEnabled('shipping_fees_popup', auth()->user()); @endphp
             <form id="sourcing-request-form" method="POST" action="{{ route('client.sourcing-requests.store') }}" enctype="multipart/form-data"
                   x-data="sourcingRequestForm" @submit.prevent="submitForm"
+                  data-fee-popup-enabled="{{ $shippingFeePopupEnabled ? 'true' : 'false' }}"
                   data-popup-rates-url="{{ route('client.shipping-fees.popup-rates', ['country' => ':country']) }}"
                   data-translation-destination-required="{{ __('At least one destination is required!') }}"
                   data-translation-getting-location="{{ __('Getting your location...') }}"
@@ -301,6 +303,7 @@
                     </button>
                 </div>
 
+                @featureVisible('shipping_fees_popup')
                 <!-- Shipping Routing Selection Popup (Pop-up) -->
                 <div x-show="showRoutingPopup" x-cloak class="fee-modal-overlay" style="display: none;">
                     <div class="fee-modal fee-modal-animate max-w-3xl" @click.outside="cancelRoutingPopup">
@@ -528,11 +531,13 @@
                         </div>
                     </div>
                 </div>
+                @endfeatureVisible
 
                 <!-- Product Warning Popup -->
                 <x-product-warning-popup :auto-show="true" />
 
 
+            @featureVisible('shipping_fees_popup')
             <!-- Shipping Fee Confirmation Modal -->
             <div x-show="showFeeModal" x-cloak class="fee-modal-overlay" style="display: none;">
                 <div class="fee-modal fee-modal-animate" @click.outside="cancelFeeModal">
@@ -651,6 +656,7 @@
                     </div>
                 </div>
             </div>
+            @endfeatureVisible
             </form>
         </div>
     </div>
@@ -724,6 +730,7 @@
 
             Alpine.data('sourcingRequestForm', () => ({
                 showFeeModal: false,
+                feePopupEnabled: true,
                 feeDestinations: [],
                 loadingFees: false,
                 selectedShippingMethod: '',
@@ -881,6 +888,12 @@
                         return;
                     }
 
+                    // If fee popup is disabled, submit directly without routing popup
+                    if (!this.feePopupEnabled) {
+                        await this.submitFormDirectly(form);
+                        return;
+                    }
+
                     // Open the routing pop-up and fetch rates
                     this.showRoutingPopup = true;
                     this.loadingRates = true;
@@ -965,6 +978,7 @@
                 },
 
                 init() {
+                    this.feePopupEnabled = this.$el.dataset.feePopupEnabled === 'true';
                 },
 
                 async submitFormDirectly(form) {
