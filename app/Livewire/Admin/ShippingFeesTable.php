@@ -17,7 +17,12 @@ class ShippingFeesTable extends Component
 
     public ?Country $selectedCountry = null;
 
-    protected $queryString = ['search' => ['except' => '']];
+    public bool $showConfiguredOnly = false;
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'showConfiguredOnly' => ['except' => false],
+    ];
 
     public function updatingSearch()
     {
@@ -29,10 +34,22 @@ class ShippingFeesTable extends Component
         $this->redirect(route('admin.shipping-fees.edit', $countryId), navigate: true);
     }
 
+    public function toggleConfigured(): void
+    {
+        $this->showConfiguredOnly = !$this->showConfiguredOnly;
+        $this->resetPage();
+    }
+
     public function render()
     {
         $countries = rescue(function () {
             $query = Country::with(['shippingFee.items']);
+
+            if ($this->showConfiguredOnly) {
+                $query->whereHas('shippingFee.items', function ($q) {
+                    $q->whereNotNull('price_per_kg');
+                });
+            }
 
             if (! empty($this->search)) {
                 $query->where(function ($q) {

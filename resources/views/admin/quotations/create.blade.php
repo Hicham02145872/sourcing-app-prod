@@ -133,6 +133,7 @@
                                         <tr>
                                             <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('Country') }}</th>
                                             <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('Service') }}</th>
+                                            <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('Address') }}</th>
                                             <th class="px-6 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ __('Qty') }}</th>
                                         </tr>
                                     </thead>
@@ -147,6 +148,18 @@
                                                 <span class="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-md border border-slate-200/60">
                                                     {{ $dest->service->name }}
                                                 </span>
+                                            </td>
+                                            <td class="px-6 py-3.5 text-sm max-w-[200px]">
+                                                @if($dest->address)
+                                                    <div class="text-xs text-slate-700 leading-tight">
+                                                        @if($dest->label_address)
+                                                            <span class="font-semibold text-slate-800">{{ $dest->label_address }}</span><br>
+                                                        @endif
+                                                        {{ $dest->address }}
+                                                    </div>
+                                                @else
+                                                    <span class="text-xs text-slate-400 italic">—</span>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-3.5 text-sm text-right font-mono font-bold text-slate-800">
                                                 {{ number_format($dest->quantity) }}

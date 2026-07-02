@@ -488,7 +488,14 @@
                                             <div class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                                                 <template x-for="item in ratesData?.indirect?.items" :key="item.id">
                                                     <div class="flex justify-between items-start gap-2 border-b border-slate-100 dark:border-slate-700/50 pb-2 text-xs">
-                                                        <span class="text-slate-600 dark:text-slate-400 font-medium text-left leading-tight" x-text="item.item_style"></span>
+                                                        <div class="flex flex-col">
+                                                            <span class="text-slate-600 dark:text-slate-400 font-medium text-left leading-tight" x-text="item.item_style"></span>
+                                                            <template x-if="item.price_per_kg_china_to_dubai != null && item.price_per_kg_dubai_to_africa != null">
+                                                                <span class="text-[9px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                                                                    CN→DXB: <span x-text="parseFloat(item.price_per_kg_china_to_dubai).toFixed(2)"></span> + DXB→<span x-text="ratesData?.country_code"></span>: <span x-text="parseFloat(item.price_per_kg_dubai_to_africa).toFixed(2)"></span>
+                                                                </span>
+                                                            </template>
+                                                        </div>
                                                         <span class="font-mono font-bold text-slate-950 dark:text-white whitespace-nowrap">
                                                             <span x-text="parseFloat(item.price_per_kg).toFixed(2)"></span>
                                                             <span class="text-[9px] text-slate-400" x-text="ratesData?.currency"></span>

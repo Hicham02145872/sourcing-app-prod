@@ -78,6 +78,18 @@ class ShippingFeeController extends Controller
         return false;
     }
 
+    protected function calculateIndirectPrice($item): ?float
+    {
+        $chinaToDubai = $item->price_per_kg_china_to_dubai;
+        $dubaiToAfrica = $item->price_per_kg_dubai_to_africa;
+
+        if (!is_null($chinaToDubai) && !is_null($dubaiToAfrica)) {
+            return (float) $chinaToDubai + (float) $dubaiToAfrica;
+        }
+
+        return $item->price_per_kg;
+    }
+
     public function getRatesForPopup(string $locale, Country $country, Request $request)
     {
         $transportType = $request->query('transport', 'air');
@@ -123,7 +135,7 @@ class ShippingFeeController extends Controller
         $indirectFormatted = $indirectItems->map(fn($item) => [
             'id' => $item->id,
             'item_style' => $item->item_style,
-            'price_per_kg' => $item->price_per_kg,
+            'price_per_kg' => $this->calculateIndirectPrice($item),
             'price_per_kg_dubai' => $item->price_per_kg_dubai,
             'price_per_kg_china_to_dubai' => $item->price_per_kg_china_to_dubai,
             'price_per_kg_dubai_to_africa' => $item->price_per_kg_dubai_to_africa,
