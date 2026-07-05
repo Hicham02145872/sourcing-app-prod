@@ -23,11 +23,9 @@ class ChoiceXPTracker:
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--disable-setuid-sandbox")
             options.add_argument("--disable-software-rasterizer")
-            options.add_argument("--remote-debugging-pipe")
             options.add_argument("--disable-extensions")
             options.add_argument("--ash-no-coredump")
             options.add_argument("--user-data-dir=/tmp/chrome-choicexp")
-            options.add_argument("--remote-debugging-pipe")
         
         # Anti-detection options
         options.add_argument("--disable-blink-features=AutomationControlled")
