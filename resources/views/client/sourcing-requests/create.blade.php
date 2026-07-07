@@ -343,7 +343,8 @@
 
                             <!-- Content State -->
                             <div x-show="!loadingRates && ratesData" class="space-y-6">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="grid grid-cols-1 gap-6"
+                                     :class="ratesData?.indirect?.items?.length > 0 ? 'md:grid-cols-2' : 'md:grid-cols-1 max-w-lg mx-auto'">
                                     <!-- Option 1: Direct Shipping -->
                                     <label class="relative flex flex-col p-6 border-2 rounded-2xl cursor-pointer transition-all hover:shadow-md"
                                            :class="selectedRoute === 'china' ? 'border-[#EF7722] bg-[#EF7722]/5 dark:bg-[#EF7722]/5 shadow-sm' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'">
@@ -421,7 +422,8 @@
                                     </label>
 
                                     <!-- Option 2: Indirect Shipping (via Dubai) -->
-                                    <label class="relative flex flex-col p-6 border-2 rounded-2xl cursor-pointer transition-all hover:shadow-md"
+                                    <label x-show="ratesData?.indirect?.items?.length > 0"
+                                           class="relative flex flex-col p-6 border-2 rounded-2xl cursor-pointer transition-all hover:shadow-md"
                                            :class="selectedRoute === 'dubai' ? 'border-[#EF7722] bg-[#EF7722]/5 dark:bg-[#EF7722]/5 shadow-sm' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'">
                                         <input type="radio" name="popup_route" value="dubai" x-model="selectedRoute" class="sr-only">
                                         <div class="flex items-center justify-between mb-4">

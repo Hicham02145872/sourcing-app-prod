@@ -141,11 +141,13 @@
                                 <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18 M12 5V2"/></svg>
                                 <span class="pointer-events-none leading-tight">{{ __('Sea bulk from China') }}</span>
                             </button>
+                            @if(!($selectedCountry->is_direct ?? false))
                             <button type="button" wire:click="setDetailTab('train')" role="tab" aria-selected="{{ $detailTab === 'train' ? 'true' : 'false' }}"
                                     class="flex min-h-[48px] w-full cursor-pointer touch-manipulation select-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 px-3 py-3 text-center text-xs font-bold uppercase tracking-wide transition outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 dark:border-slate-600 {{ $detailTab === 'train' ? 'bg-emerald-500 text-white shadow-md border-transparent' : 'bg-white text-slate-600 hover:bg-emerald-500/10 dark:bg-slate-800' }}">
                                 <svg class="pointer-events-none h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                                 <span class="pointer-events-none leading-tight">{{ __('Air freight from United Arab Emirates') }}</span>
                             </button>
+                            @endif
                         </div>
                     </div>
                 </div>

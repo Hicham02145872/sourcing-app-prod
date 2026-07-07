@@ -33,6 +33,8 @@ class ShippingFeeEdit extends Component
         'train' => [],
     ];
 
+    public $isDirect = false;
+
     public array $transportTypes = ['air', 'sea', 'train'];
 
     public function getCurrenciesProperty(): array
@@ -46,6 +48,7 @@ class ShippingFeeEdit extends Component
             fn () => $country->load(['shippingFee.items']),
             $country
         );
+        $this->isDirect = (bool) ($this->country->is_direct ?? false);
         $this->initItemsData();
 
         if ($this->country->shippingFee) {
@@ -313,6 +316,8 @@ class ShippingFeeEdit extends Component
                     ->delete();
             }
         }
+
+        $this->country->update(['is_direct' => $this->isDirect]);
 
         $this->dispatch('show-success-toast', message: __('Shipping fees updated successfully.'));
         session()->flash('status', __('Shipping fees for :country updated successfully.', ['country' => $this->country->name]));

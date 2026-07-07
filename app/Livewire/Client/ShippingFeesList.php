@@ -43,6 +43,9 @@ class ShippingFeesList extends Component
         if (! in_array($tab, ['air', 'sea', 'train'], true)) {
             return;
         }
+        if ($tab === 'train' && ($this->selectedCountry->is_direct ?? false)) {
+            return;
+        }
         $this->detailTab = $tab;
     }
 
@@ -99,6 +102,10 @@ class ShippingFeesList extends Component
             return collect();
         }
 
+        if ($this->detailTab === 'train' && ($this->selectedCountry->is_direct ?? false)) {
+            return collect();
+        }
+
         return $this->filterItemsForTransportTab($fee->items, $this->detailTab);
     }
 
@@ -111,7 +118,11 @@ class ShippingFeesList extends Component
         if (! $fee) {
             return 'air';
         }
-        foreach (['air', 'sea', 'train'] as $type) {
+        $availableTypes = ['air', 'sea'];
+        if (! ($this->selectedCountry->is_direct ?? false)) {
+            $availableTypes[] = 'train';
+        }
+        foreach ($availableTypes as $type) {
             if ($this->filterItemsForTransportTab($fee->items, $type)->isNotEmpty()) {
                 return $type;
             }

@@ -105,6 +105,8 @@ class ShippingFeeController extends Controller
 
         $fee = $country->shippingFee;
 
+        $isDirect = (bool) ($country->is_direct ?? false);
+
         // Direct Shipping
         $directItems = $fee->items
             ->filter(fn ($i) => strtolower((string) $i->transport_type) === $transportType)
@@ -161,8 +163,8 @@ class ShippingFeeController extends Controller
             'indirect' => [
                 'transport' => $transportType,
                 'unit' => $indirectUnit,
-                'arrival_time' => $indirectArrivalTime,
-                'items' => $indirectFormatted,
+                'arrival_time' => $isDirect ? null : $indirectArrivalTime,
+                'items' => $isDirect ? [] : $indirectFormatted,
             ],
         ]);
     }

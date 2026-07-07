@@ -66,6 +66,16 @@
                     </div>
                 </div>
 
+                <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Direct Shipping') }}</span>
+                        <span class="text-[10px] text-slate-400 font-medium">{{ __('Ship directly from China, skip Dubai hub') }}</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" wire:model.live="isDirect" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500"></div>
+                    </label>
+                </div>
             </div>
 
             {{-- Configuration Info --}}
@@ -150,7 +160,9 @@
                             <tr>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Item Style / Category') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100/30">{{ __('Price per') }} {{ strtoupper($transportUnits[$type] ?? 'KG') }}</th>
+                                @if(!$isDirect)
                                 <th class="px-6 py-4 text-center text-xs font-bold text-orange-600 uppercase tracking-widest bg-orange-50/50">{{ __('Indirect') }} ({{ __('Dubai') }})</th>
+                                @endif
                                 <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Estimated Delay') }}</th>
                                 <th class="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Actions') }}</th>
                             </tr>
@@ -184,6 +196,7 @@
                                             <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg" @disabled($isDeleted) type="number" step="0.01" class="w-32 text-center text-sm font-bold text-slate-600 bg-white border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-slate-300 focus:border-slate-300 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through">
                                         </div>
                                     </td>
+                                    @if(!$isDirect)
                                     <td class="px-6 py-4 bg-orange-50/20">
                                         <div class="flex flex-col items-center justify-center gap-1.5">
                                             <div class="flex items-center justify-center gap-2">
@@ -202,6 +215,7 @@
                                             </div>
                                         </div>
                                     </td>
+                                    @endif
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center gap-2">
                                             <input wire:model="itemsData.{{ $type }}.{{ $index }}.estimation_days" @disabled($isDeleted) type="text" class="w-24 text-center text-sm font-bold text-slate-600 bg-slate-50 border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-orange-200 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through" placeholder="e.g. 7-9">

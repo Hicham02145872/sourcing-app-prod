@@ -31,17 +31,17 @@
             <img src="{{ asset('images/logos/popup-fake-product.svg') }}" alt="Fake product warning" class="w-full h-full object-contain">
         </div>
         <h3 class="text-lg font-bold text-slate-900 dark:text-white text-center mb-4">
-            ⚠️ {{ __('Avertissement concernant les produits proposés') }}
+            ⚠️ {{ __('Warning Regarding Listed Products') }}
         </h3>
         <div class="text-sm text-slate-600 dark:text-slate-400 text-center leading-relaxed mb-6 space-y-3">
             <p>
-                {{ __("Veuillez noter que nous suivons attentivement les directives d'Allah.") }}
+                {{ __("Please note that we carefully follow Allah's guidelines.") }}
             </p>
             <p>
-                {{ __("Les produits présentés proviennent de sources fiables, cependant, certains peuvent être des contrefaçons (produits non authentiques), des publicités ou des produits à ne pas acheter.") }}
+                {{ __("The products presented come from reliable sources. However, some may be counterfeit (non-authentic products), advertisements, or products not to be purchased.") }}
             </p>
             <p class="font-semibold text-amber-600 dark:text-amber-400">
-                {{ __("Nous vous recommandons de vérifier les évaluations et les avis des clients avant tout achat.") }}
+                {{ __("We recommend checking ratings and customer reviews before making any purchase.") }}
             </p>
         </div>
         <div class="text-center">
@@ -50,10 +50,10 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
-                {{ __("J'ai compris") }}
+                {{ __("I understand") }}
             </button>
             <p class="text-xs text-slate-400 dark:text-slate-500 mt-3">
-                {{ __("Cette annonce s'affiche une fois toutes les 24 heures.") }}
+                {{ __("This notice appears once every 24 hours.") }}
             </p>
         </div>
     </div>
