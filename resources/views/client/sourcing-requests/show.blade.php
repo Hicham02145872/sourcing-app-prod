@@ -604,27 +604,30 @@
                                                 {{-- Selected Payment Method Info --}}
                                                 @if($paymentMethods->isNotEmpty())
                                                 <div class="mb-4 p-4 bg-[#EBEBEB] dark:bg-slate-900/60 rounded-lg border border-[#EBEBEB] dark:border-slate-700">
-                                                    <template x-for="method in {{ json_encode($paymentMethods->map(function($pm) { return ['name' => $pm->name, 'logo' => media_url($pm->logo_path), 'details' => $pm->details]; })->values()) }}" :key="method.name">
-                                                        <div x-show="selectedMethod === method.name">
-                                                            <div class="flex items-center gap-3 mb-3">
-                                                                <div class="w-8 h-8 rounded-full border border-[#EBEBEB] bg-white p-1 shadow-sm flex items-center justify-center flex-shrink-0">
-                                                                    <img x-show="method.logo" :src="method.logo" alt="" class="w-full h-full object-contain">
-                                                                    <svg x-show="!method.logo" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                                                                    </svg>
-                                                                </div>
-                                                                <span class="text-sm font-bold text-slate-900 dark:text-white" x-text="method.name"></span>
+                                                    @foreach($paymentMethods as $pm)
+                                                    <div x-show="selectedMethod === '{{ $pm->name }}'">
+                                                        <div class="flex items-center gap-3 mb-3">
+                                                            <div class="w-8 h-8 rounded-full border border-[#EBEBEB] bg-white p-1 shadow-sm flex items-center justify-center flex-shrink-0">
+                                                                @if($pm->logo_path)
+                                                                <img src="{{ media_url($pm->logo_path) }}" alt="{{ $pm->name }}" class="w-full h-full object-contain">
+                                                                @else
+                                                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                                                </svg>
+                                                                @endif
                                                             </div>
-                                                            <div class="space-y-1.5">
-                                                                <template x-for="(value, key) in method.details" :key="key">
-                                                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-slate-800 rounded border border-[#EBEBEB] dark:border-slate-700">
-                                                                        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium" x-text="key"></span>
-                                                                        <span class="text-xs font-semibold text-slate-900 dark:text-white" x-text="value"></span>
-                                                                    </div>
-                                                                </template>
-                                                            </div>
+                                                            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $pm->name }}</span>
                                                         </div>
-                                                    </template>
+                                                        <div class="space-y-1.5">
+                                                            @foreach($pm->details as $key => $value)
+                                                            <div class="flex justify-between items-center p-2 bg-white dark:bg-slate-800 rounded border border-[#EBEBEB] dark:border-slate-700">
+                                                                <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">{{ $key }}</span>
+                                                                <span class="text-xs font-semibold text-slate-900 dark:text-white">{{ $value }}</span>
+                                                            </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                    @endforeach
                                                 </div>
                                                 @endif
                                                 
