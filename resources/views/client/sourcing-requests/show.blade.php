@@ -85,7 +85,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="{ selectedMethod: '{{ $paymentMethods->first()->name ?? '' }}' }">
                 {{-- Main Content --}}
                 <div class="lg:col-span-2 space-y-8">
                     
@@ -547,38 +547,49 @@
                                                             @php 
                                                                 $opt = $sourcingRequest->quotation->quality_options[$key]; 
                                                             @endphp
-                                                            <label class="relative flex flex-col bg-white dark:bg-slate-800 border-2 rounded-xl p-4 cursor-pointer focus:outline-none transition-all hover:border-[#EF7722]/50 shadow-sm"
-                                                                   :class="selectedQuality === '{{ $key }}' ? 'border-[#EF7722] ring-2 ring-[#EF7722]/20' : 'border-[#EBEBEB] dark:border-slate-700'">
-                                                                <input type="radio" name="quality_selector" value="{{ $key }}" class="sr-only" 
-                                                                       :checked="selectedQuality === '{{ $key }}'"
-                                                                       @change="selectedQuality = '{{ $key }}'; document.querySelectorAll('.selected-quality-input').forEach(i => i.value = '{{ $key }}')">
-                                                                
-                                                                {{-- Image preview --}}
-                                                                <div class="aspect-video w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 mb-3 border border-slate-100 dark:border-slate-600 flex items-center justify-center">
-                                                                    @if(!empty($opt['image_path']))
-                                                                        <img src="{{ media_url($opt['image_path']) }}" alt="{{ $label }}" class="w-full h-full object-cover cursor-pointer" onclick="openMediaModal(this.src, 'image')">
-                                                                    @else
-                                                                        <div class="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900/50">
-                                                                            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                                            </svg>
-                                                                        </div>
-                                                                    @endif
-                                                                </div>
+                                                             <label class="relative flex flex-col border-2 rounded-xl p-4 cursor-pointer focus:outline-none transition-all hover:border-[#EF7722]/50 shadow-sm overflow-hidden"
+                                                                    :class="selectedQuality === '{{ $key }}' ? 'border-[#EF7722] bg-[#EF7722]' : 'border-[#EBEBEB] dark:border-slate-700 bg-white dark:bg-slate-800'">
+                                                                 <input type="radio" name="quality_selector" value="{{ $key }}" class="sr-only" 
+                                                                        :checked="selectedQuality === '{{ $key }}'"
+                                                                        @change="selectedQuality = '{{ $key }}'; document.querySelectorAll('.selected-quality-input').forEach(i => i.value = '{{ $key }}')">
 
-                                                                {{-- Label & Price --}}
-                                                                <div class="flex flex-col mt-auto">
-                                                                    <span class="block text-sm font-black text-slate-900 dark:text-white">{{ $label }}</span>
-                                                                    <div class="flex justify-between items-end mt-2">
-                                                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                                                            {{ __('Unit Price') }}
-                                                                        </span>
-                                                                        <span class="text-sm font-extrabold text-[#EF7722]">
-                                                                            {{ number_format($opt['price'], 2) }} {{ $sourcingRequest->quotation->currency }}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </label>
+                                                                 {{-- Selected checkmark badge --}}
+                                                                 <div x-show="selectedQuality === '{{ $key }}'" 
+                                                                      class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md z-10">
+                                                                     <svg class="w-4 h-4 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                                                     </svg>
+                                                                 </div>
+
+                                                                 {{-- Image preview --}}
+                                                                 <div class="aspect-video w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 mb-3 border border-slate-100 dark:border-slate-600 flex items-center justify-center">
+                                                                     @if(!empty($opt['image_path']))
+                                                                         <img src="{{ media_url($opt['image_path']) }}" alt="{{ $label }}" class="w-full h-full object-cover cursor-pointer" onclick="openMediaModal(this.src, 'image')">
+                                                                     @else
+                                                                         <div class="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900/50">
+                                                                             <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                                             </svg>
+                                                                         </div>
+                                                                     @endif
+                                                                 </div>
+
+                                                                 {{-- Label & Price --}}
+                                                                 <div class="flex flex-col mt-auto">
+                                                                     <span class="block text-sm font-black transition-colors"
+                                                                           :class="selectedQuality === '{{ $key }}' ? 'text-white' : 'text-slate-900 dark:text-white'">{{ $label }}</span>
+                                                                     <div class="flex justify-between items-end mt-2">
+                                                                         <span class="text-xs font-semibold transition-colors"
+                                                                               :class="selectedQuality === '{{ $key }}' ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'">
+                                                                             {{ __('Unit Price') }}
+                                                                         </span>
+                                                                         <span class="text-sm font-extrabold transition-colors"
+                                                                               :class="selectedQuality === '{{ $key }}' ? 'text-white' : 'text-[#EF7722]'">
+                                                                             {{ number_format($opt['price'], 2) }} {{ $sourcingRequest->quotation->currency }}
+                                                                         </span>
+                                                                     </div>
+                                                                 </div>
+                                                             </label>
                                                         @endif
                                                     @endforeach
                                                 </div>
@@ -589,6 +600,33 @@
                                             <form action="{{ route('client.quotations.accept', $sourcingRequest->quotation) }}" method="POST" enctype="multipart/form-data" class="flex-[2]">
                                                 @csrf
                                                 <input type="hidden" name="selected_quality" class="selected-quality-input" :value="selectedQuality">
+
+                                                {{-- Selected Payment Method Info --}}
+                                                @if($paymentMethods->isNotEmpty())
+                                                <div class="mb-4 p-4 bg-[#EBEBEB] dark:bg-slate-900/60 rounded-lg border border-[#EBEBEB] dark:border-slate-700">
+                                                    <template x-for="method in {{ json_encode($paymentMethods->map(function($pm) { return ['name' => $pm->name, 'logo' => media_url($pm->logo_path), 'details' => $pm->details]; })->values()) }}" :key="method.name">
+                                                        <div x-show="selectedMethod === method.name">
+                                                            <div class="flex items-center gap-3 mb-3">
+                                                                <div class="w-8 h-8 rounded-full border border-[#EBEBEB] bg-white p-1 shadow-sm flex items-center justify-center flex-shrink-0">
+                                                                    <img x-show="method.logo" :src="method.logo" alt="" class="w-full h-full object-contain">
+                                                                    <svg x-show="!method.logo" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                                                    </svg>
+                                                                </div>
+                                                                <span class="text-sm font-bold text-slate-900 dark:text-white" x-text="method.name"></span>
+                                                            </div>
+                                                            <div class="space-y-1.5">
+                                                                <template x-for="(value, key) in method.details" :key="key">
+                                                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-slate-800 rounded border border-[#EBEBEB] dark:border-slate-700">
+                                                                        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium" x-text="key"></span>
+                                                                        <span class="text-xs font-semibold text-slate-900 dark:text-white" x-text="value"></span>
+                                                                    </div>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                @endif
                                                 
                                                 <div class="mb-4">
                                                     <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('Upload Proof of Payment') }}</label>
@@ -708,7 +746,7 @@
 
                     {{-- Payment Methods --}}
                     @if($paymentMethods->isNotEmpty())
-                    <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden" x-data="{ selectedMethod: null }">
+                    <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-[#EF7722]/10 dark:bg-[#EF7722]/20 rounded-lg flex items-center justify-center flex-shrink-0">

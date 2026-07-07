@@ -98,7 +98,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {{-- Main Content --}}
-                <div class="lg:col-span-2 space-y-6">
+                <div class="lg:col-span-2 space-y-6" x-data="{ selectedMethod: '{{ $paymentMethods->first()->name ?? '' }}' }">
                     
                     {{-- Shipment & Tracking (always visible for client) --}}
                     <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden mb-6 relative group">
@@ -362,7 +362,7 @@
                     </div>
 
                     {{-- Payment Methods --}}
-                    <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden" x-data="{ selectedMethod: null }">
+                    <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-[#EF7722]/10 dark:bg-[#EF7722]/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -454,6 +454,34 @@
                                 @if($sourcingOrder->status === 'pending_payment')
                                     <form id="payment-proof-form" action="{{ route('client.sourcing-orders.upload-proof-of-payment', $sourcingOrder) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                                         @csrf
+
+                                        {{-- Selected Payment Method Info --}}
+                                        @if($paymentMethods->isNotEmpty())
+                                        <div class="p-4 bg-[#EBEBEB] dark:bg-slate-900/60 rounded-lg border border-[#EBEBEB] dark:border-slate-700">
+                                            <template x-for="method in {{ json_encode($paymentMethods->map(function($pm) { return ['name' => $pm->name, 'logo' => media_url($pm->logo_path), 'details' => $pm->details]; })->values()) }}" :key="method.name">
+                                                <div x-show="selectedMethod === method.name">
+                                                    <div class="flex items-center gap-3 mb-3">
+                                                        <div class="w-8 h-8 rounded-full border border-[#EBEBEB] bg-white p-1 shadow-sm flex items-center justify-center flex-shrink-0">
+                                                            <img x-show="method.logo" :src="method.logo" alt="" class="w-full h-full object-contain">
+                                                            <svg x-show="!method.logo" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <span class="text-sm font-bold text-slate-900 dark:text-white" x-text="method.name"></span>
+                                                    </div>
+                                                    <div class="space-y-1.5">
+                                                        <template x-for="(value, key) in method.details" :key="key">
+                                                            <div class="flex justify-between items-center p-2 bg-white dark:bg-slate-800 rounded border border-[#EBEBEB] dark:border-slate-700">
+                                                                <span class="text-xs text-slate-500 dark:text-slate-400 font-medium" x-text="key"></span>
+                                                                <span class="text-xs font-semibold text-slate-900 dark:text-white" x-text="value"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        @endif
+
                                         <div>
                                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('Upload Proof of Payment') }}</label>
                                             <input type="file" 
