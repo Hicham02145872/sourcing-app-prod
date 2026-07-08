@@ -77,10 +77,15 @@ class ShippingFeeEdit extends Component
             $this->is_sea_visible = $fee->is_sea_visible ?? true;
 
             foreach ($fee->items as $item) {
+                $transportType = match ($item->transport_type) {
+                    'air' => 'air_direct',
+                    'train' => 'air_indirect',
+                    default => $item->transport_type,
+                };
                 $found = false;
-                foreach ($this->itemsData[$item->transport_type] as $key => $existing) {
+                foreach ($this->itemsData[$transportType] as $key => $existing) {
                     if ($existing['item_style'] === $item->item_style) {
-                        $this->itemsData[$item->transport_type][$key] = [
+                        $this->itemsData[$transportType][$key] = [
                             'id' => $item->id,
                             'item_style' => $item->item_style,
                             'price_per_kg' => $item->price_per_kg,
@@ -96,7 +101,7 @@ class ShippingFeeEdit extends Component
                     }
                 }
                 if (! $found) {
-                    $this->itemsData[$item->transport_type][] = [
+                    $this->itemsData[$transportType][] = [
                         'id' => $item->id,
                         'item_style' => $item->item_style,
                         'price_per_kg' => $item->price_per_kg,
