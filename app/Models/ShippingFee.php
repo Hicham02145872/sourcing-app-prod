@@ -11,14 +11,23 @@ class ShippingFee extends Model
 
     protected $fillable = [
         'country_id',
-        'air_arrival_time',
+        'air_direct_arrival_time',
         'sea_arrival_time',
-        'train_arrival_time',
+        'air_indirect_arrival_time',
         'currency',
         'unit',
-        'air_unit',
+        'air_direct_unit',
         'sea_unit',
-        'train_unit',
+        'air_indirect_unit',
+        'is_air_direct_visible',
+        'is_air_indirect_visible',
+        'is_sea_visible',
+    ];
+
+    protected $casts = [
+        'is_air_direct_visible' => 'boolean',
+        'is_air_indirect_visible' => 'boolean',
+        'is_sea_visible' => 'boolean',
     ];
 
     public function getUnitForTransport(string $transportType): string
@@ -26,9 +35,9 @@ class ShippingFee extends Model
         $normalizedType = strtolower($transportType);
 
         $unit = match ($normalizedType) {
-            'air' => $this->air_unit,
+            'air_direct' => $this->air_direct_unit,
             'sea' => $this->sea_unit,
-            'train' => $this->train_unit,
+            'air_indirect' => $this->air_indirect_unit,
             default => null,
         };
 

@@ -16,26 +16,30 @@ class ShippingFeeEdit extends Component
     public $currency = 'USD';
 
     public array $transportUnits = [
-        'air' => 'kg',
+        'air_direct' => 'kg',
         'sea' => 'CBM',
-        'train' => 'kg',
+        'air_indirect' => 'kg',
     ];
 
-    public $air_arrival_time = '7-9';
+    public $air_direct_arrival_time = '7-9';
 
     public $sea_arrival_time = '30-45';
 
-    public $train_arrival_time = '15-20';
+    public $air_indirect_arrival_time = '15-20';
 
     public array $itemsData = [
-        'air' => [],
+        'air_direct' => [],
         'sea' => [],
-        'train' => [],
+        'air_indirect' => [],
     ];
 
     public $isDirect = false;
 
-    public array $transportTypes = ['air', 'sea', 'train'];
+    public $is_air_direct_visible = true;
+    public $is_air_indirect_visible = true;
+    public $is_sea_visible = true;
+
+    public array $transportTypes = ['air_direct', 'sea', 'air_indirect'];
 
     public function getCurrenciesProperty(): array
     {
@@ -59,14 +63,18 @@ class ShippingFeeEdit extends Component
             $this->currency = in_array($cur, $allowed, true) ? $cur : 'USD';
             $legacyUnit = $fee->unit ?? 'kg';
             $this->transportUnits = [
-                'air' => $fee->air_unit ?? $legacyUnit,
+                'air_direct' => $fee->air_direct_unit ?? $fee->air_unit ?? $legacyUnit,
                 'sea' => $fee->sea_unit ?? 'CBM',
-                'train' => $fee->train_unit ?? $legacyUnit,
+                'air_indirect' => $fee->air_indirect_unit ?? $fee->train_unit ?? $legacyUnit,
             ];
 
-            $this->air_arrival_time = $fee->air_arrival_time ?? '7-9';
+            $this->air_direct_arrival_time = $fee->air_direct_arrival_time ?? $fee->air_arrival_time ?? '7-9';
             $this->sea_arrival_time = $fee->sea_arrival_time ?? '30-45';
-            $this->train_arrival_time = $fee->train_arrival_time ?? '15-20';
+            $this->air_indirect_arrival_time = $fee->air_indirect_arrival_time ?? $fee->train_arrival_time ?? '15-20';
+            
+            $this->is_air_direct_visible = $fee->is_air_direct_visible ?? true;
+            $this->is_air_indirect_visible = $fee->is_air_indirect_visible ?? true;
+            $this->is_sea_visible = $fee->is_sea_visible ?? true;
 
             foreach ($fee->items as $item) {
                 $found = false;
@@ -249,13 +257,16 @@ class ShippingFeeEdit extends Component
             'country_id' => $this->country->id,
             'currency' => $this->currency,
             // Legacy unit kept for backward compatibility with existing integrations.
-            'unit' => $this->transportUnits['air'] ?? 'kg',
-            'air_unit' => $this->transportUnits['air'] ?? 'kg',
+            'unit' => $this->transportUnits['air_direct'] ?? 'kg',
+            'air_direct_unit' => $this->transportUnits['air_direct'] ?? 'kg',
             'sea_unit' => $this->transportUnits['sea'] ?? 'CBM',
-            'train_unit' => $this->transportUnits['train'] ?? 'kg',
-            'air_arrival_time' => $this->air_arrival_time,
+            'air_indirect_unit' => $this->transportUnits['air_indirect'] ?? 'kg',
+            'air_direct_arrival_time' => $this->air_direct_arrival_time,
             'sea_arrival_time' => $this->sea_arrival_time,
-            'train_arrival_time' => $this->train_arrival_time,
+            'air_indirect_arrival_time' => $this->air_indirect_arrival_time,
+            'is_air_direct_visible' => $this->is_air_direct_visible,
+            'is_air_indirect_visible' => $this->is_air_indirect_visible,
+            'is_sea_visible' => $this->is_sea_visible,
         ];
 
         $fee = \App\Models\ShippingFee::updateOrCreate(

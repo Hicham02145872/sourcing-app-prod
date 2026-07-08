@@ -43,8 +43,8 @@
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Units by transport') }}</span>
                         <div class="flex items-center justify-between gap-2 text-xs">
-                            <span class="font-bold text-orange-600">{{ __('Air') }}</span>
-                            <select wire:model="transportUnits.air" class="text-xs font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right uppercase">
+                            <span class="font-bold text-orange-600">{{ __('Air Direct') }}</span>
+                            <select wire:model="transportUnits.air_direct" class="text-xs font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right uppercase">
                                 <option value="kg">KG</option>
                                 <option value="CBM">CBM</option>
                             </select>
@@ -57,8 +57,8 @@
                             </select>
                         </div>
                         <div class="flex items-center justify-between gap-2 text-xs">
-                            <span class="font-bold text-green-600">{{ __('Train') }}</span>
-                            <select wire:model="transportUnits.train" class="text-xs font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right uppercase">
+                            <span class="font-bold text-green-600">{{ __('Air Indirect') }}</span>
+                            <select wire:model="transportUnits.air_indirect" class="text-xs font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 text-right uppercase">
                                 <option value="kg">KG</option>
                                 <option value="CBM">CBM</option>
                             </select>
@@ -66,15 +66,28 @@
                     </div>
                 </div>
 
-                <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Direct Shipping') }}</span>
-                        <span class="text-[10px] text-slate-400 font-medium">{{ __('Ship directly from China, skip Dubai hub') }}</span>
+                <div class="mt-4 space-y-3">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Air Direct Visible') }}</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" wire:model.live="is_air_direct_visible" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500"></div>
+                        </label>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" wire:model.live="isDirect" class="sr-only peer">
-                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500"></div>
-                    </label>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Sea Visible') }}</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" wire:model.live="is_sea_visible" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+                        </label>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Air Indirect Visible') }}</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" wire:model.live="is_air_indirect_visible" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -97,7 +110,7 @@
         </div>
 
         {{-- Detailed Tiered Rates Section (Injected into the grid) --}}
-        <div x-data="{ tab: 'air' }" class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
+        <div x-data="{ tab: 'air_direct' }" class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
         {{-- Header & Tabs --}}
         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -106,17 +119,17 @@
             </div>
             
             <div class="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
-                <button type="button" @click="tab = 'air'" :class="tab === 'air' ? 'bg-orange-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center gap-2">
+                <button type="button" @click="tab = 'air_direct'" :class="tab === 'air_direct' ? 'bg-orange-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center gap-2">
                     <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                    {{ __('Air') }}
+                    {{ __('Air Direct') }}
                 </button>
                 <button type="button" @click="tab = 'sea'" :class="tab === 'sea' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center gap-2">
                     <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17l-10-5-10 5L12 22l10-5z"/><path d="M12 12l10-5-10-5-10 5 10 5z"/><path d="M2 12l10 5 10-5"/></svg>
                     {{ __('Sea') }}
                 </button>
-                <button type="button" @click="tab = 'train'" :class="tab === 'train' ? 'bg-green-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center gap-2">
+                <button type="button" @click="tab = 'air_indirect'" :class="tab === 'air_indirect' ? 'bg-green-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center gap-2">
                     <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="15" x="3" y="4" rx="2"/><path d="M7 11h10"/><path d="M7 15h10"/><path d="M12 4v1"/><path d="M9 19l-2 2"/><path d="M15 19l2 2"/></svg>
-                    {{ __('Train') }}
+                    {{ __('Air Indirect') }}
                 </button>
             </div>
         </div>
@@ -160,7 +173,7 @@
                             <tr>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Item Style / Category') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100/30">{{ __('Price per') }} {{ strtoupper($transportUnits[$type] ?? 'KG') }}</th>
-                                @if(!$isDirect)
+                                @if($type === 'air_indirect')
                                 <th class="px-6 py-4 text-center text-xs font-bold text-orange-600 uppercase tracking-widest bg-orange-50/50">{{ __('Indirect') }} ({{ __('Dubai') }})</th>
                                 @endif
                                 <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Estimated Delay') }}</th>
@@ -176,7 +189,7 @@
                                 <tr wire:key="shipping-item-{{ $type }}-{{ $index }}" class="transition-colors group {{ $isDeleted ? 'bg-red-50/70' : 'hover:bg-slate-50/50' }}">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-4">
-                                            <div class="w-2 h-2 rounded-full {{ $type === 'air' ? 'bg-orange-500' : ($type === 'sea' ? 'bg-blue-500' : 'bg-green-500') }} opacity-40"></div>
+                                            <div class="w-2 h-2 rounded-full {{ $type === 'air_direct' ? 'bg-orange-500' : ($type === 'sea' ? 'bg-blue-500' : 'bg-green-500') }} opacity-40"></div>
                                             @if($isNew && !$isDeleted)
                                                 <span class="shrink-0 px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-widest">{{ __('New') }}</span>
                                             @endif
@@ -196,7 +209,7 @@
                                             <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg" @disabled($isDeleted) type="number" step="0.01" class="w-32 text-center text-sm font-bold text-slate-600 bg-white border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-slate-300 focus:border-slate-300 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through">
                                         </div>
                                     </td>
-                                    @if(!$isDirect)
+                                    @if($type === 'air_indirect')
                                     <td class="px-6 py-4 bg-orange-50/20">
                                         <div class="flex flex-col items-center justify-center gap-1.5">
                                             <div class="flex items-center justify-center gap-2">
@@ -207,7 +220,7 @@
                                                 <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg_china_to_dubai" @disabled($isDeleted) type="number" step="0.01" class="w-28 text-center text-sm font-bold text-orange-700 bg-white border border-orange-100 rounded-lg py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-300 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through" placeholder="-">
                                             </div>
                                             <div class="flex items-center justify-center gap-2 mt-1">
-                                                <span class="text-[10px] font-bold text-orange-500 uppercase">{{ __('Dubai') }}→{{ __('Africa') }}</span>
+                                                <span class="text-[10px] font-bold text-orange-500 uppercase">{{ __('Dubai') }}→{{ __('Destination') }}</span>
                                             </div>
                                             <div class="flex items-center justify-center gap-2">
                                                 <span class="text-xs font-bold text-slate-400">{{ $currency }}</span>

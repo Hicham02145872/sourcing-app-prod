@@ -15,7 +15,7 @@ class ShippingFeeController extends Controller
 
     public function getShippingFee(string $locale, Country $country, Request $request)
     {
-        $transportType = $request->query('transport', 'air');
+        $transportType = $request->query('transport', 'air_direct');
         $sourcing = $request->query('sourcing', 'china');
 
         $country->load(['shippingFee.items']);
@@ -25,9 +25,26 @@ class ShippingFeeController extends Controller
         }
 
         $fee = $country->shippingFee;
+        
+        $dbTransportType = $transportType;
+        if ($transportType === 'air' && $sourcing === 'china') {
+            $dbTransportType = 'air_direct';
+        } elseif ($transportType === 'air' && $sourcing === 'dubai') {
+            $dbTransportType = 'air_indirect';
+        }
+
+        if ($dbTransportType === 'air_direct' && !($fee->is_air_direct_visible ?? true)) {
+            return response()->json(['fee' => null]);
+        }
+        if ($dbTransportType === 'air_indirect' && !($fee->is_air_indirect_visible ?? true)) {
+            return response()->json(['fee' => null]);
+        }
+        if ($dbTransportType === 'sea' && !($fee->is_sea_visible ?? true)) {
+            return response()->json(['fee' => null]);
+        }
 
         $items = $fee->items
-            ->where('transport_type', $transportType)
+            ->where('transport_type', $dbTransportType)
             ->values()
             ->map(fn($item) => [
                 'id' => $item->id,
@@ -37,15 +54,15 @@ class ShippingFeeController extends Controller
                 'price_per_kg_china_to_dubai' => $item->price_per_kg_china_to_dubai,
                 'price_per_kg_dubai_to_africa' => $item->price_per_kg_dubai_to_africa,
                 'currency' => $fee->currency ?? 'USD',
-                'unit' => $fee->getUnitForTransport($transportType),
+                'unit' => $fee->getUnitForTransport($dbTransportType),
                 'estimation_days' => $item->estimation_days,
                 'estimation_unit' => $item->estimation_unit ?? 'days',
             ]);
 
-        $arrivalTime = match ($transportType) {
-            'air' => $fee->air_arrival_time,
+        $arrivalTime = match ($dbTransportType) {
+            'air_direct' => $fee->air_direct_arrival_time ?? $fee->air_arrival_time,
             'sea' => $fee->sea_arrival_time,
-            'train' => $fee->train_arrival_time,
+            'air_indirect' => $fee->air_indirect_arrival_time ?? $fee->train_arrival_time,
             default => null,
         };
 
@@ -54,7 +71,7 @@ class ShippingFeeController extends Controller
             'country_name' => $country->name,
             'country_code' => $country->code,
             'currency' => $fee->currency ?? 'USD',
-            'unit' => $fee->getUnitForTransport($transportType),
+            'unit' => $fee->getUnitForTransport($dbTransportType),
             'arrival_time' => $arrivalTime,
             'sourcing' => $sourcing,
             'transport' => $transportType,
@@ -108,20 +125,23 @@ class ShippingFeeController extends Controller
         $isDirect = (bool) ($country->is_direct ?? false);
 
         // Direct Shipping
-        $directItems = $fee->items
-            ->filter(fn ($i) => strtolower((string) $i->transport_type) === $transportType)
-            ->filter(fn ($i) => !$this->isUaeHubItemStyle($i->item_style))
-            ->values();
+        $directTransportType = $transportType === 'air' ? 'air_direct' : 'sea';
+        $directItems = collect();
+        if (($directTransportType === 'air_direct' && ($fee->is_air_direct_visible ?? true)) || 
+            ($directTransportType === 'sea' && ($fee->is_sea_visible ?? true))) {
+            
+            $directItems = $fee->items
+                ->filter(fn ($i) => strtolower((string) $i->transport_type) === $directTransportType)
+                ->values();
+        }
 
         // Indirect Shipping (UAE/Dubai)
-        $indirectItems = $fee->items->filter(
-            fn ($i) => strtolower((string) $i->transport_type) === 'train'
-        );
-        $uaeMisplaced = $fee->items->filter(function ($i) use ($transportType) {
-            $t = strtolower((string) $i->transport_type);
-            return ($t === $transportType) && $this->isUaeHubItemStyle($i->item_style);
-        });
-        $indirectItems = $indirectItems->merge($uaeMisplaced)->unique('id')->values();
+        $indirectItems = collect();
+        if ($fee->is_air_indirect_visible ?? true) {
+            $indirectItems = $fee->items->filter(
+                fn ($i) => strtolower((string) $i->transport_type) === 'air_indirect'
+            )->values();
+        }
 
         $directFormatted = $directItems->map(fn($item) => [
             'id' => $item->id,
@@ -145,8 +165,8 @@ class ShippingFeeController extends Controller
             'estimation_unit' => $item->estimation_unit ?? 'days',
         ]);
 
-        $indirectArrivalTime = $fee->train_arrival_time ?: ($transportType === 'air' ? $fee->air_arrival_time : $fee->sea_arrival_time);
-        $indirectUnit = ($transportType === 'sea') ? $fee->getUnitForTransport('sea') : ($fee->getUnitForTransport('train') ?: $fee->getUnitForTransport('air'));
+        $indirectArrivalTime = $fee->air_indirect_arrival_time ?? $fee->train_arrival_time;
+        $indirectUnit = $fee->getUnitForTransport('air_indirect');
 
         return response()->json([
             'success' => true,

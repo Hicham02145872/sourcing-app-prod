@@ -16,8 +16,8 @@ class ShippingFeesList extends Component
 
     public $selectedCountry = null;
 
-    /** @var 'air'|'sea'|'train' */
-    public string $detailTab = 'air';
+    /** @var 'air_direct'|'sea'|'air_indirect' */
+    public string $detailTab = 'air_direct';
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -35,15 +35,22 @@ class ShippingFeesList extends Component
     public function closeCountryDetails(): void
     {
         $this->selectedCountry = null;
-        $this->detailTab = 'air';
+        $this->detailTab = 'air_direct';
     }
 
     public function setDetailTab(string $tab): void
     {
-        if (! in_array($tab, ['air', 'sea', 'train'], true)) {
+        if (! in_array($tab, ['air_direct', 'sea', 'air_indirect'], true)) {
             return;
         }
-        if ($tab === 'train' && ($this->selectedCountry->is_direct ?? false)) {
+        $fee = $this->selectedCountry?->shippingFee;
+        if ($tab === 'air_direct' && !($fee->is_air_direct_visible ?? true)) {
+            return;
+        }
+        if ($tab === 'sea' && !($fee->is_sea_visible ?? true)) {
+            return;
+        }
+        if ($tab === 'air_indirect' && !($fee->is_air_indirect_visible ?? true)) {
             return;
         }
         $this->detailTab = $tab;
@@ -76,14 +83,14 @@ class ShippingFeesList extends Component
     {
         $transportTab = strtolower($transportTab);
 
-        if ($transportTab === 'train') {
+        if ($transportTab === 'air_indirect') {
             $trainRows = $items->filter(
-                fn ($i) => strtolower((string) $i->transport_type) === 'train'
+                fn ($i) => strtolower((string) $i->transport_type) === 'air_indirect'
             );
             $uaeMisplaced = $items->filter(function ($i) {
                 $t = strtolower((string) $i->transport_type);
 
-                return ($t === 'air' || $t === 'sea') && $this->isUaeHubItemStyle($i->item_style);
+                return ($t === 'air_direct' || $t === 'sea') && $this->isUaeHubItemStyle($i->item_style);
             });
 
             return $trainRows->merge($uaeMisplaced)->unique('id')->values();
@@ -102,7 +109,13 @@ class ShippingFeesList extends Component
             return collect();
         }
 
-        if ($this->detailTab === 'train' && ($this->selectedCountry->is_direct ?? false)) {
+        if ($this->detailTab === 'air_direct' && !($fee->is_air_direct_visible ?? true)) {
+            return collect();
+        }
+        if ($this->detailTab === 'sea' && !($fee->is_sea_visible ?? true)) {
+            return collect();
+        }
+        if ($this->detailTab === 'air_indirect' && !($fee->is_air_indirect_visible ?? true)) {
             return collect();
         }
 
@@ -110,25 +123,33 @@ class ShippingFeesList extends Component
     }
 
     /**
-     * @return 'air'|'sea'|'train'
+     * @return 'air_direct'|'sea'|'air_indirect'
      */
     protected function firstAvailableDetailTab(): string
     {
         $fee = $this->selectedCountry?->shippingFee;
         if (! $fee) {
-            return 'air';
+            return 'air_direct';
         }
-        $availableTypes = ['air', 'sea'];
-        if (! ($this->selectedCountry->is_direct ?? false)) {
-            $availableTypes[] = 'train';
+        
+        $availableTypes = [];
+        if ($fee->is_air_direct_visible ?? true) {
+            $availableTypes[] = 'air_direct';
         }
+        if ($fee->is_sea_visible ?? true) {
+            $availableTypes[] = 'sea';
+        }
+        if ($fee->is_air_indirect_visible ?? true) {
+            $availableTypes[] = 'air_indirect';
+        }
+
         foreach ($availableTypes as $type) {
             if ($this->filterItemsForTransportTab($fee->items, $type)->isNotEmpty()) {
                 return $type;
             }
         }
 
-        return 'air';
+        return $availableTypes[0] ?? 'air_direct';
     }
 
     public function updatingSearch()
