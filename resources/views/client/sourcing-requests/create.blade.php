@@ -907,7 +907,8 @@
                     this.showRoutingPopup = true;
                     this.loadingRates = true;
                     this.ratesData = null;
-                    this.selectedRoute = 'china';
+                    const existingSourcing = form.querySelector('[name="sourcing_location"]')?.value;
+                    this.selectedRoute = (existingSourcing === 'china' || existingSourcing === 'dubai') ? existingSourcing : 'china';
 
                     try {
                         const url = this.getPopupRatesUrl(countryId, shippingMethod);
