@@ -346,7 +346,8 @@
                                 <div class="grid grid-cols-1 gap-6"
                                      :class="ratesData?.indirect?.items?.length > 0 ? 'md:grid-cols-2' : 'md:grid-cols-1 max-w-lg mx-auto'">
                                     <!-- Option 1: Direct Shipping -->
-                                    <label class="relative flex flex-col p-6 border-2 rounded-2xl cursor-pointer transition-all hover:shadow-md"
+                                    <label x-show="!preSelectedSourcing || selectedRoute === 'china'"
+                                           class="relative flex flex-col p-6 border-2 rounded-2xl cursor-pointer transition-all hover:shadow-md"
                                            :class="selectedRoute === 'china' ? 'border-[#EF7722] bg-[#EF7722]/5 dark:bg-[#EF7722]/5 shadow-sm' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'">
                                         <input type="radio" name="popup_route" value="china" x-model="selectedRoute" class="sr-only">
                                         <div class="flex items-center justify-between mb-4">
@@ -422,7 +423,7 @@
                                     </label>
 
                                     <!-- Option 2: Indirect Shipping (via Dubai) -->
-                                    <label x-show="ratesData?.indirect?.items?.length > 0"
+                                    <label x-show="ratesData?.indirect?.items?.length > 0 && (!preSelectedSourcing || selectedRoute === 'dubai')"
                                            class="relative flex flex-col p-6 border-2 rounded-2xl cursor-pointer transition-all hover:shadow-md"
                                            :class="selectedRoute === 'dubai' ? 'border-[#EF7722] bg-[#EF7722]/5 dark:bg-[#EF7722]/5 shadow-sm' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'">
                                         <input type="radio" name="popup_route" value="dubai" x-model="selectedRoute" class="sr-only">
@@ -749,6 +750,7 @@
                 loadingRates: false,
                 ratesData: null,
                 selectedRoute: 'china',
+                preSelectedSourcing: '',
 
                 getNewIndex() {
                     const existingInputs = document.querySelectorAll('#destination-fields-container [name^="destinations"]');
@@ -907,8 +909,8 @@
                     this.showRoutingPopup = true;
                     this.loadingRates = true;
                     this.ratesData = null;
-                    const existingSourcing = form.querySelector('[name="sourcing_location"]')?.value;
-                    this.selectedRoute = (existingSourcing === 'china' || existingSourcing === 'dubai') ? existingSourcing : 'china';
+                    this.preSelectedSourcing = form.querySelector('[name="sourcing_location"]')?.value || '';
+                    this.selectedRoute = (this.preSelectedSourcing === 'china' || this.preSelectedSourcing === 'dubai') ? this.preSelectedSourcing : 'china';
 
                     try {
                         const url = this.getPopupRatesUrl(countryId, shippingMethod);
@@ -1054,6 +1056,7 @@
                 cancelRoutingPopup() {
                     this.showRoutingPopup = false;
                     this.ratesData = null;
+                    this.preSelectedSourcing = '';
                 },
 
                 confirmSubmit() {
