@@ -43,8 +43,14 @@ class ShippingFeeController extends Controller
             return response()->json(['fee' => null]);
         }
 
+        $legacyTransportTypes = match ($dbTransportType) {
+            'air_direct' => ['air_direct', 'air'],
+            'air_indirect' => ['air_indirect', 'train'],
+            default => [$dbTransportType],
+        };
+
         $items = $fee->items
-            ->where('transport_type', $dbTransportType)
+            ->whereIn('transport_type', $legacyTransportTypes)
             ->values()
             ->map(fn($item) => [
                 'id' => $item->id,
@@ -126,12 +132,13 @@ class ShippingFeeController extends Controller
 
         // Direct Shipping
         $directTransportType = $transportType === 'air' ? 'air_direct' : 'sea';
+        $directTransportTypes = $directTransportType === 'air_direct' ? ['air_direct', 'air'] : ['sea'];
         $directItems = collect();
         if (($directTransportType === 'air_direct' && ($fee->is_air_direct_visible ?? true)) || 
             ($directTransportType === 'sea' && ($fee->is_sea_visible ?? true))) {
             
             $directItems = $fee->items
-                ->filter(fn ($i) => strtolower((string) $i->transport_type) === $directTransportType)
+                ->filter(fn ($i) => in_array(strtolower((string) $i->transport_type), $directTransportTypes))
                 ->values();
         }
 
@@ -139,7 +146,7 @@ class ShippingFeeController extends Controller
         $indirectItems = collect();
         if ($fee->is_air_indirect_visible ?? true) {
             $indirectItems = $fee->items->filter(
-                fn ($i) => strtolower((string) $i->transport_type) === 'air_indirect'
+                fn ($i) => in_array(strtolower((string) $i->transport_type), ['air_indirect', 'train'])
             )->values();
         }
 
@@ -176,8 +183,8 @@ class ShippingFeeController extends Controller
             'currency' => $fee->currency ?? 'USD',
             'direct' => [
                 'transport' => $transportType,
-                'unit' => $fee->getUnitForTransport($transportType),
-                'arrival_time' => $transportType === 'air' ? $fee->air_arrival_time : $fee->sea_arrival_time,
+                'unit' => $fee->getUnitForTransport($directTransportType),
+                'arrival_time' => $directTransportType === 'air_direct' ? ($fee->air_direct_arrival_time ?? $fee->air_arrival_time) : $fee->sea_arrival_time,
                 'items' => $directFormatted,
             ],
             'indirect' => [

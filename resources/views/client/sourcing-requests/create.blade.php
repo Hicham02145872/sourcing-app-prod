@@ -950,7 +950,7 @@
                     }
                 },
 
-                confirmRoutingPopup() {
+                async confirmRoutingPopup() {
                     this.showRoutingPopup = false;
                     
                     // Set sourcing location
@@ -963,8 +963,90 @@
                         }
                     }
 
-                    if (form) {
+                    if (!form) return;
+
+                    // Collect all destination blocks
+                    const destBlocks = form.querySelectorAll('.destination-block');
+                    if (destBlocks.length === 0) {
                         this.submitFormDirectly(form);
+                        return;
+                    }
+
+                    const shippingMethod = form.querySelector('[name="shipping_method"]:checked')?.value || 'air';
+
+                    // Show fee summary modal with loading
+                    this.showFeeModal = true;
+                    this.loadingFees = true;
+                    this.feeDestinations = [];
+
+                    try {
+                        const fetchPromises = Array.from(destBlocks).map(async (block) => {
+                            const countrySelect = block.querySelector('[name$="[country_id]"]');
+                            const quantityInput = block.querySelector('[name$="[quantity]"]');
+                            const countryId = countrySelect?.value;
+                            const quantity = parseInt(quantityInput?.value) || 0;
+
+                            if (!countryId) return null;
+
+                            const url = this.getFeeUrl(countryId, shippingMethod, this.selectedRoute);
+                            try {
+                                const response = await fetch(url, {
+                                    headers: { 'Accept': 'application/json' }
+                                });
+                                const data = await response.json();
+                                if (data && data.fee === null) {
+                                    // Country has no shipping fee configuration
+                                    const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+                                    return {
+                                        country_name: selectedOption ? selectedOption.text.trim() : '{{ __("Selected Country") }}',
+                                        country_code: selectedOption ? selectedOption.getAttribute('data-flag') || '' : '',
+                                        currency: 'USD',
+                                        unit: 'KG',
+                                        arrival_time: null,
+                                        sourcing: this.selectedRoute,
+                                        transport: shippingMethod,
+                                        quantity: quantity,
+                                        items: [],
+                                    };
+                                }
+                                if (data && data.country_id) {
+                                    return {
+                                        country_name: data.country_name,
+                                        country_code: data.country_code || '',
+                                        currency: data.currency || 'USD',
+                                        unit: data.unit || 'KG',
+                                        arrival_time: data.arrival_time || null,
+                                        sourcing: data.sourcing || this.selectedRoute,
+                                        transport: data.transport || shippingMethod,
+                                        quantity: quantity,
+                                        items: data.items || [],
+                                    };
+                                }
+                            } catch (err) {
+                                console.error('Error fetching fee for country', countryId, err);
+                            }
+
+                            // Fallback: basic info with empty items
+                            const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+                            return {
+                                country_name: selectedOption ? selectedOption.text.trim() : '{{ __("Selected Country") }}',
+                                country_code: selectedOption ? selectedOption.getAttribute('data-flag') || '' : '',
+                                currency: 'USD',
+                                unit: 'KG',
+                                arrival_time: null,
+                                sourcing: this.selectedRoute,
+                                transport: shippingMethod,
+                                quantity: quantity,
+                                items: [],
+                            };
+                        });
+
+                        const results = await Promise.all(fetchPromises);
+                        this.feeDestinations = results.filter(r => r !== null);
+                    } catch (err) {
+                        console.error('Error fetching destination fees:', err);
+                    } finally {
+                        this.loadingFees = false;
                     }
                 },
 
