@@ -142,9 +142,9 @@ class ShippingFeeController extends Controller
                 ->values();
         }
 
-        // Indirect Shipping (UAE/Dubai)
+        // Indirect Shipping (UAE/Dubai) — only available for air transport
         $indirectItems = collect();
-        if ($fee->is_air_indirect_visible ?? true) {
+        if ($transportType === 'air' && ($fee->is_air_indirect_visible ?? true)) {
             $indirectItems = $fee->items->filter(
                 fn ($i) => in_array(strtolower((string) $i->transport_type), ['air_indirect', 'train'])
             )->values();
