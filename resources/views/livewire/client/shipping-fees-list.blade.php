@@ -178,6 +178,20 @@
                         <h4 class="text-base font-bold text-slate-900 dark:text-white">{{ $sectionTitle }}</h4>
                         @if($currentType === 'air_indirect')
                             <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ __('United Arab Emirates') }}</p>
+                            @if($fee->china_to_dubai_duration || $fee->dubai_to_destination_duration)
+                            <div class="mt-2 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest">
+                                @if($fee->china_to_dubai_duration)
+                                    <span class="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-1 text-green-700 dark:bg-green-950/40 dark:text-green-300">
+                                        CN → DXB: {{ $fee->china_to_dubai_duration }} {{ __('days') }}
+                                    </span>
+                                @endif
+                                @if($fee->dubai_to_destination_duration)
+                                    <span class="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-1 text-green-700 dark:bg-green-950/40 dark:text-green-300">
+                                        DXB → {{ $selectedCountry->code }}: {{ $fee->dubai_to_destination_duration }} {{ __('days') }}
+                                    </span>
+                                @endif
+                            </div>
+                            @endif
                         @else
                             <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ __('China') }}</p>
                         @endif

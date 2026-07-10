@@ -483,7 +483,17 @@
                                             <!-- Est Time -->
                                             <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-xl text-xs">
                                                 <span class="text-slate-500 dark:text-slate-400">{{ __('Estimated Delivery:') }} / مدة الشحن:</span>
-                                                <span class="font-bold text-slate-800 dark:text-slate-200" x-text="ratesData?.indirect?.arrival_time ? ratesData.indirect.arrival_time + ' ' + '{{ __("days") }}' : '{{ __("N/A") }}'"></span>
+                                                <div class="flex flex-col items-end gap-0.5">
+                                                    <template x-if="ratesData?.indirect?.china_to_dubai_duration && ratesData?.indirect?.dubai_to_destination_duration">
+                                                        <div class="flex flex-col items-end gap-0.5">
+                                                            <span class="text-[10px] text-green-600 dark:text-green-400" x-text="'CN→DXB: ' + ratesData.indirect.china_to_dubai_duration + ' {{ __("days") }}'"></span>
+                                                            <span class="text-[10px] text-green-600 dark:text-green-400" x-text="'DXB→' + ratesData?.country_code + ': ' + ratesData.indirect.dubai_to_destination_duration + ' {{ __("days") }}'"></span>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="!ratesData?.indirect?.china_to_dubai_duration || !ratesData?.indirect?.dubai_to_destination_duration">
+                                                        <span class="font-bold text-slate-800 dark:text-slate-200" x-text="ratesData?.indirect?.arrival_time ? ratesData.indirect.arrival_time + ' {{ __("days") }}' : '{{ __("N/A") }}'"></span>
+                                                    </template>
+                                                </div>
                                             </div>
 
                                             <!-- Rates list -->

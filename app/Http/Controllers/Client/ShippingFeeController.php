@@ -174,6 +174,8 @@ class ShippingFeeController extends Controller
 
         $indirectArrivalTime = $fee->air_indirect_arrival_time ?? $fee->train_arrival_time;
         $indirectUnit = $fee->getUnitForTransport('air_indirect');
+        $chinaToDubaiDuration = $fee->china_to_dubai_duration ?? null;
+        $dubaiToDestinationDuration = $fee->dubai_to_destination_duration ?? null;
 
         return response()->json([
             'success' => true,
@@ -191,6 +193,8 @@ class ShippingFeeController extends Controller
                 'transport' => $transportType,
                 'unit' => $indirectUnit,
                 'arrival_time' => $isDirect ? null : $indirectArrivalTime,
+                'china_to_dubai_duration' => $isDirect ? null : $chinaToDubaiDuration,
+                'dubai_to_destination_duration' => $isDirect ? null : $dubaiToDestinationDuration,
                 'items' => $isDirect ? [] : $indirectFormatted,
             ],
         ]);

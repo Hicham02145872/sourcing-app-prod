@@ -27,6 +27,10 @@ class ShippingFeeEdit extends Component
 
     public $air_indirect_arrival_time = '15-20';
 
+    public $china_to_dubai_duration = '';
+
+    public $dubai_to_destination_duration = '';
+
     public array $itemsData = [
         'air_direct' => [],
         'sea' => [],
@@ -71,6 +75,8 @@ class ShippingFeeEdit extends Component
             $this->air_direct_arrival_time = $fee->air_direct_arrival_time ?? $fee->air_arrival_time ?? '7-9';
             $this->sea_arrival_time = $fee->sea_arrival_time ?? '30-45';
             $this->air_indirect_arrival_time = $fee->air_indirect_arrival_time ?? $fee->train_arrival_time ?? '15-20';
+            $this->china_to_dubai_duration = $fee->china_to_dubai_duration ?? '';
+            $this->dubai_to_destination_duration = $fee->dubai_to_destination_duration ?? '';
             
             $this->is_air_direct_visible = $fee->is_air_direct_visible ?? true;
             $this->is_air_indirect_visible = $fee->is_air_indirect_visible ?? true;
@@ -269,6 +275,8 @@ class ShippingFeeEdit extends Component
             'air_direct_arrival_time' => $this->air_direct_arrival_time,
             'sea_arrival_time' => $this->sea_arrival_time,
             'air_indirect_arrival_time' => $this->air_indirect_arrival_time,
+            'china_to_dubai_duration' => $this->china_to_dubai_duration ?: null,
+            'dubai_to_destination_duration' => $this->dubai_to_destination_duration ?: null,
             'is_air_direct_visible' => $this->is_air_direct_visible,
             'is_air_indirect_visible' => $this->is_air_indirect_visible,
             'is_sea_visible' => $this->is_sea_visible,
