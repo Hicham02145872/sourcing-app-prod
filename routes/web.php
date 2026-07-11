@@ -312,5 +312,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/dev/login', [\App\Http\Controllers\Auth\DevLoginController::class, 'showLoginForm'])->name('dev.login');
     Route::post('/dev/login', [\App\Http\Controllers\Auth\DevLoginController::class, 'login'])->middleware('throttle:5,1');
 });
+Route::middleware('guest')->prefix('{locale}')->where(['locale' => 'eng|fr|ar'])->group(function () {
+    Route::get('/dev/login', [\App\Http\Controllers\Auth\DevLoginController::class, 'showLoginForm'])->name('dev.login.locale');
+    Route::post('/dev/login', [\App\Http\Controllers\Auth\DevLoginController::class, 'login'])->middleware('throttle:5,1');
+});
 
 require __DIR__.'/auth.php';

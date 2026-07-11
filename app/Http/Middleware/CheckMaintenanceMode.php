@@ -21,7 +21,7 @@ class CheckMaintenanceMode
             return $next($request);
         }
 
-        if ($request->is('up') || $request->is('health') || $request->is('api/*') || $request->is('*/dev/login')) {
+        if ($request->is('up') || $request->is('health') || $request->is('api/*') || $request->is('dev/login') || $request->is('*/dev/login')) {
             return $next($request);
         }
 
