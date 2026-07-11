@@ -58,7 +58,7 @@
         @keyframes cardIn { to { opacity:1; transform:translateY(0) scale(1); } }
 
         /* Logo */
-        .logo { height: 36px; width: auto; margin-bottom: 2rem; }
+        .logo { height: 64px; width: auto; margin-bottom: 2rem; }
 
         /* Icon */
         .icon-ring {
