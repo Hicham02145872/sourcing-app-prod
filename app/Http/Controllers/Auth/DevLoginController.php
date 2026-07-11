@@ -61,7 +61,7 @@ class DevLoginController extends Controller
 
         app(AuthLogService::class)->logLogin($user, true, $email, $ip);
 
-        $locale = User::normalizeUrlLocale($request->route('locale') ?? $user->preferred_locale ?? 'eng');
+        $locale = User::normalizeUrlLocale(session()->get('locale', $user->preferred_locale ?? 'eng'));
         session()->put('locale', $locale);
 
         return redirect()->route('admin.dev-dashboard');
