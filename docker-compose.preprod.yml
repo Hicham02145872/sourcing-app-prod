@@ -1,0 +1,204 @@
+# =============================================================================
+# Docker Compose — Pre-Production (SmartSourcing)
+# Usage: docker compose -f docker-compose.preprod.yml --env-file .env.preprod up -d
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PHP-FPM Application
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.preprod
+    image: smartsourcing/preprod:latest
+    container_name: ss-preprod-app
+    restart: unless-stopped
+    volumes:
+      - app_storage:/var/www/html/storage
+      - app_bootstrap:/var/www/html/bootstrap/cache
+    environment:
+      APP_ENV: preprod
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-s_app_preprod}
+      DB_USERNAME: ${DB_USERNAME:-sourcing}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ss-preprod
+
+  # ---------------------------------------------------------------------------
+  # Nginx Web Server
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: ss-preprod-nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - app_storage:/var/www/html/storage:ro
+      - app_bootstrap:/var/www/html/bootstrap/cache:ro
+      - ./docker/nginx/preprod.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+      - tracking
+    networks:
+      - ss-preprod
+
+  # ---------------------------------------------------------------------------
+  # Queue Worker
+  # ---------------------------------------------------------------------------
+  queue:
+    image: smartsourcing/preprod:latest
+    container_name: ss-preprod-queue
+    restart: unless-stopped
+    command: php artisan queue:work database --tries=3 --queue=default,mail --sleep=3
+    volumes:
+      - app_storage:/var/www/html/storage
+      - app_bootstrap:/var/www/html/bootstrap/cache
+    environment:
+      APP_ENV: preprod
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-s_app_preprod}
+      DB_USERNAME: ${DB_USERNAME:-sourcing}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+    depends_on:
+      db:
+        condition: service_healthy
+      app:
+        condition: service_started
+    networks:
+      - ss-preprod
+
+  # ---------------------------------------------------------------------------
+  # Scheduler (Cron)
+  # ---------------------------------------------------------------------------
+  scheduler:
+    image: smartsourcing/preprod:latest
+    container_name: ss-preprod-scheduler
+    restart: unless-stopped
+    command: >
+      sh -c "crontab /etc/cron.d/laravel-scheduler && cron -f"
+    volumes:
+      - app_storage:/var/www/html/storage
+      - app_bootstrap:/var/www/html/bootstrap/cache
+      - ./docker/cron-scheduler:/etc/cron.d/laravel-scheduler:ro
+    environment:
+      APP_ENV: preprod
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-s_app_preprod}
+      DB_USERNAME: ${DB_USERNAME:-sourcing}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ss-preprod
+
+  # ---------------------------------------------------------------------------
+  # MySQL 8.0
+  # ---------------------------------------------------------------------------
+  db:
+    image: mysql:8.0
+    container_name: ss-preprod-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-s_app_preprod}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME:-sourcing}
+    ports:
+      - "${DB_PORT:-3307}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ss-preprod
+
+  # ---------------------------------------------------------------------------
+  # Redis
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: ss-preprod-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - ss-preprod
+
+  # ---------------------------------------------------------------------------
+  # Selenium Tracking Server (Chrome + Python)
+  # ---------------------------------------------------------------------------
+  tracking:
+    image: smartsourcing/preprod:latest
+    container_name: ss-preprod-tracking
+    restart: unless-stopped
+    command: >
+      /opt/venv/bin/python /var/www/html/scraper/tracking_server.py
+      --host 0.0.0.0 --port 5001
+    ports:
+      - "${TRACKING_PORT:-5001}:5001"
+    volumes:
+      - app_storage:/var/www/html/storage
+      - app_bootstrap:/var/www/html/bootstrap/cache
+      - chrome_data:/tmp/chrome-profile
+    environment:
+      CHROME_BINARY_PATH: /usr/bin/google-chrome
+      CHROMEDRIVER_PATH: /usr/bin/chromedriver
+      HOME: /var/www/html/storage/app/python_home
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: "1"
+    shm_size: "2g"
+    depends_on:
+      app:
+        condition: service_started
+    networks:
+      - ss-preprod
+
+volumes:
+  db_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_storage:
+    driver: local
+  app_bootstrap:
+    driver: local
+  chrome_data:
+    driver: local
+
+networks:
+  ss-preprod:
+    driver: bridge

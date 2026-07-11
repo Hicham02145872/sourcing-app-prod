@@ -46,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ], append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\UpdateSessionActivity::class,
+            \App\Http\Middleware\CheckMaintenanceMode::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

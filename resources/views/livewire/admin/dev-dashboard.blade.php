@@ -65,6 +65,7 @@
                     'notifications' => 'Notifications',
                     'mail' => 'Mail Viewer',
                     'cache' => 'Cache',
+                    'maintenance' => 'Maintenance',
                 ],
                 'Data' => [
                     'db' => 'Database',
@@ -2156,6 +2157,71 @@
                     </div>
                 </div>
             @endif
+
+            {{-- ═══════════════════════════════════════════════════════════ --}}
+            {{-- MAINTENANCE MODE                                        --}}
+            {{-- ═══════════════════════════════════════════════════════════ --}}
+            @if($activeTab === 'maintenance')
+                <div class="space-y-8 max-w-2xl">
+                    <div class="border-b border-slate-300 pb-6">
+                        <h2 class="text-lg font-black text-slate-900 uppercase tracking-widest">Maintenance Mode</h2>
+                        <p class="text-[11px] text-slate-500 mt-1">Active/désactive l'écran de maintenance pour les utilisateurs.</p>
+                    </div>
+
+                    {{-- Status Card --}}
+                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900">Mode Maintenance</h3>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">
+                                        @if($maintenanceMode)
+                                            <span class="text-red-600 font-bold">● ACTIVÉ</span> — Les utilisateurs voient l'écran de maintenance
+                                        @else
+                                            <span class="text-emerald-600 font-bold">● DÉSACTIVÉ</span> — L'application fonctionne normalement
+                                        @endif
+                                    </p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox"
+                                           wire:click="toggleMaintenanceMode"
+                                           {{ $maintenanceMode ? 'checked' : '' }}
+                                           class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                </label>
+                            </div>
+
+                            {{-- Message Input --}}
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+                                    Message personnalisé
+                                </label>
+                                <textarea
+                                    wire:model.live="maintenanceMessage"
+                                    wire:change="updateMaintenanceMessage"
+                                    rows="3"
+                                    class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-300 focus:border-purple-300 outline-none transition-all"
+                                    placeholder="Maintenance en cours, revenez bientôt..."></textarea>
+                                <p class="text-[10px] text-slate-400 mt-1">Affiché sur l'écran de maintenance aux utilisateurs.</p>
+                            </div>
+                        </div>
+
+                        {{-- Info Box --}}
+                        <div class="px-6 py-4 bg-purple-50 border-t border-purple-100">
+                            <div class="flex items-start gap-3">
+                                <div class="p-1.5 bg-purple-100 text-purple-600 rounded-lg mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div class="text-[11px] text-purple-800 leading-relaxed">
+                                    <strong>Avertissement :</strong> Lorsque le mode maintenance est activé, seuls les développeurs et administrateurs peuvent accéder à l'application. Les clients verront un écran de maintenance. Les endpoints API ne sont pas affectés.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </main>
     </div>
 
@@ -2176,7 +2242,7 @@
                             'db' => 'Database', 'seeders' => 'Seeders', 'backups' => 'Backups', 'actionlog' => 'Audit log', 'audit' => 'Status Audit',
                             'testing' => 'Test / Impersonate', 'users' => 'Users', 'flags' => 'Feature Flags', 'scheduler' => 'Scheduler',
                             'shortcuts' => 'Artisan', 'webhooks' => 'Webhooks', 'sessions' => 'Sessions', 'rate_limits' => 'Rate limiters',
-                            'fcm_tokens' => 'FCM tokens', 'env' => 'Env',
+                            'fcm_tokens' => 'FCM tokens', 'env' => 'Env', 'maintenance' => 'Maintenance',
                         ];
                         $q = strtolower(trim($commandPaletteQuery ?? ''));
                     @endphp

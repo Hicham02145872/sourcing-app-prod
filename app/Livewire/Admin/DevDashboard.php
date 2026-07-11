@@ -27,6 +27,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
+use App\Models\Setting;
+
 class DevDashboard extends Component
 {
     // Debug System
@@ -199,6 +201,28 @@ class DevDashboard extends Component
 
     public array $availableMailables = [];
 
+    // ── Maintenance Mode ──
+    public bool $maintenanceMode = false;
+    public string $maintenanceMessage = '';
+
+    public function toggleMaintenanceMode(): void
+    {
+        $this->maintenanceMode = !$this->maintenanceMode;
+        Setting::toggleMaintenance($this->maintenanceMode, $this->maintenanceMessage);
+        AuditLogger::log('maintenance_toggle', Setting::class, $this->maintenanceMode ? 'activated' : 'deactivated');
+    }
+
+    public function updateMaintenanceMessage(): void
+    {
+        Setting::set('maintenance_message', $this->maintenanceMessage);
+    }
+
+    public function loadMaintenanceStatus(): void
+    {
+        $this->maintenanceMode = Setting::isMaintenanceMode();
+        $this->maintenanceMessage = Setting::getMaintenanceMessage();
+    }
+
     /** Canaux pour DevPing : mail, database, fcm */
     public array $devPingChannels = ['database', 'fcm'];
 
@@ -257,6 +281,7 @@ class DevDashboard extends Component
         $this->loadEmailOrders();
         $this->loadFeatureFlags();
         $this->loadAvailableMailables();
+        $this->loadMaintenanceStatus();
     }
 
     public function updatedActiveTab(string $value): void

@@ -1,0 +1,107 @@
+# =============================================================================
+# Dockerfile — Pre-Production (SmartSourcing)
+# Multi-stage: Frontend → Backend → Final image with Selenium
+# =============================================================================
+
+# Stage 1: Frontend Asset Builder
+FROM node:18-alpine AS frontend
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 2: Backend Dependency Builder
+FROM composer:2.5 AS backend
+WORKDIR /app
+COPY --from=frontend /app .
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Stage 3: Final Pre-Production Image
+FROM php:8.2-fpm
+WORKDIR /var/www/html
+
+# Install system dependencies, PHP extensions, and Chrome for Selenium
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libzip-dev \
+    libicu-dev \
+    supervisor \
+    cron \
+    gnupg \
+    ca-certificates \
+    apt-transport-https \
+    wget \
+    unzip \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libasound2 \
+    libxshmfence1 \
+    fonts-liberation \
+    xdg-utils \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd dom fileinfo zip intl \
+    && pecl install redis \
+    && docker-php-ext-enable redis opcache \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Google Chrome
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends google-chrome-stable \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install ChromeDriver (matching Chrome version)
+RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+') \
+    && CHROMEDRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION%%.*}" 2>/dev/null || echo "$CHROME_VERSION") \
+    && wget -q "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
+    && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
+    && chmod +x /usr/local/bin/chromedriver \
+    && rm /tmp/chromedriver.zip
+
+# Install Python 3 + Selenium for tracking server
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-venv \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create Python virtual environment and install dependencies
+RUN python3 -m venv /opt/venv
+COPY scraper/requirements.txt /tmp/requirements.txt
+RUN /opt/venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
+
+# Copy application code and compiled assets
+COPY --from=backend /app .
+
+# Copy Supervisor config for tracking server
+COPY docker/supervisord-preprod.conf /etc/supervisor/conf.d/app.conf
+
+# Copy cron scheduler
+COPY docker/cron-scheduler /etc/cron.d/laravel-scheduler
+RUN chmod 0644 /etc/cron.d/laravel-scheduler && crontab /etc/cron.d/laravel-scheduler
+
+# Set correct permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:9000/fpm-ping || exit 1
+
+EXPOSE 9000
+
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
