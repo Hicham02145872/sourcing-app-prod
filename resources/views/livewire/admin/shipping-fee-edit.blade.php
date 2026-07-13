@@ -171,11 +171,11 @@
                     @if($type === 'air_indirect')
                     <div class="px-4 py-3 bg-green-50/50 border-b border-green-100 flex items-center gap-4">
                         <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-bold text-green-700 uppercase tracking-widest">{{ __('Durée Chine') }} → {{ __('Dubaï') }}</span>
+                            <span class="text-[10px] font-bold text-green-700 uppercase tracking-widest">{{ __('Durée') }} {{ __('Chine') }} → {{ __('Dubaï') }}</span>
                             <input wire:model="china_to_dubai_duration" type="text" class="w-24 text-center text-sm font-bold text-green-700 bg-white border border-green-200 rounded-lg py-1.5 focus:ring-2 focus:ring-green-300 focus:border-green-300 outline-none transition-all" placeholder="ex: 5-7">
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-bold text-green-700 uppercase tracking-widest">{{ __('Durée Dubaï') }} → {{ __('Destination') }}</span>
+                            <span class="text-[10px] font-bold text-green-700 uppercase tracking-widest">{{ __('Durée') }} {{ __('Dubaï') }} → {{ $country->name }}</span>
                             <input wire:model="dubai_to_destination_duration" type="text" class="w-24 text-center text-sm font-bold text-green-700 bg-white border border-green-200 rounded-lg py-1.5 focus:ring-2 focus:ring-green-300 focus:border-green-300 outline-none transition-all" placeholder="ex: 3-5">
                         </div>
                     </div>

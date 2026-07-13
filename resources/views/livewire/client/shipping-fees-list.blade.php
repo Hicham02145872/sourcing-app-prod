@@ -187,7 +187,7 @@
                                 @endif
                                 @if($fee->dubai_to_destination_duration)
                                     <span class="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-1 text-green-700 dark:bg-green-950/40 dark:text-green-300">
-                                        DXB → {{ $selectedCountry->code }}: {{ $fee->dubai_to_destination_duration }} {{ __('days') }}
+                                        DXB → {{ strtoupper($selectedCountry->code) }}: {{ $fee->dubai_to_destination_duration }} {{ __('days') }}
                                     </span>
                                 @endif
                             </div>
