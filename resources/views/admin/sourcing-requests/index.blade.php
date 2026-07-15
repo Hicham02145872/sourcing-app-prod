@@ -115,18 +115,6 @@
                                     class="w-full pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 block transition-colors placeholder:text-slate-400">
                             </div>
 
-                            <!-- Status Filter -->
-                            <div class="w-full md:w-48">
-                                <select name="status" class="w-full px-3 py-1.5 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 block">
-                                    <option value="all">{{ __('All Statuses') }}</option>
-                                    @foreach (\App\Models\SourcingRequest::STATUSES as $status)
-                                        <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
-                                            {{ ucfirst(str_replace('_', ' ', $status)) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
                             <!-- Admin Filter (Super Admin only) -->
                             @if(auth()->user()->isSuperAdmin())
                             <div class="w-full md:w-48">
@@ -156,6 +144,48 @@
                         </div>
                     </div>
                 </form>
+            </div>
+
+            <!-- Section 2b: Status Toggle Bar -->
+            @php
+                $statusStyles = [
+                    'pending'     => ['active' => 'bg-amber-500 text-white border-amber-500 shadow-sm', 'inactive' => 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50'],
+                    'in_review'   => ['active' => 'bg-blue-500 text-white border-blue-500 shadow-sm', 'inactive' => 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50'],
+                    'quoted'      => ['active' => 'bg-purple-500 text-white border-purple-500 shadow-sm', 'inactive' => 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'],
+                    'negotiating' => ['active' => 'bg-sky-500 text-white border-sky-500 shadow-sm', 'inactive' => 'bg-white text-sky-700 border-sky-200 hover:bg-sky-50'],
+                    'accepted'    => ['active' => 'bg-indigo-500 text-white border-indigo-500 shadow-sm', 'inactive' => 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'],
+                    'completed'   => ['active' => 'bg-emerald-500 text-white border-emerald-500 shadow-sm', 'inactive' => 'bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50'],
+                    'rejected'    => ['active' => 'bg-red-500 text-white border-red-500 shadow-sm', 'inactive' => 'bg-white text-red-700 border-red-200 hover:bg-red-50'],
+                    'cancelled'   => ['active' => 'bg-slate-500 text-white border-slate-500 shadow-sm', 'inactive' => 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'],
+                ];
+                $statusLabels = [
+                    'pending' => 'Pending',
+                    'in_review' => 'In Review',
+                    'quoted' => 'Quoted',
+                    'negotiating' => 'Negotiating',
+                    'accepted' => 'Accepted',
+                    'completed' => 'Completed',
+                    'rejected' => 'Rejected',
+                    'cancelled' => 'Cancelled',
+                ];
+            @endphp
+            <div class="flex flex-wrap gap-2">
+                @foreach (\App\Models\SourcingRequest::STATUSES as $status)
+                    @php
+                        $isActive = $activeStatus === $status;
+                        $style = $isActive ? $statusStyles[$status]['active'] : $statusStyles[$status]['inactive'];
+                        $count = $statusCounts[$status] ?? 0;
+                        $params = array_merge(request()->except('status', 'page'), ['status' => $status]);
+                        $url = $isActive ? route('admin.sourcing-requests.index', array_merge(request()->except('status', 'page'), ['status' => 'all'])) : route('admin.sourcing-requests.index', $params);
+                    @endphp
+                    <a href="{{ $url }}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-all {{ $style }}">
+                        {{ $statusLabels[$status] }}
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full {{ $isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-600' }}">
+                            {{ $count }}
+                        </span>
+                    </a>
+                @endforeach
             </div>
 
             <!-- Section 3: Data Table -->

@@ -118,11 +118,6 @@ class AdminSourcingRequestController extends Controller
     {
         $query = SourcingRequest::with('category', 'user', 'destinations.country', 'destinations.service', 'assignedAdmin');
 
-        // Filter by status
-        if ($request->has('status') && $request->status != 'all') {
-            $query->where('status', $request->status);
-        }
-
         // Filter by search term
         if ($request->has('search')) {
             $searchTerm = $request->search;
@@ -159,9 +154,51 @@ class AdminSourcingRequestController extends Controller
             }
         }
 
-        // AUTO-ASSIGNMENT SECURITY FILTER REMOVED
-        // Admins can now see all requests, but standard admins are restricted to "read-only"
-        // on requests assigned to others via Policy/Gate checks.
+        // Status counts (respecting search + admin filters, but NOT status filter)
+        $statusCountsQuery = SourcingRequest::query();
+        if ($request->has('search')) {
+            $searchTerm = $request->search;
+            $statusCountsQuery->where(function ($q) use ($searchTerm) {
+                $q->where('product_name', 'like', '%'.$searchTerm.'%')
+                    ->orWhere('shared_id', 'like', '%'.$searchTerm.'%')
+                    ->orWhere('id', 'like', '%'.$searchTerm.'%')
+                    ->orWhere('note', 'like', '%'.$searchTerm.'%')
+                    ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                        $userQuery->where('name', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('email', 'like', '%'.$searchTerm.'%');
+                    })
+                    ->orWhereHas('destinations', function ($destQuery) use ($searchTerm) {
+                        $destQuery->where('address', 'like', '%'.$searchTerm.'%')
+                            ->orWhereHas('country', function ($countryQuery) use ($searchTerm) {
+                                $countryQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            })
+                            ->orWhereHas('service', function ($serviceQuery) use ($searchTerm) {
+                                $serviceQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            });
+                    })
+                    ->orWhereHas('assignedAdmin', function ($adminQuery) use ($searchTerm) {
+                        $adminQuery->where('name', 'like', '%'.$searchTerm.'%');
+                    });
+            });
+        }
+        if (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
+            if ($request->admin_id == 'unassigned') {
+                $statusCountsQuery->whereNull('assigned_to_admin_id');
+            } else {
+                $statusCountsQuery->where('assigned_to_admin_id', $request->admin_id);
+            }
+        }
+        $statusCountsRaw = $statusCountsQuery->select('status', DB::raw('count(*) as count'))->groupBy('status')->pluck('count', 'status');
+        $statusCounts = [];
+        foreach (SourcingRequest::STATUSES as $s) {
+            $statusCounts[$s] = $statusCountsRaw->get($s, 0);
+        }
+
+        // Filter by status (default to 'pending' when no status param)
+        $activeStatus = $request->input('status', 'pending');
+        if ($activeStatus !== 'all') {
+            $query->where('status', $activeStatus);
+        }
 
         // Sort: 1) Critical statuses first (e.g. negotiating), 2) unassigned → my assignments → others, 3) newest first
         $criticalStatuses = SourcingRequest::CRITICAL_STATUSES_FOR_LIST;
@@ -175,9 +212,9 @@ class AdminSourcingRequestController extends Controller
         $query->orderByRaw("{$criticalSql} ASC, {$assignmentSql} ASC, sourcing_requests.created_at DESC");
 
         $sourcingRequests = $query->paginate(10)->withQueryString();
-        $admins = \App\Models\User::where('role', 'admin')->get(); // For manual assignment dropdown
+        $admins = \App\Models\User::where('role', 'admin')->get();
 
-        return view('admin.sourcing-requests.index', compact('sourcingRequests', 'admins'));
+        return view('admin.sourcing-requests.index', compact('sourcingRequests', 'admins', 'statusCounts', 'activeStatus'));
     }
 
     /**
