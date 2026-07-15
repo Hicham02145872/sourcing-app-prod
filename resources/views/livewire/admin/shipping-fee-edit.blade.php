@@ -188,7 +188,9 @@
                                 @if($type === 'air_indirect')
                                 <th class="px-6 py-4 text-center text-xs font-bold text-orange-600 uppercase tracking-widest bg-orange-50/50">{{ __('Indirect') }} ({{ __('Dubai') }})</th>
                                 @endif
+                                @if($type !== 'air_indirect')
                                 <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Estimated Delay') }}</th>
+                                @endif
                                 <th class="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
@@ -241,6 +243,7 @@
                                         </div>
                                     </td>
                                     @endif
+                                    @if($type !== 'air_indirect')
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center gap-2">
                                             <input wire:model="itemsData.{{ $type }}.{{ $index }}.estimation_days" @disabled($isDeleted) type="text" class="w-24 text-center text-sm font-bold text-slate-600 bg-slate-50 border border-slate-100 rounded-lg py-2 focus:ring-2 focus:ring-orange-200 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through" placeholder="e.g. 7-9">
@@ -250,6 +253,7 @@
                                             </select>
                                         </div>
                                     </td>
+                                    @endif
                                     <td class="px-4 py-4 text-center">
                                         @if($isDeleted)
                                             <button
