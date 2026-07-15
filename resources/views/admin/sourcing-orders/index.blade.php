@@ -208,9 +208,10 @@
             <div class="flex flex-wrap gap-1.5">
                 @foreach (\App\Models\SourcingOrder::STATUSES as $status)
                     @php
-                        $isActive = $activeStatus === $status;
-                        $style = $isActive ? $statusColors[$status]['active'] : ($statusColors[$status]['inactive'] ?? 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50');
                         $count = $statusCounts[$status] ?? 0;
+                        $isActive = $activeStatus === $status;
+                        if ($count === 0 && !$isActive) continue;
+                        $style = $isActive ? $statusColors[$status]['active'] : ($statusColors[$status]['inactive'] ?? 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50');
                         $params = array_merge(request()->except('status', 'page'), ['status' => $status]);
                         $url = $isActive ? route('admin.sourcing-orders.index', array_merge(request()->except('status', 'page'), ['status' => 'all'])) : route('admin.sourcing-orders.index', $params);
                     @endphp

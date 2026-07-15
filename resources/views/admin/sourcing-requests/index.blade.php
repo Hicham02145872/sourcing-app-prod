@@ -172,9 +172,10 @@
             <div class="flex flex-wrap gap-2">
                 @foreach (\App\Models\SourcingRequest::STATUSES as $status)
                     @php
-                        $isActive = $activeStatus === $status;
-                        $style = $isActive ? $statusStyles[$status]['active'] : $statusStyles[$status]['inactive'];
                         $count = $statusCounts[$status] ?? 0;
+                        $isActive = $activeStatus === $status;
+                        if ($count === 0 && !$isActive) continue;
+                        $style = $isActive ? $statusStyles[$status]['active'] : $statusStyles[$status]['inactive'];
                         $params = array_merge(request()->except('status', 'page'), ['status' => $status]);
                         $url = $isActive ? route('admin.sourcing-requests.index', array_merge(request()->except('status', 'page'), ['status' => 'all'])) : route('admin.sourcing-requests.index', $params);
                     @endphp
