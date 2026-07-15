@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -66,11 +67,6 @@ class SourcingOrderController extends Controller
             END")
             ->orderBy('id', 'desc');
 
-        // Filter by status
-        if ($request->has('status') && $request->status != 'all') {
-            $query->where('status', $request->status);
-        }
-
         // Filter by search term
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
@@ -109,10 +105,58 @@ class SourcingOrderController extends Controller
             }
         }
 
+        // Status counts (respecting search + admin filters, but NOT status filter)
+        $statusCountsQuery = SourcingOrder::query();
+        if ($search = $request->query('search')) {
+            $statusCountsQuery->where(function ($q) use ($search) {
+                $q->where('id', 'like', '%'.$search.'%')
+                    ->orWhere('shared_id', 'like', '%'.$search.'%')
+                    ->orWhere('sourcing_request_id', 'like', '%'.$search.'%')
+                    ->orWhere('quotation_id', 'like', '%'.$search.'%')
+                    ->orWhereRaw("CAST((sourcing_orders.id * 5) AS CHAR) LIKE ?", ['%'.$search.'%'])
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('email', 'like', '%'.$search.'%');
+                    })
+                    ->orWhereHas('quotation.sourcingRequest', function ($srQuery) use ($search) {
+                        $srQuery->where('product_name', 'like', '%'.$search.'%')
+                            ->orWhere('id', 'like', '%'.$search.'%')
+                            ->orWhere('note', 'like', '%'.$search.'%')
+                            ->orWhereHas('destinations', function ($destQuery) use ($search) {
+                                $destQuery->where('address', 'like', '%'.$search.'%')
+                                    ->orWhereHas('country', function ($countryQuery) use ($search) {
+                                        $countryQuery->where('name', 'like', '%'.$search.'%');
+                                    });
+                            });
+                    })
+                    ->orWhereHas('assignedAdmin', function ($adminQuery) use ($search) {
+                        $adminQuery->where('name', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+        if (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
+            if ($request->admin_id == 'unassigned') {
+                $statusCountsQuery->whereNull('assigned_to_admin_id');
+            } else {
+                $statusCountsQuery->where('assigned_to_admin_id', $request->admin_id);
+            }
+        }
+        $statusCountsRaw = $statusCountsQuery->select('status', DB::raw('count(*) as count'))->groupBy('status')->pluck('count', 'status');
+        $statusCounts = [];
+        foreach (SourcingOrder::STATUSES as $s) {
+            $statusCounts[$s] = $statusCountsRaw->get($s, 0);
+        }
+
+        // Filter by status (default to 'pending_payment' when no status param)
+        $activeStatus = $request->input('status', 'pending_payment');
+        if ($activeStatus !== 'all') {
+            $query->where('status', $activeStatus);
+        }
+
         $sourcingOrders = $query->paginate(10)->withQueryString();
         $admins = \App\Models\User::where('role', 'admin')->get();
 
-        return view('admin.sourcing-orders.index', compact('sourcingOrders', 'admins'));
+        return view('admin.sourcing-orders.index', compact('sourcingOrders', 'admins', 'statusCounts', 'activeStatus'));
     }
 
     public function show(SourcingOrder $sourcingOrder): View

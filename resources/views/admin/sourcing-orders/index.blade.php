@@ -127,18 +127,6 @@
                                     class="w-full pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 block transition-colors placeholder:text-slate-400">
                             </div>
 
-                            <!-- Status Filter -->
-                            <div class="w-full md:w-48">
-                                <select name="status" class="w-full px-3 py-1.5 text-sm bg-slate-50 border border-slate-300 text-slate-900 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 block">
-                                    <option value="all">{{ __('All Statuses') }}</option>
-                                    @foreach (\App\Models\SourcingOrder::STATUSES as $status)
-                                        <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
-                                            {{ ucfirst(str_replace('_', ' ', $status)) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
                             <!-- Admin Filter (Super Admin only) -->
                             @if(auth()->user()->isSuperAdmin())
                             <div class="w-full md:w-48">
@@ -168,6 +156,72 @@
                         </div>
                     </div>
                 </form>
+            </div>
+
+            <!-- Section 2b: Status Toggle Bar -->
+            @php
+                $statusColors = [
+                    'pending_payment'                      => ['active' => 'bg-amber-500 text-white border-amber-500', 'inactive' => 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50'],
+                    'paid'                                 => ['active' => 'bg-blue-500 text-white border-blue-500', 'inactive' => 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50'],
+                    'shipment_preparing'                   => ['active' => 'bg-cyan-500 text-white border-cyan-500', 'inactive' => 'bg-white text-cyan-700 border-cyan-200 hover:bg-cyan-50'],
+                    'in_transit_china'                     => ['active' => 'bg-teal-500 text-white border-teal-500', 'inactive' => 'bg-white text-teal-700 border-teal-200 hover:bg-teal-50'],
+                    'arrival_uae'                          => ['active' => 'bg-sky-500 text-white border-sky-500', 'inactive' => 'bg-white text-sky-700 border-sky-200 hover:bg-sky-50'],
+                    'customs_clearance_uae'                => ['active' => 'bg-indigo-500 text-white border-indigo-500', 'inactive' => 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'],
+                    'in_transit_uae'                       => ['active' => 'bg-violet-500 text-white border-violet-500', 'inactive' => 'bg-white text-violet-700 border-violet-200 hover:bg-violet-50'],
+                    'arrival_destination_country'          => ['active' => 'bg-purple-500 text-white border-purple-500', 'inactive' => 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'],
+                    'customs_clearance_destination_country' => ['active' => 'bg-fuchsia-500 text-white border-fuchsia-500', 'inactive' => 'bg-white text-fuchsia-700 border-fuchsia-200 hover:bg-fuchsia-50'],
+                    'out_for_delivery'                     => ['active' => 'bg-pink-500 text-white border-pink-500', 'inactive' => 'bg-white text-pink-700 border-pink-200 hover:bg-pink-50'],
+                    'delivered'                            => ['active' => 'bg-emerald-500 text-white border-emerald-500', 'inactive' => 'bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50'],
+                    'delivery_failed'                      => ['active' => 'bg-red-500 text-white border-red-500', 'inactive' => 'bg-white text-red-700 border-red-200 hover:bg-red-50'],
+                    'shipment_delayed'                     => ['active' => 'bg-orange-500 text-white border-orange-500', 'inactive' => 'bg-white text-orange-700 border-orange-200 hover:bg-orange-50'],
+                    'shipment_returned'                    => ['active' => 'bg-rose-500 text-white border-rose-500', 'inactive' => 'bg-white text-rose-700 border-rose-200 hover:bg-rose-50'],
+                    'shipment_canceled'                    => ['active' => 'bg-slate-500 text-white border-slate-500', 'inactive' => 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'],
+                    'order_completed'                      => ['active' => 'bg-green-500 text-white border-green-500', 'inactive' => 'bg-white text-green-700 border-green-200 hover:bg-green-50'],
+                    'waiting_for_refund'                   => ['active' => 'bg-amber-600 text-white border-amber-600', 'inactive' => 'bg-white text-amber-800 border-amber-200 hover:bg-amber-50'],
+                    'refund_approved'                      => ['active' => 'bg-lime-500 text-white border-lime-500', 'inactive' => 'bg-white text-lime-700 border-lime-200 hover:bg-lime-50'],
+                    'refunded'                             => ['active' => 'bg-teal-600 text-white border-teal-600', 'inactive' => 'bg-white text-teal-800 border-teal-200 hover:bg-teal-50'],
+                    'refund_rejected'                      => ['active' => 'bg-red-600 text-white border-red-600', 'inactive' => 'bg-white text-red-800 border-red-200 hover:bg-red-50'],
+                ];
+                $statusLabels = [
+                    'pending_payment'                      => 'Pending Payment',
+                    'paid'                                 => 'Paid',
+                    'shipment_preparing'                   => 'Shipment Preparing',
+                    'in_transit_china'                     => 'In Transit (CN)',
+                    'arrival_uae'                          => 'Arrival UAE',
+                    'customs_clearance_uae'                => 'Customs UAE',
+                    'in_transit_uae'                       => 'In Transit (UAE)',
+                    'arrival_destination_country'          => 'Arrival Dest.',
+                    'customs_clearance_destination_country' => 'Customs Dest.',
+                    'out_for_delivery'                     => 'Out for Delivery',
+                    'delivered'                            => 'Delivered',
+                    'delivery_failed'                      => 'Delivery Failed',
+                    'shipment_delayed'                     => 'Delayed',
+                    'shipment_returned'                    => 'Returned',
+                    'shipment_canceled'                    => 'Canceled',
+                    'order_completed'                      => 'Completed',
+                    'waiting_for_refund'                   => 'Waiting Refund',
+                    'refund_approved'                      => 'Refund Approved',
+                    'refunded'                             => 'Refunded',
+                    'refund_rejected'                      => 'Refund Rejected',
+                ];
+            @endphp
+            <div class="flex flex-wrap gap-1.5">
+                @foreach (\App\Models\SourcingOrder::STATUSES as $status)
+                    @php
+                        $isActive = $activeStatus === $status;
+                        $style = $isActive ? $statusColors[$status]['active'] : ($statusColors[$status]['inactive'] ?? 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50');
+                        $count = $statusCounts[$status] ?? 0;
+                        $params = array_merge(request()->except('status', 'page'), ['status' => $status]);
+                        $url = $isActive ? route('admin.sourcing-orders.index', array_merge(request()->except('status', 'page'), ['status' => 'all'])) : route('admin.sourcing-orders.index', $params);
+                    @endphp
+                    <a href="{{ $url }}"
+                       class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold rounded-full border transition-all {{ $style }}">
+                        {{ $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status)) }}
+                        <span class="inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[9px] font-bold rounded-full {{ $isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-600' }}">
+                            {{ $count }}
+                        </span>
+                    </a>
+                @endforeach
             </div>
 
             <!-- Section 3: Data Table -->
