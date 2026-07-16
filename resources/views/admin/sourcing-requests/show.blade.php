@@ -204,10 +204,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Unit Weight') }}</label>
-                                    <div class="text-sm font-bold text-slate-900">
-                                        {{ number_format($sourcingRequest->quotation->unit_weight, 2) }} 
-                                        <span class="text-xs font-medium text-slate-500">{{ $sourcingRequest->quotation->weight_unit ?? 'g' }}</span>
-                                    </div>
+                                    <div class="text-sm font-bold text-slate-900">{{ number_format($sourcingRequest->quotation->unit_weight, 2) }} {{ $sourcingRequest->quotation->weight_unit ?? 'g' }}</div>
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('China Delivery') }}</label>
@@ -228,7 +225,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
                     @endif
                      <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">

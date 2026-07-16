@@ -155,8 +155,21 @@ class QuotationController extends Controller
         // Calculate total quantity from all destinations (use actual sum; do not force minimum 1)
         $totalQuantity = $sourcingRequest->destinations->sum('quantity');
 
+        // Auto-set unit_price from quality options if hidden field is 0
+        // Quality options define per-quality pricing; use first available as base unit_price
+        $effectiveUnitPrice = (float) $validated['unit_price'];
+        if ($effectiveUnitPrice == 0 && $request->has('quality_options')) {
+            $rawOptions = $request->input('quality_options');
+            foreach (['medium', 'good', 'low'] as $quality) {
+                if (isset($rawOptions[$quality]['price']) && $rawOptions[$quality]['price'] !== '') {
+                    $effectiveUnitPrice = (float) $rawOptions[$quality]['price'];
+                    break;
+                }
+            }
+        }
+
         // Calculate total amount: (unit_price * totalQuantity) + commission + delivery
-        $subtotal = $validated['unit_price'] * $totalQuantity;
+        $subtotal = $effectiveUnitPrice * $totalQuantity;
         $amount = $subtotal + $validated['commission_service'] + $validated['delivery_cost_china'];
 
         // Handle Estimated Product Cost: Input is Unit Cost -> Store as Total Cost
@@ -248,7 +261,7 @@ class QuotationController extends Controller
             'sourcing_request_id' => $validated['sourcing_request_id'],
             'assigned_to_admin_id' => $sourcingRequest->assigned_to_admin_id, // Inherit assignment from request
             'amount' => $amount,
-            'unit_price' => $validated['unit_price'],
+            'unit_price' => $effectiveUnitPrice,
             'commission_service' => $validated['commission_service'],
             'unit_weight' => $validated['unit_weight'],
             'weight_unit' => $validated['weight_unit'],
@@ -362,12 +375,23 @@ class QuotationController extends Controller
 
             $totalQuantity = $sourcingRequest->destinations->sum('quantity');
 
-            $subtotal = $validated['unit_price'] * $totalQuantity;
+            $effectiveUnitPrice = (float) $validated['unit_price'];
+            if ($effectiveUnitPrice == 0 && $request->has('quality_options')) {
+                $rawOptions = $request->input('quality_options');
+                foreach (['medium', 'good', 'low'] as $quality) {
+                    if (isset($rawOptions[$quality]['price']) && $rawOptions[$quality]['price'] !== '') {
+                        $effectiveUnitPrice = (float) $rawOptions[$quality]['price'];
+                        break;
+                    }
+                }
+            }
+
+            $subtotal = $effectiveUnitPrice * $totalQuantity;
             $amount = $subtotal + $validated['commission_service'] + $validated['delivery_cost_china'];
 
             Log::info('Quotation update calculation', [
                 'quotation_id' => $quotation->id,
-                'unit_price' => $validated['unit_price'],
+                'unit_price' => $effectiveUnitPrice,
                 'quantity' => $totalQuantity,
                 'subtotal' => $subtotal,
                 'amount' => $amount,
@@ -478,7 +502,7 @@ class QuotationController extends Controller
 
             $quotation->update([
                 'amount' => $amount,
-                'unit_price' => $validated['unit_price'],
+                'unit_price' => $effectiveUnitPrice,
                 'commission_service' => $validated['commission_service'],
                 'unit_weight' => $validated['unit_weight'],
                 'weight_unit' => $validated['weight_unit'],
