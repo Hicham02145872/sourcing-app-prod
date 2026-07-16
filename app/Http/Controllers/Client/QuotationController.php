@@ -152,6 +152,7 @@ class QuotationController extends Controller
                     'unit_price' => $unitPrice,
                     'amount' => $amount,
                     'real_product_image' => $realProductImage,
+                    'selected_quality' => $selectedQuality,
                 ]);
                 $q->sourcingRequest->transitionTo('accepted', auth()->user());
 
@@ -395,6 +396,7 @@ class QuotationController extends Controller
                         'unit_price' => $unitPrice,
                         'amount' => $amount,
                         'real_product_image' => $realProductImage,
+                        'selected_quality' => $selectedQuality,
                     ]);
                     $quotation->sourcingRequest->transitionTo('accepted', auth()->user());
 

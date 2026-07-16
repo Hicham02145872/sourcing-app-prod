@@ -95,6 +95,43 @@
                     <!-- Order Workflow & Tracking (Livewire) -->
                     <livewire:admin.sourcing-order-workflow :sourcingOrder="$sourcingOrder" />
 
+                    <!-- Quotation Fees (Quality-aware pricing) -->
+                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                            <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 3.666A5.102 5.102 0 0113 15m0 2h1v1h-1a1.002 1.002 0 01-.84-.525L10 13a4.002 4.002 0 01-1.12-1m7-5a5 5 0 01-2 5M5 21V7a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2z"/></svg>
+                                {{ __('Quotation Fees') }}
+                                @if($selectedQuality)
+                                    <span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold rounded uppercase">{{ ucfirst($selectedQuality) }} Quality</span>
+                                @endif
+                            </h3>
+                        </div>
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Unit Price') }}</label>
+                                <div class="text-sm font-bold text-slate-900">{{ number_format($effectiveUnitPrice, 2) }} {{ $sourcingOrder->quotation->currency }}</div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Commission') }}</label>
+                                <div class="text-sm font-bold text-slate-900">{{ number_format($sourcingOrder->quotation->commission_service, 2) }} {{ $sourcingOrder->quotation->currency }}</div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Unit Weight') }}</label>
+                                <div class="text-sm font-bold text-slate-900">{{ number_format($sourcingOrder->quotation->unit_weight, 2) }} {{ $sourcingOrder->quotation->weight_unit ?? 'g' }}</div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Shipping') }}</label>
+                                <div class="text-sm font-bold text-slate-900">{{ number_format($sourcingOrder->quotation->delivery_cost_china, 2) }} {{ $sourcingOrder->quotation->currency }}</div>
+                            </div>
+                            <div class="col-span-1 md:col-span-4 pt-4 border-t border-slate-100">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-bold text-slate-700">{{ __('Total Amount:') }}</span>
+                                    <span class="text-lg font-extrabold text-orange-600">{{ number_format($sourcingOrder->quotation->amount, 2) }} {{ $sourcingOrder->quotation->currency }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 2. Financial Control (Admin Only) - ENHANCED -->
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">

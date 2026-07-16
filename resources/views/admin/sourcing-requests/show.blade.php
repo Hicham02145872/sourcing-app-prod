@@ -193,10 +193,36 @@
                                     <a href="{{ route('admin.quotations.show', $sourcingRequest->quotation) }}" class="text-xs text-orange-600 hover:text-orange-700 font-bold uppercase tracking-wider">{{ __('View full quotation') }}</a>
                                 </div>
                             </div>
+
+                            {{-- Quality Options (Read-only display) --}}
+                            @if(!empty($qualityOptions) && count(array_filter($qualityOptions, fn($opt) => !empty($opt['price']))) > 0)
+                                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/30">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">{{ __('Quality Options') }}</p>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        @foreach(['low' => __('Low'), 'medium' => __('Medium'), 'good' => __('Good')] as $key => $label)
+                                            @if(!empty($qualityOptions[$key]['price']))
+                                                <div class="relative border-2 rounded-lg p-3 transition-all {{ $selectedQuality === $key ? 'border-orange-500 bg-orange-50' : 'border-slate-200 bg-white' }}">
+                                                    @if($selectedQuality === $key)
+                                                        <div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+                                                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                                        </div>
+                                                    @endif
+                                                    <p class="text-[10px] font-bold uppercase tracking-wider {{ $selectedQuality === $key ? 'text-orange-700' : 'text-slate-500' }}">{{ $label }}</p>
+                                                    <p class="text-sm font-bold {{ $selectedQuality === $key ? 'text-orange-900' : 'text-slate-900' }}">{{ number_format($qualityOptions[$key]['price'], 2) }} {{ $sourcingRequest->quotation->currency }}</p>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Unit Price') }}</label>
-                                    <div class="text-sm font-bold text-slate-900">{{ number_format($sourcingRequest->quotation->unit_price, 2) }} {{ $sourcingRequest->quotation->currency }}</div>
+                                    <div class="text-sm font-bold text-slate-900">{{ number_format($effectiveUnitPrice, 2) }} {{ $sourcingRequest->quotation->currency }}</div>
+                                    @if(!$selectedQuality && $sourcingRequest->quotation->status === 'pending')
+                                        <p class="text-[10px] text-slate-400 mt-0.5">{{ __('Reference price — pending client selection') }}</p>
+                                    @endif
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Commission') }}</label>
@@ -221,7 +247,7 @@
                                 <div class="col-span-1 md:col-span-4 pt-4 border-t border-slate-50">
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm font-bold text-slate-700">{{ __('Total Amount:') }}</span>
-                                        <span class="text-lg font-extrabold text-orange-600">{{ number_format($sourcingRequest->quotation->amount, 2) }} {{ $sourcingRequest->quotation->currency }}</span>
+                                        <span class="text-lg font-extrabold text-orange-600">{{ number_format($effectiveTotal, 2) }} {{ $sourcingRequest->quotation->currency }}</span>
                                     </div>
                                 </div>
                             </div>

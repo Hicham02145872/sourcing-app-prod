@@ -164,7 +164,16 @@ class SourcingOrderController extends Controller
         $this->authorize('view', $sourcingOrder);
         $sourcingOrder->load('user', 'media', 'sourcingRequest', 'quotation.sourcingRequest.category', 'quotation.sourcingRequest.destinations.country', 'quotation.sourcingRequest.destinations.service');
 
-        return view('admin.sourcing-orders.show', compact('sourcingOrder'));
+        // Calculate quality-aware pricing for display
+        $quotation = $sourcingOrder->quotation;
+        $qualityOptions = $quotation->quality_options ?? [];
+        $totalQuantity = $quotation->sourcingRequest->destinations->sum('quantity');
+
+        // Use stored selected_quality from client acceptance
+        $selectedQuality = $quotation->selected_quality ?? null;
+        $effectiveUnitPrice = (float) $quotation->unit_price;
+
+        return view('admin.sourcing-orders.show', compact('sourcingOrder', 'qualityOptions', 'selectedQuality', 'effectiveUnitPrice', 'totalQuantity'));
     }
 
     public function editLabel(SourcingOrder $sourcingOrder): View
