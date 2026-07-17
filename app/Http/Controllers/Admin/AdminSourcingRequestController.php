@@ -233,36 +233,43 @@ class AdminSourcingRequestController extends Controller
         $sourcingRequest->load('category', 'user', 'destinations.country', 'destinations.service', 'assignedAdmin', 'order');
 
         // Calculate quality-aware pricing for display
-        $quotation = $sourcingRequest->quotation;
-        $qualityOptions = $quotation->quality_options ?? [];
+        $qualityOptions = [];
+        $selectedQuality = null;
+        $effectiveUnitPrice = 0;
+        $effectiveTotal = 0;
         $totalQuantity = $sourcingRequest->destinations->sum('quantity');
 
-        // Use stored selected_quality from client acceptance
-        $selectedQuality = $quotation->selected_quality ?? null;
-        $effectiveUnitPrice = (float) $quotation->unit_price;
+        if ($sourcingRequest->quotation) {
+            $quotation = $sourcingRequest->quotation;
+            $qualityOptions = $quotation->quality_options ?? [];
+            $effectiveUnitPrice = (float) $quotation->unit_price;
 
-        // If no selected_quality stored, detect by matching unit_price to quality prices
-        if ($selectedQuality === null && !empty($qualityOptions)) {
-            foreach (['low', 'medium', 'good'] as $quality) {
-                if (isset($qualityOptions[$quality]['price']) && (float) $qualityOptions[$quality]['price'] === $effectiveUnitPrice) {
-                    $selectedQuality = $quality;
-                    break;
-                }
-            }
+            // Use stored selected_quality from client acceptance
+            $selectedQuality = $quotation->selected_quality ?? null;
 
-            // If unit_price is 0, use first available as reference
-            if ($selectedQuality === null && $effectiveUnitPrice == 0) {
-                foreach (['medium', 'good', 'low'] as $quality) {
-                    if (isset($qualityOptions[$quality]['price']) && !empty($qualityOptions[$quality]['price'])) {
+            // If no selected_quality stored, detect by matching unit_price to quality prices
+            if ($selectedQuality === null && !empty($qualityOptions)) {
+                foreach (['low', 'medium', 'good'] as $quality) {
+                    if (isset($qualityOptions[$quality]['price']) && (float) $qualityOptions[$quality]['price'] === $effectiveUnitPrice) {
                         $selectedQuality = $quality;
-                        $effectiveUnitPrice = (float) $qualityOptions[$quality]['price'];
                         break;
                     }
                 }
-            }
-        }
 
-        $effectiveTotal = ($effectiveUnitPrice * $totalQuantity) + (float) $quotation->commission_service + (float) $quotation->delivery_cost_china;
+                // If unit_price is 0, use first available as reference
+                if ($selectedQuality === null && $effectiveUnitPrice == 0) {
+                    foreach (['medium', 'good', 'low'] as $quality) {
+                        if (isset($qualityOptions[$quality]['price']) && !empty($qualityOptions[$quality]['price'])) {
+                            $selectedQuality = $quality;
+                            $effectiveUnitPrice = (float) $qualityOptions[$quality]['price'];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            $effectiveTotal = ($effectiveUnitPrice * $totalQuantity) + (float) $quotation->commission_service + (float) $quotation->delivery_cost_china;
+        }
 
         return view('admin.sourcing-requests.show', compact('sourcingRequest', 'qualityOptions', 'selectedQuality', 'effectiveUnitPrice', 'effectiveTotal', 'totalQuantity'));
     }
