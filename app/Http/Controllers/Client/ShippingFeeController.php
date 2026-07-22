@@ -60,6 +60,8 @@ class ShippingFeeController extends Controller
                 'price_per_kg_china_to_dubai' => $item->price_per_kg_china_to_dubai,
                 'price_per_kg_dubai_to_africa' => $item->price_per_kg_dubai_to_africa,
                 'currency' => $fee->currency ?? 'USD',
+                'china_to_dubai_currency' => $fee->china_to_dubai_currency ?? 'CNY',
+                'dubai_to_destination_currency' => $fee->dubai_to_destination_currency ?? 'USD',
                 'unit' => $fee->getUnitForTransport($dbTransportType),
                 'estimation_days' => $item->estimation_days,
                 'estimation_unit' => $item->estimation_unit ?? 'days',
@@ -176,6 +178,8 @@ class ShippingFeeController extends Controller
         $indirectUnit = $fee->getUnitForTransport('air_indirect');
         $chinaToDubaiDuration = $fee->china_to_dubai_duration ?? null;
         $dubaiToDestinationDuration = $fee->dubai_to_destination_duration ?? null;
+        $chinaToDubaiCurrency = $fee->china_to_dubai_currency ?? 'CNY';
+        $dubaiToDestinationCurrency = $fee->dubai_to_destination_currency ?? 'USD';
 
         return response()->json([
             'success' => true,
@@ -195,6 +199,8 @@ class ShippingFeeController extends Controller
                 'arrival_time' => $isDirect ? null : $indirectArrivalTime,
                 'china_to_dubai_duration' => $isDirect ? null : $chinaToDubaiDuration,
                 'dubai_to_destination_duration' => $isDirect ? null : $dubaiToDestinationDuration,
+                'china_to_dubai_currency' => $isDirect ? null : $chinaToDubaiCurrency,
+                'dubai_to_destination_currency' => $isDirect ? null : $dubaiToDestinationCurrency,
                 'items' => $isDirect ? [] : $indirectFormatted,
             ],
         ]);

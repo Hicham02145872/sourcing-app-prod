@@ -173,10 +173,20 @@
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] font-bold text-green-700 uppercase tracking-widest">{{ __('Durée') }} {{ __('Chine') }} → {{ __('Dubaï') }}</span>
                             <input wire:model="china_to_dubai_duration" type="text" class="w-24 text-center text-sm font-bold text-green-700 bg-white border border-green-200 rounded-lg py-1.5 focus:ring-2 focus:ring-green-300 focus:border-green-300 outline-none transition-all" placeholder="ex: 5-7">
+                            <select wire:model="china_to_dubai_currency" class="text-xs font-bold text-green-700 bg-white border border-green-200 rounded-lg py-1.5 px-2 focus:ring-2 focus:ring-green-300 focus:border-green-300 outline-none transition-all">
+                                @foreach($this->currencies as $code => $label)
+                                    <option value="{{ $code }}">{{ $code }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] font-bold text-green-700 uppercase tracking-widest">{{ __('Durée') }} {{ __('Dubaï') }} → {{ $country->name }}</span>
                             <input wire:model="dubai_to_destination_duration" type="text" class="w-24 text-center text-sm font-bold text-green-700 bg-white border border-green-200 rounded-lg py-1.5 focus:ring-2 focus:ring-green-300 focus:border-green-300 outline-none transition-all" placeholder="ex: 3-5">
+                            <select wire:model="dubai_to_destination_currency" class="text-xs font-bold text-green-700 bg-white border border-green-200 rounded-lg py-1.5 px-2 focus:ring-2 focus:ring-green-300 focus:border-green-300 outline-none transition-all">
+                                @foreach($this->currencies as $code => $label)
+                                    <option value="{{ $code }}">{{ $code }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     @endif
@@ -230,14 +240,14 @@
                                                 <span class="text-[10px] font-bold text-orange-500 uppercase">{{ __('China') }}→{{ __('Dubai') }}</span>
                                             </div>
                                             <div class="flex items-center justify-center gap-2">
-                                                <span class="text-xs font-bold text-slate-400">{{ $currency }}</span>
+                                                <span class="text-xs font-bold text-slate-400">{{ $china_to_dubai_currency }}</span>
                                                 <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg_china_to_dubai" @disabled($isDeleted) type="number" step="0.01" class="w-28 text-center text-sm font-bold text-orange-700 bg-white border border-orange-100 rounded-lg py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-300 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through" placeholder="-">
                                             </div>
                                             <div class="flex items-center justify-center gap-2 mt-1">
                                                 <span class="text-[10px] font-bold text-orange-500 uppercase">{{ __('Dubai') }}→{{ __('Destination') }}</span>
                                             </div>
                                             <div class="flex items-center justify-center gap-2">
-                                                <span class="text-xs font-bold text-slate-400">{{ $currency }}</span>
+                                                <span class="text-xs font-bold text-slate-400">{{ $dubai_to_destination_currency }}</span>
                                                 <input wire:model="itemsData.{{ $type }}.{{ $index }}.price_per_kg_dubai_to_africa" @disabled($isDeleted) type="number" step="0.01" class="w-28 text-center text-sm font-bold text-orange-700 bg-white border border-orange-100 rounded-lg py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-300 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:line-through" placeholder="-">
                                             </div>
                                         </div>

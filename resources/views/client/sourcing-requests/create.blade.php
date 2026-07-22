@@ -504,7 +504,7 @@
                                                             <span class="text-slate-600 dark:text-slate-400 font-medium text-left leading-tight" x-text="item.item_style"></span>
                                                             <template x-if="item.price_per_kg_china_to_dubai != null && item.price_per_kg_dubai_to_africa != null">
                                                                 <span class="text-[9px] text-emerald-600 dark:text-emerald-400 mt-0.5">
-                                                                    CN→DXB: <span x-text="parseFloat(item.price_per_kg_china_to_dubai).toFixed(2)"></span> + DXB→<span x-text="ratesData?.country_code"></span>: <span x-text="parseFloat(item.price_per_kg_dubai_to_africa).toFixed(2)"></span>
+                                                                    CN→DXB: <span x-text="parseFloat(item.price_per_kg_china_to_dubai).toFixed(2)"></span> <span x-text="ratesData?.indirect?.china_to_dubai_currency || 'CNY'"></span> + DXB→<span x-text="ratesData?.country_code"></span>: <span x-text="parseFloat(item.price_per_kg_dubai_to_africa).toFixed(2)"></span> <span x-text="ratesData?.indirect?.dubai_to_destination_currency || 'USD'"></span>
                                                                 </span>
                                                             </template>
                                                         </div>

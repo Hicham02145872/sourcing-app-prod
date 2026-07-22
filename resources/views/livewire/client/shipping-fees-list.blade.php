@@ -253,9 +253,11 @@
                                                                     <div class="flex flex-col items-center gap-0.5">
                                                                         <div class="text-[10px] font-semibold text-orange-600 uppercase">{{ __('China') }}→{{ __('Dubai') }}
                                                                             <span class="text-slate-900">{{ number_format((float) $chinaToDubai, 2) }}</span>
+                                                                            <span class="text-[10px] font-bold text-slate-400">{{ $fee->china_to_dubai_currency ?? 'CNY' }}</span>
                                                                         </div>
                                                                         <div class="text-[10px] font-semibold text-orange-600 uppercase">{{ __('Dubai') }}→{{ __('Destination') }}
                                                                             <span class="text-slate-900">{{ number_format((float) $dubaiToAfrica, 2) }}</span>
+                                                                            <span class="text-[10px] font-bold text-slate-400">{{ $fee->dubai_to_destination_currency ?? 'USD' }}</span>
                                                                         </div>
                                                                     </div>
                                                                 @else

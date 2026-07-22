@@ -31,6 +31,10 @@ class ShippingFeeEdit extends Component
 
     public $dubai_to_destination_duration = '';
 
+    public $china_to_dubai_currency = 'CNY';
+
+    public $dubai_to_destination_currency = 'USD';
+
     public array $itemsData = [
         'air_direct' => [],
         'sea' => [],
@@ -77,6 +81,8 @@ class ShippingFeeEdit extends Component
             $this->air_indirect_arrival_time = $fee->air_indirect_arrival_time ?? $fee->train_arrival_time ?? '15-20';
             $this->china_to_dubai_duration = $fee->china_to_dubai_duration ?? '';
             $this->dubai_to_destination_duration = $fee->dubai_to_destination_duration ?? '';
+            $this->china_to_dubai_currency = $fee->china_to_dubai_currency ?? 'CNY';
+            $this->dubai_to_destination_currency = $fee->dubai_to_destination_currency ?? 'USD';
             
             $this->is_air_direct_visible = $fee->is_air_direct_visible ?? true;
             $this->is_air_indirect_visible = $fee->is_air_indirect_visible ?? true;
@@ -277,6 +283,8 @@ class ShippingFeeEdit extends Component
             'air_indirect_arrival_time' => $this->air_indirect_arrival_time,
             'china_to_dubai_duration' => $this->china_to_dubai_duration ?: null,
             'dubai_to_destination_duration' => $this->dubai_to_destination_duration ?: null,
+            'china_to_dubai_currency' => $this->china_to_dubai_currency ?: 'CNY',
+            'dubai_to_destination_currency' => $this->dubai_to_destination_currency ?: 'USD',
             'is_air_direct_visible' => $this->is_air_direct_visible,
             'is_air_indirect_visible' => $this->is_air_indirect_visible,
             'is_sea_visible' => $this->is_sea_visible,

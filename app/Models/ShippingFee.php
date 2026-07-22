@@ -24,6 +24,8 @@ class ShippingFee extends Model
         'is_sea_visible',
         'china_to_dubai_duration',
         'dubai_to_destination_duration',
+        'china_to_dubai_currency',
+        'dubai_to_destination_currency',
     ];
 
     protected $casts = [
