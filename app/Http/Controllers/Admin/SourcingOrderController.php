@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\SourcingOrderStatusChanged;
 use App\Http\Controllers\Controller;
+use App\Jobs\DeleteCloudinaryAsset;
 use App\Models\SourcingOrder;
 use App\Models\SourcingOrderMedia;
+use App\Notifications\ParcelEvidenceAdded;
 use App\Notifications\ProofOfPaymentRejected;
 use App\Services\GoogleSheetService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -649,6 +651,43 @@ class SourcingOrderController extends Controller
         }
 
         return redirect()->back()->with('success', 'Média supprimé avec succès.');
+    }
+
+    public function uploadParcel(Request $request, SourcingOrder $sourcingOrder): RedirectResponse
+    {
+        $this->authorize('update', $sourcingOrder);
+
+        $validated = $request->validate([
+            'parcel_photo' => 'required|image|mimes:jpeg,png,jpg,webp,gif|max:15360',
+            'parcel_weight_kg' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $result = $this->imageService->compressAndStore(
+            $request->file('parcel_photo'),
+            'parcel-photos',
+            'public'
+        );
+
+        // Replace existing photo: remove old local file and Cloudinary asset
+        if ($sourcingOrder->parcel_photo_path) {
+            Storage::disk('public')->delete($sourcingOrder->parcel_photo_path);
+        }
+        if ($sourcingOrder->parcel_photo_public_id) {
+            DeleteCloudinaryAsset::dispatch($sourcingOrder->parcel_photo_public_id);
+        }
+
+        $sourcingOrder->update([
+            'parcel_photo_path' => $result->path,
+            'parcel_photo_public_id' => $result->publicId,
+            'parcel_weight_kg' => $validated['parcel_weight_kg'] ?? null,
+            'parcel_photo_uploaded_at' => now(),
+        ]);
+
+        if ($sourcingOrder->user) {
+            $sourcingOrder->user->notify(new ParcelEvidenceAdded($sourcingOrder));
+        }
+
+        return back()->with('status', 'Parcel photo added successfully.');
     }
 
     public function exportPdf(Request $request)

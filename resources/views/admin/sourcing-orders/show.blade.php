@@ -577,6 +577,43 @@
                         @endif
                     </div>
 
+                    <!-- 2. Parcel / Colis -->
+                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-5 py-3 border-b border-slate-100 bg-slate-50/50">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('Parcel / Colis') }}</h3>
+                        </div>
+                        <div class="p-5">
+                            @if ($sourcingOrder->parcel_photo_path)
+                                <div class="mb-3">
+                                    <img src="{{ media_url($sourcingOrder->parcel_photo_path) }}" alt="{{ __('Parcel photo') }}" class="w-full rounded-md border border-slate-200 object-cover max-h-48">
+                                    @if (! is_null($sourcingOrder->parcel_weight_kg))
+                                        <p class="mt-2 text-xs font-semibold text-slate-700">{{ __('Weight:') }} <span class="font-mono">{{ number_format($sourcingOrder->parcel_weight_kg, 2) }} kg</span></p>
+                                    @endif
+                                    @if ($sourcingOrder->parcel_photo_uploaded_at)
+                                        <p class="mt-1 text-[10px] text-slate-400">{{ __('Uploaded :date', ['date' => $sourcingOrder->parcel_photo_uploaded_at->format('d/m/Y H:i')]) }}</p>
+                                    @endif
+                                </div>
+                            @else
+                                <p class="text-[10px] text-slate-500 mb-3">{{ __('No parcel photo yet.') }}</p>
+                            @endif
+
+                            <form action="{{ route('admin.sourcing-orders.parcel.store', $sourcingOrder) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <label for="parcel_photo" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Parcel photo') }}</label>
+                                <input type="file" name="parcel_photo" id="parcel_photo" accept="image/jpeg,image/png,image/jpg,image/webp,image/gif" required
+                                       class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100 mb-3">
+                                <label for="parcel_weight_kg" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Weight (kg) — admin only') }}</label>
+                                <input type="number" step="0.01" min="0" name="parcel_weight_kg" id="parcel_weight_kg"
+                                       value="{{ old('parcel_weight_kg', $sourcingOrder->parcel_weight_kg) }}"
+                                       class="w-full px-3 py-1.5 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 mb-3"
+                                       placeholder="0.00">
+                                <button type="submit" class="w-full px-3 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-medium rounded transition-colors">
+                                    {{ $sourcingOrder->parcel_photo_path ? __('Replace parcel photo') : __('Upload parcel photo') }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
                     <!-- 2. Payment Proof Verification -->
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-5 py-3 border-b border-slate-100 bg-slate-50/50">

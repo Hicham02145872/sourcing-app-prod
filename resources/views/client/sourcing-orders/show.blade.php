@@ -308,6 +308,52 @@
                         </div>
                     </div>
 
+                    {{-- Parcel Photo --}}
+                    @if ($sourcingOrder->parcel_photo_path)
+                        <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
+                            <div class="px-6 py-4 bg-[#EBEBEB] dark:bg-slate-900/50 border-b border-[#EBEBEB] dark:border-slate-700">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-[#EF7722]/10 dark:bg-[#EF7722]/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('Your Parcel') }}</h3>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ __('Photo of your parcel prepared for shipping') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="relative group cursor-zoom-in" onclick="openMediaModal('{{ media_url($sourcingOrder->parcel_photo_path) }}', 'image')">
+                                    <img src="{{ media_url($sourcingOrder->parcel_photo_path) }}"
+                                         alt="{{ __('Parcel photo') }}"
+                                         class="w-full max-h-96 object-cover rounded-lg border border-[#EBEBEB] dark:border-slate-700 transition-transform duration-300 group-hover:scale-[1.02]">
+                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 rounded-lg transition-opacity">
+                                        <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/90 text-slate-900 text-sm font-bold rounded-full shadow">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6"/></svg>
+                                            {{ __('Zoom') }}
+                                        </span>
+                                    </div>
+                                </div>
+                                @if ($sourcingOrder->parcel_photo_uploaded_at)
+                                    <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">{{ __('Uploaded :date', ['date' => $sourcingOrder->parcel_photo_uploaded_at->format('d/m/Y')]) }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    @else
+                        <div class="bg-white dark:bg-slate-800 border border-[#EBEBEB] dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
+                            <div class="p-6 flex items-center gap-4">
+                                <div class="w-10 h-10 bg-[#EBEBEB] dark:bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                </div>
+                                <p class="text-sm text-slate-600 dark:text-slate-400">{{ __('The photo of your parcel will appear here once it is prepared for shipping.') }}</p>
+                            </div>
+                        </div>
+                    @endif
+
 
 
                     {{-- Quotation Details --}}

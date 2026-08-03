@@ -39,6 +39,12 @@ class SourcingOrder extends Model
             if ($sourcingOrder->refund_proof_path) {
                 Storage::disk('public')->delete($sourcingOrder->refund_proof_path);
             }
+            if ($sourcingOrder->parcel_photo_path) {
+                Storage::disk('public')->delete($sourcingOrder->parcel_photo_path);
+            }
+            if ($sourcingOrder->parcel_photo_public_id) {
+                DeleteCloudinaryAsset::dispatch($sourcingOrder->parcel_photo_public_id);
+            }
             $sourcingOrder->media()->each(function ($media) {
                 $media->delete();
             });
@@ -108,6 +114,10 @@ class SourcingOrder extends Model
         'label_product_name',
         'status_timestamps',
         'cloudinary_public_id',
+        'parcel_photo_path',
+        'parcel_photo_public_id',
+        'parcel_weight_kg',
+        'parcel_photo_uploaded_at',
     ];
 
     /**
@@ -125,6 +135,7 @@ class SourcingOrder extends Model
         'initial_estimated_shipping_cost',
         'initial_estimated_other_costs',
         'real_tracking_assigned_at', // Champ interne uniquement, non exposé au client
+        'parcel_weight_kg', // Poids du colis interne uniquement, non exposé au client
     ];
 
     protected $casts = [
@@ -137,8 +148,10 @@ class SourcingOrder extends Model
         'initial_estimated_shipping_cost' => 'decimal:2',
         'initial_estimated_other_costs' => 'decimal:2',
         'refund_amount' => 'decimal:2',
+        'parcel_weight_kg' => 'decimal:2',
         'fsb_tracking_created_at' => 'datetime',
         'real_tracking_assigned_at' => 'datetime',
+        'parcel_photo_uploaded_at' => 'datetime',
         'status_timestamps' => 'array',
     ];
 
