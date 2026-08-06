@@ -3,6 +3,8 @@ import json
 import time
 import argparse
 import os
+import shutil
+import tempfile
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -25,7 +27,13 @@ class ChoiceXPTracker:
             options.add_argument("--disable-software-rasterizer")
             options.add_argument("--disable-extensions")
             options.add_argument("--ash-no-coredump")
-            options.add_argument("--user-data-dir=/tmp/chrome-choicexp")
+
+            self.chrome_profile = tempfile.mkdtemp(
+                prefix="chrome-choicexp-"
+            )
+            options.add_argument(
+                f"--user-data-dir={self.chrome_profile}"
+            )
         
         # Anti-detection options
         options.add_argument("--disable-blink-features=AutomationControlled")
@@ -147,6 +155,12 @@ class ChoiceXPTracker:
             except Exception:
                 pass
             self.driver = None
+
+        if hasattr(self, "chrome_profile"):
+            shutil.rmtree(
+                self.chrome_profile,
+                ignore_errors=True
+            )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ChoiceXP Scraper")

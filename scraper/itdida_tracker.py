@@ -4,6 +4,8 @@ import time
 import argparse
 import os
 import re
+import shutil
+import tempfile
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -29,7 +31,13 @@ class OptimizedOrderTrackerSelenium:
             options.add_argument("--disable-software-rasterizer")
             options.add_argument("--disable-extensions")
             options.add_argument("--ash-no-coredump")
-            options.add_argument("--user-data-dir=/tmp/chrome-itdida")
+
+            self.chrome_profile = tempfile.mkdtemp(
+                prefix="chrome-itdida-"
+            )
+            options.add_argument(
+                f"--user-data-dir={self.chrome_profile}"
+            )
             options.add_argument("--remote-debugging-pipe")
 
         options.add_argument("--disable-blink-features=AutomationControlled")
@@ -210,8 +218,17 @@ class OptimizedOrderTrackerSelenium:
 
     def close(self):
         if self.driver:
-            self.driver.quit()
+            try:
+                self.driver.quit()
+            except Exception:
+                pass
             self.driver = None
+
+        if hasattr(self, "chrome_profile"):
+            shutil.rmtree(
+                self.chrome_profile,
+                ignore_errors=True
+            )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

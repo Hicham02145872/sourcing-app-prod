@@ -9,6 +9,8 @@ import json
 import re
 import argparse
 import os
+import shutil
+import tempfile
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -16,7 +18,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 
-def _build_chrome_options(headless=True):
+def _build_chrome_options(headless=True, user_data_dir=None):
     """Build Chrome options consistent with other scrapers (itdida, choicexp)."""
     options = Options()
     if headless:
@@ -29,7 +31,8 @@ def _build_chrome_options(headless=True):
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--log-level=3")
-    options.add_argument("--user-data-dir=/tmp/chrome-ups")
+    if user_data_dir:
+        options.add_argument(f"--user-data-dir={user_data_dir}")
     options.add_argument(
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -51,8 +54,8 @@ def _build_chrome_options(headless=True):
     return options
 
 
-def _create_driver(headless=True):
-    options = _build_chrome_options(headless=headless)
+def _create_driver(headless=True, user_data_dir=None):
+    options = _build_chrome_options(headless=headless, user_data_dir=user_data_dir)
     driver_path = os.environ.get("CHROMEDRIVER_PATH")
     if driver_path and os.path.exists(driver_path):
         service = Service(executable_path=driver_path)
@@ -242,7 +245,13 @@ class UPSTracker:
         self.driver = None
 
     def _init_driver(self):
-        self.driver = _create_driver(headless=self.headless)
+        self.chrome_profile = tempfile.mkdtemp(
+            prefix="chrome-ups-"
+        )
+        self.driver = _create_driver(
+            headless=self.headless,
+            user_data_dir=self.chrome_profile,
+        )
 
     def scrape(self, tracking_number):
         if not self.driver:
@@ -256,6 +265,12 @@ class UPSTracker:
             except Exception:
                 pass
             self.driver = None
+
+        if hasattr(self, "chrome_profile"):
+            shutil.rmtree(
+                self.chrome_profile,
+                ignore_errors=True
+            )
 
 
 def get_ups_status(tracking_number, headless=True):
