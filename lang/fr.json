@@ -1450,5 +1450,13 @@
     "The products presented come from reliable sources. However, some may be counterfeit (non-authentic products), advertisements, or products not to be purchased.": "Les produits présentés proviennent de sources fiables. Cependant, certains peuvent être des contrefaçons (produits non authentiques), des publicités ou des produits à ne pas acheter.",
     "This notice appears once every 24 hours.": "Cette annonce s'affiche une fois toutes les 24 heures.",
     "Warning Regarding Listed Products": "Avertissement concernant les produits proposés",
-    "We recommend checking ratings and customer reviews before making any purchase.": "Nous vous recommandons de vérifier les évaluations et les avis des clients avant tout achat."
+    "We recommend checking ratings and customer reviews before making any purchase.": "Nous vous recommandons de vérifier les évaluations et les avis des clients avant tout achat.",
+
+    "Label": "Étiquette",
+    "Cards": "Cartes",
+    "Shipping Label": "Étiquette d'expédition",
+    "Card view": "Vue cartes",
+    "Sync": "Synchroniser",
+    "List view": "Vue liste",
+    "List": "Liste"
 }

@@ -225,12 +225,32 @@
                 @endforeach
             </div>
 
-            <!-- Section 3: Data Table -->
-            <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+            <!-- Section 3: Data Table / Cards -->
+            <div x-data="{
+                    view: (() => { try { return localStorage.getItem('sourcingOrdersView') || 'list'; } catch (e) { return 'list'; } })(),
+                    init() { this.$watch('view', (v) => { try { localStorage.setItem('sourcingOrdersView', v); } catch (e) {} }); }
+                }" class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
                     <h3 class="text-sm font-semibold text-slate-900">{{ __('Order List') }}</h3>
-                    <div class="text-xs text-slate-500">
-                        <span class="font-medium text-slate-900">{{ $sourcingOrders->count() }}</span> {{ __('results') }}
+                    <div class="flex items-center gap-3">
+                        <div class="text-xs text-slate-500 hidden sm:block">
+                            <span class="font-medium text-slate-900">{{ $sourcingOrders->count() }}</span> {{ __('results') }}
+                        </div>
+                        <!-- View Toggle: List / Cards -->
+                        <div class="inline-flex items-center gap-0.5 bg-slate-100 border border-slate-200 rounded-lg p-0.5">
+                            <button type="button" @click="view = 'list'" title="{{ __('List view') }}"
+                                :class="view === 'list' ? 'bg-white text-orange-600 shadow-sm border-slate-200' : 'text-slate-500 hover:text-slate-700 border-transparent'"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md border transition-all">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                                <span class="hidden sm:inline">{{ __('List') }}</span>
+                            </button>
+                            <button type="button" @click="view = 'cards'" title="{{ __('Card view') }}"
+                                :class="view === 'cards' ? 'bg-white text-orange-600 shadow-sm border-slate-200' : 'text-slate-500 hover:text-slate-700 border-transparent'"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md border transition-all">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4z"/></svg>
+                                <span class="hidden sm:inline">{{ __('Cards') }}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -243,7 +263,7 @@
                         <p class="text-xs text-slate-500 mt-1">{{ __('New orders will appear here.') }}</p>
                     </div>
                 @else
-                    <div class="overflow-x-auto">
+                    <div x-show="view === 'list'" x-cloak class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-slate-200">
                             <thead class="bg-slate-50">
                                  <tr>
@@ -416,6 +436,143 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Cards view -->
+                    <div x-show="view === 'cards'" x-cloak class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-4">
+                        @foreach ($sourcingOrders as $order)
+                            @php
+                                $statusColors = [
+                                    'pending_payment' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                    'paid' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                    'shipment_preparing' => 'bg-cyan-50 text-cyan-700 border-cyan-200',
+                                    'processing' => 'bg-cyan-50 text-cyan-700 border-cyan-200',
+                                    'shipped' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                    'delivered' => 'bg-purple-50 text-purple-700 border-purple-200',
+                                    'completed' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                    'cancelled' => 'bg-red-50 text-red-700 border-red-200',
+                                ];
+                                $currentClass = $statusColors[$order->client_status] ?? 'bg-slate-50 text-slate-700 border-slate-200';
+                            @endphp
+                            <div class="flex flex-col border border-slate-200 rounded-lg bg-white shadow-sm hover:shadow-md hover:border-orange-200 transition-all overflow-hidden">
+                                <!-- Card Header -->
+                                <div class="p-4 flex items-start gap-3 border-b border-slate-100">
+                                    <div class="h-14 w-14 flex-shrink-0 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                                        @if($order->quotation->sourcingRequest->product_image)
+                                            <img src="{{ media_url($order->quotation->sourcingRequest->product_image) }}" class="h-full w-full object-cover" alt="{{ __('Product') }}">
+                                        @else
+                                            <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div class="text-sm font-mono font-medium text-orange-600">{{ $order->reference_id }}</div>
+                                            <div class="text-right shrink-0">
+                                                <div class="text-sm font-bold text-slate-900">{{ number_format($order->total_amount, 2) }}</div>
+                                                <div class="text-[10px] text-slate-500">{{ $order->quotation->currency }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="text-sm font-medium text-slate-900 truncate mt-1" title="{{ $order->quotation->sourcingRequest->product_name }}">
+                                            {{ $order->quotation->sourcingRequest->product_name }}
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 font-mono">
+                                            {{ __('Request') }} #{{ $order->sourcing_request_id ?? $order->quotation->sourcing_request_id }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="p-4 space-y-3 flex-1">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <div class="h-7 w-7 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 shrink-0">
+                                                {{ substr($order->user->name, 0, 1) }}
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="text-sm text-slate-700 truncate">{{ $order->user->name }}</div>
+                                                @if($order->user->phone)
+                                                    <div class="text-[10px] text-slate-400">{{ $order->user->phone }}</div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="text-right shrink-0">
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{{ __('Manager') }}</span>
+                                            @if($order->assignedAdmin)
+                                                <span class="text-xs text-slate-600 truncate max-w-[100px] inline-block" title="{{ $order->assignedAdmin->name }}">{{ $order->assignedAdmin->name }}</span>
+                                            @else
+                                                <span class="text-[10px] text-slate-400 italic">{{ __('Unassigned') }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">{{ __('Status') }}</span>
+                                        <form action="{{ route('admin.sourcing-orders.update-status', $order) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <select name="status"
+                                                onchange="if(confirm('{{ __('Change status of order #:id?', ['id' => $order->display_id]) }}')) { this.form.submit(); } else { location.reload(); }"
+                                                class="block w-full text-center px-2 py-1 text-[11px] font-bold rounded border uppercase tracking-wide cursor-pointer focus:ring-1 focus:ring-offset-1 focus:ring-slate-400 {{ $currentClass }}">
+                                                @foreach (App\Models\SourcingOrder::STATUSES as $status)
+                                                    <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }} class="bg-white text-slate-700">
+                                                        {{ ucfirst(str_replace('_', ' ', $status)) }}
+                                                        @if(in_array($status, ['in_transit_china', 'arrival_uae'])) ({{ __('Masked') }}) @endif
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </form>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-2 text-xs">
+                                        <div>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{{ __('Date') }}</span>
+                                            <div class="text-sm text-slate-600">{{ $order->created_at->format('d/m/Y') }}</div>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{{ __('Payment Proof') }}</span>
+                                            @if ($order->proof_of_payment_path)
+                                                <a href="{{ route('admin.sourcing-orders.download-proof-of-payment', $order) }}" class="text-[11px] font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                                                    {{ __('Download') }}
+                                                </a>
+                                            @else
+                                                <span class="text-[10px] text-slate-400 italic">{{ __('Not received') }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Card Footer -->
+                                <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-2">
+                                    <a href="{{ route('admin.sourcing-orders.show', [$order, 'page' => request('page')]) }}"
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        {{ __('View') }}
+                                    </a>
+                                    <button type="button"
+                                        onclick="syncToGoogleSheet({{ $order->display_id }})"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-emerald-700 bg-white border border-emerald-200 hover:bg-emerald-50 transition-colors"
+                                        title="{{ __('Sync to Google Sheet') }}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        {{ __('Sync') }}
+                                    </button>
+                                    @if($order->proof_of_payment_path || in_array($order->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+                                        <a href="{{ route('admin.sourcing-orders.shipping-label', $order) }}" target="_blank"
+                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-indigo-700 bg-white border border-indigo-200 hover:bg-indigo-50 transition-colors"
+                                           title="{{ __('Shipping Label') }}">
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            {{ __('Label') }}
+                                        </a>
+                                    @endif
+                                    <form action="{{ route('admin.sourcing-orders.destroy', $order) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure you want to delete this order?') }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-red-600 bg-white border border-red-200 hover:bg-red-50 transition-colors">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            {{ __('Delete') }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
                     <div class="px-6 py-4 border-t border-slate-200 bg-slate-50">
                         {{ $sourcingOrders->appends(request()->query())->links() }}
                     </div>

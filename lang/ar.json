@@ -769,5 +769,15 @@
     "The products presented come from reliable sources. However, some may be counterfeit (non-authentic products), advertisements, or products not to be purchased.": "المنتجات المعروضة تأتي من مصادر موثوقة. ومع ذلك، قد يكون بعضها مقلداً (منتجات غير أصلية) أو إعلانات أو منتجات غير صالحة للشراء.",
     "This notice appears once every 24 hours.": "يظهر هذا الإشعار مرة كل 24 ساعة.",
     "Warning Regarding Listed Products": "تحذير بخصوص المنتجات المعروضة",
-    "We recommend checking ratings and customer reviews before making any purchase.": "نوصي بالتحقق من التقييمات ومراجعات العملاء قبل إجراء أي عملية شراء."
+    "We recommend checking ratings and customer reviews before making any purchase.": "نوصي بالتحقق من التقييمات ومراجعات العملاء قبل إجراء أي عملية شراء.",
+
+    "List view": "عرض القائمة",
+    "Card view": "عرض البطاقات",
+    "Sync": "مزامنة",
+    "Manager": "المدير",
+    "Label": "ملصق",
+    "List": "قائمة",
+    "Sync to Google Sheet": "مزامنة مع جدول جوجل",
+    "Cards": "بطاقات",
+    "Shipping Label": "ملصق الشحن"
 }
