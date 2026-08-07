@@ -394,15 +394,18 @@
                             $statusClass = $statusConfig[$request->status] ?? $statusConfig['pending'];
                         @endphp
                         <div class="flex flex-col border border-slate-200 rounded-lg bg-white shadow-sm hover:shadow-md hover:border-orange-200 transition-all overflow-hidden">
+                            <!-- Product Image -->
+                            <div class="relative h-40 w-full flex-shrink-0 bg-slate-100 overflow-hidden">
+                                @if ($request->product_image)
+                                    <img src="{{ media_url($request->product_image) }}" alt="" class="h-full w-full object-cover">
+                                @else
+                                    <div class="h-full w-full flex items-center justify-center">
+                                        <span class="text-2xl font-bold text-slate-300">{{ substr($request->product_name, 0, 1) }}</span>
+                                    </div>
+                                @endif
+                            </div>
                             <!-- Card Header -->
                             <div class="p-4 flex items-start gap-3 border-b border-slate-100">
-                                <div class="h-14 w-14 flex-shrink-0 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
-                                    @if ($request->product_image)
-                                        <img src="{{ media_url($request->product_image) }}" alt="" class="h-full w-full object-cover">
-                                    @else
-                                        <span class="text-sm font-bold text-slate-400">{{ substr($request->product_name, 0, 1) }}</span>
-                                    @endif
-                                </div>
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center justify-between gap-2">
                                         <div class="text-sm font-mono font-medium text-orange-600">{{ $request->reference_id }}</div>
