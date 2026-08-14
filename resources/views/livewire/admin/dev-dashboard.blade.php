@@ -43,6 +43,22 @@
                 <button type="button" wire:click="$set('showCommandPalette', true)" class="text-[10px] font-bold text-amber-400 uppercase border border-amber-400/40 px-2 py-1 hover:bg-amber-400/10 transition-none">
                     ⌘K Palette
                 </button>
+                <div class="h-4 w-px bg-slate-700 hidden lg:block"></div>
+                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
+                    <span class="whitespace-nowrap">Gemini API Key</span>
+                    <input type="password" wire:model="geminiApiKey" placeholder="AIza… (UI/UX Inspector)" autocomplete="off"
+                        class="bg-slate-800 border border-slate-600 text-slate-200 text-[10px] px-2 py-1 w-72 font-mono rounded-none focus:border-violet-500" />
+                    <button type="button" wire:click="saveGeminiApiKey" wire:loading.attr="disabled" wire:target="saveGeminiApiKey"
+                        class="text-emerald-400 border border-emerald-400/40 px-2 py-1 hover:bg-emerald-400/10 transition-none">Save</button>
+                    @if($geminiKeySaved)
+                        <span class="text-emerald-400">Saved</span>
+                    @endif
+                    @if(!empty($geminiApiKey) || !is_null(\App\Services\UiUxInspectionService::effectiveApiKey()))
+                        <button type="button" wire:click="clearGeminiApiKey" wire:confirm="Supprimer la clé Gemini enregistrée ?"
+                            class="text-red-400 border border-red-400/40 px-2 py-1 hover:bg-red-400/10 transition-none">Clear</button>
+                    @endif
+                    <a href="{{ route('admin.dev.uiux-inspector') }}" class="text-violet-400 border border-violet-400/40 px-2 py-1 hover:bg-violet-400/10 transition-none whitespace-nowrap">Open Inspector →</a>
+                </div>
             </div>
         </div>
     </header>
@@ -101,6 +117,13 @@
                     </div>
                 </div>
             @endforeach
+
+            <div class="mt-auto pt-4 border-t border-slate-200">
+                <a href="{{ route('admin.dev.uiux-inspector') }}"
+                    class="flex items-center gap-2 text-left px-3 py-2.5 text-[11px] font-black uppercase tracking-tight text-violet-700 bg-violet-50 border border-violet-200 hover:bg-violet-100 transition-none">
+                    <span class="bg-violet-600 text-white text-[9px] px-1 py-0.5">UX</span> UI/UX Inspector
+                </a>
+            </div>
         </nav>
 
         <!-- Main Content Matrix -->

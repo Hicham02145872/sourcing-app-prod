@@ -55,4 +55,10 @@ return [
         'base_url' => env('SEVENTEEN_TRACK_BASE_URL', 'https://api.17track.net/track/v2.2'),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'endpoint' => env('GEMINI_ENDPOINT', 'https://generativelanguage.googleapis.com/v1beta/models'),
+    ],
+
 ];

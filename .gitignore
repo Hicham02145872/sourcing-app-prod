@@ -63,3 +63,4 @@ shipping-fees-analysis.md
 storage/debug_image_result.php
 *.backup
 scraper/__pycache__/
+storage/app/uiux/

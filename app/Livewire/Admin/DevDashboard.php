@@ -2,15 +2,16 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\AuditLog;
+use App\Models\DevQueryLog;
 use App\Models\RefundRequest;
+use App\Models\Setting;
 use App\Models\SourcingOrder;
 use App\Models\TrackingLog;
 use App\Models\User;
-use App\Models\AuditLog;
 use App\Models\WebhookEvent;
-use App\Models\DevQueryLog;
-use App\Notifications\DevPingNotification;
 use App\Notifications\DevLaravelLogErrorAlert;
+use App\Notifications\DevPingNotification;
 use App\Services\BackupService;
 use App\Services\Dev\ArtisanWhitelist;
 use App\Services\Dev\AuditLogger;
@@ -21,13 +22,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
-
-use App\Models\Setting;
 
 class DevDashboard extends Component
 {
@@ -59,6 +58,7 @@ class DevDashboard extends Component
     public $logs = '';
 
     public array $laravelLogSummary = [];
+
     public bool $laravelLogEmailAlertsEnabled = true;
 
     public array $nginxLogSummary = [];
@@ -203,11 +203,12 @@ class DevDashboard extends Component
 
     // ── Maintenance Mode ──
     public bool $maintenanceMode = false;
+
     public string $maintenanceMessage = '';
 
     public function toggleMaintenanceMode(): void
     {
-        $this->maintenanceMode = !$this->maintenanceMode;
+        $this->maintenanceMode = ! $this->maintenanceMode;
         Setting::toggleMaintenance($this->maintenanceMode, $this->maintenanceMessage);
         AuditLogger::log('maintenance_toggle', Setting::class, $this->maintenanceMode ? 'activated' : 'deactivated');
     }
@@ -221,6 +222,36 @@ class DevDashboard extends Component
     {
         $this->maintenanceMode = Setting::isMaintenanceMode();
         $this->maintenanceMessage = Setting::getMaintenanceMessage();
+    }
+
+    // ── Gemini API Key (UI/UX Inspector) ──
+    public string $geminiApiKey = '';
+
+    public bool $geminiKeySaved = false;
+
+    public function loadGeminiApiKey(): void
+    {
+        $this->geminiApiKey = (string) Setting::get('gemini_api_key', '');
+        $this->geminiKeySaved = false;
+    }
+
+    public function saveGeminiApiKey(): void
+    {
+        $this->validate([
+            'geminiApiKey' => ['required', 'string', 'min:20'],
+        ]);
+
+        Setting::set('gemini_api_key', trim($this->geminiApiKey));
+        AuditLogger::log('gemini_api_key_updated', Setting::class, null, []);
+        $this->geminiKeySaved = true;
+        $this->dispatch('show-success-toast', message: 'Gemini API key enregistrée.');
+    }
+
+    public function clearGeminiApiKey(): void
+    {
+        Setting::forget('gemini_api_key');
+        $this->loadGeminiApiKey();
+        $this->dispatch('show-success-toast', message: 'Gemini API key supprimée.');
     }
 
     /** Canaux pour DevPing : mail, database, fcm */
@@ -272,6 +303,7 @@ class DevDashboard extends Component
     {
         $this->laravelLogEmailAlertsEnabled = (bool) session()->get('dev_laravel_log_email_alerts_enabled', true);
         $this->loadData();
+        $this->loadGeminiApiKey();
         $this->queryHistory = session()->get('dev_query_history', []);
         $this->captureServerStats();
         $this->fetchLogs();

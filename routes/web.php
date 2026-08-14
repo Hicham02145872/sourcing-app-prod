@@ -218,6 +218,19 @@ Route::middleware(['auth', 'verified'])->post('/admin/dev/stop-impersonation', f
 // Dev Dashboard & Impersonation (Strictly for Developer role)
 Route::middleware(['auth', 'role:developer', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dev-dashboard', \App\Livewire\Admin\DevDashboard::class)->name('dev-dashboard');
+
+    // UI/UX Inspector (Gemini)
+    Route::get('/dev/uiux-inspector', \App\Livewire\Admin\UiUxInspector::class)->name('dev.uiux-inspector');
+    Route::get('/dev/uiux/screenshot/{run}/{file}', function (string $run, string $file) {
+        $file = basename($file);
+        $path = storage_path('app/uiux'.DIRECTORY_SEPARATOR.$run.DIRECTORY_SEPARATOR.$file);
+        if (! is_file($path)) {
+            abort(404);
+        }
+
+        return response()->file($path);
+    })->name('dev.uiux-screenshot');
+
     Route::get('/impersonate/{user}', function (\App\Models\User $user) {
         // Double security check for impersonation
         if (auth()->user()->email !== 'hichamaltit@gmail.com') {
