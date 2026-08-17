@@ -190,6 +190,24 @@
                         </div>
                     </div>
                     @endif
+                    @if($type === 'air_direct')
+                    <div class="px-4 py-3 bg-orange-50/50 border-b border-orange-100 flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold text-orange-700 uppercase tracking-widest">{{ __('Durée') }} {{ __('Chine') }} → {{ __('CM') }}</span>
+                            <input wire:model="air_direct_arrival_time" type="text" class="w-24 text-center text-sm font-bold text-orange-700 bg-white border border-orange-200 rounded-lg py-1.5 focus:ring-2 focus:ring-orange-300 focus:border-orange-300 outline-none transition-all" placeholder="ex: 7-9">
+                            <span class="text-[10px] font-bold text-orange-500 uppercase tracking-widest">{{ __('jours') }}</span>
+                        </div>
+                    </div>
+                    @endif
+                    @if($type === 'sea')
+                    <div class="px-4 py-3 bg-blue-50/50 border-b border-blue-100 flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold text-blue-700 uppercase tracking-widest">{{ __('Durée') }} {{ __('Chine') }} → {{ __('CM') }}</span>
+                            <input wire:model="sea_arrival_time" type="text" class="w-24 text-center text-sm font-bold text-blue-700 bg-white border border-blue-200 rounded-lg py-1.5 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all" placeholder="ex: 30-45">
+                            <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{{ __('jours') }}</span>
+                        </div>
+                    </div>
+                    @endif
                     <table class="min-w-full divide-y divide-slate-100">
                         <thead class="bg-slate-50">
                             <tr>
