@@ -429,6 +429,25 @@
         </div>
     </div>
 
+    {{-- Global photo viewer modal --}}
+    <div x-data="{ viewerOpen: false, viewerSrc: '' }"
+         @open-viewer.window="viewerSrc = $event.detail.src; viewerOpen = true"
+         @keydown.window.escape="viewerOpen = false">
+        <template x-teleport="body">
+            <div x-show="viewerOpen" x-cloak
+                 class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4"
+                 @click="viewerOpen = false">
+                <div class="relative max-w-[90vw] max-h-[90vh]" @click.stop>
+                    <button type="button" @click="viewerOpen = false"
+                        class="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center text-slate-700 hover:text-slate-900 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                    <img :src="viewerSrc" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl object-contain">
+                </div>
+            </div>
+        </template>
+    </div>
+
     @push('scripts')
     <script>
         // Currency signs map
