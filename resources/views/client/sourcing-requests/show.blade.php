@@ -561,10 +561,28 @@
                                                                      </svg>
                                                                  </div>
 
-                                                                 {{-- Image preview --}}
+                                                                 {{-- Image/Video preview --}}
                                                                  <div class="aspect-video w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 mb-3 border border-slate-100 dark:border-slate-600 flex items-center justify-center">
                                                                      @if(!empty($opt['image_path']))
-                                                                         <img src="{{ media_url($opt['image_path']) }}" alt="{{ $label }}" class="w-full h-full object-cover cursor-pointer" onclick="openMediaModal(this.src, 'image')">
+                                                                         @php $optExt = strtolower(pathinfo($opt['image_path'], PATHINFO_EXTENSION)); @endphp
+                                                                         @if(in_array($optExt, ['mp4', 'mov', 'avi', 'webm']))
+                                                                             <div class="relative w-full h-full">
+                                                                                 <video src="{{ media_url($opt['image_path']) }}" 
+                                                                                        class="w-full h-full object-cover"
+                                                                                        controls
+                                                                                        preload="metadata">
+                                                                                 </video>
+                                                                                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                                                     <div class="w-10 h-10 bg-black/60 rounded-full flex items-center justify-center">
+                                                                                         <svg class="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                                                             <path d="M8 5v14l11-7z"/>
+                                                                                         </svg>
+                                                                                     </div>
+                                                                                 </div>
+                                                                             </div>
+                                                                         @else
+                                                                             <img src="{{ media_url($opt['image_path']) }}" alt="{{ $label }}" class="w-full h-full object-cover cursor-pointer" onclick="openMediaModal(this.src, 'image')">
+                                                                         @endif
                                                                      @else
                                                                          <div class="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900/50">
                                                                              <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -839,29 +857,51 @@
         }
     </style>
 
-    {{-- Image Modal for Full Size Viewing --}}
+    {{-- Media Modal for Full Size Viewing --}}
     <div id="mediaModal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onclick="closeMediaModal()">
-        <div class="relative max-w-7xl w-full h-full flex items-center justify-center">
+        <div class="relative max-w-7xl w-full h-full flex items-center justify-center" onclick="event.stopPropagation()">
             <button onclick="closeMediaModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
-            <img id="modalImage" src="" alt="Full size" class="max-w-full max-h-full object-contain" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="Full size" class="max-w-full max-h-full object-contain hidden" onclick="event.stopPropagation()">
+            <video id="modalVideo" src="" controls class="max-w-full max-h-full rounded-lg shadow-2xl hidden bg-black" onclick="event.stopPropagation()"></video>
         </div>
     </div>
 
     <script>
         function openMediaModal(src, type) {
-            if (type === 'image') {
-                document.getElementById('modalImage').src = src;
-                document.getElementById('mediaModal').classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
+            const modal = document.getElementById('mediaModal');
+            const img = document.getElementById('modalImage');
+            const vid = document.getElementById('modalVideo');
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            if (type === 'video') {
+                img.classList.add('hidden');
+                vid.src = src;
+                vid.classList.remove('hidden');
+            } else {
+                vid.classList.add('hidden');
+                vid.pause();
+                img.src = src;
+                img.classList.remove('hidden');
             }
         }
 
         function closeMediaModal() {
-            document.getElementById('mediaModal').classList.add('hidden');
+            const modal = document.getElementById('mediaModal');
+            const vid = document.getElementById('modalVideo');
+            const img = document.getElementById('modalImage');
+
+            modal.classList.add('hidden');
+            vid.pause();
+            vid.src = '';
+            img.src = '';
+            img.classList.add('hidden');
+            vid.classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
 
