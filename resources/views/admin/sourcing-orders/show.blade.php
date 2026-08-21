@@ -563,9 +563,9 @@
                     
                     <!-- 1. Product Image -->
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-1">
-                        @if($sourcingOrder->quotation->sourcingRequest->product_image)
+                        @if($sourcingOrder->quotation?->real_product_image || $sourcingOrder->quotation?->sourcingRequest?->product_image)
                             <div class="relative group aspect-square rounded overflow-hidden bg-slate-100 cursor-pointer">
-                                <img src="{{ media_url($sourcingOrder->quotation->sourcingRequest->product_image) }}" 
+                                <img src="{{ media_url($sourcingOrder->quotation->real_product_image ?: $sourcingOrder->quotation->sourcingRequest->product_image) }}" 
                                      alt="Product" 
                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                             </div>
