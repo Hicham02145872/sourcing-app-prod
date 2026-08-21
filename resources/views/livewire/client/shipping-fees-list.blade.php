@@ -224,9 +224,17 @@
                                             <td class="px-3 py-3 align-top text-center border-l border-slate-100/80 dark:border-slate-700/80">
                                                 @foreach($cells as $item)
                                                     <div class="{{ $cells->count() > 1 ? 'mb-2 last:mb-0' : '' }}" wire:key="sf-delay-{{ $item->id }}">
-                                                        @if($item->estimation_days)
+                                                        @php
+                                                            $globalDelay = match ($currentType) {
+                                                                'air_direct' => $selectedCountry->shippingFee?->air_direct_arrival_time,
+                                                                'sea' => $selectedCountry->shippingFee?->sea_arrival_time,
+                                                                default => null,
+                                                            };
+                                                            $delayValue = filled($globalDelay) ? $globalDelay : $item->estimation_days;
+                                                        @endphp
+                                                        @if($delayValue)
                                                             <span class="inline-flex rounded-lg bg-orange-50 px-2 py-1 text-[10px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
-                                                                {{ $item->estimation_days }} {{ $item->estimation_unit !== null && $item->estimation_unit !== '' ? $item->estimation_unit : __('days') }}
+                                                                {{ $delayValue }} {{ (!filled($globalDelay) && $item->estimation_unit !== null && $item->estimation_unit !== '') ? $item->estimation_unit : __('days') }}
                                                             </span>
                                                         @else
                                                             <span class="text-slate-300 dark:text-slate-600">—</span>
