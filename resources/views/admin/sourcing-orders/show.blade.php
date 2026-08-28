@@ -563,9 +563,26 @@
                     
                     <!-- 1. Product Image -->
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden p-1">
-                        @if($sourcingOrder->quotation?->real_product_image || $sourcingOrder->quotation?->sourcingRequest?->product_image)
+                        @php
+                            $showPhotoUrl = '';
+                            if (is_image_file($sourcingOrder->quotation?->real_product_image)) {
+                                $showPhotoUrl = $sourcingOrder->quotation->real_product_image;
+                            } elseif (is_image_file($sourcingOrder->quotation?->sourcingRequest?->product_image)) {
+                                $showPhotoUrl = $sourcingOrder->quotation->sourcingRequest->product_image;
+                            } else {
+                                $showMedia = $sourcingOrder->media->firstWhere('file_type', 'image');
+                                if (!$showMedia || !is_image_file($showMedia->file_path)) {
+                                    $showMedia = $sourcingOrder->quotation?->media?->firstWhere('file_type', 'image');
+                                    if (!$showMedia || !is_image_file($showMedia->file_path)) {
+                                        $showMedia = null;
+                                    }
+                                }
+                                $showPhotoUrl = is_image_file($showMedia?->file_path) ? $showMedia->file_path : '';
+                            }
+                        @endphp
+                        @if($showPhotoUrl)
                             <div class="relative group aspect-square rounded overflow-hidden bg-slate-100 cursor-pointer">
-                                <img src="{{ media_url($sourcingOrder->quotation->real_product_image ?: $sourcingOrder->quotation->sourcingRequest->product_image) }}" 
+                                <img src="{{ media_url($showPhotoUrl) }}" 
                                      alt="Product" 
                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                             </div>

@@ -164,7 +164,7 @@ class SourcingOrderController extends Controller
     public function show(SourcingOrder $sourcingOrder): View
     {
         $this->authorize('view', $sourcingOrder);
-        $sourcingOrder->load('user', 'media', 'sourcingRequest', 'quotation.sourcingRequest.category', 'quotation.sourcingRequest.destinations.country', 'quotation.sourcingRequest.destinations.service');
+        $sourcingOrder->load('user', 'media', 'sourcingRequest', 'quotation.sourcingRequest.category', 'quotation.sourcingRequest.destinations.country', 'quotation.sourcingRequest.destinations.service', 'quotation.media');
 
         // Calculate quality-aware pricing for display
         $quotation = $sourcingOrder->quotation;
