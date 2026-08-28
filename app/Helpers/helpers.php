@@ -1,5 +1,17 @@
 <?php
 
+if (! function_exists('is_image_file')) {
+    function is_image_file(?string $path): bool
+    {
+        if (empty($path)) {
+            return false;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        return in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'avif'], true);
+    }
+}
+
 if (! function_exists('media_url')) {
     function media_url(?string $path, array $transformations = []): string
     {

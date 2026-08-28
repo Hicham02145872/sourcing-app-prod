@@ -286,14 +286,20 @@
                                                     {{ $order->reference_id }}
                                                 </div>
                                                 @php
-                                                    $listPhotoUrl = $order->quotation?->real_product_image
-                                                        ?: $order->quotation?->sourcingRequest?->product_image;
-                                                    if (!$listPhotoUrl) {
-                                                        $listMedia = $order->media->where('file_type', 'image')->first();
-                                                        if (!$listMedia) {
-                                                            $listMedia = $order->quotation?->media?->where('file_type', 'image')->first();
+                                                    $listPhotoUrl = '';
+                                                    if (is_image_file($order->quotation?->real_product_image)) {
+                                                        $listPhotoUrl = $order->quotation->real_product_image;
+                                                    } elseif (is_image_file($order->quotation?->sourcingRequest?->product_image)) {
+                                                        $listPhotoUrl = $order->quotation->sourcingRequest->product_image;
+                                                    } else {
+                                                        $listMedia = $order->media->firstWhere('file_type', 'image');
+                                                        if (!$listMedia || !is_image_file($listMedia->file_path)) {
+                                                            $listMedia = $order->quotation?->media?->firstWhere('file_type', 'image');
+                                                            if (!$listMedia || !is_image_file($listMedia->file_path)) {
+                                                                $listMedia = null;
+                                                            }
                                                         }
-                                                        $listPhotoUrl = $listMedia?->file_path;
+                                                        $listPhotoUrl = is_image_file($listMedia?->file_path) ? $listMedia->file_path : '';
                                                     }
                                                 @endphp
                                                 @if($listPhotoUrl)
@@ -468,14 +474,20 @@
                                 <!-- Product Image -->
                                 <div class="relative h-40 w-full flex-shrink-0 bg-slate-100 overflow-hidden">
                                     @php
-                                        $cardPhotoUrl = $order->quotation?->real_product_image
-                                            ?: $order->quotation?->sourcingRequest?->product_image;
-                                        if (!$cardPhotoUrl) {
-                                            $cardMedia = $order->media->where('file_type', 'image')->first();
-                                            if (!$cardMedia) {
-                                                $cardMedia = $order->quotation?->media?->where('file_type', 'image')->first();
+                                        $cardPhotoUrl = '';
+                                        if (is_image_file($order->quotation?->real_product_image)) {
+                                            $cardPhotoUrl = $order->quotation->real_product_image;
+                                        } elseif (is_image_file($order->quotation?->sourcingRequest?->product_image)) {
+                                            $cardPhotoUrl = $order->quotation->sourcingRequest->product_image;
+                                        } else {
+                                            $cardMedia = $order->media->firstWhere('file_type', 'image');
+                                            if (!$cardMedia || !is_image_file($cardMedia->file_path)) {
+                                                $cardMedia = $order->quotation?->media?->firstWhere('file_type', 'image');
+                                                if (!$cardMedia || !is_image_file($cardMedia->file_path)) {
+                                                    $cardMedia = null;
+                                                }
                                             }
-                                            $cardPhotoUrl = $cardMedia?->file_path;
+                                            $cardPhotoUrl = is_image_file($cardMedia?->file_path) ? $cardMedia->file_path : '';
                                         }
                                     @endphp
                                     @if($cardPhotoUrl)
