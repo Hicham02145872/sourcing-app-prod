@@ -30,7 +30,7 @@ class SourcingOrderController extends Controller
     public function index(Request $request): View
     {
         $this->authorize('viewAny', SourcingOrder::class);
-        $query = SourcingOrder::with('user', 'quotation.sourcingRequest', 'assignedAdmin');
+        $query = SourcingOrder::with('user', 'quotation.sourcingRequest', 'quotation.media', 'media', 'assignedAdmin');
 
         // Scope visibility: Regular admins now see ALL orders (read-only for others)
         // Apply admin-priority ordering first so it is a secondary key after pending_payment prioritization
