@@ -32,6 +32,11 @@ class ShippingSheetRowDTO
             $imageFormula = '=IMAGE("'.$imageUrl.'")';
         }
 
+        $weightData = $order->quotation->weightForQuality();
+        $weight = $weightData
+            ? number_format($weightData['weight'], 2).' '.$weightData['weight_unit']
+            : '';
+
         return new self(
             id: $order->display_id,
             createdAt: $order->created_at->format('Y-m-d H:i:s'),
@@ -43,7 +48,7 @@ class ShippingSheetRowDTO
             address: $sourcingRequest->address ?? 'N/A',
             phone: $sourcingRequest->phone_number ?? 'N/A',
             productImage: $imageFormula,
-            weight: '', // Future implementation
+            weight: $weight,
             notes: '',  // Future implementation
             isCanceled: $order->status === 'shipment_canceled'
         );

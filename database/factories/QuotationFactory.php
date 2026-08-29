@@ -23,8 +23,12 @@ class QuotationFactory extends Factory
             'status' => $this->faker->randomElement(['pending', 'sent', 'accepted', 'rejected', 'expired']),
             'unit_price' => $this->faker->randomFloat(2, 10, 100),
             'commission_service' => $this->faker->randomFloat(2, 5, 50),
-            'unit_weight' => $this->faker->randomFloat(2, 0.1, 10),
             'delivery_cost_china' => $this->faker->randomFloat(2, 10, 200),
+            'quality_options' => [
+                'low' => ['price' => 5.00, 'weight' => 1.5, 'weight_unit' => 'kg', 'image_path' => null, 'image_paths' => []],
+                'medium' => ['price' => 7.50, 'weight' => 1.5, 'weight_unit' => 'kg', 'image_path' => null, 'image_paths' => []],
+                'good' => ['price' => 10.00, 'weight' => 1.5, 'weight_unit' => 'kg', 'image_path' => null, 'image_paths' => []],
+            ],
         ];
     }
 }

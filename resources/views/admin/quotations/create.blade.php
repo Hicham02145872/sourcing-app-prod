@@ -217,6 +217,8 @@
                                 
                                 @include('admin.quotations.partials.quality-options', [
                                     'qualityPriceValues' => [],
+                                    'qualityWeightValues' => [],
+                                    'qualityWeightUnits' => [],
                                 ])
 
 
@@ -227,8 +229,6 @@
                                 ])
 
                                 @include('admin.quotations.partials.logistics', [
-                                    'weightValue' => '',
-                                    'weightUnitValue' => '',
                                     'deliveryCostValue' => '',
                                 ])
 

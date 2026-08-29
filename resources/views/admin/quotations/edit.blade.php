@@ -353,9 +353,13 @@
                         @php
                             $qualityOptionsData = is_array($quotation->quality_options) ? $quotation->quality_options : [];
                             $qualityPriceValues = [];
+                            $qualityWeightValues = [];
+                            $qualityWeightUnits = [];
                             $qualityExistingImages = [];
                             foreach (['low', 'medium', 'good'] as $q) {
                                 $qualityPriceValues[$q] = $qualityOptionsData[$q]['price'] ?? '';
+                                $qualityWeightValues[$q] = $qualityOptionsData[$q]['weight'] ?? '';
+                                $qualityWeightUnits[$q] = $qualityOptionsData[$q]['weight_unit'] ?? 'g';
                                 $path = $qualityOptionsData[$q]['image_path'] ?? null;
                                 $paths = $qualityOptionsData[$q]['image_paths'] ?? ($path ? [$path] : []);
                                 $qualityExistingImages[$q] = $paths;
@@ -363,6 +367,8 @@
                         @endphp
                         @include('admin.quotations.partials.quality-options', [
                             'qualityPriceValues' => $qualityPriceValues,
+                            'qualityWeightValues' => $qualityWeightValues,
+                            'qualityWeightUnits' => $qualityWeightUnits,
                             'qualityExistingImages' => $qualityExistingImages,
                         ])
 
@@ -373,8 +379,6 @@
                         ])
 
                         @include('admin.quotations.partials.logistics', [
-                            'weightValue' => $quotation->unit_weight,
-                            'weightUnitValue' => $quotation->weight_unit,
                             'deliveryCostValue' => $quotation->delivery_cost_china,
                         ])
 

@@ -51,14 +51,12 @@ class Quotation extends Model
         'status',
         'unit_price',
         'commission_service',
-        'unit_weight',
         'delivery_cost_china',
         // Financial estimation fields
         'estimated_product_cost',
         'estimated_shipping_cost',
         'estimated_other_costs',
         'estimated_net_profit',
-        'weight_unit',
         'negotiation_notes',
         'admin_negotiation_reply',
         'actual_sourcing_location',
@@ -75,7 +73,6 @@ class Quotation extends Model
         'amount' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'commission_service' => 'decimal:2',
-        'unit_weight' => 'decimal:2',
         'delivery_cost_china' => 'decimal:2',
         'estimated_product_cost' => 'decimal:2',
         'estimated_shipping_cost' => 'decimal:2',
@@ -138,5 +135,31 @@ class Quotation extends Model
     public function getDisplayIdAttribute(): int
     {
         return $this->id * 5;
+    }
+
+    /**
+     * Get the weight and unit for a quality option, honoring the selected quality.
+     *
+     * Falls back to the medium quality when the requested quality has no weight,
+     * and returns null when no weight is available.
+     */
+    public function weightForQuality(?string $quality = null): ?array
+    {
+        $options = $this->quality_options ?? [];
+
+        $quality = $quality ?? $this->selected_quality ?? 'medium';
+
+        if (!isset($options[$quality]['weight']) || $options[$quality]['weight'] === null || $options[$quality]['weight'] === '') {
+            $quality = 'medium';
+        }
+
+        if (!isset($options[$quality]['weight']) || $options[$quality]['weight'] === null || $options[$quality]['weight'] === '') {
+            return null;
+        }
+
+        return [
+            'weight' => (float) $options[$quality]['weight'],
+            'weight_unit' => $options[$quality]['weight_unit'] ?? 'g',
+        ];
     }
 }

@@ -90,8 +90,12 @@ class TestUserSeeder extends Seeder
                     'status' => 'sent',
                     'unit_price' => $prod['unit'],
                     'commission_service' => 5.00,
-                    'unit_weight' => 1.5,
                     'delivery_cost_china' => 20.00,
+                    'quality_options' => [
+                        'low' => ['price' => 5.00, 'weight' => 1.5, 'weight_unit' => 'kg', 'image_path' => null, 'image_paths' => []],
+                        'medium' => ['price' => 7.50, 'weight' => 1.5, 'weight_unit' => 'kg', 'image_path' => null, 'image_paths' => []],
+                        'good' => ['price' => 10.00, 'weight' => 1.5, 'weight_unit' => 'kg', 'image_path' => null, 'image_paths' => []],
+                    ],
                 ]);
             }
         }

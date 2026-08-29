@@ -36,6 +36,24 @@
                                 class="pl-8 block w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-semibold text-slate-800">
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{{ __('Weight') }}</label>
+                        <div class="relative rounded-xl shadow-sm flex">
+                            <input type="number" step="0.01" name="quality_options[{{ $key }}][weight]"
+                                value="{{ old('quality_options.'.$key.'.weight', $qualityWeightValues[$key] ?? '') }}"
+                                placeholder="0.00"
+                                class="block w-full pl-4 pr-20 py-2.5 text-sm bg-white border border-slate-200 text-slate-900 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-semibold">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-1">
+                                <select name="quality_options[{{ $key }}][weight_unit]"
+                                    class="h-8 py-0 pl-2 pr-7 border-transparent bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg focus:ring-0 focus:border-transparent mr-1 cursor-pointer">
+                                    <option value="g" {{ old('quality_options.'.$key.'.weight_unit', $qualityWeightUnits[$key] ?? 'g') == 'g' ? 'selected' : '' }}>g</option>
+                                    <option value="kg" {{ old('quality_options.'.$key.'.weight_unit', $qualityWeightUnits[$key] ?? 'g') == 'kg' ? 'selected' : '' }}>kg</option>
+                                    <option value="colis" {{ old('quality_options.'.$key.'.weight_unit', $qualityWeightUnits[$key] ?? 'g') == 'colis' ? 'selected' : '' }}>{{ __('package') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-[10px] text-slate-400">{{ __('Weight for this quality (g / kg / colis)') }}</p>
+                    </div>
                     <div x-data="{ 
                             existingMedia: {{ isset($qualityExistingImages) ? json_encode($qualityExistingImages[$key] ?? []) : '[]' }},
                             removedMedia: [],

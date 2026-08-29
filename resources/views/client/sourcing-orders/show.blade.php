@@ -384,7 +384,8 @@
                                     </div>
                                     <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Weight') }}</p>
-                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingOrder->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingOrder->quotation->weight_unit ?? __('g') }}</span></p>
+                                        @php $unitWeight = $sourcingOrder->quotation->weightForQuality(); @endphp
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">@if($unitWeight){{ number_format($unitWeight['weight'], 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $unitWeight['weight_unit'] }}</span>@else <span class="text-sm font-medium text-slate-500 dark:text-slate-400">-</span>@endif</p>
                                     </div>
                                     <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Shipping fees') }}</p>

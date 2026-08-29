@@ -117,8 +117,6 @@ class QuotationController extends Controller
             'sourcing_request_id' => 'required|exists:sourcing_requests,id',
             'unit_price' => 'required|numeric|min:0',
             'commission_service' => 'required|numeric|min:0',
-            'unit_weight' => 'required|numeric|min:0',
-            'weight_unit' => 'required|string|in:g,kg,colis',
             'delivery_cost_china' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
             'actual_sourcing_location' => 'nullable|string|in:china,dubai',
@@ -135,6 +133,8 @@ class QuotationController extends Controller
             'quality_options.low.price' => 'nullable|numeric|min:0',
             'quality_options.medium.price' => 'nullable|numeric|min:0',
             'quality_options.good.price' => 'nullable|numeric|min:0',
+            'quality_options.*.weight' => 'required_with:quality_options.*.price|numeric|min:0',
+            'quality_options.*.weight_unit' => 'required_with:quality_options.*.weight|string|in:g,kg,colis',
             'quality_options_images' => 'nullable|array',
             'quality_options_images.low' => 'nullable|array',
             'quality_options_images.low.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
@@ -248,6 +248,8 @@ class QuotationController extends Controller
                     
                     $qualityOptionsData[$quality] = [
                         'price' => $price,
+                        'weight' => isset($rawOptions[$quality]['weight']) && $rawOptions[$quality]['weight'] !== '' ? (float) $rawOptions[$quality]['weight'] : null,
+                        'weight_unit' => $rawOptions[$quality]['weight_unit'] ?? 'g',
                         'image_path' => $imagePath,
                         'image_paths' => $imagePaths,
                     ];
@@ -263,8 +265,6 @@ class QuotationController extends Controller
             'amount' => $amount,
             'unit_price' => $effectiveUnitPrice,
             'commission_service' => $validated['commission_service'],
-            'unit_weight' => $validated['unit_weight'],
-            'weight_unit' => $validated['weight_unit'],
             'delivery_cost_china' => $validated['delivery_cost_china'],
             'currency' => $validated['currency'],
             'status' => 'pending', // Default status
@@ -332,8 +332,6 @@ class QuotationController extends Controller
             $validated = $request->validate([
                 'unit_price' => 'required|numeric|min:0',
                 'commission_service' => 'required|numeric|min:0',
-                'unit_weight' => 'required|numeric|min:0',
-                'weight_unit' => 'required|string|in:g,kg,colis',
                 'delivery_cost_china' => 'required|numeric|min:0',
                 'currency' => 'required|string|max:3',
                 'actual_sourcing_location' => 'nullable|string|in:china,dubai',
@@ -351,6 +349,8 @@ class QuotationController extends Controller
                 'quality_options.low.price' => 'nullable|numeric|min:0',
                 'quality_options.medium.price' => 'nullable|numeric|min:0',
                 'quality_options.good.price' => 'nullable|numeric|min:0',
+                'quality_options.*.weight' => 'required_with:quality_options.*.price|numeric|min:0',
+                'quality_options.*.weight_unit' => 'required_with:quality_options.*.weight|string|in:g,kg,colis',
                 'quality_options_images' => 'nullable|array',
                 'quality_options_images.low' => 'nullable|array',
                 'quality_options_images.low.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
@@ -482,6 +482,8 @@ class QuotationController extends Controller
                         
                         $qualityOptionsData[$quality] = [
                             'price' => $price,
+                            'weight' => isset($rawOptions[$quality]['weight']) && $rawOptions[$quality]['weight'] !== '' ? (float) $rawOptions[$quality]['weight'] : null,
+                            'weight_unit' => $rawOptions[$quality]['weight_unit'] ?? 'g',
                             'image_path' => $imagePath,
                             'image_paths' => $imagePaths,
                         ];
@@ -504,8 +506,6 @@ class QuotationController extends Controller
                 'amount' => $amount,
                 'unit_price' => $effectiveUnitPrice,
                 'commission_service' => $validated['commission_service'],
-                'unit_weight' => $validated['unit_weight'],
-                'weight_unit' => $validated['weight_unit'],
                 'delivery_cost_china' => $validated['delivery_cost_china'],
                 'currency' => $validated['currency'],
                 'status' => 'pending',

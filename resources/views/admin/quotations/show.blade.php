@@ -261,7 +261,12 @@
                                         <p class="text-sm font-bold text-slate-900">
                                             {{ number_format($quotation->sourcingRequest->destinations->sum('quantity')) }} {{ $quotation->sourcingRequest->unit ?? __('pcs') }}
                                             <span class="mx-2 text-slate-300">|</span>
-                                            {{ number_format($quotation->unit_weight, 2) }} {{ $quotation->weight_unit ?? __('kg') }} / {{ __('unit') }}
+                                            @php $quotationWeight = $quotation->weightForQuality(); @endphp
+                                            @if($quotationWeight)
+                                                {{ number_format($quotationWeight['weight'], 2) }} {{ $quotationWeight['weight_unit'] }} / {{ __('unit') }}
+                                            @else
+                                                -
+                                            @endif
                                         </p>
                                     </div>
 

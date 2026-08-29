@@ -309,8 +309,8 @@
                                                                                "
                                                                         class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all"
                                                                         :class="selectedVal === '{{ $key }}' ? 'bg-[#EF7722] text-white border-[#EF7722]' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-[#EBEBEB] dark:border-slate-700 hover:border-[#EF7722]/50'">
-                                                                    {{ $label }} ({{ number_format($opt['price'], 2) }} {{ $request->quotation->currency }})
-                                                                </button>
+{{ $label }} ({{ number_format($opt['price'], 2) }} {{ $request->quotation->currency }})@if(!empty($opt['weight'])) · {{ number_format((float)$opt['weight'], 2) }} {{ $opt['weight_unit'] ?? 'g' }}@endif
+                                                                 </button>
                                                             @endif
                                                         @endforeach
                                                     </div>

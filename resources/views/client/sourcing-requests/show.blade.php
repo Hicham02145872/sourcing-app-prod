@@ -348,7 +348,15 @@
                                     </div>
                                     <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Unit Weight') }}</p>
-                                        <p class="text-lg font-bold text-slate-900 dark:text-white">{{ number_format($sourcingRequest->quotation->unit_weight, 2) }} <span class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->weight_unit ?? 'g' }}</span></p>
+                                        @php
+                                            $initialWeight = $sourcingRequest->quotation->weightForQuality($firstQuality);
+                                            $initialWeightValue = $initialWeight['weight'] ?? null;
+                                            $initialWeightUnit = $initialWeight['weight_unit'] ?? 'g';
+                                        @endphp
+                                        <p class="text-lg font-bold text-slate-900 dark:text-white">
+                                            <span id="dynamic-unit-weight">{{ $initialWeightValue !== null ? number_format($initialWeightValue, 2) : '-' }}</span>
+                                            <span id="dynamic-unit-weight-unit" class="text-sm font-medium text-slate-500 dark:text-slate-400">@if($initialWeightValue !== null){{ $initialWeightUnit }}@endif</span>
+                                        </p>
                                     </div>
                                     <div class="p-4 bg-[#EBEBEB] dark:bg-slate-700 border border-[#EBEBEB] dark:border-slate-600 rounded-lg">
                                         <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">{{ __('Shipping fees') }}</p>
@@ -503,6 +511,11 @@
                                             medium: {{ (float)($sourcingRequest->quotation->quality_options['medium']['price'] ?? 0) }},
                                             good: {{ (float)($sourcingRequest->quotation->quality_options['good']['price'] ?? 0) }}
                                         },
+                                        qualityWeights: {
+                                            low: { weight: {{ (float)($sourcingRequest->quotation->quality_options['low']['weight'] ?? 0) }}, unit: '{{ $sourcingRequest->quotation->quality_options['low']['weight_unit'] ?? 'g' }}' },
+                                            medium: { weight: {{ (float)($sourcingRequest->quotation->quality_options['medium']['weight'] ?? 0) }}, unit: '{{ $sourcingRequest->quotation->quality_options['medium']['weight_unit'] ?? 'g' }}' },
+                                            good: { weight: {{ (float)($sourcingRequest->quotation->quality_options['good']['weight'] ?? 0) }}, unit: '{{ $sourcingRequest->quotation->quality_options['good']['weight_unit'] ?? 'g' }}' }
+                                        },
                                         init() {
                                             this.$watch('selectedQuality', value => {
                                                 if (value && this.qualityPrices[value]) {
@@ -510,6 +523,18 @@
                                                     const total = (price * this.totalQuantity) + this.commission + this.deliveryCost;
                                                     document.getElementById('dynamic-unit-price').textContent = price.toFixed(2);
                                                     document.getElementById('dynamic-grand-total').textContent = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                                }
+                                                const w = this.qualityWeights[value];
+                                                const weightEl = document.getElementById('dynamic-unit-weight');
+                                                const unitEl = document.getElementById('dynamic-unit-weight-unit');
+                                                if (weightEl) {
+                                                    if (w && (w.weight || w.weight === 0)) {
+                                                        weightEl.textContent = Number(w.weight).toFixed(2);
+                                                        if (unitEl) unitEl.textContent = w.unit;
+                                                    } else {
+                                                        weightEl.textContent = '-';
+                                                        if (unitEl) unitEl.textContent = '';
+                                                    }
                                                 }
                                             });
                                         }
@@ -604,6 +629,20 @@
                                                                          <span class="text-sm font-extrabold transition-colors"
                                                                                :class="selectedQuality === '{{ $key }}' ? 'text-white' : 'text-[#EF7722]'">
                                                                              {{ number_format($opt['price'], 2) }} {{ $sourcingRequest->quotation->currency }}
+                                                                         </span>
+                                                                     </div>
+                                                                     <div class="flex justify-between items-end mt-1.5">
+                                                                         <span class="text-xs font-semibold transition-colors"
+                                                                               :class="selectedQuality === '{{ $key }}' ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'">
+                                                                             {{ __('Weight') }}
+                                                                         </span>
+                                                                         <span class="text-sm font-extrabold transition-colors"
+                                                                               :class="selectedQuality === '{{ $key }}' ? 'text-white' : 'text-slate-700 dark:text-slate-200'">
+                                                                             @if(!empty($opt['weight']))
+                                                                                 {{ number_format((float)$opt['weight'], 2) }} {{ $opt['weight_unit'] ?? 'g' }}
+                                                                             @else
+                                                                                 -
+                                                                             @endif
                                                                          </span>
                                                                      </div>
                                                                  </div>

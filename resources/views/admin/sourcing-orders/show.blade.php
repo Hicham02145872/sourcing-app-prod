@@ -117,7 +117,8 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Unit Weight') }}</label>
-                                <div class="text-sm font-bold text-slate-900">{{ number_format($sourcingOrder->quotation->unit_weight, 2) }} {{ $sourcingOrder->quotation->weight_unit ?? 'g' }}</div>
+                                @php $unitWeight = $sourcingOrder->quotation->weightForQuality(); @endphp
+                                <div class="text-sm font-bold text-slate-900">@if($unitWeight){{ number_format($unitWeight['weight'], 2) }} {{ $unitWeight['weight_unit'] }}@else-@endif</div>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Shipping') }}</label>

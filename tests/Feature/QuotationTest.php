@@ -47,10 +47,13 @@ class QuotationTest extends TestCase
             'sourcing_request_id' => $sourcingRequest->id,
             'unit_price' => 100.50,
             'commission_service' => 10.00,
-            'unit_weight' => 5.20,
-            'weight_unit' => 'kg',
             'delivery_cost_china' => 25.00,
             'currency' => 'USD',
+            'quality_options' => [
+                'low' => ['price' => 100.50, 'weight' => 5.20, 'weight_unit' => 'kg'],
+                'medium' => ['price' => null, 'weight' => 5.20, 'weight_unit' => 'kg'],
+                'good' => ['price' => null, 'weight' => 5.20, 'weight_unit' => 'kg'],
+            ],
             '_token' => Session::token(),
         ];
 
@@ -66,12 +69,15 @@ class QuotationTest extends TestCase
             'sourcing_request_id' => $sourcingRequest->id,
             'unit_price' => 100.50,
             'commission_service' => 10.00,
-            'unit_weight' => 5.20,
             'delivery_cost_china' => 25.00,
             'currency' => 'USD',
             'amount' => 10085, // (100.50 * 100) + 10.00 + 25.00
             'status' => 'pending',
         ]);
+
+        $quotation = \App\Models\Quotation::where('sourcing_request_id', $sourcingRequest->id)->first();
+        $this->assertEquals(5.20, (float) $quotation->quality_options['low']['weight']);
+        $this->assertSame('kg', $quotation->quality_options['low']['weight_unit']);
     }
 
     /** @test */

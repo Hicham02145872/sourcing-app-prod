@@ -8,22 +8,6 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-            <label for="unit_weight" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">{{ __('Unit Weight') }} <span class="text-red-500">*</span></label>
-            <div class="relative rounded-xl shadow-sm flex">
-                <input type="number" step="0.01" name="unit_weight" id="unit_weight" required placeholder="0.00" value="{{ old('unit_weight', $weightValue ?? '') }}"
-                    class="block w-full pl-4 pr-20 py-2.5 text-sm bg-slate-50 hover:bg-slate-100/50 border border-slate-200 text-slate-900 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold">
-                <div class="absolute inset-y-0 right-0 flex items-center pr-1">
-                    <select name="weight_unit" class="h-8 py-0 pl-2 pr-7 border-transparent bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg focus:ring-0 focus:border-transparent mr-1 cursor-pointer">
-                        <option value="g" {{ old('weight_unit', $weightUnitValue ?? '') == 'g' ? 'selected' : '' }}>g</option>
-                        <option value="kg" {{ old('weight_unit', $weightUnitValue ?? '') == 'kg' ? 'selected' : '' }}>kg</option>
-                        <option value="colis" {{ old('weight_unit', $weightUnitValue ?? '') == 'colis' ? 'selected' : '' }}>{{ __('package') }}</option>
-                    </select>
-                </div>
-            </div>
-            <p class="mt-1 text-[10px] text-slate-400">{{ __('Weight value for routing calculation') }}</p>
-        </div>
-
-        <div>
             <label for="delivery_cost_china" class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">{{ __('Shipping Fees') }} <span class="text-red-500">*</span></label>
             <div class="relative rounded-xl shadow-sm">
                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
