@@ -12,6 +12,26 @@ if (! function_exists('is_image_file')) {
     }
 }
 
+if (! function_exists('cloudinary_mirror_url')) {
+    function cloudinary_mirror_url(string $path): ?string
+    {
+        if (empty(config('filesystems.disks.cloudinary.url'))) {
+            return null;
+        }
+
+        try {
+            $info = pathinfo($path);
+            $dirname = str_replace('\\', '/', $info['dirname'] ?? '');
+            $dirname = $dirname === '.' ? '' : $dirname;
+            $publicId = $dirname ? $dirname.'/'.$info['filename'] : $info['filename'];
+
+            return (string) cloudinary()->image($publicId)->toUrl();
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+}
+
 if (! function_exists('media_url')) {
     function media_url(?string $path, array $transformations = []): string
     {
@@ -20,6 +40,20 @@ if (! function_exists('media_url')) {
         }
 
         if (!str_starts_with($path, 'http://') && !str_starts_with($path, 'https://')) {
+            static $localCheck = [];
+
+            if (!isset($localCheck[$path])) {
+                $localCheck[$path] = \Illuminate\Support\Facades\Storage::disk('public')->exists($path);
+            }
+
+            if (!$localCheck[$path]) {
+                $mirrorUrl = cloudinary_mirror_url($path);
+
+                if ($mirrorUrl) {
+                    return $mirrorUrl;
+                }
+            }
+
             return asset('storage/' . $path);
         }
 
