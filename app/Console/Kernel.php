@@ -24,6 +24,11 @@ class Kernel extends ConsoleKernel
                 ->appendOutputTo(storage_path('logs/auto-update-statuses.log'))
                 ->emailOutputOnFailure(config('mail.admin_email', env('MAIL_ADMIN_EMAIL')));
         }
+
+        // Purge daily unverified spam accounts (older than 48h)
+        $schedule->command('auth:purge-spam')
+            ->daily()
+            ->at('03:00');
     }
 
     /**

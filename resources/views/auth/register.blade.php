@@ -10,8 +10,16 @@
     </div>
 
     <!-- Registration Form -->
-    <form method="POST" action="{{ route('register') }}" class="space-y-5">
+    <form method="POST" action="{{ route('register') }}" class="space-y-5" id="registerForm">
         @csrf
+
+        <!-- Honeypot (hidden from humans, visible to bots) -->
+        <div style="position:absolute;left:-9999px;" aria-hidden="true">
+            <input type="text" name="website" tabindex="-1" autocomplete="off" value="">
+        </div>
+
+        <!-- reCAPTCHA v3 token -->
+        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
 
         <!-- Full Name -->
         <div>
@@ -152,4 +160,21 @@
             {{ __('Sign In') }}
         </a>
     </p>
+
+    {{-- reCAPTCHA v3 --}}
+    @if(config('services.captcha.sitekey'))
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.captcha.sitekey') }}"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var form = this;
+            grecaptcha.ready(function() {
+                grecaptcha.execute('{{ config("services.captcha.sitekey") }}', {action: 'register'}).then(function(token) {
+                    document.getElementById('g-recaptcha-response').value = token;
+                    form.submit();
+                });
+            });
+        });
+    </script>
+    @endif
 </x-guest-layout>
