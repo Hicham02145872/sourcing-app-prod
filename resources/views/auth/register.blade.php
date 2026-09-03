@@ -18,9 +18,6 @@
             <input type="text" name="website" tabindex="-1" autocomplete="off" value="">
         </div>
 
-        <!-- reCAPTCHA v3 token -->
-        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
-
         <!-- Full Name -->
         <div>
             <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -139,6 +136,13 @@
             </label>
         </div>
 
+        <!-- reCAPTCHA v2 Checkbox -->
+        @if(config('services.captcha.sitekey'))
+        <div id="recaptchaBox" class="flex justify-center">
+            <div class="g-recaptcha" data-sitekey="{{ config('services.captcha.sitekey') }}" data-theme="light"></div>
+        </div>
+        @endif
+
         <!-- Submit Button -->
         <button type="submit"
                 class="w-full py-3.5 bg-gradient-to-r from-[#EF7722] to-[#FAA533] hover:from-[#FAA533] hover:to-[#EF7722] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#EF7722] focus:ring-offset-2 mt-6">
@@ -161,76 +165,39 @@
         </a>
     </p>
 
-    {{-- reCAPTCHA v3 --}}
+    {{-- reCAPTCHA v2 --}}
     @if(config('services.captcha.sitekey'))
-    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.captcha.sitekey') }}" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script>
         (function() {
-            var sitekey = @json(config('services.captcha.sitekey'));
             var form = document.getElementById('registerForm');
             if (!form) { return; }
 
-            function logCaptcha(msg) {
-                if (window.console) console.log('[reCAPTCHA]', msg);
-            }
-
-            var submitting = false;
-            var tokenField = document.getElementById('g-recaptcha-response');
-
-            function obtainTokenThenSubmit() {
-                if (typeof grecaptcha === 'undefined' || !grecaptcha.ready) {
-                    logCaptcha('ERROR: grecaptcha not loaded yet');
-                    // Attendre que le script soit chargé (2s max) plutôt que soumettre sans token
-                    setTimeout(obtainTokenThenSubmit, 250);
-                    return;
+            // reCAPTCHA v2 crée automatiquement le textarea "g-recaptcha-response"
+            // dans le widget. On bloque la soumission tant que la checkbox n'est
+            // pas coché (grecaptcha.getResponse vide), pour un message clair.
+            form.addEventListener('submit', function(e) {
+                var running = typeof grecaptcha !== 'undefined' && grecaptcha.getResponse
+                    && grecaptcha.getResponse().length > 0;
+                if (!running) {
+                    e.preventDefault();
+                    var box = document.getElementById('recaptchaBox');
+                    if (box) {
+                        var existing = box.querySelector('.recaptcha-error');
+                        if (!existing) {
+                            var el = document.createElement('div');
+                            el.className = 'recaptcha-error';
+                            el.style.cssText = 'color:#dc2626;font-size:12px;margin-top:6px;text-align:center;';
+                            el.textContent = @json(__('validation.captcha_required'));
+                            box.appendChild(el);
+                        }
+                    }
                 }
-
-                grecaptcha.ready(function() {
-                    logCaptcha('executing reCAPTCHA v3...');
-                    grecaptcha.execute(sitekey, {action: 'register'}).then(function(token) {
-                        logCaptcha('token acquired (length=' + token.length + ')');
-                        tokenField.value = token;
-                        form.submit();
-                    }).catch(function(err) {
-                        logCaptcha('ERROR acquiring token: ' + (err && err.message || err));
-                        // Pas de token = ne pas bloquer l'utilisateur ; soumettre sans token
-                        // (le serveur le rejettera proprement avec un message clair plutôt qu'un échec silencieux)
-                        form.submit();
-                    });
-                });
-            }
-
-            var tokenAttempts = 0;
-            function guardedSubmit(e) {
-                e.preventDefault();
-                if (submitting) { return; }
-                submitting = true;
-
-                logCaptcha('submit intercepted, requesting token...');
-
-                // Boucle de garde : si grecaptcha n'est toujours pas prêt après 4s, soumettre sans token
-                var attempts = 0;
-                var wait = setInterval(function() {
-                    if (typeof grecaptcha !== 'undefined' && grecaptcha.ready) {
-                        clearInterval(wait);
-                        obtainTokenThenSubmit();
-                        return;
-                    }
-                    attempts++;
-                    if (attempts > 16) { // ~4s
-                        clearInterval(wait);
-                        logCaptcha('ERROR: timeout waiting for grecaptcha - submitting without token');
-                        form.submit();
-                    }
-                }, 250);
-            }
-
-            form.addEventListener('submit', guardedSubmit);
+            });
         })();
     </script>
     @else
     <script>
-        // reCAPTCHA nicht konfiguriert: nur diagnostischer Log
         (function() {
             if (window.console) console.log('[reCAPTCHA] sitekey not configured - captcha disabled');
         })();

@@ -6,7 +6,6 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 
 class RecaptchaRule implements ValidationRule
 {
@@ -18,15 +17,6 @@ class RecaptchaRule implements ValidationRule
         // La clé reCAPTCHA n'est pas configurée : ne pas bloquer l'inscription.
         if (empty($secret)) {
             Log::debug('[reCAPTCHA] skipped: no NOCAPTCHA_SECRET configured');
-
-            return;
-        }
-
-        // Si le captcha a déjà été validé avec succès lors d'une soumission
-        // précédente (ex: erreur sur un autre champ), ne pas re-vérifier.
-        // Évite le problème de token consommé réutilisé => invalid-input-response.
-        if (Session::get('recaptcha_verified') === true) {
-            Log::debug('[reCAPTCHA] already verified in this session, skipping');
 
             return;
         }
@@ -71,9 +61,6 @@ class RecaptchaRule implements ValidationRule
                     'http_status' => $response->status(),
                 ]);
             } else {
-                // Token valide : le mémoriser pour cette session.
-                Session::put('recaptcha_verified', true);
-
                 Log::info('[reCAPTCHA] verified successfully', [
                     'score' => $result['score'] ?? null,
                     'action' => $result['action'] ?? null,
