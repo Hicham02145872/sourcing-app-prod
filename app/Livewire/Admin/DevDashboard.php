@@ -584,6 +584,43 @@ class DevDashboard extends Component
         });
     }
 
+    public function exportClientsCsv()
+    {
+        $clients = User::where('role', 'client')->orderBy('name')->get();
+
+        if ($clients->isEmpty()) {
+            $this->dispatch('show-error-toast', message: 'No client users found.');
+
+            return;
+        }
+
+        $filename = 'clients_'.now()->format('Y-m-d_His').'.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ];
+
+        return response()->streamDownload(function () use ($clients) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['id', 'name', 'email', 'phone', 'role', 'email_verified_at', 'preferred_locale', 'can_delete_clients', 'created_at', 'updated_at']);
+            foreach ($clients as $user) {
+                fputcsv($out, [
+                    $user->id,
+                    $user->name,
+                    $user->email,
+                    $user->phone,
+                    $user->role,
+                    $user->email_verified_at?->format('Y-m-d H:i:s'),
+                    $user->preferred_locale,
+                    $user->can_delete_clients ? 'Yes' : 'No',
+                    $user->created_at?->format('Y-m-d H:i:s'),
+                    $user->updated_at?->format('Y-m-d H:i:s'),
+                ]);
+            }
+            fclose($out);
+        }, $filename, $headers);
+    }
+
     public function updateUserPassword($userId)
     {
         $actor = Auth::user();

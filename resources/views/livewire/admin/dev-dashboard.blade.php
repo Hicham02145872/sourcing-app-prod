@@ -247,13 +247,18 @@
                             <h2 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Users Management</h2>
                             <p class="text-xs text-slate-500 uppercase mt-1">View all users and reset account passwords</p>
                         </div>
-                        <div class="w-full max-w-sm">
-                            <input
-                                wire:model.live.debounce.300ms="userSearch"
-                                type="text"
-                                placeholder="Search by name, email, role..."
-                                class="w-full bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none"
-                            >
+                        <div class="flex items-center gap-3">
+                            <button wire:click="exportClientsCsv" class="bg-emerald-600 text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-none hover:bg-emerald-700">
+                                Export Clients CSV
+                            </button>
+                            <div class="w-full max-w-sm">
+                                <input
+                                    wire:model.live.debounce.300ms="userSearch"
+                                    type="text"
+                                    placeholder="Search by name, email, role..."
+                                    class="w-full bg-white border border-slate-200 text-xs px-3 py-2 outline-none focus:border-indigo-500 transition-none"
+                                >
+                            </div>
                         </div>
                     </div>
 
