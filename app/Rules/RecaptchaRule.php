@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class RecaptchaRule implements ValidationRule
 {
@@ -14,15 +15,18 @@ class RecaptchaRule implements ValidationRule
         $secret = config('services.captcha.secret');
         $sitekey = config('services.captcha.sitekey');
 
-        Log::debug('[reCAPTCHA] validate started', [
-            'secret_configured' => ! empty($secret),
-            'sitekey_configured' => ! empty($sitekey),
-            'value_present' => ! empty($value),
-            'value_length' => is_string($value) ? strlen($value) : null,
-        ]);
-
+        // La clé reCAPTCHA n'est pas configurée : ne pas bloquer l'inscription.
         if (empty($secret)) {
             Log::debug('[reCAPTCHA] skipped: no NOCAPTCHA_SECRET configured');
+
+            return;
+        }
+
+        // Si le captcha a déjà été validé avec succès lors d'une soumission
+        // précédente (ex: erreur sur un autre champ), ne pas re-vérifier.
+        // Évite le problème de token consommé réutilisé => invalid-input-response.
+        if (Session::get('recaptcha_verified') === true) {
+            Log::debug('[reCAPTCHA] already verified in this session, skipping');
 
             return;
         }
@@ -47,7 +51,6 @@ class RecaptchaRule implements ValidationRule
             $response = Http::timeout(5)->post('https://www.google.com/recaptcha/api/siteverify', [
                 'secret' => $secret,
                 'response' => $value,
-                'remoteip' => request()->ip(),
             ]);
 
             $result = $response->json();
@@ -60,6 +63,14 @@ class RecaptchaRule implements ValidationRule
                     'secret_prefix' => substr($secret, 0, 6).'...',
                     'token_length' => strlen($value),
                     'ip' => request()->ip(),
+                ]);
+            } else {
+                // Token valide : le mémoriser pour cette session.
+                Session::put('recaptcha_verified', true);
+
+                Log::debug('[reCAPTCHA] verified successfully, marked session', [
+                    'score' => $result['score'] ?? null,
+                    'action' => $result['action'] ?? null,
                 ]);
             }
 
@@ -83,4 +94,5 @@ class RecaptchaRule implements ValidationRule
         }
     }
 }
+
 
