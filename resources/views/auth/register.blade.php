@@ -163,18 +163,55 @@
 
     {{-- reCAPTCHA v3 --}}
     @if(config('services.captcha.sitekey'))
-    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.captcha.sitekey') }}"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.captcha.sitekey') }}" async defer></script>
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            var form = this;
-            grecaptcha.ready(function() {
-                grecaptcha.execute('{{ config("services.captcha.sitekey") }}', {action: 'register'}).then(function(token) {
-                    document.getElementById('g-recaptcha-response').value = token;
+        (function() {
+            var sitekey = @json(config('services.captcha.sitekey'));
+            var form = document.getElementById('registerForm');
+            if (!form) { return; }
+
+            function logCaptcha(msg) {
+                if (window.console) console.log('[reCAPTCHA]', msg);
+            }
+
+            var fakeSubmit = false;
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (fakeSubmit) { return; }
+
+                logCaptcha('submit intercepted, requesting token...');
+
+                if (typeof grecaptcha === 'undefined') {
+                    logCaptcha('ERROR: grecaptcha not loaded yet');
+                    // Fallback: still submit so the user is not stuck
+                    fakeSubmit = true;
                     form.submit();
+                    return;
+                }
+
+                grecaptcha.ready(function() {
+                    logCaptcha('executing reCAPTCHA v3...');
+                    grecaptcha.execute(sitekey, {action: 'register'}).then(function(token) {
+                        logCaptcha('token acquired (length=' + token.length + ')');
+                        document.getElementById('g-recaptcha-response').value = token;
+                        fakeSubmit = true;
+                        form.submit();
+                    }).catch(function(err) {
+                        logCaptcha('ERROR acquiring token: ' + (err && err.message || err));
+                        // Fallback so the user is not stuck
+                        fakeSubmit = true;
+                        form.submit();
+                    });
                 });
             });
-        });
+        })();
+    </script>
+    @else
+    <script>
+        // reCAPTCHA nicht konfiguriert: nur diagnostischer Log
+        (function() {
+            if (window.console) console.log('[reCAPTCHA] sitekey not configured - captcha disabled');
+        })();
     </script>
     @endif
 </x-guest-layout>

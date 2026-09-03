@@ -30,4 +30,10 @@ return [
         'password_confirmation' => 'password confirmation',
         'terms' => 'terms acceptance',
     ],
+
+    'name_invalid_chars' => 'The full name may only contain letters, spaces, apostrophes and hyphens.',
+    'name_no_urls' => 'The full name cannot contain URLs or web links.',
+    'name_no_spam' => 'The full name contains prohibited promotional content.',
+    'captcha_required' => 'Please complete the security check.',
+    'captcha_failed' => 'Security verification failed. Please try again.',
 ];
