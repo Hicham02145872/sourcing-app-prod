@@ -48,10 +48,12 @@ class RecaptchaRule implements ValidationRule
         ]);
 
         try {
-            $response = Http::timeout(5)->post('https://www.google.com/recaptcha/api/siteverify', [
-                'secret' => $secret,
-                'response' => $value,
-            ]);
+            $response = Http::timeout(5)
+                ->asForm()
+                ->post('https://www.google.com/recaptcha/api/siteverify', [
+                    'secret' => $secret,
+                    'response' => $value,
+                ]);
 
             $result = $response->json();
 
@@ -59,28 +61,25 @@ class RecaptchaRule implements ValidationRule
             if (! ($result['success'] ?? false)) {
                 Log::warning('[reCAPTCHA] verification failed', [
                     'error_codes' => $result['error-codes'] ?? [],
+                    'score' => $result['score'] ?? null,
+                    'action' => $result['action'] ?? null,
+                    'hostname' => $result['hostname'] ?? null,
                     'sitekey_prefix' => $sitekey ? substr($sitekey, 0, 6).'...' : '(none)',
                     'secret_prefix' => substr($secret, 0, 6).'...',
                     'token_length' => strlen($value),
-                    'ip' => request()->ip(),
+                    'request_ip' => request()->ip(),
+                    'http_status' => $response->status(),
                 ]);
             } else {
                 // Token valide : le mémoriser pour cette session.
                 Session::put('recaptcha_verified', true);
 
-                Log::debug('[reCAPTCHA] verified successfully, marked session', [
+                Log::info('[reCAPTCHA] verified successfully', [
                     'score' => $result['score'] ?? null,
                     'action' => $result['action'] ?? null,
+                    'hostname' => $result['hostname'] ?? null,
                 ]);
             }
-
-            Log::debug('[reCAPTCHA] siteverify response received', [
-                'success' => $result['success'] ?? false,
-                'score' => $result['score'] ?? null,
-                'action' => $result['action'] ?? null,
-                'hostname' => $result['hostname'] ?? null,
-                'error_codes' => $result['error-codes'] ?? [],
-            ]);
 
             if (! ($result['success'] ?? false)) {
                 $fail(__('validation.captcha_failed'));
