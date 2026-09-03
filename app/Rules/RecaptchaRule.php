@@ -35,6 +35,14 @@ class RecaptchaRule implements ValidationRule
             return;
         }
 
+        // Diagnostic essential (visible en production) : le couple clé/secret utilisé
+        Log::info('[reCAPTCHA] registering attempt', [
+            'sitekey_prefix' => $sitekey ? substr($sitekey, 0, 6).'...' : '(none)',
+            'secret_prefix' => substr($secret, 0, 6).'...',
+            'token_length' => strlen($value),
+            'token_preview' => substr($value, 0, 12).'...'.substr($value, -8),
+        ]);
+
         try {
             $response = Http::timeout(5)->post('https://www.google.com/recaptcha/api/siteverify', [
                 'secret' => $secret,
@@ -43,6 +51,17 @@ class RecaptchaRule implements ValidationRule
             ]);
 
             $result = $response->json();
+
+            // Logger en niveau warning les infos utiles pour diagnostiquer invalid-input-response
+            if (! ($result['success'] ?? false)) {
+                Log::warning('[reCAPTCHA] verification failed', [
+                    'error_codes' => $result['error-codes'] ?? [],
+                    'sitekey_prefix' => $sitekey ? substr($sitekey, 0, 6).'...' : '(none)',
+                    'secret_prefix' => substr($secret, 0, 6).'...',
+                    'token_length' => strlen($value),
+                    'ip' => request()->ip(),
+                ]);
+            }
 
             Log::debug('[reCAPTCHA] siteverify response received', [
                 'success' => $result['success'] ?? false,
@@ -53,11 +72,6 @@ class RecaptchaRule implements ValidationRule
             ]);
 
             if (! ($result['success'] ?? false)) {
-                Log::warning('[reCAPTCHA] verification failed', [
-                    'error_codes' => $result['error-codes'] ?? [],
-                    'ip' => request()->ip(),
-                ]);
-
                 $fail(__('validation.captcha_failed'));
             }
         } catch (\Throwable $e) {

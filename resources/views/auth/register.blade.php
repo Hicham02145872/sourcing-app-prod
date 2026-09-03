@@ -174,18 +174,14 @@
                 if (window.console) console.log('[reCAPTCHA]', msg);
             }
 
-            var fakeSubmit = false;
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                if (fakeSubmit) { return; }
+            var submitting = false;
+            var tokenField = document.getElementById('g-recaptcha-response');
 
-                logCaptcha('submit intercepted, requesting token...');
-
-                if (typeof grecaptcha === 'undefined') {
+            function obtainTokenThenSubmit() {
+                if (typeof grecaptcha === 'undefined' || !grecaptcha.ready) {
                     logCaptcha('ERROR: grecaptcha not loaded yet');
-                    // Fallback: still submit so the user is not stuck
-                    fakeSubmit = true;
-                    form.submit();
+                    // Attendre que le script soit chargé (2s max) plutôt que soumettre sans token
+                    setTimeout(obtainTokenThenSubmit, 250);
                     return;
                 }
 
@@ -193,17 +189,43 @@
                     logCaptcha('executing reCAPTCHA v3...');
                     grecaptcha.execute(sitekey, {action: 'register'}).then(function(token) {
                         logCaptcha('token acquired (length=' + token.length + ')');
-                        document.getElementById('g-recaptcha-response').value = token;
-                        fakeSubmit = true;
+                        tokenField.value = token;
                         form.submit();
                     }).catch(function(err) {
                         logCaptcha('ERROR acquiring token: ' + (err && err.message || err));
-                        // Fallback so the user is not stuck
-                        fakeSubmit = true;
+                        // Pas de token = ne pas bloquer l'utilisateur ; soumettre sans token
+                        // (le serveur le rejettera proprement avec un message clair plutôt qu'un échec silencieux)
                         form.submit();
                     });
                 });
-            });
+            }
+
+            var tokenAttempts = 0;
+            function guardedSubmit(e) {
+                e.preventDefault();
+                if (submitting) { return; }
+                submitting = true;
+
+                logCaptcha('submit intercepted, requesting token...');
+
+                // Boucle de garde : si grecaptcha n'est toujours pas prêt après 4s, soumettre sans token
+                var attempts = 0;
+                var wait = setInterval(function() {
+                    if (typeof grecaptcha !== 'undefined' && grecaptcha.ready) {
+                        clearInterval(wait);
+                        obtainTokenThenSubmit();
+                        return;
+                    }
+                    attempts++;
+                    if (attempts > 16) { // ~4s
+                        clearInterval(wait);
+                        logCaptcha('ERROR: timeout waiting for grecaptcha - submitting without token');
+                        form.submit();
+                    }
+                }, 250);
+            }
+
+            form.addEventListener('submit', guardedSubmit);
         })();
     </script>
     @else
