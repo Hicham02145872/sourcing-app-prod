@@ -315,6 +315,12 @@ class UnifiedTrackingService
         // Resolve Alias
         [$realNumber, $realCarrier, $isAlias, $error] = $this->resolveAlias($trackingNumber, $carrier);
 
+        // A tracking number never contains whitespace — strip it defensively
+        // so legacy dirty rows (pasted tab/space prefix) can't break the scraper.
+        if (is_string($realNumber)) {
+            $realNumber = preg_replace('/\s+/', '', $realNumber) ?? '';
+        }
+
         // If error is a virtual tracking response (success => true), return it directly
         if ($error && isset($error['success']) && $error['success'] === true) {
             return $error;

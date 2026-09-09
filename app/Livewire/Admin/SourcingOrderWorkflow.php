@@ -89,6 +89,15 @@ class SourcingOrderWorkflow extends Component
             return;
         }
 
+        $this->tracking_number = trim((string) $this->tracking_number);
+        $this->tracking_carrier = trim((string) $this->tracking_carrier);
+
+        if ($this->sourcingOrder->hasMultipleDestinations() === false) {
+            // A tracking number never contains whitespace; strip it so a pasted
+            // tab/space prefix can't corrupt the number sent to the scraper.
+            $this->tracking_number = preg_replace('/\s+/', '', (string) $this->tracking_number) ?? '';
+        }
+
         $updateData = [
             'tracking_number' => $this->tracking_number,
             'tracking_carrier' => $this->tracking_carrier,
