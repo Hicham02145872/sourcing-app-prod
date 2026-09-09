@@ -8,10 +8,13 @@ use App\Models\Quotation;
 use App\Models\SourcingOrder;
 use App\Models\SourcingRequest;
 use App\Models\User;
+use App\Services\ImageProcessingService;
 use App\Services\SharedIdService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SharedIdGenerationTest extends TestCase
@@ -38,6 +41,22 @@ class SharedIdGenerationTest extends TestCase
         return compact('client', 'admin', 'sourcingRequest', 'quotation');
     }
 
+    private function acceptQuotation(Quotation $quotation): void
+    {
+        Storage::fake('local');
+
+        $request = Request::create('/', 'POST', [], [], [
+            'proof_of_payment' => UploadedFile::fake()->image('proof.jpg'),
+        ]);
+
+        app(QuotationController::class)->accept(
+            $request,
+            'eng',
+            $quotation,
+            app(ImageProcessingService::class)
+        );
+    }
+
     public function test_nouvelle_sr_obtient_SB00005(): void
     {
         $sr = SourcingRequest::factory()->create();
@@ -59,13 +78,13 @@ class SharedIdGenerationTest extends TestCase
         $data = $this->createQuotedRequestWithQuotation();
 
         $this->actingAs($data['client']);
-        app(QuotationController::class)->accept(Request::create('/', 'POST'), 'eng', $data['quotation']);
+        $this->acceptQuotation($data['quotation']);
 
         $order = SourcingOrder::where('quotation_id', $data['quotation']->id)->first();
 
         $this->assertNotNull($order);
         $this->assertSame($data['sourcingRequest']->shared_id, $order->shared_id);
-        $this->assertSame($data['sourcingRequest']->reference_id, $order->reference_id);
+        $this->assertSame('FSB'.str_pad((string) $order->id, 6, '0', STR_PAD_LEFT), $order->reference_id);
     }
 
     public function test_so_a_sourcing_request_id_lie(): void
@@ -73,7 +92,7 @@ class SharedIdGenerationTest extends TestCase
         $data = $this->createQuotedRequestWithQuotation();
 
         $this->actingAs($data['client']);
-        app(QuotationController::class)->accept(Request::create('/', 'POST'), 'eng', $data['quotation']);
+        $this->acceptQuotation($data['quotation']);
 
         $order = SourcingOrder::where('quotation_id', $data['quotation']->id)->first();
 
@@ -85,13 +104,10 @@ class SharedIdGenerationTest extends TestCase
         $data = $this->createQuotedRequestWithQuotation();
 
         $this->actingAs($data['client']);
-        $controller = app(QuotationController::class);
-        $request = Request::create('/', 'POST');
-
-        $controller->accept($request, 'eng', $data['quotation']);
+        $this->acceptQuotation($data['quotation']);
         $firstOrderId = SourcingOrder::where('quotation_id', $data['quotation']->id)->value('id');
 
-        $controller->accept($request, 'eng', $data['quotation']->fresh());
+        $this->acceptQuotation($data['quotation']->fresh());
         $orderCount = SourcingOrder::where('quotation_id', $data['quotation']->id)->count();
 
         $this->assertSame(1, $orderCount);
@@ -119,7 +135,7 @@ class SharedIdGenerationTest extends TestCase
         $this->assertSame('#'.($legacyId * 5), $sr->reference_id);
     }
 
-    public function test_ancien_so_sans_shared_id_reste_intact(): void
+    public function test_ancien_so_sans_shared_id_utilise_le_fsb(): void
     {
         $data = $this->createQuotedRequestWithQuotation();
 
@@ -137,13 +153,13 @@ class SharedIdGenerationTest extends TestCase
         $order = SourcingOrder::findOrFail($legacyOrderId);
 
         $this->assertNull($order->shared_id);
-        $this->assertSame('#'.($legacyOrderId * 5), $order->reference_id);
+        $this->assertSame('FSB'.str_pad((string) $legacyOrderId, 6, '0', STR_PAD_LEFT), $order->reference_id);
     }
 
     public function test_recherche_par_shared_id_trouve_la_sr(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $sr = SourcingRequest::factory()->create(['shared_id' => 'SB00005']);
+        $sr = SourcingRequest::factory()->create(['shared_id' => 'SB00005', 'status' => 'pending']);
 
         $response = $this->actingAs($admin)->get(route('admin.sourcing-requests.index', ['search' => 'SB00005']));
 
@@ -158,11 +174,48 @@ class SharedIdGenerationTest extends TestCase
         $counterBefore = app(SharedIdService::class)->currentCounter();
 
         $this->actingAs($data['client']);
-        app(QuotationController::class)->accept(Request::create('/', 'POST'), 'eng', $data['quotation']);
+        $this->acceptQuotation($data['quotation']);
 
         $counterAfter = app(SharedIdService::class)->currentCounter();
 
         $this->assertSame($counterBefore, $counterAfter);
         $this->assertSame('SB00005', $data['sourcingRequest']->fresh()->shared_id);
+    }
+
+    public function test_reference_de_l_ordre_est_le_numero_fsb(): void
+    {
+        $data = $this->createQuotedRequestWithQuotation();
+
+        $order = SourcingOrder::factory()->create([
+            'user_id' => $data['client']->id,
+            'quotation_id' => $data['quotation']->id,
+            'sourcing_request_id' => $data['sourcingRequest']->id,
+            'status' => 'paid',
+        ]);
+
+        $expected = 'FSB'.str_pad((string) $order->id, 6, '0', STR_PAD_LEFT);
+
+        $this->assertSame($data['sourcingRequest']->shared_id, $order->shared_id);
+        $this->assertSame($expected, $order->reference_id);
+        $this->assertSame($order->fsb_tracking_number, $order->reference_id);
+        $this->assertNotSame($order->reference_id, (string) $order->shared_id);
+        $this->assertStringStartsWith('FSB', $order->reference_id);
+        $this->assertFalse(str_starts_with($order->reference_id, 'SB0'));
+    }
+
+    public function test_shared_id_de_l_ordre_reste_stocke_et_recherchable(): void
+    {
+        $data = $this->createQuotedRequestWithQuotation();
+
+        $order = SourcingOrder::factory()->create([
+            'user_id' => $data['client']->id,
+            'quotation_id' => $data['quotation']->id,
+            'sourcing_request_id' => $data['sourcingRequest']->id,
+        ]);
+
+        $order->update(['shared_id' => 'SB99999']);
+
+        $this->assertSame('SB99999', SourcingOrder::where('shared_id', 'SB99999')->value('shared_id'));
+        $this->assertSame('FSB'.str_pad((string) $order->id, 6, '0', STR_PAD_LEFT), $order->fresh()->reference_id);
     }
 }

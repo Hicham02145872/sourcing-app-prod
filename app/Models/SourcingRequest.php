@@ -102,7 +102,7 @@ class SourcingRequest extends Model
     }
 
     /**
-     * Public reference: SBxxxxx for new records, legacy #display_id otherwise.
+     * Public reference: FSBxxxxx for new records, legacy #display_id otherwise.
      */
     public function getReferenceIdAttribute(): string
     {

@@ -367,16 +367,12 @@ class SourcingOrder extends Model
     }
 
     /**
-     * Public reference: SBxxxxx for new records, legacy #display_id otherwise.
+     * Public reference: FSB tracking number alias (same as the tracking number).
      */
     public function getReferenceIdAttribute(): string
     {
-        if (! empty($this->shared_id)) {
-            return (string) $this->shared_id;
-        }
-
         if ($this->id) {
-            return '#'.$this->display_id;
+            return $this->fsb_tracking_number;
         }
 
         return '';
@@ -423,19 +419,39 @@ class SourcingOrder extends Model
 
     /**
      * Get the FSB tracking number alias (main order).
+     * New orders carry the FSB number inherited from their sourcing request
+     * (shared_id), so the request reference and the order tracking number are
+     * the same value. Legacy orders (SB shared_id or none) keep the id-derived FSB.
      */
     public function getFsbTrackingNumberAttribute(): string
     {
-        return 'FSB'.str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        if (is_string($this->shared_id) && preg_match('/^FSB(\d{6})$/', $this->shared_id, $matches)) {
+            return $this->shared_id;
+        }
+
+        return 'FSB'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Numeric base used to derive per-destination FSB numbers.
+     */
+    protected function getFsbNumericBase(): int
+    {
+        if (is_string($this->shared_id) && preg_match('/^FSB(\d{6})$/', $this->shared_id, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return (int) $this->id;
     }
 
     /**
      * Get the FSB tracking number for a destination index (0-based).
-     * First destination = FSB000010, second = FSB000011 for order id 10.
+     * New orders: base of the inherited FSB + index (e.g. FSB000006 for dest 1 on FSB000005).
+     * Legacy orders: order id + index.
      */
     public function getFsbTrackingNumberForDestinationIndex(int $index): string
     {
-        $numeric = $this->id + $index;
+        $numeric = $this->getFsbNumericBase() + $index;
 
         return 'FSB'.str_pad((string) $numeric, 6, '0', STR_PAD_LEFT);
     }
@@ -454,24 +470,51 @@ class SourcingOrder extends Model
     /**
      * Resolve FSB to order and destination index (0-based) for per-destination tracking.
      *
-     * Encoding: order N dest K → FSB(N+K). Direct order match wins; per-destination
-     * lookup only fires when no order with that exact ID exists. This prevents order 142
-     * (with 2 destinations) from stealing FSB000143 that belongs to order 143.
+     * Priority (new unified FSB scheme first, legacy fallback preserved):
+     *  1. Exact match on a new order's shared_id (FSB born with its sourcing request):
+     *     FSB000005 = order carrying shared_id FSB000005, dest 0.
+     *  2. Per-destination encoding for multi-destination new orders:
+     *     FSB(base+K) resolves to the order whose shared_id base plus K destinations
+     *     (e.g. FSB000006 → order FSB000005, dest 1), only when that destination index exists.
+     *  3. Legacy fallback: FSB(N) = order id N; FSB(N+K) = order N dest K when no direct
+     *     order exists, so a multi-dest legacy order N never steals FSB(N+K) belonging to order N+K.
      *
      * @return array{order: self, destination_index: int}|null
      */
     public static function resolveFsbNumberToOrderAndDestinationIndex(string $fsbNumber): ?array
     {
-        $numeric = (int) substr($fsbNumber, 3);
+        $normalized = strtoupper($fsbNumber);
 
-        // Direct match always wins — FSB000143 = order 143, dest 0.
-        $order = self::with('quotation.sourcingRequest.destinations')->find($numeric);
+        // Priority 1: unified FSB lifecycle number (order inherited its request's shared_id).
+        $order = self::with('quotation.sourcingRequest.destinations')
+            ->where('shared_id', $normalized)
+            ->first();
         if ($order) {
             return ['order' => $order, 'destination_index' => 0];
         }
 
-        // Fallback: per-destination encoding for multi-dest orders where no direct order exists.
-        // FSB(N+K) resolves to order N, destination index K.
+        if (! preg_match('/^(?:FSB|SB)(\d{5,6})$/', $normalized, $matches)) {
+            return null;
+        }
+        $numeric = (int) $matches[1];
+
+        // Priority 2: per-destination encoding for new multi-destination orders.
+        for ($index = 1; $index <= $numeric; $index++) {
+            $base = $numeric - $index;
+            $order = self::with('quotation.sourcingRequest.destinations')
+                ->where('shared_id', 'FSB'.str_pad((string) $base, 6, '0', STR_PAD_LEFT))
+                ->first();
+            if ($order && $order->quotation?->sourcingRequest?->destinations?->count() > $index) {
+                return ['order' => $order, 'destination_index' => $index];
+            }
+        }
+
+        // Priority 3: legacy fallback — direct order id match always wins,
+        // so order 142 (2 destinations) never steals FSB000143 belonging to order 143.
+        $order = self::with('quotation.sourcingRequest.destinations')->find($numeric);
+        if ($order) {
+            return ['order' => $order, 'destination_index' => 0];
+        }
         for ($index = 1; $index <= $numeric; $index++) {
             $orderId = $numeric - $index;
             $order = self::with('quotation.sourcingRequest.destinations')->find($orderId);

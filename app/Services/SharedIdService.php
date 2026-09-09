@@ -25,18 +25,22 @@ class SharedIdService
 
     public static function format(int $counter): string
     {
-        return 'SB'.str_pad((string) $counter, 5, '0', STR_PAD_LEFT);
+        return 'FSB'.str_pad((string) $counter, 6, '0', STR_PAD_LEFT);
     }
 
     public static function parse(string $sharedId): ?int
     {
         $normalized = strtoupper(trim($sharedId));
 
-        if (! preg_match('/^SB(\d{5})$/', $normalized, $matches)) {
-            return null;
+        if (preg_match('/^FSB(\d{6})$/', $normalized, $matches)) {
+            return (int) $matches[1];
         }
 
-        return (int) $matches[1];
+        if (preg_match('/^SB(\d{5})$/', $normalized, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
     }
 
     public function currentCounter(): int
