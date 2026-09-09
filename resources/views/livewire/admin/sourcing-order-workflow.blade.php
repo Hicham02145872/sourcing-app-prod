@@ -116,7 +116,7 @@
             <div class="mb-4 p-3 bg-blue-50 border border-blue-100 rounded flex justify-between items-center">
                 <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">{{ __('Client Tracking ID (FSB)') }}</span>
                 <span class="font-mono text-sm font-bold text-blue-900 bg-white px-2 py-0.5 rounded border border-blue-200">
-                    FSB{{ str_pad($sourcingOrder->id, 6, '0', STR_PAD_LEFT) }}
+                    {{ $sourcingOrder->fsb_tracking_number }}
                 </span>
             </div>
 
