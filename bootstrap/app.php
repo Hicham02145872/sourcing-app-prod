@@ -43,6 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'feature' => \App\Http\Middleware\CheckFeatureMiddleware::class,
             'verified.client' => \App\Http\Middleware\RequireVerifiedEmailForClients::class,
+            'sla.lockout' => \App\Http\Middleware\EnforceSlaNavigationLock::class,
         ]);
 
         $middleware->web(prepend: [
