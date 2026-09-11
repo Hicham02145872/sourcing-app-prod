@@ -7,8 +7,11 @@ use App\Models\Quotation;
 use App\Models\SourcingOrder;
 use App\Models\SourcingRequest;
 use App\Models\User;
+use App\Services\ImageProcessingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class QuotationAcceptCreatesOrderTest extends TestCase
@@ -36,9 +39,12 @@ class QuotationAcceptCreatesOrderTest extends TestCase
         $this->actingAs($client);
 
         // Act
+        Storage::fake('local');
         $controller = app(QuotationController::class);
-        $request = Request::create('/','POST', []);
-        $response = $controller->accept($request, 'en', $quotation);
+        $request = Request::create('/', 'POST', [], [], [
+            'proof_of_payment' => UploadedFile::fake()->image('proof.jpg'),
+        ]);
+        $response = $controller->accept($request, 'en', $quotation, app(ImageProcessingService::class));
 
         // Assert
         $this->assertDatabaseHas('quotations', [

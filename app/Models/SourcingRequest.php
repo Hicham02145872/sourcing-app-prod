@@ -44,6 +44,7 @@ class SourcingRequest extends Model
         'quoted',
         'negotiating',
         'accepted',
+        'in_transit_china',
         'completed',
         'rejected',
         'cancelled',
@@ -70,6 +71,8 @@ class SourcingRequest extends Model
         'assigned_to_admin_id',
         'assigned_at',
         'status_timestamps',
+        'status_changed_at',
+        'is_restricted_due_to_delay',
         'cloudinary_public_id',
     ];
 
@@ -78,6 +81,8 @@ class SourcingRequest extends Model
         'negotiated_at' => 'datetime',
         'accepted_at' => 'datetime',
         'status_timestamps' => 'array',
+        'status_changed_at' => 'datetime',
+        'is_restricted_due_to_delay' => 'boolean',
     ];
 
     public function assignedAdmin()
@@ -219,6 +224,9 @@ class SourcingRequest extends Model
                 'admin' => ['quoted', 'rejected'],
             ],
             'accepted' => [
+                'admin' => ['in_transit_china', 'completed', 'cancelled'],
+            ],
+            'in_transit_china' => [
                 'admin' => ['completed', 'cancelled'],
             ],
             'rejected' => [], // No transitions from rejected

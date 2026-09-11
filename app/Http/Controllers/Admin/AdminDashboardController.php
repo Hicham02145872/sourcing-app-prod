@@ -57,6 +57,31 @@ class AdminDashboardController extends Controller
         $pendingPaymentSourcingOrders = (clone $orderQuery)->where('status', SourcingOrder::STATUSES[0])->count();
         $pendingQuotations = (clone $quotationQuery)->where('status', Quotation::STATUSES[0])->count();
 
+        // Persistent workflow alert (per-admin in-review limit)
+        $inReviewLimit = (int) config('fsb.workflow.in_review_limit', 5);
+        $showInReviewLimitBanner = ! $isSuperAdmin
+            && app(\App\Services\FeatureFlagService::class)->isEnabled('workflow_in_review_limit', $user)
+            && ($sourcingRequestsByStatus['in_review'] ?? 0) >= $inReviewLimit;
+
+        // Persistent workflow alert (per-admin SLA deadline enforcement)
+        $slaOverdueCount = 0;
+        $slaOverdueByStatus = [];
+        if (! $isSuperAdmin) {
+            $slaOverdueQuery = SourcingRequest::query()
+                ->where('assigned_to_admin_id', $user->id)
+                ->where('is_restricted_due_to_delay', true)
+                ->whereIn('status', array_keys((array) config('fsb.sla', [])));
+            $slaOverdueByStatus = (clone $slaOverdueQuery)
+                ->select('status', \DB::raw('count(*) as total'))
+                ->groupBy('status')
+                ->pluck('total', 'status')
+                ->toArray();
+            $slaOverdueCount = array_sum($slaOverdueByStatus);
+        }
+        $showSlaOverdueBanner = ! $isSuperAdmin
+            && app(\App\Services\FeatureFlagService::class)->isEnabled('sla_deadlines_autolock', $user)
+            && $slaOverdueCount > 0;
+
         $allActivities = $user->notifications()->latest()->get();
         $filteredActivities = $this->filterNotificationsByAssignment($allActivities, $user);
         $recentActivities = $filteredActivities->take(3);
@@ -92,7 +117,12 @@ class AdminDashboardController extends Controller
             'pendingQuotations',
             'recentActivities',
             'allAdminsPerformance',
-            'notificationStats'
+            'notificationStats',
+            'showInReviewLimitBanner',
+            'inReviewLimit',
+            'showSlaOverdueBanner',
+            'slaOverdueCount',
+            'slaOverdueByStatus'
         ));
     }
 }

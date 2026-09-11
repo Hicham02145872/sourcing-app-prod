@@ -229,6 +229,11 @@ class SourcingOrderController extends Controller
             return view('admin.sourcing-orders.shipping-label', compact('sourcingOrder'));
         }
 
+        $png = $this->shippingLabelPngResponse($sourcingOrder, null, 'shipping-label-'.$sourcingOrder->id);
+        if ($png) {
+            return $png;
+        }
+
         $pdf = Pdf::loadView('admin.sourcing-orders.shipping-label', compact('sourcingOrder'));
         $pdf->setPaper('a4', 'portrait');
 
@@ -243,10 +248,39 @@ class SourcingOrderController extends Controller
             return view('admin.sourcing-orders.shipping-label-destination', compact('sourcingOrder', 'destination'));
         }
 
+        $png = $this->shippingLabelPngResponse($sourcingOrder, $destination, 'shipping-label-'.$sourcingOrder->id.'-dest-'.$destination->id);
+        if ($png) {
+            return $png;
+        }
+
         $pdf = Pdf::loadView('admin.sourcing-orders.shipping-label-destination', compact('sourcingOrder', 'destination'));
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->download('shipping-label-'.$sourcingOrder->id.'-dest-'.$destination->id.'.pdf');
+    }
+
+    /**
+     * Return an inline PNG of the shipping label when requested via
+     * ?format=png and the label_image_output flag is enabled, null otherwise.
+     */
+    protected function shippingLabelPngResponse(SourcingOrder $sourcingOrder, ?\App\Models\SourcingRequestDestination $destination, ?string $basename = null)
+    {
+        if (request()->query('format') !== 'png') {
+            return null;
+        }
+
+        if (! app(\App\Services\FeatureFlagService::class)->isEnabled('label_image_output', auth()->user())) {
+            return null;
+        }
+
+        $blob = app(\App\Services\ShippingLabelImageService::class)->pngBlob(
+            app(\App\Services\ShippingLabelImageService::class)->render($sourcingOrder, $destination)
+        );
+        $filename = ($basename ?: 'shipping-label-'.$sourcingOrder->id).'.png';
+
+        return response($blob, 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'inline; filename="'.$filename.'"');
     }
 
     public function downloadProofOfPayment(SourcingOrder $sourcingOrder)

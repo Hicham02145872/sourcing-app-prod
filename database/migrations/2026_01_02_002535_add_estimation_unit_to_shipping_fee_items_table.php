@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('shipping_fee_items', function (Blueprint $table) {
-            $table->string('estimation_days')->nullable()->after('price_per_kg');
-            $table->string('estimation_unit')->default('days')->after('estimation_days');
+            if (!Schema::hasColumn('shipping_fee_items', 'estimation_days')) {
+                $table->string('estimation_days')->nullable()->after('price_per_kg');
+            }
+            if (!Schema::hasColumn('shipping_fee_items', 'estimation_unit')) {
+                $table->string('estimation_unit')->default('days')->after('estimation_days');
+            }
         });
     }
 

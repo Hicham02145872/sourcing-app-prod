@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Models\RequestStatusLog;
 use App\Models\SourcingRequest;
 
 class SourcingRequestObserver
@@ -19,11 +20,27 @@ class SourcingRequestObserver
      */
     public function updating(SourcingRequest $sourcingRequest): void
     {
+        if ($sourcingRequest->isDirty('status')) {
+            // Track when the current status began and clear any SLA delay restriction,
+            // as a status movement always resets the deadline counter.
+            $sourcingRequest->status_changed_at = now();
+            $sourcingRequest->is_restricted_due_to_delay = false;
+
+            // Audit trail of every status movement (with the acting user when known)
+            RequestStatusLog::create([
+                'sourcing_request_id' => $sourcingRequest->getKey(),
+                'from_status' => $sourcingRequest->getOriginal('status'),
+                'to_status' => $sourcingRequest->status,
+                'changed_by_user_id' => auth()->check() ? auth()->id() : null,
+                'changed_at' => now(),
+            ]);
+        }
+
         // Auto-assign to the admin who changes status to 'in_review'
         if ($sourcingRequest->isDirty('status') && $sourcingRequest->status === 'in_review') {
             $user = auth()->user();
             if ($user && ($user->role === 'admin' || $user->role === 'super_admin') && ! $sourcingRequest->assigned_to_admin_id) {
-                // Ensure we don't overwrite if already assigned (though logic says ! assigned)
+                // Ensure we don't overwrite if already assigned (logic says ! assigned)
                 $sourcingRequest->assigned_to_admin_id = $user->id;
                 $sourcingRequest->assigned_at = now();
             }

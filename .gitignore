@@ -25,6 +25,7 @@ Thumbs.db
 cloudflared.exe
 test-results/
 playwright-tests/
+tests/e2e/results/
 notify()
 'Sourcing
 storage/app/firebase_credentials.json

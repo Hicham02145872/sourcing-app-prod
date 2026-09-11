@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sourcing_orders', function (Blueprint $table) {
-            $table->decimal('product_cost_price', 10, 2)->nullable()->after('total_amount');
-            $table->decimal('shipping_cost_real', 10, 2)->nullable()->after('product_cost_price');
-            $table->decimal('rejection_loss_cost', 10, 2)->nullable()->after('shipping_cost_real');
+            if (!Schema::hasColumn('sourcing_orders', 'product_cost_price')) {
+                $table->decimal('product_cost_price', 10, 2)->nullable()->after('total_amount');
+            }
+            if (!Schema::hasColumn('sourcing_orders', 'shipping_cost_real')) {
+                $table->decimal('shipping_cost_real', 10, 2)->nullable()->after('product_cost_price');
+            }
+            if (!Schema::hasColumn('sourcing_orders', 'rejection_loss_cost')) {
+                $table->decimal('rejection_loss_cost', 10, 2)->nullable()->after('shipping_cost_real');
+            }
         });
     }
 
@@ -24,7 +30,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('sourcing_orders', function (Blueprint $table) {
-            $table->dropColumn(['product_cost_price', 'shipping_cost_real', 'rejection_loss_cost']);
+            $columnsToDrop = array_filter([
+                Schema::hasColumn('sourcing_orders', 'product_cost_price') ? 'product_cost_price' : null,
+                Schema::hasColumn('sourcing_orders', 'shipping_cost_real') ? 'shipping_cost_real' : null,
+                Schema::hasColumn('sourcing_orders', 'rejection_loss_cost') ? 'rejection_loss_cost' : null,
+            ]);
+            if (!empty($columnsToDrop)) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 };

@@ -172,9 +172,36 @@ class SourcingOrderController extends Controller
             return view('client.sourcing-orders.shipping-label', compact('sourcingOrder'));
         }
 
+        $png = $this->shippingLabelPngResponse($sourcingOrder);
+        if ($png) {
+            return $png;
+        }
+
         $pdf = Pdf::loadView('client.sourcing-orders.shipping-label', compact('sourcingOrder'));
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->download('shipping-label-'.$sourcingOrder->id.'.pdf');
+    }
+
+    /**
+     * Return an inline PNG of the shipping label when requested via
+     * ?format=png and the label_image_output flag is enabled, null otherwise.
+     */
+    protected function shippingLabelPngResponse(SourcingOrder $sourcingOrder)
+    {
+        if (request()->query('format') !== 'png') {
+            return null;
+        }
+
+        if (! app(\App\Services\FeatureFlagService::class)->isEnabled('label_image_output', auth()->user())) {
+            return null;
+        }
+
+        $service = app(\App\Services\ShippingLabelImageService::class);
+        $blob = $service->pngBlob($service->render($sourcingOrder));
+
+        return response($blob, 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'inline; filename="shipping-label-'.$sourcingOrder->id.'.png"');
     }
 }

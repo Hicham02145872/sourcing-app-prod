@@ -145,13 +145,20 @@ class AdminSourcingRequestController extends Controller
             });
         }
 
-        // Filter by admin (Super Admin only)
-        if (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
+        // Filter by admin (Super Admin only, or self via admin_id=me)
+        if ($request->admin_id === 'me') {
+            $query->where('assigned_to_admin_id', auth()->id());
+        } elseif (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
             if ($request->admin_id == 'unassigned') {
                 $query->whereNull('assigned_to_admin_id');
             } else {
                 $query->where('assigned_to_admin_id', $request->admin_id);
             }
+        }
+
+        // Filter by SLA-overdue requests (SLA deadline banner "View" action)
+        if ($request->boolean('overdue')) {
+            $query->where('is_restricted_due_to_delay', true);
         }
 
         // Status counts (respecting search + admin filters, but NOT status filter)
@@ -181,12 +188,17 @@ class AdminSourcingRequestController extends Controller
                     });
             });
         }
-        if (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
+        if ($request->admin_id === 'me') {
+            $statusCountsQuery->where('assigned_to_admin_id', auth()->id());
+        } elseif (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
             if ($request->admin_id == 'unassigned') {
                 $statusCountsQuery->whereNull('assigned_to_admin_id');
             } else {
                 $statusCountsQuery->where('assigned_to_admin_id', $request->admin_id);
             }
+        }
+        if ($request->boolean('overdue')) {
+            $statusCountsQuery->where('is_restricted_due_to_delay', true);
         }
         $statusCountsRaw = $statusCountsQuery->select('status', DB::raw('count(*) as count'))->groupBy('status')->pluck('count', 'status');
         $statusCounts = [];

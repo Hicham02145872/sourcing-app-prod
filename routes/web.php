@@ -201,6 +201,11 @@ Route::middleware(['auth', 'role:admin', 'verified'])->prefix('admin')->name('ad
 
         // Tracking Logs (toujours visible)
         Route::get('/tracking-logs', [App\Http\Controllers\Admin\TrackingLogController::class, 'index'])->name('tracking-logs.index');
+
+        // Admin Performance Analytics (Super Admin Only)
+        Route::get('/super-admin/analytics/admin-performance', \App\Livewire\Admin\AdminPerformanceAnalytics::class)
+            ->middleware('feature:admin_performance_analytics')
+            ->name('super-admin.analytics.admin-performance');
     });
 });
 

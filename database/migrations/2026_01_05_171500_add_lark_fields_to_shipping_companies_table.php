@@ -12,10 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('shipping_companies', function (Blueprint $table) {
-            $table->string('lark_app_id')->nullable()->after('is_active');
-            $table->string('lark_app_secret')->nullable()->after('lark_app_id');
-            $table->string('lark_base_token')->nullable()->after('lark_app_secret');
-            $table->string('lark_table_id')->nullable()->after('lark_base_token');
+            if (!Schema::hasColumn('shipping_companies', 'lark_app_id')) {
+                $table->string('lark_app_id')->nullable()->after('is_active');
+            }
+            if (!Schema::hasColumn('shipping_companies', 'lark_app_secret')) {
+                $table->string('lark_app_secret')->nullable()->after('lark_app_id');
+            }
+            if (!Schema::hasColumn('shipping_companies', 'lark_base_token')) {
+                $table->string('lark_base_token')->nullable()->after('lark_app_secret');
+            }
+            if (!Schema::hasColumn('shipping_companies', 'lark_table_id')) {
+                $table->string('lark_table_id')->nullable()->after('lark_base_token');
+            }
         });
     }
 
@@ -25,7 +33,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('shipping_companies', function (Blueprint $table) {
-            $table->dropColumn(['lark_app_id', 'lark_app_secret', 'lark_base_token', 'lark_table_id']);
+            $columnsToDrop = array_filter([
+                Schema::hasColumn('shipping_companies', 'lark_app_id') ? 'lark_app_id' : null,
+                Schema::hasColumn('shipping_companies', 'lark_app_secret') ? 'lark_app_secret' : null,
+                Schema::hasColumn('shipping_companies', 'lark_base_token') ? 'lark_base_token' : null,
+                Schema::hasColumn('shipping_companies', 'lark_table_id') ? 'lark_table_id' : null,
+            ]);
+            if (!empty($columnsToDrop)) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 };

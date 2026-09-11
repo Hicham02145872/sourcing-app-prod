@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('shipping_companies', function (Blueprint $table) {
-            $table->string('tracking_provider')->nullable()->after('name');
+            if (!Schema::hasColumn('shipping_companies', 'tracking_provider')) {
+                $table->string('tracking_provider')->nullable()->after('name');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('shipping_companies', function (Blueprint $table) {
-            $table->dropColumn('tracking_provider');
+            if (Schema::hasColumn('shipping_companies', 'tracking_provider')) {
+                $table->dropColumn('tracking_provider');
+            }
         });
     }
 };

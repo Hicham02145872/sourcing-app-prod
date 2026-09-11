@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('refund_requests', function (Blueprint $table) {
-            $table->integer('damaged_quantity')->nullable()->after('amount_requested');
+            if (!Schema::hasColumn('refund_requests', 'damaged_quantity')) {
+                $table->integer('damaged_quantity')->nullable()->after('amount_requested');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('refund_requests', function (Blueprint $table) {
-            $table->dropColumn('damaged_quantity');
+            if (Schema::hasColumn('refund_requests', 'damaged_quantity')) {
+                $table->dropColumn('damaged_quantity');
+            }
         });
     }
 };

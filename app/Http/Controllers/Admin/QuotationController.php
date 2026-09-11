@@ -47,7 +47,7 @@ class QuotationController extends Controller
                     ->orWhereHas('sourcingRequest', function ($srQuery) use ($searchTerm) {
                         $srQuery->where('product_name', 'like', '%'.$searchTerm.'%')
                             ->orWhere('id', 'like', '%'.$searchTerm.'%')
-                            ->orWhere('note', 'like', '%'.$searchTerm.'%')
+                ->orWhere('note', 'like', '%'.$searchTerm.'%')
                             ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
                                 $userQuery->where('name', 'like', '%'.$searchTerm.'%')
                                     ->orWhere('email', 'like', '%'.$searchTerm.'%');

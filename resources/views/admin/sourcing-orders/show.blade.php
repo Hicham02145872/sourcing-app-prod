@@ -95,6 +95,36 @@
                     <!-- Order Workflow & Tracking (Livewire) -->
                     <livewire:admin.sourcing-order-workflow :sourcingOrder="$sourcingOrder" />
 
+                    <!-- China Transit Internal Details (Super Admin Only) -->
+                    @if(auth()->user()->isSuperAdmin() && ($sourcingOrder->china_tracking_number || $sourcingOrder->package_label_photo_path))
+                        <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                                <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                    {{ __('China shipment (internal)') }}
+                                </h3>
+                            </div>
+                            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('China tracking number') }}</label>
+                                    <p class="text-sm font-semibold text-slate-900">{{ $sourcingOrder->china_tracking_number ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Package label photo') }}</label>
+                                    @if ($sourcingOrder->package_label_photo_path)
+                                        <a href="{{ media_url($sourcingOrder->package_label_photo_path) }}" target="_blank">
+                                            <img src="{{ media_url($sourcingOrder->package_label_photo_path) }}"
+                                                 alt="{{ __('Package label photo') }}"
+                                                 class="w-32 h-24 object-cover rounded border border-slate-200">
+                                        </a>
+                                    @else
+                                        <p class="text-sm text-slate-400">—</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Quotation Fees (Quality-aware pricing) -->
                     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">

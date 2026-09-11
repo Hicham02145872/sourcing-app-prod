@@ -118,6 +118,8 @@ class SourcingOrder extends Model
         'parcel_photo_public_id',
         'parcel_weight_kg',
         'parcel_photo_uploaded_at',
+        'china_tracking_number',
+        'package_label_photo_path',
     ];
 
     /**

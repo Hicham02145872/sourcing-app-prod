@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('google_sheet_settings', function (Blueprint $table) {
-            $table->json('synced_fields')->nullable()->after('sheet_name');
+            if (!Schema::hasColumn('google_sheet_settings', 'synced_fields')) {
+                $table->json('synced_fields')->nullable()->after('sheet_name');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('google_sheet_settings', function (Blueprint $table) {
-            $table->dropColumn('synced_fields');
+            if (Schema::hasColumn('google_sheet_settings', 'synced_fields')) {
+                $table->dropColumn('synced_fields');
+            }
         });
     }
 };

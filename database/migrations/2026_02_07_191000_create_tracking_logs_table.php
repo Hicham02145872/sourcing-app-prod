@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tracking_logs', function (Blueprint $table) {
-            $table->id();
-            $table->string('tracking_number');
-            $table->string('provider');
-            $table->string('status')->nullable();
-            $table->string('location')->nullable();
-            $table->json('payload')->nullable(); // Stores the full JSON response
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('ip_address')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('tracking_logs')) {
+            Schema::create('tracking_logs', function (Blueprint $table) {
+                $table->id();
+                $table->string('tracking_number');
+                $table->string('provider');
+                $table->string('status')->nullable();
+                $table->string('location')->nullable();
+                $table->json('payload')->nullable();
+                $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+                $table->string('ip_address')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

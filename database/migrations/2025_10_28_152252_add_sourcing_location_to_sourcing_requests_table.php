@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sourcing_requests', function (Blueprint $table) {
-            $table->string('sourcing_location')->default('china');
+            if (!Schema::hasColumn('sourcing_requests', 'sourcing_location')) {
+                $table->string('sourcing_location')->default('china');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('sourcing_requests', function (Blueprint $table) {
-            $table->dropColumn('sourcing_location');
+            if (Schema::hasColumn('sourcing_requests', 'sourcing_location')) {
+                $table->dropColumn('sourcing_location');
+            }
         });
     }
 };

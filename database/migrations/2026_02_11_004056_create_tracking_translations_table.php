@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tracking_translations', function (Blueprint $table) {
-            $table->id();
-            $table->string('provider');
-            $table->text('source_text');
-            $table->text('translated_text');
-            $table->string('source_hash')->unique()->comment('sha1 of provider + source_text');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('tracking_translations')) {
+            Schema::create('tracking_translations', function (Blueprint $table) {
+                $table->id();
+                $table->string('provider');
+                $table->text('source_text');
+                $table->text('translated_text');
+                $table->string('source_hash')->unique()->comment('sha1 of provider + source_text');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

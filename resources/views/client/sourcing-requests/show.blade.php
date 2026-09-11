@@ -42,6 +42,7 @@
                                 'quoted' => ['color' => '#EF7722', 'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
                                 'in_review' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
                                 'accepted' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                'in_transit_china' => ['color' => '#3B82F6', 'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
                                 'completed' => ['color' => '#0BA6DF', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
                                 'negotiating' => ['color' => '#3B82F6', 'icon' => 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'],
                                 'rejected' => ['color' => '#EF4444', 'icon' => 'M6 18L18 6M6 6l12 12'],
@@ -75,6 +76,9 @@
                                 @elseif($sourcingRequest->status === 'accepted' && $sourcingRequest->accepted_at)
                                     <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Payment Date') }}</p>
                                     <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->accepted_at?->format('M d, Y') }}</p>
+                                @elseif($sourcingRequest->status === 'in_transit_china' && isset($sourcingRequest->status_timestamps['in_transit_china']))
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('In Transit Date') }}</p>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ \Illuminate\Support\Carbon::parse($sourcingRequest->status_timestamps['in_transit_china'])->format('M d, Y') }}</p>
                                 @else
                                     <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{{ __('Request Date') }}</p>
                                     <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $sourcingRequest->created_at->format('M d, Y') }}</p>

@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('feature_flags', function (Blueprint $table) {
-            $table->id();
-            $table->string('key')->unique();
-            $table->string('name');
-            $table->enum('status', ['visible', 'hidden', 'coming_soon'])->default('visible');
-            $table->json('roles')->nullable(); // JSON array of roles like ["admin", "super_admin", "client"]
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('feature_flags')) {
+            Schema::create('feature_flags', function (Blueprint $table) {
+                $table->id();
+                $table->string('key')->unique();
+                $table->string('name');
+                $table->enum('status', ['visible', 'hidden', 'coming_soon'])->default('visible');
+                $table->json('roles')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

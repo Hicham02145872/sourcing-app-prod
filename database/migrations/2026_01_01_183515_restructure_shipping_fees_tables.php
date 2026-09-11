@@ -12,20 +12,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('shipping_fees', function (Blueprint $table) {
-            $table->string('air_arrival_time')->nullable();
-            $table->string('sea_arrival_time')->nullable();
-            $table->string('train_arrival_time')->nullable();
+            if (!Schema::hasColumn('shipping_fees', 'air_arrival_time')) {
+                $table->string('air_arrival_time')->nullable();
+            }
+            if (!Schema::hasColumn('shipping_fees', 'sea_arrival_time')) {
+                $table->string('sea_arrival_time')->nullable();
+            }
+            if (!Schema::hasColumn('shipping_fees', 'train_arrival_time')) {
+                $table->string('train_arrival_time')->nullable();
+            }
         });
 
         Schema::table('shipping_fee_items', function (Blueprint $table) {
-            $table->decimal('price_per_kg', 10, 2)->after('item_style');
-            $table->dropColumn([
-                'price_16_49',
-                'price_50_99',
-                'price_100_499',
-                'price_plus_500',
-                'estimation_days', // Moved to shipping_fees
+            if (!Schema::hasColumn('shipping_fee_items', 'price_per_kg')) {
+                $table->decimal('price_per_kg', 10, 2)->after('item_style');
+            }
+            $columnsToDrop = array_filter([
+                Schema::hasColumn('shipping_fee_items', 'price_16_49') ? 'price_16_49' : null,
+                Schema::hasColumn('shipping_fee_items', 'price_50_99') ? 'price_50_99' : null,
+                Schema::hasColumn('shipping_fee_items', 'price_100_499') ? 'price_100_499' : null,
+                Schema::hasColumn('shipping_fee_items', 'price_plus_500') ? 'price_plus_500' : null,
+                Schema::hasColumn('shipping_fee_items', 'estimation_days') ? 'estimation_days' : null,
             ]);
+            if (!empty($columnsToDrop)) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 

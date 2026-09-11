@@ -37,7 +37,7 @@ class ImageProcessingService
             }
 
             return new ImageResult(path: $path, publicId: $publicId);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $path = $file->store($directory, $disk);
             return new ImageResult(path: $path);
         }

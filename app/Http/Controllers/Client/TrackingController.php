@@ -10,7 +10,6 @@ use Illuminate\View\View;
 class TrackingController extends Controller
 {
     public function __construct(
-        protected \App\Services\SeventeenTrackService $seventeenTrackService,
         protected \App\Services\Tracking\UnifiedTrackingService $unifiedTrackingService,
         protected \App\Services\OrderStatus\AutoUpdateOrderStatusFromTracking $autoUpdateOrderStatus
     ) {}
@@ -48,7 +47,7 @@ class TrackingController extends Controller
             return response()->json(['error' => __('Please provide a tracking number.')], 400);
         }
 
-        $result = $this->seventeenTrackService->getTrackInfo($trackingNumber);
+        $result = app(\App\Services\SeventeenTrackService::class)->getTrackInfo($trackingNumber);
 
         if (isset($result['code']) && $result['code'] === 0) {
             return response()->json($result);
