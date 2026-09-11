@@ -276,9 +276,11 @@
                                     <th scope="col" class="px-6 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-slate-200">
+                            <tbody class="bg-white divide-y divide-slate-200" x-data="{ expandedId: null }">
                                 @foreach ($sourcingOrders as $order)
-                                    <tr class="hover:bg-slate-50 transition-colors">
+                                    <tr class="hover:bg-slate-50 transition-colors cursor-pointer"
+                                        @click="expandedId = (expandedId === {{ $order->id }} ? null : {{ $order->id }});"
+                                        wire:key="order-row-{{ $order->id }}">
                                         <!-- Order Info -->
                                         <td class="px-6 py-3 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
@@ -361,7 +363,7 @@
                                         </td>
 
                                         <!-- Status Selector -->
-                                        <td class="px-6 py-3 whitespace-nowrap">
+                                        <td class="px-6 py-3 whitespace-nowrap" @click.stop>
                                             <form action="{{ route('admin.sourcing-orders.update-status', $order) }}" method="POST">
                                                 @csrf
                                                 @method('PATCH')
@@ -392,7 +394,7 @@
                                         </td>
 
                                         <!-- Payment Proof -->
-                                        <td class="px-6 py-3 whitespace-nowrap text-center">
+                                        <td class="px-6 py-3 whitespace-nowrap text-center" @click.stop>
                                             @if ($order->proof_of_payment_path)
                                                 <a href="{{ route('admin.sourcing-orders.download-proof-of-payment', $order) }}" 
                                                     class="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-800 hover:underline">
@@ -405,7 +407,7 @@
                                         </td>
 
                                         <!-- Actions -->
-                                        <td class="px-6 py-3 whitespace-nowrap text-right">
+                                        <td class="px-6 py-3 whitespace-nowrap text-right" @click.stop>
                                             <div class="flex items-center justify-end gap-1">
                                                 <!-- View -->
                                                 <a href="{{ route('admin.sourcing-orders.show', [$order, 'page' => request('page')]) }}" 
@@ -446,6 +448,106 @@
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                     </button>
                                                 </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    {{-- Expandable detail row (photos + tracking) --}}
+                                    <tr x-cloak x-show="expandedId === {{ $order->id }}" class="bg-slate-50 border-x border-slate-200 shadow-inner" wire:key="order-expanded-{{ $order->id }}">
+                                        <td colspan="7" class="px-6 py-4 border-0">
+                                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                                <!-- Photos -->
+                                                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                                                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">{{ __('Colis photos') }}</p>
+                                                    <div class="grid grid-cols-2 gap-3">
+                                                        @if($order->package_label_photo_path)
+                                                            <a href="{{ media_url($order->package_label_photo_path) }}" target="_blank" class="group">
+                                                                <img src="{{ media_url($order->package_label_photo_path) }}" alt="{{ __('Package label photo') }}" class="w-full h-24 object-cover rounded border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
+                                                                <p class="text-[10px] text-slate-400 mt-1">{{ __('Label') }}</p>
+                                                            </a>
+                                                        @else
+                                                            <div class="h-24 flex items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded">
+                                                                <span class="text-[10px] text-slate-400 italic">{{ __('No label photo') }}</span>
+                                                            </div>
+                                                        @endif
+                                                        @if($order->parcel_photo_path)
+                                                            <a href="{{ media_url($order->parcel_photo_path) }}" target="_blank" class="group">
+                                                                <img src="{{ media_url($order->parcel_photo_path) }}" alt="{{ __('Parcel photo') }}" class="w-full h-24 object-cover rounded border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
+                                                                <p class="text-[10px] text-slate-400 mt-1">{{ __('Colis') }}</p>
+                                                            </a>
+                                                        @else
+                                                            <div class="h-24 flex items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded">
+                                                                <span class="text-[10px] text-slate-400 italic">{{ __('No colis photo') }}</span>
+                                                            </div>
+                                                        @endif
+                                                        @if($order->proof_of_payment_path)
+                                                            <a href="{{ route('admin.sourcing-orders.download-proof-of-payment', $order) }}" target="_blank" class="group">
+                                                                <img src="{{ media_url($order->proof_of_payment_path) }}" alt="{{ __('Payment proof') }}" class="w-full h-24 object-cover rounded border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
+                                                                <p class="text-[10px] text-slate-400 mt-1">{{ __('Proof') }}</p>
+                                                            </a>
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tracking -->
+                                                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                                                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">{{ __('Tracking') }}</p>
+                                                    <dl class="space-y-2 text-xs">
+                                                        <div class="flex justify-between gap-2">
+                                                            <dt class="text-slate-500 font-semibold">{{ __('FSB number') }}</dt>
+                                                            <dd class="text-slate-900 font-mono font-bold">{{ $order->fsb_tracking_number }}</dd>
+                                                        </div>
+                                                        <div class="flex justify-between gap-2">
+                                                            <dt class="text-slate-500 font-semibold">{{ __('China tracking') }}</dt>
+                                                            <dd class="text-slate-900 font-mono font-semibold">{{ $order->china_tracking_number ?: __('—') }}</dd>
+                                                        </div>
+                                                        <div class="flex justify-between gap-2">
+                                                            <dt class="text-slate-500 font-semibold">{{ __('Local / real tracking') }}</dt>
+                                                            <dd class="text-slate-900 font-mono font-semibold">{{ $order->tracking_number ?: __('—') }}</dd>
+                                                        </div>
+                                                        <div class="flex justify-between gap-2">
+                                                            <dt class="text-slate-500 font-semibold">{{ __('Carrier') }}</dt>
+                                                            <dd class="text-slate-900 font-semibold">{{ $order->tracking_carrier ?: $order->shippingCompany?->name ?: __('—') }}</dd>
+                                                        </div>
+                                                        @if($order->hasMultipleDestinations())
+                                                            @foreach($order->destinationShipments as $ds)
+                                                                <div class="flex justify-between gap-2 border-t border-slate-100 pt-2">
+                                                                    <dt class="text-slate-500 font-semibold">{{ __('Destination') }}</dt>
+                                                                    <dd class="text-slate-900 font-mono font-semibold text-right">{{ $ds->tracking_number ?: __('—') }}</dd>
+                                                                </div>
+                                                            @endforeach
+                                                        @endif
+                                                    </dl>
+                                                </div>
+
+                                                <!-- Status / Link -->
+                                                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                                                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">{{ __('Status') }}</p>
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold"
+                                                          style="background-color: #EF772222; color: #EF7722;">
+                                                        {{ str_replace('_', ' ', $order->status) }}
+                                                    </span>
+                                                    @if($order->client_status !== $order->status)
+                                                        <p class="text-[10px] text-slate-400 mt-2">{{ __('Client sees') }}: <span class="font-semibold text-slate-500">{{ str_replace('_', ' ', $order->client_status) }}</span></p>
+                                                    @endif
+                                                    @php
+                                                        $hasPhoto = $order->package_label_photo_path || $order->parcel_photo_path;
+                                                        $hasTracking = $order->china_tracking_number || $order->tracking_number;
+                                                    @endphp
+                                                    @if($order->status === 'in_transit_china' && (!$hasPhoto || !$hasTracking))
+                                                        <p class="mt-2 text-[10px] font-bold text-orange-600 flex items-center gap-1">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                            {{ __('In-transit evidence incomplete') }}
+                                                        </p>
+                                                    @endif
+                                                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                                                        <a href="{{ route('admin.sourcing-orders.show', [$order, 'page' => request('page')]) }}"
+                                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-md shadow-sm transition-colors">
+                                                            {{ __('Open order') }}
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>

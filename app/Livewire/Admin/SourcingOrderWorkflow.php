@@ -8,13 +8,17 @@ use App\Models\SourcingOrder;
 use App\Models\SourcingOrderDestinationShipment;
 use App\Models\User;
 use App\Notifications\TrackingNumberAdded;
+use App\Services\ImageProcessingService;
 use App\Services\Tracking\UnifiedTrackingService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class SourcingOrderWorkflow extends Component
 {
+    use WithFileUploads;
+
     public SourcingOrder $sourcingOrder;
 
     public string $status = '';
@@ -24,6 +28,12 @@ class SourcingOrderWorkflow extends Component
     public ?string $tracking_carrier = null;
 
     public ?int $shipping_company_id = null;
+
+    public string $chinaTrackingNumber = '';
+
+    public $packageLabelPhoto;
+
+    public bool $showEvidenceZone = false;
 
     /** @var array<int, array{tracking_number: string, tracking_carrier: string, shipping_company_id: ?int}> Per-destination tracking when order has multiple destinations */
     public array $destinationTrackings = [];
@@ -40,6 +50,8 @@ class SourcingOrderWorkflow extends Component
         $this->tracking_number = $sourcingOrder->tracking_number;
         $this->tracking_carrier = $sourcingOrder->tracking_carrier;
         $this->shipping_company_id = $sourcingOrder->shipping_company_id;
+        $this->chinaTrackingNumber = $sourcingOrder->china_tracking_number ?? '';
+        $this->showEvidenceZone = in_array($sourcingOrder->status, ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']);
 
         if ($this->sourcingOrder->hasMultipleDestinations()) {
             foreach ($this->sourcingOrder->quotation->sourcingRequest->destinations as $dest) {
@@ -76,6 +88,10 @@ class SourcingOrderWorkflow extends Component
         $this->sourcingOrder->update(['status' => $this->status]);
         $this->sourcingOrder->refresh();
 
+        if ($this->status === 'in_transit_china') {
+            $this->showEvidenceZone = true;
+        }
+
         event(new SourcingOrderStatusChanged($this->sourcingOrder));
 
         $this->dispatch('show-success-toast', message: __('Status updated successfully!'));
@@ -104,7 +120,7 @@ class SourcingOrderWorkflow extends Component
         ];
 
         // If a real tracking number is being assigned for the first time, record the timestamp
-        if ($this->tracking_number && !$this->sourcingOrder->hasRealTracking()) {
+        if ($this->tracking_number && ! $this->sourcingOrder->hasRealTracking()) {
             $updateData['real_tracking_assigned_at'] = now();
             Log::info('🎯 [FSB TRACKING] Real tracking number assigned to FSB', [
                 'order_id' => $this->sourcingOrder->id,
@@ -132,17 +148,86 @@ class SourcingOrderWorkflow extends Component
         $this->dispatch('show-success-toast', message: __('Tracking information updated successfully!'));
     }
 
+    /**
+     * Save the in-transit-from-China evidence: local tracking + photo.
+     * Kept in the order workflow so the admin fills everything from the
+     * order page without going back to the sourcing request.
+     */
+    public function saveChinaTransitEvidence()
+    {
+        if (! auth()->user()->isSuperAdmin() && $this->sourcingOrder->assigned_to_admin_id !== auth()->id()) {
+            $this->dispatch('show-error-toast', message: __('You are not authorized to update this order.'));
+
+            return;
+        }
+
+        $this->chinaTrackingNumber = trim((string) $this->chinaTrackingNumber);
+        $this->tracking_number = trim((string) $this->tracking_number);
+        $this->tracking_carrier = trim((string) $this->tracking_carrier);
+
+        $this->validate([
+            'tracking_number' => ['nullable', 'string', 'max:255'],
+            'chinaTrackingNumber' => ['nullable', 'string', 'max:255'],
+            'packageLabelPhoto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ]);
+
+        try {
+            $updateData = [
+                'china_tracking_number' => $this->chinaTrackingNumber ?: null,
+            ];
+
+            if ($this->packageLabelPhoto) {
+                $photo = app(ImageProcessingService::class)->compressAndStore($this->packageLabelPhoto, 'sourcing/in-transit');
+                $updateData['package_label_photo_path'] = $photo->path;
+            }
+
+            // Real tracking assignment timestamp (local leg)
+            if ($this->tracking_number && ! $this->sourcingOrder->hasRealTracking()) {
+                $updateData['real_tracking_assigned_at'] = now();
+                $updateData['tracking_number'] = $this->tracking_number;
+                $updateData['tracking_carrier'] = $this->tracking_carrier ?: $this->sourcingOrder->tracking_carrier;
+            } elseif ($this->tracking_number) {
+                $updateData['tracking_number'] = $this->tracking_number;
+                $updateData['tracking_carrier'] = $this->tracking_carrier ?: $this->sourcingOrder->tracking_carrier;
+            } elseif ($this->tracking_carrier) {
+                $updateData['tracking_carrier'] = $this->tracking_carrier;
+            }
+
+            $this->sourcingOrder->update($updateData);
+            $this->sourcingOrder->refresh();
+
+            Cache::forget("tracking:{$this->sourcingOrder->fsb_tracking_number}");
+
+            // Notify the client of the new real tracking number once
+            if ($this->sourcingOrder->tracking_number && $this->sourcingOrder->user) {
+                $this->sourcingOrder->user->notifications()
+                    ->where('type', \App\Notifications\FsbTrackingGenerated::class)
+                    ->whereJsonContains('data->sourcing_order_id', $this->sourcingOrder->id)
+                    ->delete();
+                $this->sourcingOrder->user->notify(new TrackingNumberAdded($this->sourcingOrder));
+            }
+
+            $this->packageLabelPhoto = null;
+            $this->dispatch('show-success-toast', message: __('In-transit from China evidence saved successfully.'));
+        } catch (\Exception $e) {
+            Log::error('Save China transit evidence error: '.$e->getMessage());
+            $this->dispatch('show-error-toast', message: __('An error occurred while saving the in-transit evidence.'));
+        }
+    }
+
     public function fetchTrackingStatus(UnifiedTrackingService $trackingService)
     {
         set_time_limit(180);
 
         if ($this->sourcingOrder->hasMultipleDestinations()) {
             $this->fetchMultiDestinationTracking($trackingService);
+
             return;
         }
 
         if (! $this->tracking_number) {
             $this->dispatch('show-error-toast', message: __('Veuillez entrer un numéro de suivi.'));
+
             return;
         }
 
@@ -183,6 +268,7 @@ class SourcingOrderWorkflow extends Component
                     'error' => __('No tracking number entered for this destination.'),
                     'dest_label' => $dest->country?->name ?? __('Destination #:n', ['n' => $dest->id]),
                 ];
+
                 continue;
             }
 
@@ -204,6 +290,7 @@ class SourcingOrderWorkflow extends Component
                             'dest_label' => $dest->country?->name ?? __('Destination #:n', ['n' => $dest->id]),
                         ];
                         $errorCount++;
+
                         continue;
                     }
                 }

@@ -104,6 +104,84 @@
         </div>
     </div>
 
+    {{-- 1b. In-transit from China evidence zone (photo + local tracking) --}}
+    @if ($showEvidenceZone && (auth()->user()->isSuperAdmin() || $sourcingOrder->assigned_to_admin_id === auth()->id()))
+        <div class="bg-white rounded-lg border border-orange-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-orange-100 bg-orange-50/50 flex justify-between items-center">
+                <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                    {{ __('In Transit from China') }}
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-200 uppercase">{{ __('Evidence') }}</span>
+                </h3>
+                <span class="text-[10px] text-slate-400">{{ __('Internal — never exposed to the client') }}</span>
+            </div>
+            <div class="p-6">
+                <form wire:submit.prevent="saveChinaTransitEvidence" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="chinaTrackingNumber" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                                {{ __('China tracking number') }} <span class="text-slate-400 normal-case font-medium">({{ __('optional') }})</span>
+                            </label>
+                            <input type="text" wire:model.defer="chinaTrackingNumber" id="chinaTrackingNumber"
+                                   placeholder="Ex: LP001234567890"
+                                   class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white">
+                            @error('chinaTrackingNumber') <p class="mt-1 text-[10px] text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="evidence_tracking_number" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                                {{ __('Local tracking number') }} <span class="text-slate-400 normal-case font-medium">({{ __('destination carrier') }})</span>
+                            </label>
+                            <input type="text" wire:model.defer="tracking_number" id="evidence_tracking_number"
+                                   placeholder="Ex: ME49508327"
+                                   class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white">
+                        </div>
+                        <div>
+                            <label for="evidence_tracking_carrier" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Tracking carrier') }}</label>
+                            <input type="text" wire:model.defer="tracking_carrier" id="evidence_tracking_carrier"
+                                   placeholder="Ex: Faster.ae, DHL..."
+                                   class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white">
+                        </div>
+                        <div>
+                            <label for="packageLabelPhoto" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                                {{ __('Package label photo') }} <span class="text-slate-400 normal-case font-medium">({{ __('optional') }})</span>
+                            </label>
+                            <input type="file" wire:model="packageLabelPhoto" id="packageLabelPhoto"
+                                   accept="image/jpeg,image/png,image/webp"
+                                   class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                            <p class="mt-1 text-[10px] text-slate-400">{{ __('JPG, PNG or WEBP — max 5 MB.') }}</p>
+                            @error('packageLabelPhoto') <p class="mt-1 text-[10px] text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    @if ($sourcingOrder->package_label_photo_path || $sourcingOrder->china_tracking_number)
+                        <div class="flex flex-wrap items-center gap-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            @if ($sourcingOrder->package_label_photo_path)
+                                <a href="{{ media_url($sourcingOrder->package_label_photo_path) }}" target="_blank" title="{{ __('View photo') }}">
+                                    <img src="{{ media_url($sourcingOrder->package_label_photo_path) }}" alt="{{ __('Package label photo') }}" class="w-24 h-18 object-cover rounded border border-slate-200">
+                                </a>
+                            @endif
+                            @if ($sourcingOrder->china_tracking_number)
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Saved China tracking') }}</p>
+                                    <p class="text-sm font-semibold text-slate-900 font-mono">{{ $sourcingOrder->china_tracking_number }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
+                    <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                        <button type="submit" wire:loading.attr="disabled"
+                                class="inline-flex items-center gap-2 px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
+                            <svg wire:loading.remove wire:target="saveChinaTransitEvidence" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <svg wire:loading wire:target="saveChinaTransitEvidence" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            {{ __('Save evidence') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
     <!-- 2. Shipping & Tracking (always visible for admin order detail) -->
     <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden relative group">
         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
