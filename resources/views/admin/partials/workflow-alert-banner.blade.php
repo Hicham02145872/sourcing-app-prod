@@ -48,7 +48,17 @@
                 </div>
                 <div class="flex flex-wrap gap-2 shrink-0">
                     @foreach ($slaOverdueByStatus ?? [] as $slaStatus => $slaCount)
-                        <a href="{{ route('admin.sourcing-requests.index', ['status' => $slaStatus, 'overdue' => 1, 'admin_id' => 'me']) }}"
+                        @php
+                            $slaTargetRequestId = $slaOverdueRequestTargets[$slaStatus] ?? null;
+                            if ($slaStatus === 'in_review' && $slaTargetRequestId) {
+                                $slaCtaUrl = route('admin.quotations.create', ['sourcingRequest' => $slaTargetRequestId]);
+                            } elseif ($slaTargetRequestId) {
+                                $slaCtaUrl = route('admin.sourcing-requests.show', $slaTargetRequestId);
+                            } else {
+                                $slaCtaUrl = route('admin.sourcing-requests.index', ['status' => $slaStatus, 'overdue' => 1, 'admin_id' => 'me']);
+                            }
+                        @endphp
+                        <a href="{{ $slaCtaUrl }}"
                            class="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-md shadow-sm transition-colors">
                             {{ __('sla.banner_cta', ['status' => __($slaStatus), 'count' => $slaCount]) }}
                         </a>

@@ -66,6 +66,7 @@ class AdminDashboardController extends Controller
         // Persistent workflow alert (per-admin action deadline enforcement)
         $slaOverdueCount = 0;
         $slaOverdueByStatus = [];
+        $slaOverdueRequestTargets = [];
         $slaOverdueOrderCount = 0;
         $slaOverdueOrderByStatus = [];
         if (! $isSuperAdmin) {
@@ -81,6 +82,17 @@ class AdminDashboardController extends Controller
                 ->pluck('total', 'status')
                 ->toArray();
             $slaOverdueCount = array_sum($slaOverdueByStatus);
+
+            // Most urgent (oldest) restricted request per status, used by the
+            // banner CTAs to land on the actionable page (quotation creation
+            // for in_review, the request page otherwise).
+            $slaOverdueRequestTargets = (clone $slaOverdueQuery)
+                ->select('id', 'status')
+                ->orderBy('status_changed_at')
+                ->get()
+                ->unique('status')
+                ->pluck('id', 'status')
+                ->toArray();
 
             $slaOverdueOrderQuery = SourcingOrder::query()
                 ->where('assigned_to_admin_id', $user->id)
@@ -138,6 +150,7 @@ class AdminDashboardController extends Controller
             'showSlaOverdueBanner',
             'slaOverdueCount',
             'slaOverdueByStatus',
+            'slaOverdueRequestTargets',
             'slaOverdueOrderCount',
             'slaOverdueOrderByStatus'
         ));

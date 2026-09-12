@@ -199,14 +199,31 @@ class SlaDeadlineAutolockTest extends TestCase
         $this->enableSlaFlag();
         $admin = User::factory()->create(['role' => 'admin']);
         $client = User::factory()->create(['role' => 'client']);
-        $this->makeRequest($client, 'in_review', $admin, [
+        $restricted = $this->makeRequest($client, 'in_review', $admin, [
             'is_restricted_due_to_delay' => true,
         ]);
 
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Action needed on your folders');
+            ->assertSee('Action needed on your folders')
+            ->assertSee(route('admin.quotations.create', ['sourcingRequest' => $restricted->id]));
+    }
+
+    /** @test */
+    public function dashboard_banner_links_other_overdue_request_statuses_to_the_request_page(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $client = User::factory()->create(['role' => 'client']);
+        $restricted = $this->makeRequest($client, 'negotiating', $admin, [
+            'is_restricted_due_to_delay' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee(route('admin.sourcing-requests.show', $restricted->id));
     }
 
     /** @test */
