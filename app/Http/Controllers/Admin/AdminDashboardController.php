@@ -88,14 +88,15 @@ class AdminDashboardController extends Controller
             // for in_review, the quotation edit (update quotation) page for
             // negotiating, the request page otherwise.
             $slaOverdueRequestTargets = (clone $slaOverdueQuery)
-                ->select('id', 'status', 'quotation_id')
+                ->select('id', 'status')
+                ->with('quotation:id')
                 ->orderBy('status_changed_at')
                 ->get()
                 ->unique('status')
                 ->mapWithKeys(fn (SourcingRequest $request) => [
                     $request->status => [
                         'request_id' => $request->id,
-                        'quotation_id' => $request->quotation_id,
+                        'quotation_id' => $request->quotation?->id,
                     ],
                 ])
                 ->toArray();
