@@ -90,6 +90,7 @@ class EnforceSlaNavigationLock
 
         $redirectUrl = match (true) {
             $target instanceof SourcingRequest && $target->status === 'in_review' => route('admin.quotations.create', ['sourcingRequest' => $target]),
+            $target instanceof SourcingRequest && $target->status === 'negotiating' && $target->quotation => route('admin.quotations.edit', $target->quotation),
             $target instanceof SourcingRequest => route('admin.sourcing-requests.show', $target),
             default => route('admin.sourcing-orders.show', $target),
         };
@@ -105,6 +106,8 @@ class EnforceSlaNavigationLock
             || in_array($routeName, [
                 'admin.quotations.create',
                 'admin.quotations.store',
+                'admin.quotations.edit',
+                'admin.quotations.update',
             ], true)
             || str_starts_with((string) $routeName, 'admin.sourcing-requests.');
 

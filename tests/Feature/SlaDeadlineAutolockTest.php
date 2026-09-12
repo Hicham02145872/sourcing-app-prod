@@ -211,7 +211,7 @@ class SlaDeadlineAutolockTest extends TestCase
     }
 
     /** @test */
-    public function dashboard_banner_links_other_overdue_request_statuses_to_the_request_page(): void
+    public function dashboard_banner_links_overdue_negotiating_requests_to_the_quotation_edit_page(): void
     {
         $this->enableSlaFlag();
         $admin = User::factory()->create(['role' => 'admin']);
@@ -219,11 +219,15 @@ class SlaDeadlineAutolockTest extends TestCase
         $restricted = $this->makeRequest($client, 'negotiating', $admin, [
             'is_restricted_due_to_delay' => true,
         ]);
+        $quotation = \App\Models\Quotation::factory()->create([
+            'sourcing_request_id' => $restricted->id,
+            'assigned_to_admin_id' => $admin->id,
+        ]);
 
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee(route('admin.sourcing-requests.show', $restricted->id));
+            ->assertSee(route('admin.quotations.edit', $quotation->id));
     }
 
     /** @test */

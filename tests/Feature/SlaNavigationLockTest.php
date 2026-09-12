@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\FeatureFlag;
+use App\Models\Quotation;
 use App\Models\SourcingOrder;
 use App\Models\SourcingRequest;
 use App\Models\User;
@@ -220,7 +221,23 @@ class SlaNavigationLockTest extends TestCase
     }
 
     /** @test */
-    public function a_locked_admin_with_an_overdue_negotiating_request_is_redirected_to_the_request_page(): void
+    public function a_locked_admin_with_an_overdue_negotiating_request_is_redirected_to_the_quotation_edit_page(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $restricted = $this->restrictAdminNegotiating($admin);
+        $quotation = Quotation::factory()->create([
+            'sourcing_request_id' => $restricted->id,
+            'assigned_to_admin_id' => $admin->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.social-media-links.edit'))
+            ->assertRedirect(route('admin.quotations.edit', $quotation));
+    }
+
+    /** @test */
+    public function a_locked_admin_with_an_overdue_negotiating_request_without_a_quotation_keeps_the_request_page_target(): void
     {
         $this->enableSlaFlag();
         $admin = User::factory()->create(['role' => 'admin']);
@@ -229,6 +246,22 @@ class SlaNavigationLockTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.social-media-links.edit'))
             ->assertRedirect(route('admin.sourcing-requests.show', $restricted));
+    }
+
+    /** @test */
+    public function a_locked_admin_with_an_overdue_negotiating_request_can_open_the_quotation_edit_page(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $restricted = $this->restrictAdminNegotiating($admin);
+        $quotation = Quotation::factory()->create([
+            'sourcing_request_id' => $restricted->id,
+            'assigned_to_admin_id' => $admin->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.quotations.edit', $quotation))
+            ->assertOk();
     }
 
     /** @test */

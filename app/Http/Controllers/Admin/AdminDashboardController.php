@@ -84,14 +84,20 @@ class AdminDashboardController extends Controller
             $slaOverdueCount = array_sum($slaOverdueByStatus);
 
             // Most urgent (oldest) restricted request per status, used by the
-            // banner CTAs to land on the actionable page (quotation creation
-            // for in_review, the request page otherwise).
+            // banner CTAs to land on the actionable page: quotation creation
+            // for in_review, the quotation edit (update quotation) page for
+            // negotiating, the request page otherwise.
             $slaOverdueRequestTargets = (clone $slaOverdueQuery)
-                ->select('id', 'status')
+                ->select('id', 'status', 'quotation_id')
                 ->orderBy('status_changed_at')
                 ->get()
                 ->unique('status')
-                ->pluck('id', 'status')
+                ->mapWithKeys(fn (SourcingRequest $request) => [
+                    $request->status => [
+                        'request_id' => $request->id,
+                        'quotation_id' => $request->quotation_id,
+                    ],
+                ])
                 ->toArray();
 
             $slaOverdueOrderQuery = SourcingOrder::query()

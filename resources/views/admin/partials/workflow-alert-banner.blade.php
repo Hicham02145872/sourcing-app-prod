@@ -49,11 +49,13 @@
                 <div class="flex flex-wrap gap-2 shrink-0">
                     @foreach ($slaOverdueByStatus ?? [] as $slaStatus => $slaCount)
                         @php
-                            $slaTargetRequestId = $slaOverdueRequestTargets[$slaStatus] ?? null;
-                            if ($slaStatus === 'in_review' && $slaTargetRequestId) {
-                                $slaCtaUrl = route('admin.quotations.create', ['sourcingRequest' => $slaTargetRequestId]);
-                            } elseif ($slaTargetRequestId) {
-                                $slaCtaUrl = route('admin.sourcing-requests.show', $slaTargetRequestId);
+                            $slaTarget = $slaOverdueRequestTargets[$slaStatus] ?? null;
+                            if ($slaStatus === 'in_review' && $slaTarget) {
+                                $slaCtaUrl = route('admin.quotations.create', ['sourcingRequest' => $slaTarget['request_id']]);
+                            } elseif ($slaStatus === 'negotiating' && ! empty($slaTarget['quotation_id'])) {
+                                $slaCtaUrl = route('admin.quotations.edit', $slaTarget['quotation_id']);
+                            } elseif ($slaTarget) {
+                                $slaCtaUrl = route('admin.sourcing-requests.show', $slaTarget['request_id']);
                             } else {
                                 $slaCtaUrl = route('admin.sourcing-requests.index', ['status' => $slaStatus, 'overdue' => 1, 'admin_id' => 'me']);
                             }
