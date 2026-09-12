@@ -12,8 +12,11 @@ class ShippingLabelImageService
     private const CSS_DPI = 96.0;
 
     private int $dpi;
+
     private string $fontPath;
+
     private string $fontBoldPath;
+
     private string $logoPath;
 
     public function __construct()
@@ -164,15 +167,17 @@ class ShippingLabelImageService
             // Label cell background
             imagefilledrectangle($image, $tableStartX, $y, $tableStartX + $labelWidth, $y + $cellHeight, $labelGray);
 
-            // Label cell text (top-aligned, vertically centered block)
-            $labelTextY = $y + $cellPad + 4;
+            // Label cell text (block vertically centered within the cell)
+            $labelBlockH = count($labelLines) * $labelLineH;
+            $labelTextY = $y + (int) round(($cellHeight - $labelBlockH) / 2) + $this->pt(14);
             foreach ($labelLines as $labelLine) {
                 imagettftext($image, $this->pt(14), 0, $tableStartX + $cellPad, $labelTextY, $black, $this->font(true), $labelLine);
                 $labelTextY += $labelLineH;
             }
 
-            // Value cell text
-            $valueTextY = $y + $cellPad + 4;
+            // Value cell text (block vertically centered within the cell)
+            $valueBlockH = count($valueLines) * $valueLineH;
+            $valueTextY = $y + (int) round(($cellHeight - $valueBlockH) / 2) + $this->pt(16);
             foreach ($valueLines as $valueLine) {
                 imagettftext($image, $this->pt(16), 0, $tableStartX + $labelWidth + $cellPad, $valueTextY, $black, $this->font(false), $valueLine);
                 $valueTextY += $valueLineH;
@@ -257,6 +262,7 @@ class ShippingLabelImageService
 
             if ($this->textWidth($font, $size, $probe) <= $maxWidth) {
                 $line = $probe;
+
                 continue;
             }
 

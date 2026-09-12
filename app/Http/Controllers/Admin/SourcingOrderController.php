@@ -260,9 +260,11 @@ class SourcingOrderController extends Controller
             return view('admin.sourcing-orders.shipping-label', compact('sourcingOrder'));
         }
 
-        $png = $this->shippingLabelPngResponse($sourcingOrder, null, 'shipping-label-'.$sourcingOrder->id);
-        if ($png) {
-            return $png;
+        if ($this->resolveLabelFormat() === 'png') {
+            $png = $this->shippingLabelPngResponse($sourcingOrder, null, 'shipping-label-'.$sourcingOrder->id);
+            if ($png) {
+                return $png;
+            }
         }
 
         $pdf = Pdf::loadView('admin.sourcing-orders.shipping-label', compact('sourcingOrder'));
@@ -279,9 +281,11 @@ class SourcingOrderController extends Controller
             return view('admin.sourcing-orders.shipping-label-destination', compact('sourcingOrder', 'destination'));
         }
 
-        $png = $this->shippingLabelPngResponse($sourcingOrder, $destination, 'shipping-label-'.$sourcingOrder->id.'-dest-'.$destination->id);
-        if ($png) {
-            return $png;
+        if ($this->resolveLabelFormat() === 'png') {
+            $png = $this->shippingLabelPngResponse($sourcingOrder, $destination, 'shipping-label-'.$sourcingOrder->id.'-dest-'.$destination->id);
+            if ($png) {
+                return $png;
+            }
         }
 
         $pdf = Pdf::loadView('admin.sourcing-orders.shipping-label-destination', compact('sourcingOrder', 'destination'));
@@ -291,15 +295,27 @@ class SourcingOrderController extends Controller
     }
 
     /**
-     * Return an inline PNG of the shipping label when requested via
-     * ?format=png and the label_image_output flag is enabled, null otherwise.
+     * Resolve the label output format. PNG downloads are the default once the
+     * label_image_output flag is enabled; format=png / format=pdf / format=html
+     * can force an explicit format.
+     */
+    private function resolveLabelFormat(): string
+    {
+        $forced = request()->query('format');
+
+        if (in_array($forced, ['png', 'pdf'], true)) {
+            return $forced;
+        }
+
+        return app(\App\Services\FeatureFlagService::class)->isEnabled('label_image_output', auth()->user()) ? 'png' : 'pdf';
+    }
+
+    /**
+     * Return a direct PNG download of the shipping label when the
+     * label_image_output flag is enabled, null otherwise.
      */
     protected function shippingLabelPngResponse(SourcingOrder $sourcingOrder, ?\App\Models\SourcingRequestDestination $destination, ?string $basename = null)
     {
-        if (request()->query('format') !== 'png') {
-            return null;
-        }
-
         if (! app(\App\Services\FeatureFlagService::class)->isEnabled('label_image_output', auth()->user())) {
             return null;
         }
@@ -311,7 +327,7 @@ class SourcingOrderController extends Controller
 
         return response($blob, 200)
             ->header('Content-Type', 'image/png')
-            ->header('Content-Disposition', 'inline; filename="'.$filename.'"');
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 
     public function downloadProofOfPayment(SourcingOrder $sourcingOrder)

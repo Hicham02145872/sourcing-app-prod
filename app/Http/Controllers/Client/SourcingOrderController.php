@@ -172,9 +172,11 @@ class SourcingOrderController extends Controller
             return view('client.sourcing-orders.shipping-label', compact('sourcingOrder'));
         }
 
-        $png = $this->shippingLabelPngResponse($sourcingOrder);
-        if ($png) {
-            return $png;
+        if ($this->resolveLabelFormat() === 'png') {
+            $png = $this->shippingLabelPngResponse($sourcingOrder);
+            if ($png) {
+                return $png;
+            }
         }
 
         $pdf = Pdf::loadView('client.sourcing-orders.shipping-label', compact('sourcingOrder'));
@@ -184,15 +186,27 @@ class SourcingOrderController extends Controller
     }
 
     /**
-     * Return an inline PNG of the shipping label when requested via
-     * ?format=png and the label_image_output flag is enabled, null otherwise.
+     * Resolve the label output format. PNG downloads are the default once the
+     * label_image_output flag is enabled; format=png / format=pdf / format=html
+     * can force an explicit format.
+     */
+    private function resolveLabelFormat(): string
+    {
+        $forced = request()->query('format');
+
+        if (in_array($forced, ['png', 'pdf'], true)) {
+            return $forced;
+        }
+
+        return app(\App\Services\FeatureFlagService::class)->isEnabled('label_image_output', auth()->user()) ? 'png' : 'pdf';
+    }
+
+    /**
+     * Return a direct PNG download of the shipping label when the
+     * label_image_output flag is enabled, null otherwise.
      */
     protected function shippingLabelPngResponse(SourcingOrder $sourcingOrder)
     {
-        if (request()->query('format') !== 'png') {
-            return null;
-        }
-
         if (! app(\App\Services\FeatureFlagService::class)->isEnabled('label_image_output', auth()->user())) {
             return null;
         }
@@ -202,6 +216,6 @@ class SourcingOrderController extends Controller
 
         return response($blob, 200)
             ->header('Content-Type', 'image/png')
-            ->header('Content-Disposition', 'inline; filename="shipping-label-'.$sourcingOrder->id.'.png"');
+            ->header('Content-Disposition', 'attachment; filename="shipping-label-'.$sourcingOrder->id.'.png"');
     }
 }

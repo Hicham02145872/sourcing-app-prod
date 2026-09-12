@@ -18,8 +18,11 @@ class ShippingLabelImageOutputTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $client;
+
     private SourcingOrder $order;
+
     private SourcingRequest $request;
 
     protected function setUp(): void
@@ -161,12 +164,14 @@ class ShippingLabelImageOutputTest extends TestCase
         $this->assertSame('image/png', $response->headers->get('Content-Type'));
     }
 
-    public function test_no_format_returns_pdf_and_disabled_flag_falls_back_to_pdf(): void
+    public function test_no_format_downloads_png_by_default_and_disabled_flag_falls_back_to_pdf(): void
     {
         $response = $this->actingAs($this->admin)
             ->get(route('admin.sourcing-orders.shipping-label', $this->order));
         $response->assertStatus(200);
-        $this->assertSame('application/pdf', $response->headers->get('Content-Type'));
+        $this->assertSame('image/png', $response->headers->get('Content-Type'));
+        $this->assertStringStartsWith('attachment; filename="shipping-label-'.$this->order->id.'.png"', $response->headers->get('Content-Disposition'));
+        $this->assertSame("\x89PNG\r\n\x1a\n", substr($response->getContent(), 0, 8));
 
         FeatureFlag::query()->updateOrCreate(
             ['key' => 'label_image_output'],

@@ -1031,18 +1031,14 @@
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Seller Name') }}</label>
                         <input type="text" name="label_seller_name" id="modal_label_seller_name"
-                               value="{{ $sourcingOrder->label_seller_name }}"
-                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                               placeholder="{{ $sourcingOrder->user->name }}">
-                        <p class="mt-0.5 text-[10px] text-slate-400">{{ __('Default:') }} {{ $sourcingOrder->user->name }}</p>
+                               value="{{ $sourcingOrder->label_seller_name ?: $sourcingOrder->user->name }}"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Product Name') }}</label>
                         <input type="text" name="label_product_name" id="modal_label_product_name"
-                               value="{{ $sourcingOrder->label_product_name }}"
-                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                               placeholder="{{ $sourcingOrder->quotation->sourcingRequest->product_name ?? '' }}">
-                        <p class="mt-0.5 text-[10px] text-slate-400">{{ __('Default:') }} {{ $sourcingOrder->quotation->sourcingRequest->product_name ?? 'N/A' }}</p>
+                               value="{{ $sourcingOrder->label_product_name ?: ($sourcingOrder->quotation->sourcingRequest->product_name ?? '') }}"
+                               class="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
 
@@ -1058,9 +1054,7 @@
                                     <span class="text-[10px] text-slate-400 ml-auto">{{ $destination->service->name ?? '' }}</span>
                                 </div>
                                 <textarea name="destinations[{{ $index }}][label_address]" rows="2"
-                                          class="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                                          placeholder="{{ $destination->address ?? '' }}">{{ $destination->label_address }}</textarea>
-                                <p class="mt-0.5 text-[10px] text-slate-400">{{ __('Default:') }} {{ $destination->address ?? 'N/A' }}</p>
+                                          class="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">{{ $destination->label_address ?: ($destination->address ?? '') }}</textarea>
                             </div>
                         @endforeach
                     </div>
@@ -1073,8 +1067,8 @@
                     </button>
                     <button type="submit" id="print-label-btn-{{ $sourcingOrder->id }}"
                             class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors inline-flex items-center gap-2">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                        {{ __('Save & Print Label') }}
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+                        {{ __('Save & Download PNG') }}
                     </button>
                 </div>
             </form>
