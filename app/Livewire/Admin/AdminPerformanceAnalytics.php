@@ -2,88 +2,90 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\RequestStatusLog;
+use App\Models\SourcingOrder;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Livewire\Component;
 
-class AdminPerformanceAnalytics extends Component
+final class AdminPerformanceAnalytics extends Component
 {
-    public string $startDate = '';
-    public string $endDate = '';
+    private const PHASES = [
+        'pending_payment' => 'pending_payment',
+        'paid' => 'paid',
+        'shipment_preparing' => 'paid',
+        'in_transit_china' => 'transit',
+        'arrival_uae' => 'transit',
+        'customs_clearance_uae' => 'transit',
+        'in_transit_uae' => 'transit',
+        'arrival_destination_country' => 'delivered',
+        'customs_clearance_destination_country' => 'delivered',
+        'out_for_delivery' => 'delivered',
+        'delivered' => 'delivered',
+        'order_completed' => 'delivered',
+        'delivery_failed' => 'issues',
+        'shipment_delayed' => 'issues',
+        'shipment_returned' => 'issues',
+        'shipment_canceled' => 'issues',
+        'waiting_for_refund' => 'refund',
+        'refund_approved' => 'refund',
+        'refunded' => 'refund',
+        'refund_rejected' => 'refund',
+    ];
 
     public array $metrics = [];
 
-    public function applyDateRange(): void
-    {
-        // Properties are already bound to the request; re-render applies the filter.
-    }
-
-    public function resetDateRange(): void
-    {
-        $this->reset('startDate', 'endDate');
-    }
-
     public function render()
     {
-        $query = RequestStatusLog::query();
-
-        if ($this->startDate) {
-            $query->where('changed_at', '>=', Carbon::parse($this->startDate)->startOfDay());
-        }
-        if ($this->endDate) {
-            $query->where('changed_at', '<=', Carbon::parse($this->endDate)->endOfDay());
-        }
-
-        $this->metrics = $this->buildMetrics($query->get());
+        $this->metrics = $this->buildMetrics();
 
         return view('livewire.admin.admin-performance-analytics', [
             'metrics' => $this->metrics,
         ]);
     }
 
-    private function buildMetrics($logs): array
+    private function buildMetrics(): array
     {
-        $admins = User::whereIn('role', ['admin', 'super_admin'])->pluck('name', 'id');
+        $adminNames = User::whereIn('role', ['admin', 'super_admin'])->pluck('name', 'id');
 
-        $metrics = [];
+        $counts = SourcingOrder::query()
+            ->select('assigned_to_admin_id', 'status')
+            ->selectRaw('count(*) as total')
+            ->groupBy('assigned_to_admin_id', 'status')
+            ->get();
 
-        foreach ($logs->groupBy('changed_by_user_id') as $adminId => $adminLogs) {
-            $adminLogs = $adminLogs->sortBy('changed_at')->values();
+        $byAdmin = [];
+        foreach ($counts as $row) {
+            $adminKey = $row->assigned_to_admin_id ?: 0;
+            $phase = self::PHASES[$row->status] ?? self::PHASES['order_completed'];
 
-            $reviews = $adminLogs->where('to_status', 'in_review')->count();
-            $responses = $adminLogs->where('to_status', 'quoted')->count();
-            $acceptances = $adminLogs->where('to_status', 'accepted')->count();
-
-            $pairDurations = [];
-            foreach ($adminLogs->groupBy('sourcing_request_id') as $requestLogs) {
-                $requestLogs = $requestLogs->sortBy('changed_at')->values();
-                $inReviewTimes = $requestLogs->where('to_status', 'in_review')->pluck('changed_at');
-                $quotedTimes = $requestLogs->where('to_status', 'quoted')->pluck('changed_at');
-
-                foreach ($inReviewTimes as $inReviewAt) {
-                    foreach ($quotedTimes as $quotedAt) {
-                        if ($quotedAt->gt($inReviewAt)) {
-                            $pairDurations[] = $quotedAt->diffInHours($inReviewAt);
-                            break;
-                        }
-                    }
-                }
+            if (! isset($byAdmin[$adminKey])) {
+                $byAdmin[$adminKey] = [
+                    'pending_payment' => 0,
+                    'paid' => 0,
+                    'transit' => 0,
+                    'delivered' => 0,
+                    'issues' => 0,
+                    'refund' => 0,
+                    'total' => 0,
+                ];
             }
 
+            $byAdmin[$adminKey][$phase] += $row->total;
+            $byAdmin[$adminKey]['total'] += $row->total;
+        }
+
+        $metrics = [];
+        foreach ($byAdmin as $adminKey => $countsByPhase) {
             $metrics[] = [
-                'admin_id' => $adminId,
-                'admin_name' => $admins[$adminId] ?? null,
-                'reviews' => $reviews,
-                'responses' => $responses,
-                'acceptances' => $acceptances,
-                'acceptance_rate' => $responses > 0 ? round(($acceptances / $responses) * 100, 1) : null,
-                'avg_response_hours' => count($pairDurations) > 0 ? round(array_sum($pairDurations) / count($pairDurations), 2) : null,
+                'admin_id' => $adminKey,
+                'admin_name' => $adminKey !== 0
+                    ? ($adminNames[$adminKey] ?? null)
+                    : __('Unassigned'),
+                ...$countsByPhase,
             ];
         }
 
-        usort($metrics, fn ($a, $b) => $b['reviews'] <=> $a['reviews']);
+        usort($metrics, fn ($a, $b) => $b['total'] <=> $a['total'] ?: $a['admin_name'] <=> $b['admin_name']);
 
-        return $metrics;
+        return array_values($metrics);
     }
 }

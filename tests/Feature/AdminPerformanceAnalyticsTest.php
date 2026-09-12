@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\RequestStatusLog;
+use App\Models\SourcingOrder;
 use App\Models\SourcingRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
@@ -49,92 +49,67 @@ class AdminPerformanceAnalyticsTest extends TestCase
         ]);
     }
 
-    public function test_analytics_aggregates_only_within_date_range(): void
+    public function test_workload_counts_orders_per_admin_by_phase(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $inRangeRequest = SourcingRequest::factory()->create(['status' => 'pending']);
-        $outOfRangeRequest = SourcingRequest::factory()->create(['status' => 'pending']);
+        $admin1 = User::factory()->create(['role' => 'admin']);
+        $admin2 = User::factory()->create(['role' => 'admin']);
 
-        RequestStatusLog::create([
-            'sourcing_request_id' => $inRangeRequest->getKey(),
-            'from_status' => 'pending',
-            'to_status' => 'in_review',
-            'changed_by_user_id' => $admin->getKey(),
-            'changed_at' => now(),
-        ]);
+        // admin1: 2 paid, 1 delivered → total 3
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => $admin1->id, 'status' => 'paid']);
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => $admin1->id, 'status' => 'paid']);
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => $admin1->id, 'status' => 'delivered']);
 
-        RequestStatusLog::create([
-            'sourcing_request_id' => $outOfRangeRequest->getKey(),
-            'from_status' => 'pending',
-            'to_status' => 'in_review',
-            'changed_by_user_id' => $admin->getKey(),
-            'changed_at' => now()->subMonth(),
-        ]);
-
-        $component = Livewire::actingAs($this->superAdmin)
-            ->test(\App\Livewire\Admin\AdminPerformanceAnalytics::class)
-            ->set('startDate', now()->startOfMonth()->format('Y-m-d'))
-            ->set('endDate', now()->endOfMonth()->format('Y-m-d'))
-            ->call('applyDateRange');
-
-        $metrics = $component->get('metrics');
-        $this->assertNotEmpty($metrics);
-        $this->assertEquals(1, $metrics[0]['reviews']);
-    }
-
-    public function test_acceptance_rate_null_when_no_responses(): void
-    {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $request = SourcingRequest::factory()->create(['status' => 'pending']);
-
-        RequestStatusLog::create([
-            'sourcing_request_id' => $request->getKey(),
-            'from_status' => 'pending',
-            'to_status' => 'in_review',
-            'changed_by_user_id' => $admin->getKey(),
-            'changed_at' => now(),
-        ]);
+        // admin2: 3 in_transit_china, 1 delivery_failed → total 4
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => $admin2->id, 'status' => 'in_transit_china']);
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => $admin2->id, 'status' => 'in_transit_china']);
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => $admin2->id, 'status' => 'in_transit_china']);
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => $admin2->id, 'status' => 'delivery_failed']);
 
         $component = Livewire::actingAs($this->superAdmin)
             ->test(\App\Livewire\Admin\AdminPerformanceAnalytics::class);
 
         $metrics = $component->get('metrics');
-        $this->assertNotNull($metrics);
-        $adminMetric = collect($metrics)->firstWhere('admin_id', $admin->getKey());
-        $this->assertNotNull($adminMetric);
-        $this->assertNull($adminMetric['acceptance_rate']);
-        $this->assertEquals(1, $adminMetric['reviews']);
-        $this->assertEquals(0, $adminMetric['responses']);
+        $this->assertCount(2, $metrics);
+
+        // Sorted by total descending
+        $this->assertEquals($admin2->id, $metrics[0]['admin_id']);
+
+        $admin2Metric = collect($metrics)->firstWhere('admin_id', $admin2->id);
+        $this->assertEquals(4, $admin2Metric['total']);
+        $this->assertEquals(3, $admin2Metric['transit']);
+        $this->assertEquals(1, $admin2Metric['issues']);
+
+        $admin1Metric = collect($metrics)->firstWhere('admin_id', $admin1->id);
+        $this->assertEquals(3, $admin1Metric['total']);
+        $this->assertEquals(2, $admin1Metric['paid']);
+        $this->assertEquals(1, $admin1Metric['delivered']);
     }
 
-    public function test_reset_date_range_shows_full_dataset(): void
+    public function test_unassigned_orders_listed_as_unassigned_row(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $request = SourcingRequest::factory()->create(['status' => 'pending']);
-
-        RequestStatusLog::create([
-            'sourcing_request_id' => $request->getKey(),
-            'from_status' => 'pending',
-            'to_status' => 'in_review',
-            'changed_by_user_id' => $admin->getKey(),
-            'changed_at' => now()->subMonth(),
-        ]);
-
-        Livewire::actingAs($this->superAdmin)
-            ->test(\App\Livewire\Admin\AdminPerformanceAnalytics::class)
-            ->set('startDate', now()->format('Y-m-d'))
-            ->set('endDate', now()->format('Y-m-d'))
-            ->call('applyDateRange')
-            ->assertSet('metrics', [])
-            ->call('resetDateRange')
-            ->assertSet('startDate', '')
-            ->assertSet('endDate', '');
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => null, 'status' => 'pending_payment']);
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => null, 'status' => 'pending_payment']);
 
         $component = Livewire::actingAs($this->superAdmin)
             ->test(\App\Livewire\Admin\AdminPerformanceAnalytics::class);
 
         $metrics = $component->get('metrics');
-        $this->assertNotEmpty($metrics);
+        $unassigned = collect($metrics)->firstWhere('admin_id', 0);
+
+        $this->assertNotNull($unassigned);
+        $this->assertEquals(__('Unassigned'), $unassigned['admin_name']);
+        $this->assertEquals(2, $unassigned['total']);
+        $this->assertEquals(2, $unassigned['pending_payment']);
+    }
+
+    public function test_no_orders_returns_empty_metrics(): void
+    {
+        $component = Livewire::actingAs($this->superAdmin)
+            ->test(\App\Livewire\Admin\AdminPerformanceAnalytics::class);
+
+        $metrics = $component->get('metrics');
+        $this->assertIsArray($metrics);
+        $this->assertEmpty($metrics);
     }
 
     public function test_analytics_page_returns_404_when_feature_flag_disabled(): void
