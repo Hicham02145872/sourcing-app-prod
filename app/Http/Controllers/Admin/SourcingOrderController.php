@@ -76,7 +76,7 @@ class SourcingOrderController extends Controller
                     ->orWhere('shared_id', 'like', '%'.$search.'%')
                     ->orWhere('sourcing_request_id', 'like', '%'.$search.'%')
                     ->orWhere('quotation_id', 'like', '%'.$search.'%')
-                    ->orWhereRaw("CAST((sourcing_orders.id * 5) AS CHAR) LIKE ?", ['%'.$search.'%'])
+                    ->orWhereRaw('CAST((sourcing_orders.id * 5) AS CHAR) LIKE ?', ['%'.$search.'%'])
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('name', 'like', '%'.$search.'%')
                             ->orWhere('email', 'like', '%'.$search.'%');
@@ -98,13 +98,20 @@ class SourcingOrderController extends Controller
             });
         }
 
-        // Filter by admin (Super Admin only)
-        if (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
+        // Filter by admin (Super Admin may target any admin; 'me' scopes to self)
+        if ($request->admin_id === 'me') {
+            $query->where('assigned_to_admin_id', auth()->id());
+        } elseif (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
             if ($request->admin_id == 'unassigned') {
                 $query->whereNull('assigned_to_admin_id');
             } else {
                 $query->where('assigned_to_admin_id', $request->admin_id);
             }
+        }
+
+        // Filter by overdue (action-deadline restricted) orders
+        if ($request->boolean('overdue')) {
+            $query->where('is_restricted_due_to_delay', true);
         }
 
         // Status counts (respecting search + admin filters, but NOT status filter)
@@ -115,7 +122,7 @@ class SourcingOrderController extends Controller
                     ->orWhere('shared_id', 'like', '%'.$search.'%')
                     ->orWhere('sourcing_request_id', 'like', '%'.$search.'%')
                     ->orWhere('quotation_id', 'like', '%'.$search.'%')
-                    ->orWhereRaw("CAST((sourcing_orders.id * 5) AS CHAR) LIKE ?", ['%'.$search.'%'])
+                    ->orWhereRaw('CAST((sourcing_orders.id * 5) AS CHAR) LIKE ?', ['%'.$search.'%'])
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('name', 'like', '%'.$search.'%')
                             ->orWhere('email', 'like', '%'.$search.'%');
@@ -136,12 +143,17 @@ class SourcingOrderController extends Controller
                     });
             });
         }
-        if (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
+        if ($request->admin_id === 'me') {
+            $statusCountsQuery->where('assigned_to_admin_id', auth()->id());
+        } elseif (auth()->user()->isSuperAdmin() && $request->has('admin_id') && $request->admin_id != 'all') {
             if ($request->admin_id == 'unassigned') {
                 $statusCountsQuery->whereNull('assigned_to_admin_id');
             } else {
                 $statusCountsQuery->where('assigned_to_admin_id', $request->admin_id);
             }
+        }
+        if ($request->boolean('overdue')) {
+            $statusCountsQuery->where('is_restricted_due_to_delay', true);
         }
         $statusCountsRaw = $statusCountsQuery->select('status', DB::raw('count(*) as count'))->groupBy('status')->pluck('count', 'status');
         $statusCounts = [];
@@ -149,8 +161,20 @@ class SourcingOrderController extends Controller
             $statusCounts[$s] = $statusCountsRaw->get($s, 0);
         }
 
-        // Filter by status (default to 'pending_payment' when no status param)
+        // Filter by status. When the action-deadline navigation lock is active,
+        // force the list onto the order status(es) the admin must act on
+        // (paid then in_transit_china), hiding the rest of the pipeline.
         $activeStatus = $request->input('status', 'pending_payment');
+        $isSlaNavigationLocked = ! auth()->user()->isSuperAdmin()
+            && \Illuminate\Support\Facades\View::shared('slaNavigationLocked', false);
+        $slaLockedOrderStatuses = $isSlaNavigationLocked
+            ? (array) \Illuminate\Support\Facades\View::shared('slaLockedOrderStatuses', [])
+            : [];
+        if ($isSlaNavigationLocked && $slaLockedOrderStatuses !== []) {
+            $activeStatus = in_array($activeStatus, $slaLockedOrderStatuses, true)
+                ? $activeStatus
+                : (in_array('paid', $slaLockedOrderStatuses, true) ? 'paid' : $slaLockedOrderStatuses[0]);
+        }
         if ($activeStatus !== 'all') {
             $query->where('status', $activeStatus);
         }
@@ -517,6 +541,7 @@ class SourcingOrderController extends Controller
             $service = $factory->getService($company);
             if (! $service) {
                 $lastError = __('Sheet not configured for :name.', ['name' => $company->name]);
+
                 continue;
             }
 

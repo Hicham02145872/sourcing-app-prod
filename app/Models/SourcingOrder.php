@@ -55,6 +55,11 @@ class SourcingOrder extends Model
                 $timestamps = $sourcingOrder->status_timestamps ?? [];
                 $timestamps[$sourcingOrder->status] = now()->toDateTimeString();
                 $sourcingOrder->status_timestamps = $timestamps;
+
+                // Track when the current status began and clear any action-delay
+                // restriction, as a status movement always resets the counter.
+                $sourcingOrder->status_changed_at = now();
+                $sourcingOrder->is_restricted_due_to_delay = false;
             }
         });
     }
@@ -120,6 +125,8 @@ class SourcingOrder extends Model
         'parcel_photo_uploaded_at',
         'china_tracking_number',
         'package_label_photo_path',
+        'status_changed_at',
+        'is_restricted_due_to_delay',
     ];
 
     /**
@@ -154,7 +161,9 @@ class SourcingOrder extends Model
         'fsb_tracking_created_at' => 'datetime',
         'real_tracking_assigned_at' => 'datetime',
         'parcel_photo_uploaded_at' => 'datetime',
+        'status_changed_at' => 'datetime',
         'status_timestamps' => 'array',
+        'is_restricted_due_to_delay' => 'boolean',
     ];
 
     public function user()
@@ -555,7 +564,7 @@ class SourcingOrder extends Model
      */
     public function hasRealTracking(): bool
     {
-        return !is_null($this->tracking_number) && !is_null($this->real_tracking_assigned_at);
+        return ! is_null($this->tracking_number) && ! is_null($this->real_tracking_assigned_at);
     }
 
     /**
@@ -564,7 +573,7 @@ class SourcingOrder extends Model
     public function shouldUseVirtualStatus(): bool
     {
         // Use virtual status if FSB tracking was created but no real tracking assigned yet
-        return !is_null($this->fsb_tracking_created_at) && !$this->hasRealTracking();
+        return ! is_null($this->fsb_tracking_created_at) && ! $this->hasRealTracking();
     }
 
     /**
@@ -572,7 +581,7 @@ class SourcingOrder extends Model
      */
     public function getVirtualTrackingStatus(): string
     {
-        if (!$this->fsb_tracking_created_at) {
+        if (! $this->fsb_tracking_created_at) {
             return 'pending_payment';
         }
 

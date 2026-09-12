@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\FeatureFlag;
+use App\Models\SourcingOrder;
 use App\Models\SourcingRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,6 +47,29 @@ class SlaNavigationLockTest extends TestCase
             'assigned_at' => now()->subDays(2),
             'is_restricted_due_to_delay' => true,
         ]);
+    }
+
+    private function restrictAdminNegotiating(User $admin): SourcingRequest
+    {
+        $client = User::factory()->create(['role' => 'client']);
+
+        return SourcingRequest::factory()->create([
+            'user_id' => $client->id,
+            'status' => 'negotiating',
+            'assigned_to_admin_id' => $admin->id,
+            'assigned_at' => now()->subDays(2),
+            'is_restricted_due_to_delay' => true,
+        ]);
+    }
+
+    private function restrictAdminOrder(User $admin, string $status, array $overrides = []): SourcingOrder
+    {
+        return SourcingOrder::factory()->create(array_merge([
+            'assigned_to_admin_id' => $admin->id,
+            'status' => $status,
+            'status_changed_at' => now()->subDays(2),
+            'is_restricted_due_to_delay' => true,
+        ], $overrides));
     }
 
     /** @test */
@@ -187,11 +211,105 @@ class SlaNavigationLockTest extends TestCase
             ->get(route('admin.sourcing-requests.index'))
             ->assertOk();
 
-        $response->assertSee('Navigation restricted (SLA)');
+        $response->assertSee('Action needed on your folders');
         $response->assertSee(route('admin.quotations.create', ['sourcingRequest' => $restricted]));
         $response->assertDontSee('Quoted');
         $response->assertDontSee('Negotiating');
         $response->assertDontSee('Accepted');
         $response->assertSee('In Review');
+    }
+
+    /** @test */
+    public function a_locked_admin_with_an_overdue_negotiating_request_is_redirected_to_the_request_page(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $restricted = $this->restrictAdminNegotiating($admin);
+
+        $this->actingAs($admin)
+            ->get(route('admin.social-media-links.edit'))
+            ->assertRedirect(route('admin.sourcing-requests.show', $restricted));
+    }
+
+    /** @test */
+    public function a_locked_admin_with_an_overdue_paid_order_is_redirected_to_the_order_page(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $order = $this->restrictAdminOrder($admin, 'paid');
+
+        $this->actingAs($admin)
+            ->get(route('admin.quotations.index'))
+            ->assertRedirect(route('admin.sourcing-orders.show', $order));
+    }
+
+    /** @test */
+    public function a_locked_admin_with_an_overdue_in_transit_china_order_is_redirected_to_the_order_page(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $order = $this->restrictAdminOrder($admin, 'in_transit_china');
+
+        $this->actingAs($admin)
+            ->get(route('admin.quotations.index'))
+            ->assertRedirect(route('admin.sourcing-orders.show', $order));
+    }
+
+    /** @test */
+    public function an_admin_locked_by_an_overdue_order_can_open_the_orders_index_and_the_dashboard(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin', 'name' => 'Order Locked Admin']);
+        $this->restrictAdminOrder($admin, 'paid');
+
+        $this->actingAs($admin)
+            ->get(route('admin.sourcing-orders.index', ['status' => 'all']))
+            ->assertOk();
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk();
+    }
+
+    /** @test */
+    public function an_admin_locked_by_an_overdue_order_sees_only_the_locked_order_status_tabs(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin', 'name' => 'Order Locked Admin']);
+        $this->restrictAdminOrder($admin, 'paid');
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.sourcing-orders.index'))
+            ->assertOk();
+
+        $response->assertSee('Action needed on your folders');
+        $response->assertSee('Paid');
+        $response->assertDontSee('In Transit (CN)');
+        $response->assertDontSee('Shipment Preparing');
+    }
+
+    /** @test */
+    public function an_admin_locked_only_by_a_request_is_redirected_away_from_the_orders_index(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $restricted = $this->restrictAdmin($admin);
+
+        $this->actingAs($admin)
+            ->get(route('admin.sourcing-orders.index'))
+            ->assertRedirect(route('admin.quotations.create', ['sourcingRequest' => $restricted]));
+    }
+
+    /** @test */
+    public function an_in_review_request_wins_over_a_paid_order_when_both_are_overdue(): void
+    {
+        $this->enableSlaFlag();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $restricted = $this->restrictAdmin($admin);
+        $this->restrictAdminOrder($admin, 'paid');
+
+        $this->actingAs($admin)
+            ->get(route('admin.quotations.index'))
+            ->assertRedirect(route('admin.quotations.create', ['sourcingRequest' => $restricted]));
     }
 }

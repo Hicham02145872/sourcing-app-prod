@@ -101,6 +101,7 @@ class AdminSourcingRequestController extends Controller
                     ]);
                 }
             });
+
             return redirect()
                 ->route('admin.sourcing-requests.show', $sourcingRequest)
                 ->with('success', 'Demande de sourcing créée et assignée avec succès.');
@@ -206,12 +207,24 @@ class AdminSourcingRequestController extends Controller
             $statusCounts[$s] = $statusCountsRaw->get($s, 0);
         }
 
-        // Filter by status (default to 'pending' when no status param).
-        // When the SLA navigation lock is active, only in_review is actionable
-        // (the quotation is created from an in_review request).
+        // Filter by status. When the action-deadline navigation lock is active,
+        // force the list onto the request status(es) the admin must act on
+        // (in_review then negotiating), hiding the rest of the pipeline.
         $isSlaNavigationLocked = ! auth()->user()->isSuperAdmin()
             && \Illuminate\Support\Facades\View::shared('slaNavigationLocked', false);
-        $activeStatus = $isSlaNavigationLocked ? 'in_review' : $request->input('status', 'pending');
+        $slaLockedRequestStatuses = $isSlaNavigationLocked
+            ? (array) \Illuminate\Support\Facades\View::shared('slaLockedRequestStatuses', [])
+            : [];
+        $requestedStatus = $request->input('status', 'pending');
+
+        if ($isSlaNavigationLocked && $slaLockedRequestStatuses !== []) {
+            $activeStatus = in_array($requestedStatus, $slaLockedRequestStatuses, true)
+                ? $requestedStatus
+                : (in_array('in_review', $slaLockedRequestStatuses, true) ? 'in_review' : $slaLockedRequestStatuses[0]);
+        } else {
+            $activeStatus = $requestedStatus;
+        }
+
         if ($activeStatus !== 'all') {
             $query->where('status', $activeStatus);
         }
@@ -220,10 +233,10 @@ class AdminSourcingRequestController extends Controller
         $criticalStatuses = SourcingRequest::CRITICAL_STATUSES_FOR_LIST;
         $criticalSql = empty($criticalStatuses)
             ? '1'
-            : "CASE WHEN sourcing_requests.status IN (".implode(',', array_map(fn ($s) => "'".addslashes($s)."'", $criticalStatuses)).") THEN 0 ELSE 1 END";
+            : 'CASE WHEN sourcing_requests.status IN ('.implode(',', array_map(fn ($s) => "'".addslashes($s)."'", $criticalStatuses)).') THEN 0 ELSE 1 END';
         $userId = auth()->id();
         $assignmentSql = $userId
-            ? "CASE WHEN sourcing_requests.assigned_to_admin_id IS NULL THEN 1 WHEN sourcing_requests.assigned_to_admin_id = ".(int) $userId." THEN 2 ELSE 3 END"
+            ? 'CASE WHEN sourcing_requests.assigned_to_admin_id IS NULL THEN 1 WHEN sourcing_requests.assigned_to_admin_id = '.(int) $userId.' THEN 2 ELSE 3 END'
             : '0';
         $query->orderByRaw("{$criticalSql} ASC, {$assignmentSql} ASC, sourcing_requests.created_at DESC");
 
@@ -264,7 +277,7 @@ class AdminSourcingRequestController extends Controller
             $selectedQuality = $quotation->selected_quality ?? null;
 
             // If no selected_quality stored, detect by matching unit_price to quality prices
-            if ($selectedQuality === null && !empty($qualityOptions)) {
+            if ($selectedQuality === null && ! empty($qualityOptions)) {
                 foreach (['low', 'medium', 'good'] as $quality) {
                     if (isset($qualityOptions[$quality]['price']) && (float) $qualityOptions[$quality]['price'] === $effectiveUnitPrice) {
                         $selectedQuality = $quality;
@@ -275,7 +288,7 @@ class AdminSourcingRequestController extends Controller
                 // If unit_price is 0, use first available as reference
                 if ($selectedQuality === null && $effectiveUnitPrice == 0) {
                     foreach (['medium', 'good', 'low'] as $quality) {
-                        if (isset($qualityOptions[$quality]['price']) && !empty($qualityOptions[$quality]['price'])) {
+                        if (isset($qualityOptions[$quality]['price']) && ! empty($qualityOptions[$quality]['price'])) {
                             $selectedQuality = $quality;
                             $effectiveUnitPrice = (float) $qualityOptions[$quality]['price'];
                             break;

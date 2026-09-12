@@ -1,5 +1,5 @@
 <!-- Persistent workflow alert banner (Meta Ads account-restriction pattern).
-     Reused by the SLA module via the same component. -->
+     Shows whenever the admin has requests or orders past their action deadline. -->
 @if ($showInReviewLimitBanner ?? false)
     <div class="bg-amber-50 border-b border-amber-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -25,7 +25,7 @@
     </div>
 @endif
 
-@if (($showSlaOverdueBanner ?? false) && ! empty($slaOverdueByStatus ?? []))
+@if (($showSlaOverdueBanner ?? false) && (! empty($slaOverdueByStatus ?? []) || ! empty($slaOverdueOrderByStatus ?? [])))
     <div class="bg-red-50 border-b border-red-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -35,14 +35,28 @@
                     </span>
                     <div>
                         <p class="text-sm font-semibold text-red-800">{{ __('sla.banner_title') }}</p>
-                        <p class="text-xs text-red-700 mt-0.5">{{ __('sla.banner_message', ['count' => $slaOverdueCount ?? 0]) }}</p>
+                        <p class="text-xs text-red-700 mt-0.5">
+                            @if (($slaOverdueCount ?? 0) > 0 && ($slaOverdueOrderCount ?? 0) > 0)
+                                {{ __('sla.banner_message_both', ['requests' => $slaOverdueCount, 'orders' => $slaOverdueOrderCount]) }}
+                            @elseif (($slaOverdueOrderCount ?? 0) > 0)
+                                {{ __('sla.banner_message_orders', ['count' => $slaOverdueOrderCount]) }}
+                            @else
+                                {{ __('sla.banner_message', ['count' => $slaOverdueCount ?? 0]) }}
+                            @endif
+                        </p>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2 shrink-0">
-                    @foreach ($slaOverdueByStatus as $slaStatus => $slaCount)
-                        <a href="{{ route('admin.sourcing-requests.index', ['status' => $slaStatus, 'overdue' => 1]) }}"
+                    @foreach ($slaOverdueByStatus ?? [] as $slaStatus => $slaCount)
+                        <a href="{{ route('admin.sourcing-requests.index', ['status' => $slaStatus, 'overdue' => 1, 'admin_id' => 'me']) }}"
                            class="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-md shadow-sm transition-colors">
                             {{ __('sla.banner_cta', ['status' => __($slaStatus), 'count' => $slaCount]) }}
+                        </a>
+                    @endforeach
+                    @foreach ($slaOverdueOrderByStatus ?? [] as $slaOrderStatus => $slaOrderCount)
+                        <a href="{{ route('admin.sourcing-orders.index', ['status' => $slaOrderStatus, 'overdue' => 1, 'admin_id' => 'me']) }}"
+                           class="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-800 text-white text-xs font-bold rounded-md shadow-sm transition-colors">
+                            {{ __('sla.banner_cta', ['status' => __($slaOrderStatus), 'count' => $slaOrderCount]) }}
                         </a>
                     @endforeach
                 </div>

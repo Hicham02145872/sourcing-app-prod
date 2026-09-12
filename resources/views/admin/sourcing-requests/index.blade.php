@@ -173,7 +173,8 @@
                 @foreach (\App\Models\SourcingRequest::STATUSES as $status)
                     @php
                         $isSlaNavLocked = ($slaNavigationLocked ?? false) && ! auth()->user()?->isSuperAdmin();
-                        if ($isSlaNavLocked && $status !== 'in_review') continue;
+                        $slaRequestLockStatuses = \Illuminate\Support\Facades\View::shared('slaLockedRequestStatuses', []);
+                        if ($isSlaNavLocked && ! empty($slaRequestLockStatuses) && ! in_array($status, $slaRequestLockStatuses, true)) continue;
                         $count = $statusCounts[$status] ?? 0;
                         $isActive = $activeStatus === $status;
                         if ($count === 0 && !$isActive) continue;

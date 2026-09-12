@@ -208,6 +208,9 @@
             <div class="flex flex-wrap gap-1.5">
                 @foreach (\App\Models\SourcingOrder::STATUSES as $status)
                     @php
+                        $isSlaNavLocked = ($slaNavigationLocked ?? false) && ! auth()->user()?->isSuperAdmin();
+                        $slaOrderLockStatuses = \Illuminate\Support\Facades\View::shared('slaLockedOrderStatuses', []);
+                        if ($isSlaNavLocked && ! empty($slaOrderLockStatuses) && ! in_array($status, $slaOrderLockStatuses, true)) continue;
                         $count = $statusCounts[$status] ?? 0;
                         $isActive = $activeStatus === $status;
                         if ($count === 0 && !$isActive) continue;

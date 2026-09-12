@@ -63,24 +63,39 @@ class AdminDashboardController extends Controller
             && app(\App\Services\FeatureFlagService::class)->isEnabled('workflow_in_review_limit', $user)
             && ($sourcingRequestsByStatus['in_review'] ?? 0) >= $inReviewLimit;
 
-        // Persistent workflow alert (per-admin SLA deadline enforcement)
+        // Persistent workflow alert (per-admin action deadline enforcement)
         $slaOverdueCount = 0;
         $slaOverdueByStatus = [];
+        $slaOverdueOrderCount = 0;
+        $slaOverdueOrderByStatus = [];
         if (! $isSuperAdmin) {
+            $slaRules = (array) config('fsb.sla', []);
+
             $slaOverdueQuery = SourcingRequest::query()
                 ->where('assigned_to_admin_id', $user->id)
                 ->where('is_restricted_due_to_delay', true)
-                ->whereIn('status', array_keys((array) config('fsb.sla', [])));
+                ->whereIn('status', array_keys((array) ($slaRules['requests'] ?? [])));
             $slaOverdueByStatus = (clone $slaOverdueQuery)
                 ->select('status', \DB::raw('count(*) as total'))
                 ->groupBy('status')
                 ->pluck('total', 'status')
                 ->toArray();
             $slaOverdueCount = array_sum($slaOverdueByStatus);
+
+            $slaOverdueOrderQuery = SourcingOrder::query()
+                ->where('assigned_to_admin_id', $user->id)
+                ->where('is_restricted_due_to_delay', true)
+                ->whereIn('status', array_keys((array) ($slaRules['orders'] ?? [])));
+            $slaOverdueOrderByStatus = (clone $slaOverdueOrderQuery)
+                ->select('status', \DB::raw('count(*) as total'))
+                ->groupBy('status')
+                ->pluck('total', 'status')
+                ->toArray();
+            $slaOverdueOrderCount = array_sum($slaOverdueOrderByStatus);
         }
         $showSlaOverdueBanner = ! $isSuperAdmin
             && app(\App\Services\FeatureFlagService::class)->isEnabled('sla_deadlines_autolock', $user)
-            && $slaOverdueCount > 0;
+            && ($slaOverdueCount + $slaOverdueOrderCount) > 0;
 
         $allActivities = $user->notifications()->latest()->get();
         $filteredActivities = $this->filterNotificationsByAssignment($allActivities, $user);
@@ -122,7 +137,9 @@ class AdminDashboardController extends Controller
             'inReviewLimit',
             'showSlaOverdueBanner',
             'slaOverdueCount',
-            'slaOverdueByStatus'
+            'slaOverdueByStatus',
+            'slaOverdueOrderCount',
+            'slaOverdueOrderByStatus'
         ));
     }
 }

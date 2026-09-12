@@ -16,17 +16,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | SLA deadlines (hours per status)
+    | Action deadlines (hours per status)
     |--------------------------------------------------------------------------
-    | Command workflow:check-deadlines flags requests that stay longer than
-    | the configured duration in a SLA status (feature flag
-    | 'sla_deadlines_autolock' must be enabled for the rule to apply).
+    | Command workflow:check-deadlines flags requests and orders that stay
+    | longer than the configured duration in an actionable status (feature
+    | flag 'sla_deadlines_autolock' must be enabled for the rule to apply).
+    |
+    | requests: statuses of sourcing_requests.
+    | orders:   statuses of sourcing_orders. A 'paid' deadline is also
+    |           escalated (reported) to super admins.
     */
     'sla' => [
-        'in_review' => 24,
-        'quoted' => 24,
-        'negotiating' => 24,
-        'accepted' => 48,
+        'requests' => [
+            'in_review' => 24,     // price the request and move it to Quoted, otherwise block new work
+            'negotiating' => 24,   // update the price for the client or close the negotiation
+        ],
+        'orders' => [
+            'paid' => 24,              // buy the goods and move the order to shipping
+            'in_transit_china' => 48,  // upload parcel photo + label + China tracking number
+        ],
     ],
 
     /*
