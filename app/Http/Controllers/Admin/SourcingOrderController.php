@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\SourcingOrderStatusChanged;
+use App\Http\Controllers\Concerns\AppliesDateRangeFilter;
 use App\Http\Controllers\Controller;
 use App\Jobs\DeleteCloudinaryAsset;
 use App\Models\SourcingOrder;
@@ -23,6 +24,8 @@ use Illuminate\View\View;
 
 class SourcingOrderController extends Controller
 {
+    use AppliesDateRangeFilter;
+
     public function __construct(
         protected \App\Services\ImageProcessingService $imageService
     ) {}
@@ -114,6 +117,9 @@ class SourcingOrderController extends Controller
             $query->where('is_restricted_due_to_delay', true);
         }
 
+        // Filter by creation date range (start / end)
+        $this->applyDateRangeFilter($query, $request->query('date_debut'), $request->query('date_fin'));
+
         // Status counts (respecting search + admin filters, but NOT status filter)
         $statusCountsQuery = SourcingOrder::query();
         if ($search = $request->query('search')) {
@@ -155,6 +161,7 @@ class SourcingOrderController extends Controller
         if ($request->boolean('overdue')) {
             $statusCountsQuery->where('is_restricted_due_to_delay', true);
         }
+        $this->applyDateRangeFilter($statusCountsQuery, $request->query('date_debut'), $request->query('date_fin'));
         $statusCountsRaw = $statusCountsQuery->select('status', DB::raw('count(*) as count'))->groupBy('status')->pluck('count', 'status');
         $statusCounts = [];
         foreach (SourcingOrder::STATUSES as $s) {

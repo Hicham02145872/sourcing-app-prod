@@ -142,6 +142,8 @@
                             </div>
                             @endif
 
+                            @include('admin.partials.date-range-fields')
+
                              <button type="submit" class="w-full md:w-auto px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors shadow-sm">
                                 {{ __('Filter') }}
                             </button>

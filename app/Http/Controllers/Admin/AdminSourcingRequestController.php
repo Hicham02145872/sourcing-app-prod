@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\AppliesDateRangeFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAdminSourcingRequest;
 use App\Models\Category;
@@ -19,6 +20,8 @@ use Illuminate\View\View;
 
 class AdminSourcingRequestController extends Controller
 {
+    use AppliesDateRangeFilter;
+
     public function __construct(
         protected \App\Services\ImageProcessingService $imageService
     ) {}
@@ -162,6 +165,9 @@ class AdminSourcingRequestController extends Controller
             $query->where('is_restricted_due_to_delay', true);
         }
 
+        // Filter by creation date range (start / end)
+        $this->applyDateRangeFilter($query, $request->query('date_debut'), $request->query('date_fin'));
+
         // Status counts (respecting search + admin filters, but NOT status filter)
         $statusCountsQuery = SourcingRequest::query();
         if ($request->has('search')) {
@@ -201,6 +207,7 @@ class AdminSourcingRequestController extends Controller
         if ($request->boolean('overdue')) {
             $statusCountsQuery->where('is_restricted_due_to_delay', true);
         }
+        $this->applyDateRangeFilter($statusCountsQuery, $request->query('date_debut'), $request->query('date_fin'));
         $statusCountsRaw = $statusCountsQuery->select('status', DB::raw('count(*) as count'))->groupBy('status')->pluck('count', 'status');
         $statusCounts = [];
         foreach (SourcingRequest::STATUSES as $s) {

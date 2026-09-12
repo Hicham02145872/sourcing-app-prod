@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\AppliesDateRangeFilter;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -11,6 +12,8 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
+    use AppliesDateRangeFilter;
+
     public function index(Request $request): View|JsonResponse
     {
         $query = User::where('role', 'client');
@@ -29,6 +32,9 @@ class UserController extends Controller
                 $query->whereNull('fcm_token');
             }
         }
+
+        // Filter by creation date range (start / end)
+        $this->applyDateRangeFilter($query, $request->query('date_debut'), $request->query('date_fin'));
 
         $inactiveUsers = User::where('role', 'client')
             ->whereNull('email_verified_at')

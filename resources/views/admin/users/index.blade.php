@@ -135,6 +135,8 @@
                                 <option value="no_token" {{ request('fcm_status') == 'no_token' ? 'selected' : '' }}>{{ __('No Token') }}</option>
                             </select>
                         </div>
+
+                        @include('admin.partials.date-range-fields')
                     </div>
 
                     <!-- Action Buttons -->
@@ -193,14 +195,18 @@
                 const status = document.querySelector('select[name="status"]').value;
                 const role = document.querySelector('select[name="role"]').value;
                 const fcm_status = document.querySelector('select[name="fcm_status"]').value;
-                
+                const dateDebut = document.querySelector('input[name="date_debut"]')?.value ?? '';
+                const dateFin = document.querySelector('input[name="date_fin"]')?.value ?? '';
+
                 axios.get('{{ route('admin.users.index') }}', {
                     params: { 
                         search: searchTerm, 
                         page: page,
                         status: status,
                         role: role,
-                        fcm_status: fcm_status
+                        fcm_status: fcm_status,
+                        date_debut: dateDebut,
+                        date_fin: dateFin
                     },
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 })

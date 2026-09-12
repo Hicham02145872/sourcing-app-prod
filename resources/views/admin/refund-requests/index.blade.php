@@ -102,7 +102,7 @@
 
             <!-- Section 2: Filters -->
             <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-                <form action="{{ route('admin.refund-requests.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                <form action="{{ route('admin.refund-requests.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Status') }}</label>
                         <select name="status" class="w-full text-xs border-slate-200 rounded-md focus:ring-slate-900 focus:border-slate-900">
@@ -129,9 +129,8 @@
                         <input type="number" name="min_amount" value="{{ request('min_amount') }}" step="0.01" placeholder="0.00" class="w-full text-xs border-slate-200 rounded-md focus:ring-slate-900 focus:border-slate-900">
                     </div>
 
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{{ __('Date') }}</label>
-                        <input type="date" name="date" value="{{ request('date') }}" class="w-full text-xs border-slate-200 rounded-md focus:ring-slate-900 focus:border-slate-900">
+                    <div class="col-span-2">
+                        @include('admin.partials.date-range-fields')
                     </div>
 
                     <div class="flex gap-2">

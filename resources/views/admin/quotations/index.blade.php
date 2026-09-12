@@ -132,14 +132,16 @@
                                     <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
                                 </select>
                             </div>
-                            
+
+                            @include('admin.partials.date-range-fields')
+
                             <div class="pb-[1px]">
                                 <button type="submit" class="w-full md:w-auto h-[34px] px-4 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded transition-colors shadow-sm flex items-center justify-center gap-2">
                                     {{ __('Apply') }}
                                 </button>
                             </div>
                             
-                            @if(request()->has('search') || request()->has('status'))
+                            @if(request()->has('search') || request()->has('status') || request()->has('date_debut') || request()->has('date_fin'))
                                 <div class="pb-[1px]">
                                     <a href="{{ route('admin.quotations.index') }}" class="w-full md:w-auto h-[34px] px-4 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded transition-colors shadow-sm flex items-center justify-center gap-2">
                                         {{ __('Clear') }}

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\AppliesDateRangeFilter;
 use App\Http\Controllers\Controller;
 use App\Models\RefundRequest;
 use Illuminate\Http\RedirectResponse;
@@ -10,6 +11,8 @@ use Illuminate\View\View;
 
 class RefundRequestController extends Controller
 {
+    use AppliesDateRangeFilter;
+
     public function index(Request $request): View
     {
         $query = RefundRequest::with(['sourcingOrder', 'user', 'assignedAdmin'])
@@ -52,6 +55,9 @@ class RefundRequestController extends Controller
         if ($request->filled('date')) {
             $query->whereDate('created_at', $request->date);
         }
+
+        // Filter by creation date range (start / end)
+        $this->applyDateRangeFilter($query, $request->query('date_debut'), $request->query('date_fin'));
 
         // Stats for the header (unfiltered or filtered? Usually unfiltered for total context, but let's stick to base query)
         $statsBaseQuery = RefundRequest::query();

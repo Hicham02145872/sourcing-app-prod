@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\AppliesDateRangeFilter;
 use App\Http\Controllers\Controller;
 use App\Models\Quotation;
 use App\Models\SourcingRequest;
@@ -15,7 +16,10 @@ use Illuminate\View\View;
 
 class QuotationController extends Controller
 {
+    use AppliesDateRangeFilter;
+
     public function __construct(protected ImageProcessingService $imageService) {}
+
     public function index(Request $request): View
     {
         $this->authorize('viewAny', Quotation::class);
@@ -47,7 +51,7 @@ class QuotationController extends Controller
                     ->orWhereHas('sourcingRequest', function ($srQuery) use ($searchTerm) {
                         $srQuery->where('product_name', 'like', '%'.$searchTerm.'%')
                             ->orWhere('id', 'like', '%'.$searchTerm.'%')
-                ->orWhere('note', 'like', '%'.$searchTerm.'%')
+                            ->orWhere('note', 'like', '%'.$searchTerm.'%')
                             ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
                                 $userQuery->where('name', 'like', '%'.$searchTerm.'%')
                                     ->orWhere('email', 'like', '%'.$searchTerm.'%');
@@ -69,6 +73,9 @@ class QuotationController extends Controller
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
         }
+
+        // Filter by creation date range (start / end)
+        $this->applyDateRangeFilter($query, $request->query('date_debut'), $request->query('date_fin'));
 
         // Default sort: newest first
         $query->orderBy('created_at', 'desc');
@@ -218,12 +225,12 @@ class QuotationController extends Controller
             foreach (['low', 'medium', 'good'] as $quality) {
                 if (isset($rawOptions[$quality]['price']) && $rawOptions[$quality]['price'] !== '') {
                     $price = (float) $rawOptions[$quality]['price'];
-                    
+
                     $imagePath = null;
                     $imagePaths = [];
                     if ($request->hasFile("quality_options_images.{$quality}")) {
                         $files = $request->file("quality_options_images.{$quality}");
-                        if (!is_array($files)) {
+                        if (! is_array($files)) {
                             $files = [$files];
                         }
                         foreach ($files as $file) {
@@ -245,11 +252,11 @@ class QuotationController extends Controller
                                 }
                             }
                         }
-                        if (!empty($imagePaths)) {
+                        if (! empty($imagePaths)) {
                             $imagePath = $imagePaths[0];
                         }
                     }
-                    
+
                     $qualityOptionsData[$quality] = [
                         'price' => $price,
                         'weight' => isset($rawOptions[$quality]['weight']) && $rawOptions[$quality]['weight'] !== '' ? (float) $rawOptions[$quality]['weight'] : null,
@@ -281,11 +288,9 @@ class QuotationController extends Controller
             'comments' => $validated['comments'] ?? null,
             'real_product_image' => $realProductImagePath,
             'supplier_url' => $validated['supplier_url'] ?? null,
-            'quality_options' => !empty($qualityOptionsData) ? $qualityOptionsData : null,
+            'quality_options' => ! empty($qualityOptionsData) ? $qualityOptionsData : null,
             // estimated_net_profit will be calculated by QuotationObserver
         ]);
-
-
 
         event(new \App\Events\QuotationCreated($quotation));
 
@@ -348,17 +353,16 @@ class QuotationController extends Controller
                 'real_product_image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
                 'supplier_url' => 'nullable|url|max:2048',
 
-
                 'quality_options' => 'nullable|array',
                 'quality_options.low.price' => 'nullable|numeric|min:0',
                 'quality_options.medium.price' => 'nullable|numeric|min:0',
                 'quality_options.good.price' => 'nullable|numeric|min:0',
-                'quality_options.low.weight'      => 'nullable|required_with:quality_options.low.price|numeric|min:0',
-                'quality_options.medium.weight'   => 'nullable|required_with:quality_options.medium.price|numeric|min:0',
-                'quality_options.good.weight'     => 'nullable|required_with:quality_options.good.price|numeric|min:0',
-                'quality_options.low.weight_unit'    => 'nullable|required_with:quality_options.low.weight|string|in:g,kg,colis',
+                'quality_options.low.weight' => 'nullable|required_with:quality_options.low.price|numeric|min:0',
+                'quality_options.medium.weight' => 'nullable|required_with:quality_options.medium.price|numeric|min:0',
+                'quality_options.good.weight' => 'nullable|required_with:quality_options.good.price|numeric|min:0',
+                'quality_options.low.weight_unit' => 'nullable|required_with:quality_options.low.weight|string|in:g,kg,colis',
                 'quality_options.medium.weight_unit' => 'nullable|required_with:quality_options.medium.weight|string|in:g,kg,colis',
-                'quality_options.good.weight_unit'   => 'nullable|required_with:quality_options.good.weight|string|in:g,kg,colis',
+                'quality_options.good.weight_unit' => 'nullable|required_with:quality_options.good.weight|string|in:g,kg,colis',
                 'quality_options_images' => 'nullable|array',
                 'quality_options_images.low' => 'nullable|array',
                 'quality_options_images.low.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:20480',
@@ -375,8 +379,9 @@ class QuotationController extends Controller
 
             $sourcingRequest = $quotation->sourcingRequest;
 
-            if (!$sourcingRequest) {
+            if (! $sourcingRequest) {
                 Log::error('Sourcing request not found for quotation', ['quotation_id' => $quotation->id]);
+
                 return redirect()->route('admin.quotations.index')
                     ->withErrors(['generic' => __('La demande d\'approvisionnement associée n\'existe plus.')]);
             }
@@ -435,18 +440,18 @@ class QuotationController extends Controller
             if ($request->has('quality_options')) {
                 $rawOptions = $request->input('quality_options');
                 $existingOptions = $quotation->quality_options ?? [];
-                
+
                 foreach (['low', 'medium', 'good'] as $quality) {
                     if (isset($rawOptions[$quality]['price']) && $rawOptions[$quality]['price'] !== '') {
                         $price = (float) $rawOptions[$quality]['price'];
-                        
+
                         $imagePath = $existingOptions[$quality]['image_path'] ?? null;
                         $imagePaths = $existingOptions[$quality]['image_paths'] ?? ($imagePath ? [$imagePath] : []);
-                        
+
                         // Handle deletions
                         if ($request->has("delete_quality_images.{$quality}")) {
                             $deletedPaths = $request->input("delete_quality_images.{$quality}");
-                            if (!is_array($deletedPaths)) {
+                            if (! is_array($deletedPaths)) {
                                 $deletedPaths = [$deletedPaths];
                             }
                             foreach ($deletedPaths as $dPath) {
@@ -462,7 +467,7 @@ class QuotationController extends Controller
 
                         if ($request->hasFile("quality_options_images.{$quality}")) {
                             $files = $request->file("quality_options_images.{$quality}");
-                            if (!is_array($files)) {
+                            if (! is_array($files)) {
                                 $files = [$files];
                             }
                             foreach ($files as $file) {
@@ -485,9 +490,9 @@ class QuotationController extends Controller
                                 }
                             }
                         }
-                        
-                        $imagePath = !empty($imagePaths) ? $imagePaths[0] : null;
-                        
+
+                        $imagePath = ! empty($imagePaths) ? $imagePaths[0] : null;
+
                         $qualityOptionsData[$quality] = [
                             'price' => $price,
                             'weight' => isset($rawOptions[$quality]['weight']) && $rawOptions[$quality]['weight'] !== '' ? (float) $rawOptions[$quality]['weight'] : null,
@@ -526,7 +531,7 @@ class QuotationController extends Controller
                 'admin_negotiation_reply' => $validated['admin_negotiation_reply'] ?? null,
                 'real_product_image' => $realProductImagePath,
                 'supplier_url' => $validated['supplier_url'] ?? null,
-                'quality_options' => !empty($qualityOptionsData) ? $qualityOptionsData : null,
+                'quality_options' => ! empty($qualityOptionsData) ? $qualityOptionsData : null,
             ]);
 
             if ($quotation->wasChanged('actual_sourcing_location') && $quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location) {
@@ -534,8 +539,6 @@ class QuotationController extends Controller
                     $sourcingRequest->user->notify(new \App\Notifications\AlternativeSourcingNotification($quotation));
                 }
             }
-
-
 
             // Transition sourcing request back to quoted if it was negotiating
             if ($sourcingRequest->status === 'negotiating') {
@@ -546,6 +549,7 @@ class QuotationController extends Controller
                         'sourcing_request_id' => $sourcingRequest->id,
                         'error' => $e->getMessage(),
                     ]);
+
                     return redirect()->route('admin.sourcing-requests.show', $sourcingRequest)
                         ->withErrors(['generic' => $e->getMessage()])
                         ->with('error', __('Impossible de mettre à jour le statut de la demande.'));
@@ -564,6 +568,7 @@ class QuotationController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return redirect()->route('admin.quotations.edit', $quotation)
                 ->withInput()
                 ->with('error', __('Une erreur est survenue lors de la mise à jour du devis. Veuillez réessayer ou contacter le support.'));

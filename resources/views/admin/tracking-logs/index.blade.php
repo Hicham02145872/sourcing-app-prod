@@ -23,6 +23,24 @@
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-4 bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                <form action="{{ route('admin.tracking-logs.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3 items-end">
+                    <div class="flex-1 w-full sm:w-auto">
+                        @include('admin.partials.date-range-fields')
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="px-4 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded transition-colors shadow-sm">
+                            {{ __('Filter') }}
+                        </button>
+                        @if(request()->has('date_debut') || request()->has('date_fin'))
+                            <a href="{{ route('admin.tracking-logs.index') }}" class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-300 rounded-md transition-colors">
+                                {{ __('Reset') }}
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
             <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
                     <h3 class="text-sm font-semibold text-slate-900">{{ __('Historical Searches') }}</h3>
