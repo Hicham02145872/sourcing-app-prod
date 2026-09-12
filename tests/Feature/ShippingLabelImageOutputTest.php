@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\ShippingLabelImageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use ZipArchive;
 
 class ShippingLabelImageOutputTest extends TestCase
 {
@@ -182,5 +183,41 @@ class ShippingLabelImageOutputTest extends TestCase
             ->get(route('admin.sourcing-orders.shipping-label', $this->order).'?format=png');
         $flaggedResponse->assertStatus(200);
         $this->assertSame('application/pdf', $flaggedResponse->headers->get('Content-Type'));
+    }
+
+    public function test_multi_destination_downloads_a_zip_containing_a_png_per_destination(): void
+    {
+        $saudi = Country::factory()->create(['name' => 'Saudi Arabia']);
+        $express = Service::factory()->create(['name' => 'Air Express']);
+
+        $this->request->destinations()->create([
+            'country_id' => $saudi->id,
+            'service_id' => $express->id,
+            'quantity' => 4,
+            'address' => 'King Fahd Road, Riyadh',
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.sourcing-orders.shipping-label', $this->order));
+        $response->assertStatus(200);
+        $this->assertSame('application/zip', $response->headers->get('Content-Type'));
+        $this->assertStringStartsWith(
+            'attachment; filename="shipping-labels-'.$this->order->id.'.zip"',
+            $response->headers->get('Content-Disposition')
+        );
+
+        $tmp = tempnam(sys_get_temp_dir(), 'zip-');
+        file_put_contents($tmp, $response->getContent());
+
+        $zip = new ZipArchive;
+        $this->assertTrue($zip->open($tmp) === true);
+        $this->assertSame(2, $zip->numFiles);
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $this->assertSame("\x89PNG\r\n\x1a\n", substr($zip->getFromIndex($i), 0, 8));
+        }
+
+        $zip->close();
+        @unlink($tmp);
     }
 }

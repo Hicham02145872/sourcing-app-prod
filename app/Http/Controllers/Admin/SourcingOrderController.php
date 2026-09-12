@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -261,7 +262,7 @@ class SourcingOrderController extends Controller
         }
 
         if ($this->resolveLabelFormat() === 'png') {
-            $png = $this->shippingLabelPngResponse($sourcingOrder, null, 'shipping-label-'.$sourcingOrder->id);
+            $png = $this->shippingLabelDownloadResponse($sourcingOrder);
             if ($png) {
                 return $png;
             }
@@ -308,6 +309,58 @@ class SourcingOrderController extends Controller
         }
 
         return app(\App\Services\FeatureFlagService::class)->isEnabled('label_image_output', auth()->user()) ? 'png' : 'pdf';
+    }
+
+    /**
+     * Return a direct PNG download (single destination) or a ZIP archive
+     * containing one PNG per destination when the order has several
+     * destinations, provided the label_image_output flag is enabled.
+     * Returns null otherwise.
+     */
+    protected function shippingLabelDownloadResponse(SourcingOrder $sourcingOrder)
+    {
+        if (! app(\App\Services\FeatureFlagService::class)->isEnabled('label_image_output', auth()->user())) {
+            return null;
+        }
+
+        $service = app(\App\Services\ShippingLabelImageService::class);
+        $destinations = $sourcingOrder->quotation->sourcingRequest->destinations;
+
+        if ($destinations->count() < 2) {
+            $blob = $service->pngBlob($service->render($sourcingOrder, $destinations->first()));
+
+            return response($blob, 200)
+                ->header('Content-Type', 'image/png')
+                ->header('Content-Disposition', 'attachment; filename="shipping-label-'.$sourcingOrder->id.'.png"');
+        }
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'labels-').'.zip';
+        $zip = new \ZipArchive;
+
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return null;
+        }
+
+        foreach ($destinations as $index => $destination) {
+            $blob = $service->pngBlob($service->render($sourcingOrder, $destination));
+
+            $country = Str::slug($destination?->country?->name ?? 'destination-'.($index + 1), '-');
+
+            $zip->addFromString(
+                'shipping-label-'.$sourcingOrder->id.'/'.($index + 1).'-'.$country.'.png',
+                $blob
+            );
+        }
+
+        $zip->close();
+
+        $response = response((string) file_get_contents($zipPath), 200)
+            ->header('Content-Type', 'application/zip')
+            ->header('Content-Disposition', 'attachment; filename="shipping-labels-'.$sourcingOrder->id.'.zip"');
+
+        @unlink($zipPath);
+
+        return $response;
     }
 
     /**
