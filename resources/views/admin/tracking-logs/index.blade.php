@@ -29,11 +29,11 @@
                         @include('admin.partials.date-range-fields')
                     </div>
                     <div class="flex items-center gap-2">
-                        <button type="submit" class="px-4 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded transition-colors shadow-sm">
+                        <button type="submit" class="h-[34px] px-4 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded transition-colors shadow-sm">
                             {{ __('Filter') }}
                         </button>
                         @if(request()->has('date_debut') || request()->has('date_fin'))
-                            <a href="{{ route('admin.tracking-logs.index') }}" class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-300 rounded-md transition-colors">
+                            <a href="{{ route('admin.tracking-logs.index') }}" class="h-[34px] px-3 text-sm font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-300 rounded-md transition-colors inline-flex items-center">
                                 {{ __('Reset') }}
                             </a>
                         @endif

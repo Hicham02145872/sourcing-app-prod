@@ -96,10 +96,10 @@
 
             <!-- Section 2: Toolbar & Filters (Sticky) -->
             <div class="sticky top-20 z-10 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
-                <form action="{{ route('admin.users.index') }}" method="GET" class="flex flex-col lg:flex-row gap-3 items-center justify-between">
+                <form action="{{ route('admin.users.index') }}" method="GET" class="flex flex-col lg:flex-row gap-3 lg:items-end justify-between">
                     
                     <!-- Search & Filters Group -->
-                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto flex-1">
+                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto flex-1 items-end">
                         <!-- Search -->
                         <div class="relative w-full sm:w-72">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

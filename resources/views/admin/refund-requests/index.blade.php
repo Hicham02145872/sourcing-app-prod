@@ -129,11 +129,11 @@
                         <input type="number" name="min_amount" value="{{ request('min_amount') }}" step="0.01" placeholder="0.00" class="w-full text-xs border-slate-200 rounded-md focus:ring-slate-900 focus:border-slate-900">
                     </div>
 
-                    <div class="col-span-2">
+                    <div class="col-span-6 md:col-span-3">
                         @include('admin.partials.date-range-fields')
                     </div>
 
-                    <div class="flex gap-2">
+                    <div class="col-span-6 flex gap-2">
                         <button type="submit" class="flex-1 bg-slate-900 text-white text-xs font-bold py-2 rounded-md hover:bg-slate-800 transition-colors">
                             {{ __('Filter') }}
                         </button>

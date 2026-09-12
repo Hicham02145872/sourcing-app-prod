@@ -103,9 +103,9 @@
             <!-- Section 2: Filters Bar (Sticky) -->
             <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 sticky top-20 z-10">
                 <form action="{{ route('admin.sourcing-requests.index') }}" method="GET">
-                    <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div class="flex flex-col md:flex-row gap-4 md:items-end justify-between">
                         
-                        <div class="flex-1 w-full md:w-auto flex flex-col md:flex-row gap-3">
+                        <div class="flex-1 w-full md:w-auto flex flex-col md:flex-row gap-3 items-end">
                             <!-- Search -->
                             <div class="relative w-full md:w-64">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -132,7 +132,7 @@
 
                             @include('admin.partials.date-range-fields')
 
-                             <button type="submit" class="w-full md:w-auto px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors shadow-sm">
+                             <button type="submit" class="w-full md:w-auto h-[34px] px-4 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded transition-colors shadow-sm inline-flex items-center justify-center">
                                 {{ __('Filter') }}
                             </button>
                         </div>
