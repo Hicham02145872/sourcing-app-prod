@@ -19,6 +19,8 @@ class ShippingLabelImageService
 
     private string $logoPath;
 
+    private int $logoBottomY = 0;
+
     public function __construct()
     {
         $this->dpi = (int) config('fsb.label.dpi', 300);
@@ -112,15 +114,19 @@ class ShippingLabelImageService
     private function drawLogo(GdImage $image, int $canvasWidth): void
     {
         if (! $this->logoPath || ! is_file($this->logoPath)) {
+            $this->logoBottomY = 0;
+
             return;
         }
 
         $source = @imagecreatefrompng($this->logoPath);
         if (! $source) {
+            $this->logoBottomY = 0;
+
             return;
         }
 
-        $maxWidth = $this->px(350);
+        $maxWidth = $this->px(400);
         $srcW = imagesx($source);
         $srcH = imagesy($source);
 
@@ -132,6 +138,8 @@ class ShippingLabelImageService
 
         imagecopyresampled($image, $source, $dstX, $dstY, 0, 0, $dstW, $dstH, $srcW, $srcH);
         imagedestroy($source);
+
+        $this->logoBottomY = $dstY + $dstH;
     }
 
     private function drawTable(GdImage $image, SourcingOrder $order, SourcingRequestDestination $destination): void
@@ -147,8 +155,10 @@ class ShippingLabelImageService
         $borderW = max(1, $this->px(2));
         $cellPad = $this->px(15);
 
-        // Top of the table sits under the logo (30px top + scaled logo height).
-        $y = $this->px(30) + (int) round($this->px(350) * 0.25) + $this->px(30);
+        // Top of the table sits under the logo with a clear gap.
+        $y = $this->logoBottomY > 0
+            ? $this->logoBottomY + $this->px(45)
+            : $this->px(30) + $this->px(45);
 
         $rows = $this->tableRows($order, $destination);
 
