@@ -206,8 +206,12 @@ class AdminSourcingRequestController extends Controller
             $statusCounts[$s] = $statusCountsRaw->get($s, 0);
         }
 
-        // Filter by status (default to 'pending' when no status param)
-        $activeStatus = $request->input('status', 'pending');
+        // Filter by status (default to 'pending' when no status param).
+        // When the SLA navigation lock is active, only in_review is actionable
+        // (the quotation is created from an in_review request).
+        $isSlaNavigationLocked = ! auth()->user()->isSuperAdmin()
+            && \Illuminate\Support\Facades\View::shared('slaNavigationLocked', false);
+        $activeStatus = $isSlaNavigationLocked ? 'in_review' : $request->input('status', 'pending');
         if ($activeStatus !== 'all') {
             $query->where('status', $activeStatus);
         }

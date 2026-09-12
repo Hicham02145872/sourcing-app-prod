@@ -172,6 +172,8 @@
             <div class="flex flex-wrap gap-2">
                 @foreach (\App\Models\SourcingRequest::STATUSES as $status)
                     @php
+                        $isSlaNavLocked = ($slaNavigationLocked ?? false) && ! auth()->user()?->isSuperAdmin();
+                        if ($isSlaNavLocked && $status !== 'in_review') continue;
                         $count = $statusCounts[$status] ?? 0;
                         $isActive = $activeStatus === $status;
                         if ($count === 0 && !$isActive) continue;

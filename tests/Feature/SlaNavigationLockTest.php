@@ -35,15 +35,6 @@ class SlaNavigationLockTest extends TestCase
         ]);
     }
 
-    private function overdueRequestsList(): string
-    {
-        return route('admin.sourcing-requests.index', [
-            'status' => 'all',
-            'overdue' => 1,
-            'admin_id' => 'me',
-        ]);
-    }
-
     private function restrictAdmin(User $admin): SourcingRequest
     {
         $client = User::factory()->create(['role' => 'client']);
@@ -58,31 +49,31 @@ class SlaNavigationLockTest extends TestCase
     }
 
     /** @test */
-    public function a_locked_admin_is_redirected_to_the_overdue_list_when_opening_a_blocked_page(): void
+    public function a_locked_admin_is_redirected_to_the_quotation_creation_page_when_opening_a_blocked_page(): void
     {
         $this->enableSlaFlag();
         $admin = User::factory()->create(['role' => 'admin']);
-        $this->restrictAdmin($admin);
+        $restricted = $this->restrictAdmin($admin);
 
         $this->actingAs($admin)
             ->get(route('admin.sourcing-orders.index'))
-            ->assertRedirect($this->overdueRequestsList());
+            ->assertRedirect(route('admin.quotations.create', ['sourcingRequest' => $restricted]));
     }
 
     /** @test */
-    public function a_locked_admin_is_redirected_from_quotations_and_management_pages(): void
+    public function a_locked_admin_is_redirected_from_quotations_list_and_management_pages(): void
     {
         $this->enableSlaFlag();
         $admin = User::factory()->create(['role' => 'admin']);
-        $this->restrictAdmin($admin);
+        $restricted = $this->restrictAdmin($admin);
 
         $this->actingAs($admin)
             ->get(route('admin.quotations.index'))
-            ->assertRedirect($this->overdueRequestsList());
+            ->assertRedirect(route('admin.quotations.create', ['sourcingRequest' => $restricted]));
 
         $this->actingAs($admin)
             ->get(route('admin.social-media-links.edit'))
-            ->assertRedirect($this->overdueRequestsList());
+            ->assertRedirect(route('admin.quotations.create', ['sourcingRequest' => $restricted]));
     }
 
     /** @test */
@@ -102,14 +93,14 @@ class SlaNavigationLockTest extends TestCase
     }
 
     /** @test */
-    public function a_locked_admin_is_not_blocked_from_the_overdue_list_itself(): void
+    public function a_locked_admin_can_open_the_quotation_creation_page_for_their_restricted_request(): void
     {
         $this->enableSlaFlag();
         $admin = User::factory()->create(['role' => 'admin']);
-        $this->restrictAdmin($admin);
+        $restricted = $this->restrictAdmin($admin);
 
         $this->actingAs($admin)
-            ->get($this->overdueRequestsList())
+            ->get(route('admin.quotations.create', ['sourcingRequest' => $restricted]))
             ->assertOk();
     }
 
@@ -186,18 +177,21 @@ class SlaNavigationLockTest extends TestCase
     }
 
     /** @test */
-    public function the_locked_sidebar_hides_non_workflow_links_and_shows_the_lock_banner(): void
+    public function the_locked_requests_page_hides_other_status_tabs_and_shows_the_lock_banner(): void
     {
         $this->enableSlaFlag();
         $admin = User::factory()->create(['role' => 'admin', 'name' => 'Locked Admin']);
-        $this->restrictAdmin($admin);
+        $restricted = $this->restrictAdmin($admin);
 
         $response = $this->actingAs($admin)
-            ->get($this->overdueRequestsList())
+            ->get(route('admin.sourcing-requests.index'))
             ->assertOk();
 
         $response->assertSee('Navigation restricted (SLA)');
-        $response->assertDontSee('/admin/quotations');
-        $response->assertDontSee('/admin/sourcing-orders');
+        $response->assertSee(route('admin.quotations.create', ['sourcingRequest' => $restricted]));
+        $response->assertDontSee('Quoted');
+        $response->assertDontSee('Negotiating');
+        $response->assertDontSee('Accepted');
+        $response->assertSee('In Review');
     }
 }
