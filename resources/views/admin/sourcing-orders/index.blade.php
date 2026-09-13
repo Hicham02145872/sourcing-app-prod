@@ -461,69 +461,25 @@
                                     <tr x-cloak x-show="expandedId === {{ $order->id }}" class="bg-slate-50 border-x border-slate-200 shadow-inner" wire:key="order-expanded-{{ $order->id }}">
                                         <td colspan="7" class="px-6 py-4 border-0">
                                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                                <!-- Photos -->
+                                                <!-- Colis -->
                                                 <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-                                                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">{{ __('Colis photos') }}</p>
-                                                    <div class="grid grid-cols-2 gap-3">
-                                                        @if($order->package_label_photo_path)
-                                                            <a href="{{ media_url($order->package_label_photo_path) }}" target="_blank" class="group">
-                                                                <img src="{{ media_url($order->package_label_photo_path) }}" alt="{{ __('Package label photo') }}" class="w-full h-24 object-cover rounded border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
-                                                                <p class="text-[10px] text-slate-400 mt-1">{{ __('Label') }}</p>
-                                                            </a>
-                                                        @else
-                                                            <div class="h-24 flex items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded">
-                                                                <span class="text-[10px] text-slate-400 italic">{{ __('No label photo') }}</span>
-                                                            </div>
-                                                        @endif
-                                                        @if($order->parcel_photo_path)
-                                                            <div>
-                                                                <a href="{{ media_url($order->parcel_photo_path) }}" target="_blank" class="group">
-                                                                    <img src="{{ media_url($order->parcel_photo_path) }}" alt="{{ __('Parcel photo') }}" class="w-full h-24 object-cover rounded border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
-                                                                    <p class="text-[10px] text-slate-400 mt-1">{{ __('Colis') }}</p>
-                                                                </a>
-                                                                @if (! is_null($order->parcel_weight_kg))
-                                                                    <p class="text-[10px] text-slate-500 mt-1">{{ __('Weight:') }} <span class="font-mono font-semibold">{{ number_format($order->parcel_weight_kg, 2) }} kg</span></p>
-                                                                @endif
-                                                            </div>
-                                                        @else
-                                                            <div class="h-24 flex items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded">
-                                                                <span class="text-[10px] text-slate-400 italic">{{ __('No colis photo') }}</span>
-                                                            </div>
-                                                        @endif
-                                                        @if($order->proof_of_payment_path)
-                                                            <a href="{{ route('admin.sourcing-orders.download-proof-of-payment', $order) }}" target="_blank" class="group">
-                                                                <img src="{{ media_url($order->proof_of_payment_path) }}" alt="{{ __('Payment proof') }}" class="w-full h-24 object-cover rounded border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
-                                                                <p class="text-[10px] text-slate-400 mt-1">{{ __('Proof') }}</p>
-                                                            </a>
-                                                        @endif
-                                                    </div>
+                                                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">{{ __('Colis') }}</p>
+                                                    @if($order->package_label_photo_path || $order->parcel_photo_path)
+                                                        @php $colisPhoto = $order->package_label_photo_path ?: $order->parcel_photo_path; @endphp
+                                                        <a href="{{ media_url($colisPhoto) }}" target="_blank" class="group">
+                                                            <img src="{{ media_url($colisPhoto) }}" alt="{{ __('Colis photo') }}" class="w-full h-24 object-cover rounded border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
+                                                        </a>
+                                                    @else
+                                                        <div class="h-24 flex items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded">
+                                                            <span class="text-[10px] text-slate-400 italic">{{ __('No colis photo') }}</span>
+                                                        </div>
+                                                    @endif
                                                 </div>
 
-                                                <!-- Tracking -->
+                                                <!-- Tracking (China) -->
                                                 <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-                                                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">{{ __('Tracking') }}</p>
-                                                    <dl class="space-y-2 text-xs">
-                                                        <div class="flex justify-between gap-2">
-                                                            <dt class="text-slate-500 font-semibold">{{ __('FSB number') }}</dt>
-                                                            <dd class="text-slate-900 font-mono font-bold">{{ $order->fsb_tracking_number }}</dd>
-                                                        </div>
-                                                        <div class="flex justify-between gap-2">
-                                                            <dt class="text-slate-500 font-semibold">{{ __('Local / real tracking') }}</dt>
-                                                            <dd class="text-slate-900 font-mono font-semibold">{{ $order->tracking_number ?: __('—') }}</dd>
-                                                        </div>
-                                                        <div class="flex justify-between gap-2">
-                                                            <dt class="text-slate-500 font-semibold">{{ __('Carrier') }}</dt>
-                                                            <dd class="text-slate-900 font-semibold">{{ $order->tracking_carrier ?: $order->shippingCompany?->name ?: __('—') }}</dd>
-                                                        </div>
-                                                        @if($order->hasMultipleDestinations())
-                                                            @foreach($order->destinationShipments as $ds)
-                                                                <div class="flex justify-between gap-2 border-t border-slate-100 pt-2">
-                                                                    <dt class="text-slate-500 font-semibold">{{ __('Destination') }}</dt>
-                                                                    <dd class="text-slate-900 font-mono font-semibold text-right">{{ $ds->tracking_number ?: __('—') }}</dd>
-                                                                </div>
-                                                            @endforeach
-                                                        @endif
-                                                    </dl>
+                                                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">{{ __('Local tracking (China)') }}</p>
+                                                    <p class="text-slate-900 font-mono font-semibold text-sm truncate">{{ $order->tracking_number ?: __('—') }}</p>
                                                 </div>
 
                                                 <!-- Status / Link -->
