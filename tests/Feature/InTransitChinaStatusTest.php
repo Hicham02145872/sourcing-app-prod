@@ -65,7 +65,7 @@ class InTransitChinaStatusTest extends TestCase
     }
 
     /** @test */
-    public function admin_can_save_china_tracking_and_label_photo_as_evidence(): void
+    public function admin_can_save_local_tracking_and_label_photo_as_evidence(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $client = User::factory()->create(['role' => 'client']);
@@ -74,7 +74,6 @@ class InTransitChinaStatusTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(SourcingOrderWorkflow::class, ['sourcingOrder' => $order])
-            ->set('chinaTrackingNumber', 'LP1234567890')
             ->set('tracking_number', 'ME49508327')
             ->set('tracking_carrier', 'Faster.ae')
             ->set('packageLabelPhoto', UploadedFile::fake()->image('label.jpg'))
@@ -83,7 +82,6 @@ class InTransitChinaStatusTest extends TestCase
             ->assertDispatched('show-success-toast');
 
         $order->refresh();
-        $this->assertSame('LP1234567890', $order->china_tracking_number);
         $this->assertSame('ME49508327', $order->tracking_number);
         $this->assertSame('Faster.ae', $order->tracking_carrier);
         $this->assertNotNull($order->package_label_photo_path);
@@ -101,19 +99,18 @@ class InTransitChinaStatusTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(SourcingOrderWorkflow::class, ['sourcingOrder' => $order])
-            ->set('chinaTrackingNumber', 'LP1234567890')
             ->set('packageLabelPhoto', UploadedFile::fake()->create('document.txt', 1))
             ->call('saveChinaTransitEvidence')
             ->assertHasErrors(['packageLabelPhoto']);
 
         $order->refresh();
-        $this->assertNull($order->china_tracking_number);
+        $this->assertNull($order->tracking_number);
         $this->assertNull($order->package_label_photo_path);
         $this->assertEmpty(Storage::disk('public')->allFiles('sourcing'));
     }
 
     /** @test */
-    public function evidence_can_be_saved_without_photo_when_china_tracking_known(): void
+    public function evidence_can_be_saved_without_photo_when_local_tracking_known(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $client = User::factory()->create(['role' => 'client']);
@@ -122,13 +119,13 @@ class InTransitChinaStatusTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(SourcingOrderWorkflow::class, ['sourcingOrder' => $order])
-            ->set('chinaTrackingNumber', 'LP9876543210')
+            ->set('tracking_number', 'ME49508327')
             ->call('saveChinaTransitEvidence')
             ->assertHasNoErrors()
             ->assertDispatched('show-success-toast');
 
         $order->refresh();
-        $this->assertSame('LP9876543210', $order->china_tracking_number);
+        $this->assertSame('ME49508327', $order->tracking_number);
         $this->assertNull($order->package_label_photo_path);
     }
 
@@ -143,11 +140,11 @@ class InTransitChinaStatusTest extends TestCase
 
         Livewire::actingAs($otherAdmin)
             ->test(SourcingOrderWorkflow::class, ['sourcingOrder' => $order])
-            ->set('chinaTrackingNumber', 'LP1234567890')
+            ->set('tracking_number', 'ME49508327')
             ->call('saveChinaTransitEvidence');
 
         $order->refresh();
-        $this->assertNull($order->china_tracking_number);
+        $this->assertNull($order->tracking_number);
     }
 
     /** @test */
@@ -161,14 +158,14 @@ class InTransitChinaStatusTest extends TestCase
 
         Livewire::actingAs($superAdmin)
             ->test(SourcingOrderWorkflow::class, ['sourcingOrder' => $order])
-            ->set('chinaTrackingNumber', 'LP555')
+            ->set('tracking_number', 'ME49508327')
             ->set('packageLabelPhoto', UploadedFile::fake()->image('label.jpg'))
             ->call('saveChinaTransitEvidence')
             ->assertHasNoErrors()
             ->assertDispatched('show-success-toast');
 
         $order->refresh();
-        $this->assertSame('LP555', $order->china_tracking_number);
+        $this->assertSame('ME49508327', $order->tracking_number);
         $this->assertNotNull($order->package_label_photo_path);
     }
 
@@ -197,7 +194,7 @@ class InTransitChinaStatusTest extends TestCase
     }
 
     /** @test */
-    public function client_never_sees_evidence_from_their_sourcing_request_page(): void
+    public function client_never_sees_internal_evidence_from_their_sourcing_request_page(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $client = User::factory()->create(['role' => 'client']);
@@ -206,12 +203,12 @@ class InTransitChinaStatusTest extends TestCase
 
         $order->update([
             'status' => 'in_transit_china',
-            'china_tracking_number' => 'LP1234567890',
+            'package_label_photo_path' => 'sourcing/in-transit/internal-colis-photo.jpg',
         ]);
 
         $this->actingAs($client)
             ->get(route('client.sourcing-requests.show', $request))
             ->assertOk()
-            ->assertDontSee('LP1234567890');
+            ->assertDontSee('internal-colis-photo.jpg');
     }
 }

@@ -119,15 +119,6 @@
                 <form wire:submit.prevent="saveChinaTransitEvidence" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="chinaTrackingNumber" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                                {{ __('China tracking number') }} <span class="text-slate-400 normal-case font-medium">({{ __('optional') }})</span>
-                            </label>
-                            <input type="text" wire:model.defer="chinaTrackingNumber" id="chinaTrackingNumber"
-                                   placeholder="Ex: LP001234567890"
-                                   class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white">
-                            @error('chinaTrackingNumber') <p class="mt-1 text-[10px] text-red-600">{{ $message }}</p> @enderror
-                        </div>
-                        <div>
                             <label for="evidence_tracking_number" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                                 {{ __('Local tracking number') }} <span class="text-slate-400 normal-case font-medium">({{ __('destination carrier') }})</span>
                             </label>
@@ -136,14 +127,8 @@
                                    class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white">
                         </div>
                         <div>
-                            <label for="evidence_tracking_carrier" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Tracking carrier') }}</label>
-                            <input type="text" wire:model.defer="tracking_carrier" id="evidence_tracking_carrier"
-                                   placeholder="Ex: Faster.ae, DHL..."
-                                   class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white">
-                        </div>
-                        <div>
                             <label for="packageLabelPhoto" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-                                {{ __('Package label photo') }} <span class="text-slate-400 normal-case font-medium">({{ __('optional') }})</span>
+                                {{ __('Colis photo') }}
                             </label>
                             <input type="file" wire:model="packageLabelPhoto" id="packageLabelPhoto"
                                    accept="image/jpeg,image/png,image/webp"
@@ -153,17 +138,17 @@
                         </div>
                     </div>
 
-                    @if ($sourcingOrder->package_label_photo_path || $sourcingOrder->china_tracking_number)
+                    @if ($sourcingOrder->package_label_photo_path || $sourcingOrder->tracking_number)
                         <div class="flex flex-wrap items-center gap-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
                             @if ($sourcingOrder->package_label_photo_path)
                                 <a href="{{ media_url($sourcingOrder->package_label_photo_path) }}" target="_blank" title="{{ __('View photo') }}">
-                                    <img src="{{ media_url($sourcingOrder->package_label_photo_path) }}" alt="{{ __('Package label photo') }}" class="w-24 h-18 object-cover rounded border border-slate-200">
+                                    <img src="{{ media_url($sourcingOrder->package_label_photo_path) }}" alt="{{ __('Colis photo') }}" class="w-24 h-18 object-cover rounded border border-slate-200">
                                 </a>
                             @endif
-                            @if ($sourcingOrder->china_tracking_number)
+                            @if ($sourcingOrder->tracking_number)
                                 <div>
-                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Saved China tracking') }}</p>
-                                    <p class="text-sm font-semibold text-slate-900 font-mono">{{ $sourcingOrder->china_tracking_number }}</p>
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Saved tracking') }}</p>
+                                    <p class="text-sm font-semibold text-slate-900 font-mono">{{ $sourcingOrder->tracking_number }}</p>
                                 </div>
                             @endif
                         </div>

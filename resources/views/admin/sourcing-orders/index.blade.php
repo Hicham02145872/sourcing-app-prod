@@ -476,10 +476,15 @@
                                                             </div>
                                                         @endif
                                                         @if($order->parcel_photo_path)
-                                                            <a href="{{ media_url($order->parcel_photo_path) }}" target="_blank" class="group">
-                                                                <img src="{{ media_url($order->parcel_photo_path) }}" alt="{{ __('Parcel photo') }}" class="w-full h-24 object-cover rounded border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
-                                                                <p class="text-[10px] text-slate-400 mt-1">{{ __('Colis') }}</p>
-                                                            </a>
+                                                            <div>
+                                                                <a href="{{ media_url($order->parcel_photo_path) }}" target="_blank" class="group">
+                                                                    <img src="{{ media_url($order->parcel_photo_path) }}" alt="{{ __('Parcel photo') }}" class="w-full h-24 object-cover rounded border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
+                                                                    <p class="text-[10px] text-slate-400 mt-1">{{ __('Colis') }}</p>
+                                                                </a>
+                                                                @if (! is_null($order->parcel_weight_kg))
+                                                                    <p class="text-[10px] text-slate-500 mt-1">{{ __('Weight:') }} <span class="font-mono font-semibold">{{ number_format($order->parcel_weight_kg, 2) }} kg</span></p>
+                                                                @endif
+                                                            </div>
                                                         @else
                                                             <div class="h-24 flex items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded">
                                                                 <span class="text-[10px] text-slate-400 italic">{{ __('No colis photo') }}</span>
@@ -501,10 +506,6 @@
                                                         <div class="flex justify-between gap-2">
                                                             <dt class="text-slate-500 font-semibold">{{ __('FSB number') }}</dt>
                                                             <dd class="text-slate-900 font-mono font-bold">{{ $order->fsb_tracking_number }}</dd>
-                                                        </div>
-                                                        <div class="flex justify-between gap-2">
-                                                            <dt class="text-slate-500 font-semibold">{{ __('China tracking') }}</dt>
-                                                            <dd class="text-slate-900 font-mono font-semibold">{{ $order->china_tracking_number ?: __('—') }}</dd>
                                                         </div>
                                                         <div class="flex justify-between gap-2">
                                                             <dt class="text-slate-500 font-semibold">{{ __('Local / real tracking') }}</dt>
@@ -537,7 +538,7 @@
                                                     @endif
                                                     @php
                                                         $hasPhoto = $order->package_label_photo_path || $order->parcel_photo_path;
-                                                        $hasTracking = $order->china_tracking_number || $order->tracking_number;
+                                                        $hasTracking = $order->tracking_number;
                                                     @endphp
                                                     @if($order->status === 'in_transit_china' && (!$hasPhoto || !$hasTracking))
                                                         <p class="mt-2 text-[10px] font-bold text-orange-600 flex items-center gap-1">

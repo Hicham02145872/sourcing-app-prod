@@ -29,8 +29,6 @@ class SourcingOrderWorkflow extends Component
 
     public ?int $shipping_company_id = null;
 
-    public string $chinaTrackingNumber = '';
-
     public $packageLabelPhoto;
 
     public bool $showEvidenceZone = false;
@@ -50,7 +48,6 @@ class SourcingOrderWorkflow extends Component
         $this->tracking_number = $sourcingOrder->tracking_number;
         $this->tracking_carrier = $sourcingOrder->tracking_carrier;
         $this->shipping_company_id = $sourcingOrder->shipping_company_id;
-        $this->chinaTrackingNumber = $sourcingOrder->china_tracking_number ?? '';
         $this->showEvidenceZone = in_array($sourcingOrder->status, ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']);
 
         if ($this->sourcingOrder->hasMultipleDestinations()) {
@@ -161,20 +158,16 @@ class SourcingOrderWorkflow extends Component
             return;
         }
 
-        $this->chinaTrackingNumber = trim((string) $this->chinaTrackingNumber);
         $this->tracking_number = trim((string) $this->tracking_number);
         $this->tracking_carrier = trim((string) $this->tracking_carrier);
 
         $this->validate([
             'tracking_number' => ['nullable', 'string', 'max:255'],
-            'chinaTrackingNumber' => ['nullable', 'string', 'max:255'],
             'packageLabelPhoto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         try {
-            $updateData = [
-                'china_tracking_number' => $this->chinaTrackingNumber ?: null,
-            ];
+            $updateData = [];
 
             if ($this->packageLabelPhoto) {
                 $photo = app(ImageProcessingService::class)->compressAndStore($this->packageLabelPhoto, 'sourcing/in-transit');
