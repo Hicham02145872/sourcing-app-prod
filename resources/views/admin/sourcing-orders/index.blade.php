@@ -285,10 +285,14 @@
                                 @foreach ($sourcingOrders as $order)
                                     <tr class="hover:bg-slate-50 transition-colors cursor-pointer"
                                         @click="expandedId = (expandedId === {{ $order->id }} ? null : {{ $order->id }});"
+                                        title="{{ __('Click to expand order details') }}"
                                         wire:key="order-row-{{ $order->id }}">
                                         <!-- Order Info -->
                                         <td class="px-6 py-3 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
+                                                <svg class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200"
+                                                     x-bind:class="expandedId === {{ $order->id }} ? 'rotate-90' : ''"
+                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                                 <div class="h-8 w-8 rounded bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 text-xs font-mono">
                                                     {{ $order->reference_id }}
                                                 </div>
