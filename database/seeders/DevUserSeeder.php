@@ -22,5 +22,15 @@ class DevUserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        User::updateOrCreate(
+            ['email' => 'nadatayebiios@gmail.com'],
+            [
+                'name' => 'Nada Dev',
+                'password' => Hash::make('nadatayebiios@gmail.com'),
+                'role' => 'developer',
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }
