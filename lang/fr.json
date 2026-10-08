@@ -1704,5 +1704,8 @@
     "Visible on banner": "Visible sur le bandeau",
     "Upcoming": "À venir",
     "Expired": "Expirée",
-    "Period": "Période"
+    "Period": "Période",
+    "Today": "Aujourd'hui",
+    "Ends today": "Se termine aujourd'hui",
+    "Ends tomorrow": "Se termine demain"
 }

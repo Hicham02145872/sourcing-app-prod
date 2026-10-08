@@ -1031,5 +1031,8 @@
     "Upcoming": "قادم",
     "Expired": "منتهي",
     "Period": "الفترة",
-    "Inactive": "غير نشط"
+    "Inactive": "غير نشط",
+    "Today": "اليوم",
+    "Ends today": "ينتهي اليوم",
+    "Ends tomorrow": "ينتهي غدًا"
 }
