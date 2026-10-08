@@ -50,6 +50,7 @@ class AutoUpdateOrderStatusFromTracking
         $eligibleStatuses = [
             'shipment_preparing',
             'in_transit_china',
+            'in_air_cargo',
             'arrival_uae',
             'customs_clearance_uae',
             'in_transit_uae',
@@ -223,7 +224,7 @@ class AutoUpdateOrderStatusFromTracking
         }
 
         $eligibleStatuses = [
-            'paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae',
+            'paid', 'shipment_preparing', 'in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae',
             'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery',
         ];
         if (! in_array($order->status, $eligibleStatuses)) {

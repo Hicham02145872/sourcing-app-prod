@@ -10,7 +10,7 @@
                     </span>
                     <div>
                         <h1 class="text-lg font-bold text-slate-900">{{ __('Admin Performance Analytics') }}</h1>
-                        <p class="text-xs text-slate-500">{{ __('Workload distribution by admin') }}</p>
+                        <p class="text-xs text-slate-500">{{ auth()->user()?->isSuperAdmin() ? __('Workload distribution by admin') : __('Your own orders') }}</p>
                     </div>
                 </div>
                 <span class="inline-flex items-center px-2 py-1 rounded bg-slate-800 text-slate-300 text-[10px] font-bold uppercase tracking-wider">{{ __('Real Time') }}</span>
@@ -19,6 +19,38 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        {{-- Date Range Filter --}}
+        <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">{{ __('Date Range') }}</p>
+                <p class="text-xs text-slate-500">
+                    {{ __('Filter by status change date') }}
+                    @if($dateFrom || $dateTo)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-orange-50 text-orange-700 font-semibold border border-orange-100 ml-1">{{ __('Filtered') }}</span>
+                    @else
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-semibold border border-slate-200 ml-1">{{ __('All time') }}</span>
+                    @endif
+                </p>
+            </div>
+            <div class="flex flex-wrap items-end gap-3">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">{{ __('From') }}</label>
+                    <input type="date" wire:model.live="dateFrom"
+                           class="px-3 py-2 border border-slate-300 rounded text-sm bg-slate-50 focus:ring-1 focus:ring-slate-900 focus:border-slate-900" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">{{ __('To') }}</label>
+                    <input type="date" wire:model.live="dateTo"
+                           class="px-3 py-2 border border-slate-300 rounded text-sm bg-slate-50 focus:ring-1 focus:ring-slate-900 focus:border-slate-900" />
+                </div>
+                <button type="button" wire:click="resetDates"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-md transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    {{ __('Clear') }}
+                </button>
+            </div>
+        </div>
 
         @if(count($metrics) === 0)
             <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-12 text-center">
@@ -29,12 +61,13 @@
             </div>
         @else
             <!-- KPI Summary Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                 @php
                     $totalAll = collect($metrics)->sum('total');
                     $totalPaid = collect($metrics)->sum('paid');
                     $totalTransit = collect($metrics)->sum('transit');
                     $totalDelivered = collect($metrics)->sum('delivered');
+                    $totalEvidence = collect($metrics)->sum('evidence_complete');
                 @endphp
                 <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-orange-300 transition-all duration-200 group">
                     <div class="flex justify-between items-start">
@@ -95,6 +128,21 @@
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>{{ __('Successfully completed') }}
                     </div>
                 </div>
+
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-violet-300 transition-all duration-200 group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ __('Order Completed') }}</p>
+                            <h3 class="mt-1 text-2xl font-bold text-slate-900">{{ number_format($totalEvidence) }}</h3>
+                        </div>
+                        <div class="p-2 bg-violet-50 text-violet-600 rounded-lg group-hover:bg-violet-600 group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center text-xs text-slate-400">
+                        <span class="w-1.5 h-1.5 rounded-full bg-violet-500 mr-2"></span>{{ __('Evidence provided (photo + China tracking)') }}
+                    </div>
+                </div>
             </div>
 
             <!-- Performance Table -->
@@ -128,6 +176,7 @@
                                 <th class="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ __('Paid') }}</th>
                                 <th class="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ __('In Transit') }}</th>
                                 <th class="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ __('Delivered') }}</th>
+                                <th class="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ __('Order Completed') }}</th>
                                 <th class="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ __('Issues') }}</th>
                                 <th class="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ __('Refund') }}</th>
                                 <th class="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ __('Total') }}</th>
@@ -168,6 +217,13 @@
                                     <td class="px-6 py-4 text-sm text-right">
                                         @if($row['delivered'] > 0)
                                             <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100">{{ $row['delivered'] }}</span>
+                                        @else
+                                            <span class="text-slate-400">0</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-right">
+                                        @if(($row['evidence_complete'] ?? 0) > 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded bg-violet-50 text-violet-700 font-semibold border border-violet-100">{{ $row['evidence_complete'] }}</span>
                                         @else
                                             <span class="text-slate-400">0</span>
                                         @endif

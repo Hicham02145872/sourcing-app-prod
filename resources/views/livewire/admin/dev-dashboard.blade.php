@@ -96,6 +96,7 @@
                     'flags' => 'Feature Flags',
                     'scheduler' => 'Scheduler',
                     'shortcuts' => 'Artisan',
+                    'sla' => 'SLA Simulator',
                     'webhooks' => 'Webhooks',
                 ],
                 'Security' => [
@@ -237,6 +238,57 @@
                             @endforeach
                         </div>
                     </section>
+                </div>
+            @endif
+
+            @if($activeTab === 'sla')
+                <div class="space-y-8">
+                    <div class="border-b border-slate-300 pb-6 space-y-3">
+                        <h2 class="text-lg font-black text-slate-900 uppercase tracking-tighter">SLA Simulator</h2>
+                        <p class="text-[10px] text-slate-500 font-bold leading-relaxed">
+                            Vieillit le compteur <code class="bg-slate-100 px-1">status_changed_at</code> d'une demande/commande au-delà de son délai SLA,
+                            puis exécute la vraie commande production
+                            <code class="bg-slate-100 px-1">workflow:check-deadlines</code> (verrou navigation admin + notification admin / escalation super admin).
+                            Règles : <code class="bg-slate-100 px-1">config/fsb.php</code>.
+                        </p>
+                        @if($lastSlaOutput)
+                            <pre class="bg-slate-900 text-emerald-300 text-[10px] p-3 overflow-x-auto font-mono leading-relaxed">{{ $lastSlaOutput }}</pre>
+                        @endif
+                    </div>
+
+                    @foreach([
+                        ['title' => 'Sourcing Requests', 'rows' => $slaTrackedRequests, 'type' => 'request'],
+                        ['title' => 'Sourcing Orders', 'rows' => $slaTrackedOrders, 'type' => 'order'],
+                    ] as $section)
+                        <section>
+                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{{ $section['title'] }}</h3>
+                            <div class="bg-white border border-slate-200 divide-y divide-slate-100">
+                                @forelse($section['rows'] as $row)
+                                    <div class="p-4 flex flex-wrap items-center gap-3">
+                                        <span class="text-xs font-black text-slate-900 w-28 font-mono">{{ $row['reference'] }}</span>
+                                        <span class="text-[10px] text-slate-500 w-32 truncate">{{ $row['client'] }}</span>
+                                        <span class="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-700 font-black uppercase">{{ $row['status'] }}</span>
+                                        <span class="text-[10px] font-bold text-slate-500">deadline {{ $row['hours'] }}h · depuis <span class="font-mono">{{ $row['since'] }}</span></span>
+                                        @if($row['restricted'])
+                                            <span class="px-2 py-0.5 text-[9px] font-black uppercase bg-rose-100 text-rose-800">Overdue / Restricted</span>
+                                        @else
+                                            <span class="px-2 py-0.5 text-[9px] font-black uppercase bg-emerald-100 text-emerald-800">OK</span>
+                                        @endif
+                                        <div class="ml-auto flex gap-2">
+                                            <button wire:click="slaReset('{{ $section['type'] }}', {{ $row['id'] }})" class="px-3 py-1.5 border border-slate-200 text-slate-900 text-[9px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-none">
+                                                Lever
+                                            </button>
+                                            <button wire:click="slaSimulate('{{ $section['type'] }}', {{ $row['id'] }})" class="px-3 py-1.5 bg-rose-600 text-white text-[9px] font-black uppercase tracking-widest transition-none">
+                                                Simuler SLA dépassé
+                                            </button>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="p-6 text-center text-slate-400 text-xs uppercase font-bold tracking-widest">Aucun dossier dans un statut soumis au SLA</div>
+                                @endforelse
+                            </div>
+                        </section>
+                    @endforeach
                 </div>
             @endif
 
@@ -1779,6 +1831,7 @@
                                             'paid' => 'bg-emerald-100 text-emerald-800',
                                             'shipment_preparing' => 'bg-blue-100 text-blue-800',
                                             'in_transit_china' => 'bg-indigo-100 text-indigo-800',
+                                            'in_air_cargo' => 'bg-blue-100 text-blue-800',
                                             'arrival_uae' => 'bg-purple-100 text-purple-800',
                                             'customs_clearance_uae' => 'bg-violet-100 text-violet-800',
                                             'in_transit_uae' => 'bg-sky-100 text-sky-800',
@@ -1862,7 +1915,7 @@
                                 <div class="flex justify-between">
                                     <span class="text-[10px] font-bold text-slate-400 uppercase">In Transit</span>
                                     <span class="text-[10px] font-mono font-bold text-blue-600">
-                                        {{ $statusAudit->whereIn('status', ['in_transit_china', 'in_transit_uae', 'out_for_delivery'])->count() }}
+                                        {{ $statusAudit->whereIn('status', ['in_transit_china', 'in_air_cargo', 'in_transit_uae', 'out_for_delivery'])->count() }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between">

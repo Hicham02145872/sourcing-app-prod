@@ -310,6 +310,9 @@
                                     $initialAmount = $subtotal + $sourcingRequest->quotation->commission_service + $sourcingRequest->quotation->delivery_cost_china;
                                 }
                             }
+                            $hasQualityOptions = $sourcingRequest->quotation
+                                && $sourcingRequest->quotation->quality_options
+                                && count(array_filter($sourcingRequest->quotation->quality_options, fn ($opt) => !empty($opt['price']))) > 0;
                         @endphp
                         <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-[#EBEBEB] dark:border-slate-700 overflow-hidden">
                             {{-- Header --}}
@@ -573,30 +576,41 @@
                                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                     @foreach(['low' => __('Low Quality'), 'medium' => __('Medium Quality'), 'good' => __('Good Quality')] as $key => $label)
                                                         @if(!empty($sourcingRequest->quotation->quality_options[$key]['price']))
-                                                            @php 
-                                                                $opt = $sourcingRequest->quotation->quality_options[$key]; 
-                                                            @endphp
+@php
+                                                                 $opt = $sourcingRequest->quotation->quality_options[$key];
+                                                                 $mediaList = [];
+                                                                 if (!empty($opt['image_path'])) {
+                                                                     $mediaList[] = $opt['image_path'];
+                                                                 }
+                                                                 foreach (($opt['image_paths'] ?? []) as $extraMediaPath) {
+                                                                     if (!empty($extraMediaPath) && !in_array($extraMediaPath, $mediaList, true)) {
+                                                                         $mediaList[] = $extraMediaPath;
+                                                                     }
+                                                                 }
+                                                                 $mainMedia = $mediaList[0] ?? null;
+                                                                 $mediaVideoExtensions = ['mp4', 'mov', 'avi', 'webm'];
+                                                             @endphp
                                                              <label class="relative flex flex-col border-2 rounded-xl p-4 cursor-pointer focus:outline-none transition-all hover:border-[#EF7722]/50 shadow-sm overflow-hidden"
-                                                                    :class="selectedQuality === '{{ $key }}' ? 'border-[#EF7722] bg-[#EF7722]' : 'border-[#EBEBEB] dark:border-slate-700 bg-white dark:bg-slate-800'">
+                                                                    :class="selectedQuality === '{{ $key }}' ? 'border-[#EF7722] bg-[#EF7722]/10 ring-2 ring-[#EF7722]/40 shadow-md' : 'border-[#EBEBEB] dark:border-slate-700 bg-white dark:bg-slate-800'">
                                                                  <input type="radio" name="quality_selector" value="{{ $key }}" class="sr-only" 
                                                                         :checked="selectedQuality === '{{ $key }}'"
                                                                         @change="selectedQuality = '{{ $key }}'; document.querySelectorAll('.selected-quality-input').forEach(i => i.value = '{{ $key }}')">
 
                                                                  {{-- Selected checkmark badge --}}
                                                                  <div x-show="selectedQuality === '{{ $key }}'" 
-                                                                      class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md z-10">
-                                                                     <svg class="w-4 h-4 text-[#EF7722]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                      class="absolute top-2 right-2 w-6 h-6 bg-[#EF7722] rounded-full flex items-center justify-center shadow-md z-10">
+                                                                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                                                                      </svg>
                                                                  </div>
 
                                                                  {{-- Image/Video preview --}}
                                                                  <div class="aspect-video w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 mb-3 border border-slate-100 dark:border-slate-600 flex items-center justify-center">
-                                                                     @if(!empty($opt['image_path']))
-                                                                         @php $optExt = strtolower(pathinfo($opt['image_path'], PATHINFO_EXTENSION)); @endphp
-                                                                         @if(in_array($optExt, ['mp4', 'mov', 'avi', 'webm']))
+                                                                     @if(!empty($mainMedia))
+                                                                         @php $optExt = strtolower(pathinfo($mainMedia, PATHINFO_EXTENSION)); @endphp
+                                                                         @if(in_array($optExt, $mediaVideoExtensions))
                                                                              <div class="relative w-full h-full">
-                                                                                 <video src="{{ media_url($opt['image_path']) }}" 
+                                                                                 <video src="{{ media_url($mainMedia) }}" 
                                                                                         class="w-full h-full object-cover"
                                                                                         controls
                                                                                         preload="metadata">
@@ -610,7 +624,7 @@
                                                                                  </div>
                                                                              </div>
                                                                          @else
-                                                                             <img src="{{ media_url($opt['image_path']) }}" alt="{{ $label }}" class="w-full h-full object-cover cursor-pointer" onclick="openMediaModal(this.src, 'image')">
+                                                                             <img src="{{ media_url($mainMedia) }}" alt="{{ $label }}" class="w-full h-full object-cover cursor-pointer" onclick="openMediaModal(this.src, 'image')">
                                                                          @endif
                                                                      @else
                                                                          <div class="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900/50">
@@ -621,27 +635,44 @@
                                                                      @endif
                                                                  </div>
 
+
+                                                                 {{-- Additional media gallery (1-3 photos/videos) --}}
+                                                                 @if(count($mediaList) > 1)
+                                                                     <div class="flex gap-1.5 mb-3 overflow-x-auto pb-0.5">
+                                                                         @foreach($mediaList as $mediaIndex => $mediaPath)
+                                                                             @php $thumbIsVideo = in_array(strtolower(pathinfo($mediaPath, PATHINFO_EXTENSION)), $mediaVideoExtensions); @endphp
+                                                                             <button type="button"
+                                                                                     onclick="openMediaModal('{{ media_url($mediaPath) }}', '{{ $thumbIsVideo ? 'video' : 'image' }}')"
+                                                                                     title="{{ $label }} — {{ __('Media') }} {{ $mediaIndex + 1 }}"
+                                                                                     class="relative w-10 h-10 rounded-md overflow-hidden border {{ $mediaIndex === 0 ? 'border-[#EF7722]' : 'border-slate-200 dark:border-slate-600' }} bg-slate-100 dark:bg-slate-700 flex-shrink-0 group/thumb">
+                                                                                 @if($thumbIsVideo)
+                                                                                     <video src="{{ media_url($mediaPath) }}" class="w-full h-full object-cover" muted preload="metadata"></video>
+                                                                                     <span class="absolute inset-0 flex items-center justify-center bg-black/30">
+                                                                                         <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                                                     </span>
+                                                                                 @else
+                                                                                     <img src="{{ media_url($mediaPath) }}" alt="{{ $label }} {{ $mediaIndex + 1 }}" class="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform">
+                                                                                 @endif
+                                                                             </button>
+                                                                         @endforeach
+                                                                     </div>
+                                                                 @endif
                                                                  {{-- Label & Price --}}
                                                                  <div class="flex flex-col mt-auto">
-                                                                     <span class="block text-sm font-black transition-colors"
-                                                                           :class="selectedQuality === '{{ $key }}' ? 'text-white' : 'text-slate-900 dark:text-white'">{{ $label }}</span>
+                                                                     <span class="block text-sm font-black text-slate-900 dark:text-white transition-colors">{{ $label }}</span>
                                                                      <div class="flex justify-between items-end mt-2">
-                                                                         <span class="text-xs font-semibold transition-colors"
-                                                                               :class="selectedQuality === '{{ $key }}' ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'">
+                                                                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 transition-colors">
                                                                              {{ __('Unit Price') }}
                                                                          </span>
-                                                                         <span class="text-sm font-extrabold transition-colors"
-                                                                               :class="selectedQuality === '{{ $key }}' ? 'text-white' : 'text-[#EF7722]'">
+                                                                         <span class="text-sm font-extrabold text-[#EF7722] transition-colors">
                                                                              {{ number_format($opt['price'], 2) }} {{ $sourcingRequest->quotation->currency }}
                                                                          </span>
                                                                      </div>
                                                                      <div class="flex justify-between items-end mt-1.5">
-                                                                         <span class="text-xs font-semibold transition-colors"
-                                                                               :class="selectedQuality === '{{ $key }}' ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'">
+                                                                         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 transition-colors">
                                                                              {{ __('Weight') }}
                                                                          </span>
-                                                                         <span class="text-sm font-extrabold transition-colors"
-                                                                               :class="selectedQuality === '{{ $key }}' ? 'text-white' : 'text-slate-700 dark:text-slate-200'">
+                                                                         <span class="text-sm font-extrabold text-slate-700 dark:text-slate-200 transition-colors">
                                                                              @if(!empty($opt['weight']))
                                                                                  {{ number_format((float)$opt['weight'], 2) }} {{ $opt['weight_unit'] ?? 'g' }}
                                                                              @else
@@ -654,6 +685,28 @@
                                                         @endif
                                                     @endforeach
                                                 </div>
+                                            </div>
+                                        @endif
+
+                                        {{-- Live summary: current quality choice, right above the action area --}}
+                                        @if($hasQualityOptions)
+                                            <div class="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-3 bg-[#EF7722]/5 border border-[#EF7722]/30 rounded-lg">
+                                                <svg class="w-5 h-5 text-[#EF7722] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">{{ __('Selected quality') }}:</span>
+                                                <span class="text-sm font-bold text-slate-900 dark:text-white"
+                                                      x-text="{{ \Illuminate\Support\Js::from(['low' => __('Low Quality'), 'medium' => __('Medium Quality'), 'good' => __('Good Quality')]) }}[selectedQuality]">{{ $firstQuality ? (['low' => __('Low Quality'), 'medium' => __('Medium Quality'), 'good' => __('Good Quality')][$firstQuality] ?? '') : '' }}</span>
+                                                <span class="text-slate-400 dark:text-slate-500" aria-hidden="true">·</span>
+                                                <span class="text-sm font-bold text-slate-900 dark:text-white" x-text="(qualityPrices[selectedQuality] ?? 0).toFixed(2)">{{ $initialUnitPrice !== null ? number_format((float) $initialUnitPrice, 2) : '0.00' }}</span>
+                                                <span class="text-sm text-slate-500 dark:text-slate-400">{{ $sourcingRequest->quotation->currency }} / {{ __('Unit Price') }}</span>
+                                            </div>
+                                        @else
+                                            <div class="mb-4 flex items-center gap-2 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-dashed border-[#EBEBEB] dark:border-slate-700 rounded-lg">
+                                                <svg class="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('This quotation includes a single standard quality.') }}</p>
                                             </div>
                                         @endif
 

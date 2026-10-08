@@ -34,7 +34,7 @@ class SourcingOrderController extends Controller
     public function index(Request $request): View
     {
         $this->authorize('viewAny', SourcingOrder::class);
-        $query = SourcingOrder::with('user', 'quotation.sourcingRequest', 'quotation.media', 'media', 'assignedAdmin');
+        $query = SourcingOrder::with('user', 'quotation.sourcingRequest', 'quotation.sourcingRequest.destinations.country', 'destinationShipments', 'quotation.media', 'media', 'assignedAdmin');
 
         // Scope visibility: Regular admins now see ALL orders (read-only for others)
         // Apply admin-priority ordering first so it is a secondary key after pending_payment prioritization
@@ -53,52 +53,61 @@ class SourcingOrderController extends Controller
                 WHEN sourcing_orders.status = 'paid' THEN 1
                 WHEN sourcing_orders.status = 'shipment_preparing' THEN 2
                 WHEN sourcing_orders.status = 'in_transit_china' THEN 3
-                WHEN sourcing_orders.status = 'arrival_uae' THEN 4
-                WHEN sourcing_orders.status = 'customs_clearance_uae' THEN 5
-                WHEN sourcing_orders.status = 'in_transit_uae' THEN 6
-                WHEN sourcing_orders.status = 'arrival_destination_country' THEN 7
-                WHEN sourcing_orders.status = 'customs_clearance_destination_country' THEN 8
-                WHEN sourcing_orders.status = 'out_for_delivery' THEN 9
-                WHEN sourcing_orders.status = 'delivered' THEN 10
-                WHEN sourcing_orders.status = 'order_completed' THEN 11
-                WHEN sourcing_orders.status = 'delivery_failed' THEN 12
-                WHEN sourcing_orders.status = 'shipment_delayed' THEN 13
-                WHEN sourcing_orders.status = 'shipment_returned' THEN 14
-                WHEN sourcing_orders.status = 'shipment_canceled' THEN 15
-                WHEN sourcing_orders.status = 'waiting_for_refund' THEN 16
-                WHEN sourcing_orders.status = 'refund_approved' THEN 17
-                WHEN sourcing_orders.status = 'refunded' THEN 18
-                WHEN sourcing_orders.status = 'refund_rejected' THEN 19
+                WHEN sourcing_orders.status = 'in_air_cargo' THEN 4
+                WHEN sourcing_orders.status = 'arrival_uae' THEN 5
+                WHEN sourcing_orders.status = 'customs_clearance_uae' THEN 6
+                WHEN sourcing_orders.status = 'in_transit_uae' THEN 7
+                WHEN sourcing_orders.status = 'arrival_destination_country' THEN 8
+                WHEN sourcing_orders.status = 'customs_clearance_destination_country' THEN 9
+                WHEN sourcing_orders.status = 'out_for_delivery' THEN 10
+                WHEN sourcing_orders.status = 'delivered' THEN 11
+                WHEN sourcing_orders.status = 'order_completed' THEN 12
+                WHEN sourcing_orders.status = 'delivery_failed' THEN 13
+                WHEN sourcing_orders.status = 'shipment_delayed' THEN 14
+                WHEN sourcing_orders.status = 'shipment_returned' THEN 15
+                WHEN sourcing_orders.status = 'shipment_canceled' THEN 16
+                WHEN sourcing_orders.status = 'waiting_for_refund' THEN 17
+                WHEN sourcing_orders.status = 'refund_approved' THEN 18
+                WHEN sourcing_orders.status = 'refunded' THEN 19
+                WHEN sourcing_orders.status = 'refund_rejected' THEN 20
                 ELSE 999
             END")
             ->orderBy('id', 'desc');
 
         // Filter by search term
         if ($search = $request->query('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('id', 'like', '%'.$search.'%')
-                    ->orWhere('shared_id', 'like', '%'.$search.'%')
-                    ->orWhere('sourcing_request_id', 'like', '%'.$search.'%')
-                    ->orWhere('quotation_id', 'like', '%'.$search.'%')
-                    ->orWhereRaw('CAST((sourcing_orders.id * 5) AS CHAR) LIKE ?', ['%'.$search.'%'])
-                    ->orWhereHas('user', function ($userQuery) use ($search) {
-                        $userQuery->where('name', 'like', '%'.$search.'%')
-                            ->orWhere('email', 'like', '%'.$search.'%');
-                    })
-                    ->orWhereHas('quotation.sourcingRequest', function ($srQuery) use ($search) {
-                        $srQuery->where('product_name', 'like', '%'.$search.'%')
-                            ->orWhere('id', 'like', '%'.$search.'%')
-                            ->orWhere('note', 'like', '%'.$search.'%')
-                            ->orWhereHas('destinations', function ($destQuery) use ($search) {
-                                $destQuery->where('address', 'like', '%'.$search.'%')
-                                    ->orWhereHas('country', function ($countryQuery) use ($search) {
-                                        $countryQuery->where('name', 'like', '%'.$search.'%');
-                                    });
-                            });
-                    })
-                    ->orWhereHas('assignedAdmin', function ($adminQuery) use ($search) {
-                        $adminQuery->where('name', 'like', '%'.$search.'%');
-                    });
+            $fsbResolvedOrder = preg_match('/^(?:FSB|SB)\d{4,6}$/i', trim($search))
+                ? \App\Models\SourcingOrder::resolveFsbNumberToOrder(trim($search))
+                : null;
+            $query->where(function ($q) use ($search, $fsbResolvedOrder) {
+                $q->where(function ($q2) use ($search) {
+                    $q2->where('id', 'like', '%'.$search.'%')
+                        ->orWhere('shared_id', 'like', '%'.$search.'%')
+                        ->orWhere('sourcing_request_id', 'like', '%'.$search.'%')
+                        ->orWhere('quotation_id', 'like', '%'.$search.'%')
+                        ->orWhereRaw('CAST((sourcing_orders.id * 5) AS CHAR) LIKE ?', ['%'.$search.'%']);
+                });
+                if ($fsbResolvedOrder) {
+                    $q->orWhere('sourcing_orders.id', $fsbResolvedOrder->id);
+                }
+                $q->orWhereHas('user', function ($userQuery) use ($search) {
+                    $userQuery->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%');
+                });
+                $q->orWhereHas('quotation.sourcingRequest', function ($srQuery) use ($search) {
+                    $srQuery->where('product_name', 'like', '%'.$search.'%')
+                        ->orWhere('id', 'like', '%'.$search.'%')
+                        ->orWhere('note', 'like', '%'.$search.'%')
+                        ->orWhereHas('destinations', function ($destQuery) use ($search) {
+                            $destQuery->where('address', 'like', '%'.$search.'%')
+                                ->orWhereHas('country', function ($countryQuery) use ($search) {
+                                    $countryQuery->where('name', 'like', '%'.$search.'%');
+                                });
+                        });
+                });
+                $q->orWhereHas('assignedAdmin', function ($adminQuery) use ($search) {
+                    $adminQuery->where('name', 'like', '%'.$search.'%');
+                });
             });
         }
 
@@ -412,6 +421,18 @@ class SourcingOrderController extends Controller
             ]);
 
             return back()->withErrors(['status' => 'Invalid status transition from '.$sourcingOrder->status.' to '.$validated['status'].'.']);
+        }
+
+        // In-transit SLA: advancing to the next status no longer satisfies the
+        // deadline — evidence (China tracking + parcel photo) is required first.
+        if ($sourcingOrder->isChinaAdvanceBlocked($validated['status'])) {
+            return back()->withErrors(['status' => __('sla.china_advance_blocked')]);
+        }
+
+        // On-cargo gate: In Transit (China) → In Air Cargo requires the parcel
+        // photo(s) and China tracking to be entered first (all destinations).
+        if ($sourcingOrder->isOnCargoAdvanceBlocked($validated['status'])) {
+            return back()->withErrors(['status' => __('order.on_cargo_evidence_required')]);
         }
 
         try {

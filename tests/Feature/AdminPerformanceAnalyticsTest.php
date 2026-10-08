@@ -133,4 +133,81 @@ class AdminPerformanceAnalyticsTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_evidence_complete_counts_orders_with_tracking_and_photo(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        SourcingOrder::factory()->create([
+            'assigned_to_admin_id' => $admin->id,
+            'status' => 'in_transit_china',
+            'tracking_number' => 'CN123',
+            'package_label_photo_path' => 'sourcing/in-transit/label.png',
+        ]);
+        SourcingOrder::factory()->create([
+            'assigned_to_admin_id' => $admin->id,
+            'status' => 'in_transit_china',
+            'tracking_number' => 'CN456',
+            'parcel_photo_path' => 'sourcing/in-transit/parcel.jpg',
+        ]);
+        // tracking only → not completed
+        SourcingOrder::factory()->create([
+            'assigned_to_admin_id' => $admin->id,
+            'status' => 'paid',
+            'tracking_number' => 'CN789',
+        ]);
+        // photo only → not completed
+        SourcingOrder::factory()->create([
+            'assigned_to_admin_id' => $admin->id,
+            'status' => 'paid',
+            'package_label_photo_path' => 'sourcing/in-transit/label2.png',
+        ]);
+
+        $component = Livewire::actingAs($this->superAdmin)
+            ->test(\App\Livewire\Admin\AdminPerformanceAnalytics::class);
+
+        $metric = collect($component->get('metrics'))->firstWhere('admin_id', $admin->id);
+        $this->assertEquals(2, $metric['evidence_complete']);
+    }
+
+    public function test_admin_sees_only_own_orders(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $other = User::factory()->create(['role' => 'admin']);
+
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => $admin->id, 'status' => 'paid']);
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => $other->id, 'status' => 'paid']);
+        SourcingOrder::factory()->create(['assigned_to_admin_id' => null, 'status' => 'paid']);
+
+        $component = Livewire::actingAs($admin)
+            ->test(\App\Livewire\Admin\AdminPerformanceAnalytics::class);
+
+        $metrics = $component->get('metrics');
+        $this->assertCount(1, $metrics);
+        $this->assertEquals($admin->id, $metrics[0]['admin_id']);
+        $this->assertEquals(1, $metrics[0]['total']);
+    }
+
+    public function test_my_performance_route_visible_to_regular_admin(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->get(route('admin.analytics.my-performance'));
+
+        $response->assertStatus(200);
+    }
+
+    public function test_my_performance_route_hidden_when_feature_flag_disabled(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        \App\Models\FeatureFlag::query()->updateOrCreate(
+            ['key' => 'admin_performance_analytics'],
+            ['name' => 'Admin Performance Analytics', 'status' => 'hidden']
+        );
+        Cache::forget('feature_flag_admin_performance_analytics');
+
+        $response = $this->actingAs($admin)->get(route('admin.analytics.my-performance'));
+
+        $response->assertStatus(404);
+    }
 }

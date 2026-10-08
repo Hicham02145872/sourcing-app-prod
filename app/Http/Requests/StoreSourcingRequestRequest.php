@@ -63,6 +63,7 @@ class StoreSourcingRequestRequest extends FormRequest
             'destinations.*.service_id' => 'required|exists:services,id',
             'destinations.*.quantity' => 'required|integer|min:1',
             'destinations.*.address' => 'required|string|max:255',
+            'destinations.*.sourcing_location' => 'nullable|string|in:china,dubai',
         ];
     }
 

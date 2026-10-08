@@ -39,6 +39,8 @@
             </div>
         </div>
 
+        @include('admin.partials.workflow-alert-banner')
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <form id="quotation-edit-form" method="POST" action="{{ route('admin.quotations.update', $quotation) }}" enctype="multipart/form-data">
                 @csrf

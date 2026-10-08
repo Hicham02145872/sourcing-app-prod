@@ -29,6 +29,7 @@ class NotificationController extends Controller
             'paid'                                  => __('Paid'),
             'shipment_preparing'                    => __('Shipment Preparing'),
             'in_transit_china'                      => __('In Transit (Departure from China)'),
+            'in_air_cargo'                          => __('In Air Cargo'),
             'arrival_uae'                           => __('Arrival in UAE'),
             'customs_clearance_uae'                 => __('Customs Clearance in UAE'),
             'in_transit_uae'                        => __('In Transit (Departure from UAE)'),

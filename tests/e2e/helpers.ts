@@ -18,6 +18,11 @@ export const TEST_USERS = {
     password: 'password',
     name: 'Test Super Admin',
   },
+  slaAdmin: {
+    email: 'sla.e2e@example.com',
+    password: 'password',
+    name: 'SLA E2E Admin',
+  },
 };
 
 /**
@@ -25,7 +30,7 @@ export const TEST_USERS = {
  */
 export async function loginAs(
   page: Page,
-  role: 'client' | 'admin' | 'superAdmin',
+  role: 'client' | 'admin' | 'superAdmin' | 'slaAdmin',
 ): Promise<void> {
   const user = TEST_USERS[role];
   await page.goto(`${BASE_URL}/eng/login`);
@@ -33,6 +38,20 @@ export async function loginAs(
   await page.fill('input[name="password"]', user.password);
   await page.click('button[type="submit"]');
   await page.waitForURL('**/dashboard', { timeout: 30_000 });
+  await dismissSlaLoginPopup(page);
+}
+
+/**
+ * Close the SLA login popup if it appears (shown when the account has
+ * blocked folders/orders at login). Waited on, so Alpine has mounted first.
+ */
+export async function dismissSlaLoginPopup(page: Page): Promise<void> {
+  await page.waitForTimeout(700);
+  const popup = page.getByText('Action needed before you continue');
+  if (await popup.isVisible().catch(() => false)) {
+    await page.keyboard.press('Escape');
+    await popup.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => undefined);
+  }
 }
 
 /**

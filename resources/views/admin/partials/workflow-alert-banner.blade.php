@@ -18,7 +18,7 @@
                 <a href="{{ route('admin.sourcing-requests.index', ['status' => 'in_review', 'admin_id' => 'me']) }}"
                    class="inline-flex items-center justify-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-md shadow-sm transition-colors shrink-0">
                     {{ __('workflow.in_review_banner_cta') }}
-                    <svg class="w-3.5 h-3.5 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5-5 5M6 12h12"/></svg>
+                    <svg class="w-3.5 h-3.5 ms-1.5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5-5 5M6 12h12"/></svg>
                 </a>
             </div>
         </div>
@@ -44,6 +44,14 @@
                                 {{ __('sla.banner_message', ['count' => $slaOverdueCount ?? 0]) }}
                             @endif
                         </p>
+                        @if($slaNavigationLocked ?? false)
+                            <p class="flex items-center gap-1 mt-1 text-xs font-semibold text-red-800">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+                                </svg>
+                                {{ __('sla.banner_restricted_note') }}
+                            </p>
+                        @endif
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2 shrink-0">

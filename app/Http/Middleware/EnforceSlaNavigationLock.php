@@ -103,6 +103,8 @@ class EnforceSlaNavigationLock
         $routeName = $request->route()?->getName();
 
         $allowed = $routeName === 'admin.dashboard'
+            || $routeName === 'admin.sla-guide'
+            || $routeName === 'admin.analytics.my-performance'
             || in_array($routeName, [
                 'admin.quotations.create',
                 'admin.quotations.store',

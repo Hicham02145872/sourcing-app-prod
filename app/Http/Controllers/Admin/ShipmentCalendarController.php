@@ -102,15 +102,23 @@ class ShipmentCalendarController extends Controller
                     'type' => 'departure',
                 ],
                 [
-                    'title' => '🚢 Transit Chine → EAU',
+                    'title' => '🚢 Transit Chine',
                     'status' => 'in_transit_china',
                     'days_offset' => 3,
-                    'duration' => 12, // Sea/Air freight: 12 days
+                    'duration' => 5, // Sea freight: 5 days
                     'color' => '#0ea5e9', // Sky blue
                     'type' => 'transit',
                 ],
                 [
-                    'title' => '✈️ Arrivée EAU',
+                    'title' => '✈️ Vol cargo',
+                    'status' => 'in_air_cargo',
+                    'days_offset' => 8,
+                    'duration' => 7, // Air cargo: 7 days
+                    'color' => '#1d4ed8', // Blue
+                    'type' => 'air-cargo',
+                ],
+                [
+                    'title' => '🏙️ Arrivée EAU',
                     'status' => 'arrival_uae',
                     'days_offset' => 15,
                     'duration' => 1, // Arrival processing: 1 day
@@ -198,14 +206,15 @@ class ShipmentCalendarController extends Controller
             'paid' => 1,
             'shipment_preparing' => 2,
             'in_transit_china' => 3,
-            'arrival_uae' => 4,
-            'customs_clearance_uae' => 5,
-            'in_transit_uae' => 6,
-            'arrival_destination_country' => 7,
-            'customs_clearance_destination_country' => 8,
-            'out_for_delivery' => 9,
-            'delivered' => 10,
-            'order_completed' => 11,
+            'in_air_cargo' => 4,
+            'arrival_uae' => 5,
+            'customs_clearance_uae' => 6,
+            'in_transit_uae' => 7,
+            'arrival_destination_country' => 8,
+            'customs_clearance_destination_country' => 9,
+            'out_for_delivery' => 10,
+            'delivered' => 11,
+            'order_completed' => 12,
         ];
 
         $currentOrder = $statusOrder[$currentStatus] ?? 0;

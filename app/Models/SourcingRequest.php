@@ -130,6 +130,55 @@ class SourcingRequest extends Model
         return $this->shipping_method ? __($this->shipping_method) : __('N/A');
     }
 
+    /**
+     * Friendly label of the sourcing route chosen by the client in the
+     * shipping popup: 'china' → Direct (from China), 'dubai' → Indirect (via Dubai).
+     * When destinations use different routings, a "Mixed" label is returned.
+     */
+    public function getSourcingLocationLabelAttribute(): string
+    {
+        $locations = $this->destinations
+            ->pluck('effective_sourcing_location')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($locations->count() > 1) {
+            return __('Mixed (China + Dubai)');
+        }
+
+        $location = $locations->first() ?: $this->sourcing_location;
+
+        return match ($location) {
+            'china' => __('Direct (from China)'),
+            'dubai' => __('Indirect (via Dubai)'),
+            default => $this->sourcing_location ?: __('Not specified'),
+        };
+    }
+
+    /**
+     * Distinct routings used by this request's destinations ('china', 'dubai').
+     *
+     * @return array<int, string>
+     */
+    public function getEffectiveSourcingLocationsAttribute(): array
+    {
+        return $this->destinations
+            ->pluck('effective_sourcing_location')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Whether the client chose the indirect (Dubai hub) shipping route.
+     */
+    public function usesIndirectSourcing(): bool
+    {
+        return $this->sourcing_location === 'dubai';
+    }
+
     public function isAssigned()
     {
         return ! is_null($this->assigned_to_admin_id);

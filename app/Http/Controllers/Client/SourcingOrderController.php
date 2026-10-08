@@ -35,7 +35,7 @@ class SourcingOrderController extends Controller
         if ($request->has('status') && $request->status != 'all') {
             $status = $request->status;
             if ($status === 'in_transit') {
-                $query->whereIn('status', ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'shipment_delayed']);
+                $query->whereIn('status', ['in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'shipment_delayed']);
             } elseif ($status === 'preparing') {
                 $query->where('status', 'shipment_preparing');
             } else {
@@ -150,7 +150,7 @@ class SourcingOrderController extends Controller
         if ($request->has('status') && $request->status != 'all') {
             $status = $request->status;
             if ($status === 'in_transit') {
-                $query->whereIn('status', ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'shipment_delayed']);
+                $query->whereIn('status', ['in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'shipment_delayed']);
             } elseif ($status === 'preparing') {
                 $query->where('status', 'shipment_preparing');
             } else {

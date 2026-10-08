@@ -91,6 +91,68 @@ class AppServiceProvider extends ServiceProvider
             }
             $view->with('socialMediaLinks', $socialMediaLinks);
         });
+
+        // Share the current admin's SLA overdue stats with the sidebar so the
+        // SLA entry/button can be rendered on every admin page, not just the
+        // dashboard. Super admins are exempt and get the section hidden.
+        View::composer('components.sidebar', function ($view) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $slaSidebarEnabled = false;
+
+            $slaSidebarRequestCount = 0;
+            $slaSidebarOrderCount = 0;
+            $slaSidebarRequestByStatus = [];
+            $slaSidebarOrderByStatus = [];
+            $slaSidebarProcessUrl = null;
+            $slaSidebarProcessHint = null;
+
+            if ($user && ! $user->isSuperAdmin()
+                && app(\App\Services\FeatureFlagService::class)->isEnabled('sla_deadlines_autolock', $user)) {
+                $stats = app(\App\Services\SlaOverdueService::class)->statsForUser($user);
+                $slaSidebarEnabled = true;
+                $slaSidebarRequestCount = $stats['requestCount'];
+                $slaSidebarOrderCount = $stats['orderCount'];
+                $slaSidebarRequestByStatus = $stats['requestByStatus'];
+                $slaSidebarOrderByStatus = $stats['orderByStatus'];
+                // Adaptable shortcut: point at the most urgent overdue item
+                // (quotation page for requests, order page for orders) with a
+                // hint matching the item type instead of always "folder(s)".
+                $slaSidebarProcessUrl = app(\App\Services\SlaOverdueService::class)->mostUrgentTargetUrl($stats);
+                if ($slaSidebarRequestCount > 0 && $slaSidebarOrderCount > 0) {
+                    $slaSidebarProcessHint = __('sla.sidebar_hint_both', ['requests' => $slaSidebarRequestCount, 'orders' => $slaSidebarOrderCount]);
+                } elseif ($slaSidebarOrderCount > 0) {
+                    $slaSidebarProcessHint = __('sla.sidebar_hint_orders', ['count' => $slaSidebarOrderCount]);
+                } else {
+                    $slaSidebarProcessHint = __('sla.sidebar_hint', ['count' => $slaSidebarRequestCount]);
+                }
+            }
+
+            $view->with('slaSidebarEnabled', $slaSidebarEnabled)
+                ->with('slaSidebarRequestCount', $slaSidebarRequestCount)
+                ->with('slaSidebarOrderCount', $slaSidebarOrderCount)
+                ->with('slaSidebarRequestByStatus', $slaSidebarRequestByStatus)
+                ->with('slaSidebarOrderByStatus', $slaSidebarOrderByStatus)
+                ->with('slaSidebarProcessUrl', $slaSidebarProcessUrl)
+                ->with('slaSidebarProcessHint', $slaSidebarProcessHint);
+        });
+
+        // Share the persistent workflow banners (SLA overdue + in-review
+        // limit) with the other admin pages an admin lands on to process
+        // folders, so the dashboard banner also shows there.
+        View::composer([
+            'admin.sourcing-requests.index',
+            'admin.quotations.create',
+            'admin.quotations.edit',
+            'admin.sourcing-orders.show',
+        ], function ($view) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            if (! $user) {
+                return;
+            }
+            foreach (app(\App\Services\WorkflowAlertService::class)->bannerData($user) as $key => $value) {
+                $view->with($key, $value);
+            }
+        });
         \Illuminate\Support\Facades\RateLimiter::for('google-sheets', function ($job) {
             return \Illuminate\Cache\RateLimiting\Limit::perMinute(50);
         });

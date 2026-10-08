@@ -12,6 +12,7 @@ class SourcingOrderDestinationShipment extends Model
         'sourcing_request_destination_id',
         'tracking_number',
         'tracking_carrier',
+        'parcel_photo_path',
         'shipping_company_id',
     ];
 

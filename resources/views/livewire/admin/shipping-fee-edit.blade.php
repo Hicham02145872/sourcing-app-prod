@@ -5,10 +5,9 @@
         </div>
     @enderror
 
-    {{-- Top Section: Quick Summary & Base Fees --}}
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    {{-- Top Section: Overview, Visibility & Guarantee, Info --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {{-- Country Details --}}
-        <div class="lg:col-span-1 space-y-6">
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 relative">
                 <div class="absolute top-0 right-0 p-4 opacity-10">
                     <span class="fi fi-{{ strtolower($country->code) }} text-6xl"></span>
@@ -65,8 +64,12 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="mt-4 space-y-3">
+            {{-- Visibility & Guarantee --}}
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6">
+                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">{{ __('Visibility & Guarantee') }}</h3>
+                <div class="space-y-3">
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Air Direct Visible') }}</span>
                         <label class="relative inline-flex items-center cursor-pointer">
@@ -85,14 +88,38 @@
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-tight">{{ __('Air Indirect Visible') }}</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" wire:model.live="is_air_indirect_visible" class="sr-only peer">
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
                         </label>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between gap-3">
+                        <div>
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-tight block">{{ __('Direct Guarantee') }}</span>
+                            <span class="text-[10px] text-slate-400">{{ __('Badge shown in the routing popup') }}</span>
+                        </div>
+                        <div class="inline-flex rounded-lg border border-slate-200 overflow-hidden bg-white shrink-0">
+                            <button type="button" wire:click="$set('direct_guarantee', 50)"
+                                    class="px-3 py-1.5 text-xs font-bold transition-colors {{ (int) $direct_guarantee === 50 ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 hover:bg-slate-100' }}">50%</button>
+                            <button type="button" wire:click="$set('direct_guarantee', 100)"
+                                    class="px-3 py-1.5 text-xs font-bold transition-colors border-l border-slate-200 {{ (int) $direct_guarantee === 100 ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500 hover:bg-slate-100' }}">100%</button>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between gap-3">
+                        <div>
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-tight block">{{ __('Indirect Guarantee') }}</span>
+                            <span class="text-[10px] text-slate-400">{{ __('Badge shown in the routing popup') }}</span>
+                        </div>
+                        <div class="inline-flex rounded-lg border border-slate-200 overflow-hidden bg-white shrink-0">
+                            <button type="button" wire:click="$set('indirect_guarantee', 50)"
+                                    class="px-3 py-1.5 text-xs font-bold transition-colors {{ (int) $indirect_guarantee === 50 ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 hover:bg-slate-100' }}">50%</button>
+                            <button type="button" wire:click="$set('indirect_guarantee', 100)"
+                                    class="px-3 py-1.5 text-xs font-bold transition-colors border-l border-slate-200 {{ (int) $indirect_guarantee === 100 ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500 hover:bg-slate-100' }}">100%</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {{-- Configuration Info --}}
-            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-center">
                 <div class="flex items-start gap-4">
                     <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

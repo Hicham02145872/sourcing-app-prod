@@ -36,6 +36,9 @@ class SourcingOrderWorkflow extends Component
     /** @var array<int, array{tracking_number: string, tracking_carrier: string, shipping_company_id: ?int}> Per-destination tracking when order has multiple destinations */
     public array $destinationTrackings = [];
 
+    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null> Per-destination parcel photos keyed by destination id */
+    public array $destinationParcelPhotos = [];
+
     public $deepTrackingResult = null;
 
     /** @var array<int, array> Per-destination deep tracking results keyed by destination index */
@@ -48,7 +51,7 @@ class SourcingOrderWorkflow extends Component
         $this->tracking_number = $sourcingOrder->tracking_number;
         $this->tracking_carrier = $sourcingOrder->tracking_carrier;
         $this->shipping_company_id = $sourcingOrder->shipping_company_id;
-        $this->showEvidenceZone = in_array($sourcingOrder->status, ['in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']);
+        $this->showEvidenceZone = in_array($sourcingOrder->status, ['in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']);
 
         if ($this->sourcingOrder->hasMultipleDestinations()) {
             foreach ($this->sourcingOrder->quotation->sourcingRequest->destinations as $dest) {
@@ -82,10 +85,28 @@ class SourcingOrderWorkflow extends Component
             return;
         }
 
+        // In-transit SLA: advancing to the next status no longer satisfies the
+        // deadline — evidence (China tracking + parcel photo) is required first.
+        if ($this->sourcingOrder->isChinaAdvanceBlocked($this->status)) {
+            $this->dispatch('show-error-toast', message: __('sla.china_advance_blocked'));
+            $this->status = $this->sourcingOrder->status;
+
+            return;
+        }
+
+        // On-cargo gate: In Transit (China) → In Air Cargo requires the parcel
+        // photo(s) and China tracking to be entered first (all destinations).
+        if ($this->sourcingOrder->isOnCargoAdvanceBlocked($this->status)) {
+            $this->dispatch('show-error-toast', message: __('order.on_cargo_evidence_required'));
+            $this->status = $this->sourcingOrder->status;
+
+            return;
+        }
+
         $this->sourcingOrder->update(['status' => $this->status]);
         $this->sourcingOrder->refresh();
 
-        if ($this->status === 'in_transit_china') {
+        if (in_array($this->status, ['in_transit_china', 'in_air_cargo'])) {
             $this->showEvidenceZone = true;
         }
 
@@ -163,14 +184,16 @@ class SourcingOrderWorkflow extends Component
 
         $this->validate([
             'tracking_number' => ['nullable', 'string', 'max:255'],
-            'packageLabelPhoto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'packageLabelPhoto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
         ]);
 
         try {
             $updateData = [];
+            $replacedPhotoPath = null;
 
             if ($this->packageLabelPhoto) {
                 $photo = app(ImageProcessingService::class)->compressAndStore($this->packageLabelPhoto, 'sourcing/in-transit');
+                $replacedPhotoPath = $this->sourcingOrder->package_label_photo_path;
                 $updateData['package_label_photo_path'] = $photo->path;
             }
 
@@ -188,6 +211,15 @@ class SourcingOrderWorkflow extends Component
 
             $this->sourcingOrder->update($updateData);
             $this->sourcingOrder->refresh();
+
+            // Clean up the replaced parcel photo from storage (best effort).
+            if ($replacedPhotoPath && $replacedPhotoPath !== ($this->sourcingOrder->package_label_photo_path ?? null)) {
+                try {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($replacedPhotoPath);
+                } catch (\Exception $e) {
+                    Log::warning('Could not delete replaced parcel photo: '.$e->getMessage());
+                }
+            }
 
             Cache::forget("tracking:{$this->sourcingOrder->fsb_tracking_number}");
 
@@ -416,6 +448,10 @@ class SourcingOrderWorkflow extends Component
         $this->dispatch('show-success-toast', message: __($companyId ? 'Shipping company assigned successfully.' : 'Shipping company unassigned.'));
     }
 
+    /**
+     * Save the per-destination in-transit-from-China evidence: local tracking
+     * chain + parcel photo, one row per destination.
+     */
     public function saveDestinationTrackings()
     {
         if (! $this->sourcingOrder->hasMultipleDestinations()) {
@@ -430,23 +466,59 @@ class SourcingOrderWorkflow extends Component
         $destinations = $this->sourcingOrder->quotation->sourcingRequest->destinations;
         foreach ($destinations as $dest) {
             $data = $this->destinationTrackings[$dest->id] ?? null;
-            if (! is_array($data)) {
-                continue;
+            $photo = $this->destinationParcelPhotos[$dest->id] ?? null;
+
+            $update = [];
+            $replacedPhotoPath = null;
+
+            if (is_array($data)) {
+                $update['tracking_number'] = trim((string) ($data['tracking_number'] ?? ''));
+                $update['tracking_carrier'] = trim((string) ($data['tracking_carrier'] ?? ''));
+                if (! empty($data['shipping_company_id'])) {
+                    $update['shipping_company_id'] = (int) $data['shipping_company_id'];
+                }
             }
-            SourcingOrderDestinationShipment::updateOrCreate(
-                [
-                    'sourcing_order_id' => $this->sourcingOrder->id,
-                    'sourcing_request_destination_id' => $dest->id,
-                ],
-                [
-                    'tracking_number' => $data['tracking_number'] ?? '',
-                    'tracking_carrier' => $data['tracking_carrier'] ?? '',
-                    'shipping_company_id' => ! empty($data['shipping_company_id']) ? (int) $data['shipping_company_id'] : null,
-                ]
-            );
+
+            if ($photo) {
+                try {
+                    $image = app(ImageProcessingService::class)->compressAndStore($photo, 'sourcing/in-transit/'.$dest->id);
+                    $existingShipment = SourcingOrderDestinationShipment::where('sourcing_order_id', $this->sourcingOrder->id)
+                        ->where('sourcing_request_destination_id', $dest->id)
+                        ->first();
+                    if ($existingShipment?->parcel_photo_path) {
+                        $replacedPhotoPath = $existingShipment->parcel_photo_path;
+                    }
+                    $update['parcel_photo_path'] = $image->path;
+                } catch (\Exception $e) {
+                    Log::error('Save destination evidence photo error: '.$e->getMessage(), [
+                        'destination_id' => $dest->id,
+                        'order_id' => $this->sourcingOrder->id,
+                    ]);
+                    $this->dispatch('show-error-toast', message: __('An error occurred while saving the destination evidence photo.'));
+                }
+            }
+
+            if (! empty($update)) {
+                SourcingOrderDestinationShipment::updateOrCreate(
+                    [
+                        'sourcing_order_id' => $this->sourcingOrder->id,
+                        'sourcing_request_destination_id' => $dest->id,
+                    ],
+                    $update
+                );
+            }
+
+            if ($replacedPhotoPath && $replacedPhotoPath !== ($update['parcel_photo_path'] ?? null)) {
+                try {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($replacedPhotoPath);
+                } catch (\Exception $e) {
+                    Log::warning('Could not delete replaced destination parcel photo: '.$e->getMessage());
+                }
+            }
         }
 
         $this->sourcingOrder->load('destinationShipments');
+        $this->destinationParcelPhotos = [];
 
         // Invalidate cached tracking results for each per-destination FSB + the main FSB
         foreach ($destinations as $index => $dest) {
@@ -457,7 +529,7 @@ class SourcingOrderWorkflow extends Component
         }
         Cache::forget("tracking:{$this->sourcingOrder->fsb_tracking_number}");
 
-        $this->dispatch('show-success-toast', message: __('Tracking per destination updated successfully.'));
+        $this->dispatch('show-success-toast', message: __('Destination tracking & evidence saved successfully.'));
     }
 
     public function render()

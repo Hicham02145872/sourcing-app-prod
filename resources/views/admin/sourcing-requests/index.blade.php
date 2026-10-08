@@ -39,6 +39,8 @@
             </div>
         </div>
 
+        @include('admin.partials.workflow-alert-banner')
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
             
             <!-- Section 1: KPIs (Summary Cards) - Enterprise Style -->
@@ -250,6 +252,11 @@
                                         'cancelled' => 'bg-slate-100 text-slate-600 border-slate-200',
                                     ];
                                     $statusClass = $statusConfig[$request->status] ?? $statusConfig['pending'];
+                                    $slaTreatUrl = match (true) {
+                                        $request->status === 'in_review' => route('admin.quotations.create', ['sourcingRequest' => $request]),
+                                        $request->status === 'negotiating' && $request->quotation => route('admin.quotations.edit', $request->quotation),
+                                        default => route('admin.sourcing-requests.show', $request),
+                                    };
                                 @endphp
                                 <tr class="hover:bg-slate-50 transition-colors">
                                     <!-- Product -->
@@ -350,6 +357,13 @@
                                     <!-- Actions -->
                                     <td class="px-6 py-3 whitespace-nowrap text-right">
                                         <div class="flex items-center justify-end gap-2">
+                                            @if($request->is_restricted_due_to_delay)
+                                                <a href="{{ $slaTreatUrl }}"
+                                                   class="inline-flex items-center gap-1 h-8 px-2.5 rounded-full text-[11px] font-bold text-white bg-red-600 hover:bg-red-700 shadow-sm transition-colors"
+                                                   title="{{ __('sla.list_treat') }}">
+                                                    {{ __('sla.list_treat') }}
+                                                </a>
+                                            @endif
                                             <a href="{{ route('admin.sourcing-requests.show', [$request, 'page' => request('page')]) }}" 
                                                class="inline-flex items-center justify-center h-8 w-8 rounded-full text-slate-400 hover:text-orange-600 hover:bg-orange-50 transition-all border border-transparent hover:border-orange-200"
                                                title="{{ __('View') }}">
@@ -397,6 +411,11 @@
                                 'cancelled' => 'bg-slate-100 text-slate-600 border-slate-200',
                             ];
                             $statusClass = $statusConfig[$request->status] ?? $statusConfig['pending'];
+                            $slaTreatUrl = match (true) {
+                                $request->status === 'in_review' => route('admin.quotations.create', ['sourcingRequest' => $request]),
+                                $request->status === 'negotiating' && $request->quotation => route('admin.quotations.edit', $request->quotation),
+                                default => route('admin.sourcing-requests.show', $request),
+                            };
                         @endphp
                         <div class="flex flex-col border border-slate-200 rounded-lg bg-white shadow-sm hover:shadow-md hover:border-orange-200 transition-all overflow-hidden">
                             <!-- Product Image -->
@@ -484,6 +503,12 @@
                             </div>
                             <!-- Card Footer -->
                             <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-2">
+                                @if($request->is_restricted_due_to_delay)
+                                    <a href="{{ $slaTreatUrl }}"
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold text-white bg-red-600 hover:bg-red-700 shadow-sm transition-colors">
+                                        {{ __('sla.list_treat') }}
+                                    </a>
+                                @endif
                                 <a href="{{ route('admin.sourcing-requests.show', [$request, 'page' => request('page')]) }}"
                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>

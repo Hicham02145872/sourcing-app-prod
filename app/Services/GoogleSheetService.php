@@ -463,6 +463,7 @@ class GoogleSheetService implements \App\Contracts\SheetIntegrationInterface
                         'paid' => ['red' => 0.8, 'green' => 0.9, 'blue' => 1],
                         'shipment_preparing' => ['red' => 0.8, 'green' => 0.9, 'blue' => 1],
                         'in_transit_china' => ['red' => 0.7, 'green' => 0.95, 'blue' => 1],
+                        'in_air_cargo' => ['red' => 0.7, 'green' => 0.95, 'blue' => 1],
                         'arrival_uae' => ['red' => 0.7, 'green' => 0.95, 'blue' => 1],
                         'customs_clearance_uae' => ['red' => 0.7, 'green' => 0.95, 'blue' => 1],
                         'in_transit_uae' => ['red' => 0.7, 'green' => 0.95, 'blue' => 1],

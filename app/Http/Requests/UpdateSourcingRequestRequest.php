@@ -38,6 +38,7 @@ class UpdateSourcingRequestRequest extends FormRequest
             'destinations.*.service_id' => 'required|exists:services,id',
             'destinations.*.quantity' => 'required|integer|min:1',
             'destinations.*.address' => 'nullable|string|max:1000',
+            'destinations.*.sourcing_location' => 'nullable|string|in:china,dubai',
         ];
     }
 

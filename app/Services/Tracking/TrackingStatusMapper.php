@@ -269,14 +269,15 @@ class TrackingStatusMapper
             'paid' => 2,
             'shipment_preparing' => 3,
             'in_transit_china' => 4,
-            'arrival_uae' => 5,
-            'customs_clearance_uae' => 6,
-            'in_transit_uae' => 7,
-            'arrival_destination_country' => 8,
-            'customs_clearance_destination_country' => 9,
-            'out_for_delivery' => 10,
-            'delivered' => 11,
-            'order_completed' => 12,
+            'in_air_cargo' => 5,
+            'arrival_uae' => 6,
+            'customs_clearance_uae' => 7,
+            'in_transit_uae' => 8,
+            'arrival_destination_country' => 9,
+            'customs_clearance_destination_country' => 10,
+            'out_for_delivery' => 11,
+            'delivered' => 12,
+            'order_completed' => 13,
         ];
 
         $currentOrder = $statusOrder[$currentStatus] ?? 0;

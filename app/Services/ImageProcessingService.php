@@ -29,7 +29,11 @@ class ImageProcessingService
 
             $encoded = $image->toJpeg($quality);
 
-            Storage::disk($disk)->put($path, (string) $encoded);
+            if (! Storage::disk($disk)->put($path, (string) $encoded)) {
+                Log::error("compressAndStore: failed writing {$disk}:{$path} (check storage permissions)");
+
+                throw new \RuntimeException("Cannot write image to {$disk}:{$path}");
+            }
 
             $publicId = null;
             if ($this->cloudinaryConfigured()) {
@@ -39,6 +43,13 @@ class ImageProcessingService
             return new ImageResult(path: $path, publicId: $publicId);
         } catch (\Throwable $e) {
             $path = $file->store($directory, $disk);
+
+            if (! $path) {
+                Log::error('compressAndStore: fallback store failed — '.$e->getMessage());
+
+                throw $e;
+            }
+
             return new ImageResult(path: $path);
         }
     }

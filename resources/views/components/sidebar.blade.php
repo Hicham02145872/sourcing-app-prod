@@ -128,14 +128,16 @@
                 @endphp
 
                 @if($slaNavLocked)
-                    <div class="mx-3 mt-4 px-3 py-2 rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800">
-                        <p class="text-[11px] font-bold text-red-700 dark:text-red-300">{{ __('sla.lock_banner_title') }}</p>
-                        <p class="text-[10px] text-red-600 dark:text-red-400 mt-0.5">{{ __('sla.lock_banner_message') }}</p>
-                        <a href="{{ $slaLockRedirectUrl ?? route('admin.sourcing-requests.index', ['status' => 'in_review', 'overdue' => 1, 'admin_id' => 'me']) }}"
-                           class="inline-flex items-center gap-1 mt-2 text-[10px] font-bold text-red-700 dark:text-red-300 hover:underline">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5-5 5M6 12h12"/></svg>
-                            {{ __('sla.lock_banner_cta') }}
-                        </a>
+                    <div class="mx-3 mt-4 px-3 py-3 rounded-lg bg-red-600 text-white shadow-sm" role="status" aria-live="polite">
+                        <div class="flex items-start gap-2.5">
+                            <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+                            </svg>
+                            <div>
+                                <p class="text-xs font-bold leading-snug">{{ __('sla.lock_banner_title') }}</p>
+                                <p class="text-[11px] text-red-100 mt-0.5 leading-snug">{{ __('sla.lock_banner_message') }}</p>
+                            </div>
+                        </div>
                     </div>
                 @endif
                 
@@ -173,6 +175,46 @@
                             @if($adminSourcingRequestCount > 0)
                                 <span class="ms-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-800 dark:bg-blue-900 dark:text-blue-200">{{ $adminSourcingRequestCount }}</span>
                             @endif
+                        </a>
+
+                        @if(! empty($slaSidebarEnabled))
+                        @php
+                            $slaSidebarTotal = ($slaSidebarRequestCount ?? 0) + ($slaSidebarOrderCount ?? 0);
+                            $slaSidebarListUrl = route('admin.sourcing-requests.index', ['overdue' => 1, 'admin_id' => 'me']);
+                            $slaSidebarActive = request()->routeIs('admin.sourcing-requests.index') && request()->boolean('overdue');
+                        @endphp
+                        <div class="mt-3">
+                            <div class="px-3 mb-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('sla.sidebar_title') }}</div>
+                            @if($slaSidebarTotal > 0)
+                                <a href="{{ $slaSidebarProcessUrl ?? $slaSidebarListUrl }}"
+                                   class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-bold text-white bg-red-600 hover:bg-red-700 shadow-sm transition-colors duration-200">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                    </svg>
+                                    <span class="flex-1 min-w-0">
+                                        <span class="block truncate">{{ __('sla.sidebar_action') }}</span>
+                                        <span class="block text-[10px] font-medium text-red-100 truncate">{{ $slaSidebarProcessHint ?? __('sla.sidebar_hint', ['count' => $slaSidebarTotal]) }}</span>
+                                    </span>
+                                    <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/30 px-1.5 text-[10px] font-bold text-white">{{ $slaSidebarTotal }}</span>
+                                </a>
+                            @else
+                                <a href="{{ $slaSidebarListUrl }}"
+                                   class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ $slaSidebarActive ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                    </svg>
+                                    <span>{{ __('sla.sidebar_label') }}</span>
+                                </a>
+                            @endif
+                        </div>
+                        @endif
+
+                        <a href="{{ route('admin.sla-guide') }}"
+                           class="mt-1 flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.sla-guide') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+                            </svg>
+                            <span>{{ __('sla.guide.nav') }}</span>
                         </a>
 
                         @if($slaWorkflowLinksVisible)
@@ -214,6 +256,16 @@
                             <span>{{ __('Refunds') }}</span>
                         </a>
                         @endif
+
+                        @unless(auth()->user()?->isSuperAdmin())
+                        <a href="{{ route('admin.analytics.my-performance') }}"
+                           class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.analytics.my-performance') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                            </svg>
+                            <span>{{ __('My Performance') }}</span>
+                        </a>
+                        @endunless
 
                         @if(auth()->user()?->isSuperAdmin())
                         <a href="{{ route('admin.shipping-fees.index') }}" 
@@ -262,6 +314,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                             </svg>
                             <span>{{ __('Social Media') }}</span>
+                        </a>
+
+                        <a href="{{ route('admin.announcements.index') }}"
+                           class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.announcements.*') ? 'bg-[#EF7722]/10 text-[#EF7722] dark:text-[#EF7722]' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+                            </svg>
+                            <span>{{ __('Announcements') }}</span>
                         </a>
 
                         <a href="{{ route('admin.reports.sales-margin') }}" 

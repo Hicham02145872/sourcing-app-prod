@@ -19,6 +19,7 @@
                                 'paid' => __('Paid'),
                                 'shipment_preparing' => __('Shipment Preparing'),
                                 'in_transit_china' => __('In Transit China'),
+                                'in_air_cargo' => __('In Air Cargo'),
                                 'arrival_uae' => __('Arrival UAE'),
                                 'customs_clearance_uae' => __('Customs Clearance UAE'),
                                 'in_transit_uae' => __('In Transit UAE'),
@@ -104,7 +105,9 @@
         </div>
     </div>
 
-    {{-- 1b. In-transit from China evidence zone (photo + local tracking) --}}
+    {{-- 1b. In-transit from China evidence zone (photo + local tracking).
+         Shown when the status is in transit (in_transit_china and later),
+         for single and multi-destination orders. --}}
     @if ($showEvidenceZone && (auth()->user()->isSuperAdmin() || $sourcingOrder->assigned_to_admin_id === auth()->id()))
         <div class="bg-white rounded-lg border border-orange-200 shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-orange-100 bg-orange-50/50 flex justify-between items-center">
@@ -116,7 +119,9 @@
                 <span class="text-[10px] text-slate-400">{{ __('Internal — never exposed to the client') }}</span>
             </div>
             <div class="p-6">
-                <form wire:submit.prevent="saveChinaTransitEvidence" class="space-y-4">
+                @if (! $sourcingOrder->hasMultipleDestinations())
+                <form wire:submit.prevent="saveChinaTransitEvidence" class="space-y-4"
+                      x-on:livewire:upload-error.window="$dispatch('show-error-toast', '{{ __('Photo upload failed — allowed: JPG, PNG or WEBP, max 15 MB.') }}')">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="evidence_tracking_number" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
@@ -133,17 +138,37 @@
                             <input type="file" wire:model="packageLabelPhoto" id="packageLabelPhoto"
                                    accept="image/jpeg,image/png,image/webp"
                                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
-                            <p class="mt-1 text-[10px] text-slate-400">{{ __('JPG, PNG or WEBP — max 5 MB.') }}</p>
-                            @error('packageLabelPhoto') <p class="mt-1 text-[10px] text-red-600">{{ $message }}</p> @enderror
+                            <p class="mt-1 text-[10px] text-slate-400">{{ __('JPG, PNG or WEBP — max 15 MB.') }}</p>
+                            @if ($sourcingOrder->package_label_photo_path)
+                                <p class="mt-1 text-[10px] font-semibold text-orange-600">{{ __('Selecting a new photo replaces the current one.') }}</p>
+                            @endif
+                            <span wire:loading wire:target="packageLabelPhoto" class="mt-1 flex items-center gap-1.5 text-[10px] font-bold text-orange-600">
+                                <svg class="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                {{ __('Uploading photo...') }}
+                            </span>
+                            @error('packageLabelPhoto') <p class="mt-1 text-[11px] font-semibold text-red-600">{{ $message }}</p> @enderror
+                            @if ($packageLabelPhoto)
+                                <div class="mt-2 flex items-center gap-2">
+                                    <img src="{{ $packageLabelPhoto->temporaryUrl() }}" alt="{{ __('Colis photo') }}" class="h-20 rounded border border-orange-300 object-cover shadow-sm">
+                                    <p class="text-[10px] font-semibold text-orange-700">{{ $sourcingOrder->package_label_photo_path ? __('New photo selected — click "Save evidence" to replace the current one.') : __('Photo selected — click "Save evidence" to confirm.') }}</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
                     @if ($sourcingOrder->package_label_photo_path || $sourcingOrder->tracking_number)
                         <div class="flex flex-wrap items-center gap-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
                             @if ($sourcingOrder->package_label_photo_path)
-                                <a href="{{ media_url($sourcingOrder->package_label_photo_path) }}" target="_blank" title="{{ __('View photo') }}">
-                                    <img src="{{ media_url($sourcingOrder->package_label_photo_path) }}" alt="{{ __('Colis photo') }}" class="w-24 h-18 object-cover rounded border border-slate-200">
-                                </a>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ media_url($sourcingOrder->package_label_photo_path) }}" target="_blank" title="{{ __('View photo') }}">
+                                        <img src="{{ media_url($sourcingOrder->package_label_photo_path) }}" alt="{{ __('Colis photo') }}" class="w-24 h-18 object-cover rounded border border-slate-200">
+                                    </a>
+                                    <button type="button" onclick="document.getElementById('packageLabelPhoto').click()"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 hover:border-orange-400 text-slate-600 hover:text-orange-600 text-[11px] font-bold rounded-lg transition-colors shadow-sm">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        {{ __('Modify photo') }}
+                                    </button>
+                                </div>
                             @endif
                             @if ($sourcingOrder->tracking_number)
                                 <div>
@@ -163,6 +188,81 @@
                         </button>
                     </div>
                 </form>
+                @else
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-500">{{ __('Enter the local tracking number and the parcel photo for each destination.') }}</p>
+                        @foreach($sourcingOrder->quotation->sourcingRequest->destinations as $dest)
+                            @php
+                                $evLabel = $dest->country?->name ?? __('Destination #:n', ['n' => $dest->id]);
+                                if (isset($dest->quantity)) { $evLabel .= ' (x' . $dest->quantity . ')'; }
+                                $evShipment = $sourcingOrder->destinationShipments->firstWhere('sourcing_request_destination_id', $dest->id);
+                                $evHasTracking = ! empty(trim((string) ($evShipment?->tracking_number ?? '')));
+                                $evHasPhoto = ! empty($evShipment?->parcel_photo_path);
+                                $evComplete = $evHasTracking && $evHasPhoto;
+                            @endphp
+                            <div class="border border-orange-100 bg-orange-50/40 rounded-lg p-4">
+                                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                    <span class="text-sm font-semibold text-slate-800">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-700 text-xs font-bold mr-2">{{ $loop->iteration }}</span>
+                                        {{ $evLabel }}
+                                    </span>
+                                    @if ($evComplete)
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            {{ __('Complete') }}
+                                        </span>
+                                    @elseif ($evHasTracking || $evHasPhoto)
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">{{ __('Partial') }}</span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">{{ __('Missing') }}</span>
+                                    @endif
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                                            {{ __('Local tracking number') }} <span class="text-slate-400 normal-case font-medium">({{ __('destination carrier') }})</span>
+                                        </label>
+                                        <input type="text" wire:model.defer="destinationTrackings.{{ $dest->id }}.tracking_number"
+                                               placeholder="Ex: ME49508327"
+                                               class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Colis photo') }}</label>
+                                        <div class="flex items-start gap-3">
+                                            <div class="flex-1 min-w-0">
+                                                <input type="file" wire:model="destinationParcelPhotos.{{ $dest->id }}"
+                                                       accept="image/jpeg,image/png,image/webp"
+                                                       class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                                                @error("destinationParcelPhotos.{$dest->id}") <p class="mt-1 text-[11px] font-semibold text-red-600">{{ $message }}</p> @enderror
+                                                @if(! empty($destinationParcelPhotos[$dest->id] ?? null))
+                                                    <p class="mt-1 text-[10px] font-semibold text-orange-700">{{ __('New photo selected — click "Save evidence" to confirm.') }}</p>
+                                                @endif
+                                                <span wire:loading wire:target="destinationParcelPhotos.{{ $dest->id }}" class="mt-1 flex items-center gap-1.5 text-[10px] font-bold text-orange-600">
+                                                    <svg class="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                                    {{ __('Uploading photo...') }}
+                                                </span>
+                                            </div>
+                                            @if ($evShipment?->parcel_photo_path)
+                                                <a href="{{ media_url($evShipment->parcel_photo_path) }}" target="_blank" title="{{ __('View photo') }}" class="shrink-0">
+                                                    <img src="{{ media_url($evShipment->parcel_photo_path) }}" alt="{{ __('Parcel photo') }}" class="w-16 h-16 object-cover rounded border border-orange-200 shadow-sm hover:opacity-80 transition-opacity">
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                            <button type="button" wire:click="saveDestinationTrackings" wire:loading.attr="disabled"
+                                    class="inline-flex items-center gap-2 px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-70">
+                                <svg wire:loading.remove wire:target="saveDestinationTrackings" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <svg wire:loading wire:target="saveDestinationTrackings" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                {{ __('Save evidence') }}
+                            </button>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     @endif
@@ -196,20 +296,20 @@
                     <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-inner bg-slate-50/30">
                         <table class="min-w-full text-sm">
                             <thead class="bg-slate-100 border-b-2 border-slate-200">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{{ __('Destination') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{{ __('Tracking Number') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{{ __('Carrier') }}</th>
-                                    <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{{ __('Shipping Company') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white">
-                                @foreach($sourcingOrder->quotation->sourcingRequest->destinations as $dest)
-                                    @php
-                                        $destLabel = $dest->country?->name ?? __('Destination #:n', ['n' => $dest->id]);
-                                        if ($dest->service_type ?? null) { $destLabel .= ' · ' . $dest->service_type; }
-                                        if (isset($dest->quantity)) { $destLabel .= ' (x' . $dest->quantity . ')'; }
-                                    @endphp
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{{ __('Destination') }}</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{{ __('Tracking Number') }}</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{{ __('Carrier') }}</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{{ __('Shipping Company') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 bg-white">
+                                        @foreach($sourcingOrder->quotation->sourcingRequest->destinations as $dest)
+                                            @php
+                                                $destLabel = $dest->country?->name ?? __('Destination #:n', ['n' => $dest->id]);
+                                                if ($dest->service_type ?? null) { $destLabel .= ' · ' . $dest->service_type; }
+                                                if (isset($dest->quantity)) { $destLabel .= ' (x' . $dest->quantity . ')'; }
+                                            @endphp
                                     <tr class="hover:bg-slate-50/80 transition-colors">
                                         <td class="px-4 py-3 font-semibold text-slate-800 whitespace-nowrap align-middle">
                                             <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-200 text-slate-600 text-xs font-bold mr-2">{{ $loop->iteration }}</span>
@@ -238,7 +338,7 @@
                         <button type="button" wire:click="saveDestinationTrackings" wire:loading.attr="disabled" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-70">
                             <svg wire:loading.remove wire:target="saveDestinationTrackings" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <svg wire:loading wire:target="saveDestinationTrackings" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            <span wire:loading.remove wire:target="saveDestinationTrackings">{{ __('Save tracking per destination') }}</span>
+                            <span wire:loading.remove wire:target="saveDestinationTrackings">{{ __('Save tracking') }}</span>
                             <span wire:loading wire:target="saveDestinationTrackings">{{ __('Processing...') }}</span>
                         </button>
                     </div>

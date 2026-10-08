@@ -68,7 +68,7 @@
                         
                         <div class="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
-                        @if($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+                        @if($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
                             <button type="button"
                                     onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'edit-label-{{ $sourcingOrder->id }}' }))"
                                     class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded transition-colors shadow-sm">
@@ -85,6 +85,8 @@
                 </div>
             </div>
         </div>
+
+        @include('admin.partials.workflow-alert-banner')
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -417,15 +419,28 @@
 
                             <!-- Sourcing Location -->
                             <div class="col-span-1">
-                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Sourcing Location') }}</label>
-                                <div class="flex items-center gap-2 text-sm text-slate-700 capitalize">
-                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                    <span class="@if($sourcingOrder->quotation && $sourcingOrder->quotation->sourcingRequest && $sourcingOrder->quotation->actual_sourcing_location !== $sourcingOrder->quotation->sourcingRequest->sourcing_location) line-through opacity-50 @endif">
-                                        {{ $sourcingOrder->quotation->sourcingRequest->sourcing_location ?? ($sourcingOrder->quotation->actual_sourcing_location ?? __('Not specified')) }}
-                                    </span>
-                                    @if($sourcingOrder->quotation && $sourcingOrder->quotation->sourcingRequest && $sourcingOrder->quotation->actual_sourcing_location !== $sourcingOrder->quotation->sourcingRequest->sourcing_location)
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Sourcing Route') }}</label>
+                                <div class="flex items-center gap-2 text-sm text-slate-700">
+                                    @if(count($sourcingOrder->quotation?->sourcingRequest?->effective_sourcing_locations ?? []) > 1)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-violet-100 text-violet-800 border border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800">
+                                            {{ __('Mixed (China + Dubai)') }}
+                                        </span>
+                                    @elseif($sourcingOrder->quotation?->sourcingRequest?->sourcing_location === 'china')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 @if($sourcingOrder->quotation?->actual_sourcing_location !== 'china') line-through opacity-50 @endif">
+                                            {{ __('Direct (from China)') }}
+                                        </span>
+                                    @elseif($sourcingOrder->quotation?->sourcingRequest?->sourcing_location === 'dubai')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800 @if($sourcingOrder->quotation?->actual_sourcing_location !== 'dubai') line-through opacity-50 @endif">
+                                            {{ __('Indirect (via Dubai)') }}
+                                        </span>
+                                    @else
+                                        <span class="capitalize">
+                                            {{ $sourcingOrder->quotation?->sourcingRequest?->sourcing_location_label ?? ($sourcingOrder->quotation?->actual_sourcing_location ?? __('Not specified')) }}
+                                        </span>
+                                    @endif
+                                    @if($sourcingOrder->quotation?->actual_sourcing_location && $sourcingOrder->quotation?->sourcingRequest?->sourcing_location !== $sourcingOrder->quotation?->actual_sourcing_location)
                                         <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-200 capitalize whitespace-nowrap">
-                                            {{ __('Actual: ') }} {{ $sourcingOrder->quotation->actual_sourcing_location }}
+                                            {{ __('Actual: ') }} {{ $sourcingOrder->quotation?->actual_sourcing_location }}
                                         </span>
                                     @endif
                                 </div>
@@ -445,6 +460,7 @@
                                         <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Country') }}</th>
                                         <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Service') }}</th>
                                         <th class="px-6 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Quantity') }}</th>
+                                        <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Route') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50 bg-white">
@@ -458,6 +474,17 @@
                                             </td>
                                             <td class="px-6 py-3 whitespace-nowrap text-sm text-slate-500">{{ $destination->service->name }}</td>
                                             <td class="px-6 py-3 whitespace-nowrap text-right text-sm font-mono text-slate-900">{{ number_format($destination->quantity) }}</td>
+                                            <td class="px-6 py-3 whitespace-nowrap">
+                                                @if($destination->effective_sourcing_location === 'dubai')
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800">
+                                                        {{ __('Indirect') }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
+                                                        {{ __('Direct') }}
+                                                    </span>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -636,6 +663,7 @@
                                 <label for="parcel_photo" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Parcel photo') }}</label>
                                 <input type="file" name="parcel_photo" id="parcel_photo" accept="image/jpeg,image/png,image/jpg,image/webp,image/gif" required
                                        class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100 mb-3">
+                                @error('parcel_photo') <p class="text-[11px] font-semibold text-red-600 -mt-2 mb-3">{{ $message }}</p> @enderror
                                 <label for="parcel_weight_kg" class="block text-[10px] font-bold text-slate-500 uppercase mb-1">{{ __('Weight (kg) — admin only') }}</label>
                                 <input type="number" step="0.01" min="0" name="parcel_weight_kg" id="parcel_weight_kg"
                                        value="{{ old('parcel_weight_kg', $sourcingOrder->parcel_weight_kg) }}"
@@ -999,7 +1027,7 @@
         }
     </style>
 
-    @if($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+    @if($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
     <x-modal name="edit-label-{{ $sourcingOrder->id }}" :show="false" maxWidth="2xl">
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">

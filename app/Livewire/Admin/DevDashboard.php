@@ -7,6 +7,7 @@ use App\Models\DevQueryLog;
 use App\Models\RefundRequest;
 use App\Models\Setting;
 use App\Models\SourcingOrder;
+use App\Models\SourcingRequest;
 use App\Models\TrackingLog;
 use App\Models\User;
 use App\Models\WebhookEvent;
@@ -38,6 +39,13 @@ class DevDashboard extends Component
     public $serverStats = [];
 
     public $activeTab = 'sync';
+
+    // SLA Simulator tab
+    public array $slaTrackedRequests = [];
+
+    public array $slaTrackedOrders = [];
+
+    public string $lastSlaOutput = '';
 
     public $syncErrors = [];
 
@@ -325,8 +333,108 @@ class DevDashboard extends Component
             'tracking_deep' => $this->loadTrackingDeep(),
             'performance' => $this->refreshPerformanceTab(),
             'rate_limits' => $this->loadRateLimiterOverview(),
+            'sla' => $this->loadSlaData(),
             default => null,
         };
+    }
+
+    /**
+     * Load requests and orders that are in an SLA-tracked status.
+     */
+    public function loadSlaData(): void
+    {
+        $sla = (array) config('fsb.sla', []);
+        $requestStatuses = array_keys((array) ($sla['requests'] ?? []));
+        $orderStatuses = array_keys((array) ($sla['orders'] ?? []));
+
+        $this->slaTrackedRequests = SourcingRequest::query()
+            ->whereIn('status', $requestStatuses)
+            ->with('user', 'assignedAdmin')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (SourcingRequest $r) => [
+                'id' => $r->id,
+                'reference' => $r->reference_id,
+                'client' => $r->user?->name ?? '—',
+                'status' => $r->status,
+                'hours' => (int) ($sla['requests'][$r->status] ?? 0),
+                'since' => $r->status_changed_at ? $r->status_changed_at->diffForHumans() : '—',
+                'restricted' => (bool) $r->is_restricted_due_to_delay,
+            ])
+            ->values()
+            ->toArray();
+
+        $this->slaTrackedOrders = SourcingOrder::query()
+            ->whereIn('status', $orderStatuses)
+            ->with('user', 'assignedAdmin')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (SourcingOrder $o) => [
+                'id' => $o->id,
+                'reference' => $o->fsb_tracking_number,
+                'client' => $o->user?->name ?? '—',
+                'status' => $o->status,
+                'hours' => (int) ($sla['orders'][$o->status] ?? 0),
+                'since' => $o->status_changed_at ? $o->status_changed_at->diffForHumans() : '—',
+                'restricted' => (bool) $o->is_restricted_due_to_delay,
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Age an SLA-tracked request/order beyond its deadline, then run the real
+     * workflow:check-deadlines command so the production flagging logic applies.
+     */
+    public function slaSimulate(string $type, int $id): void
+    {
+        $isRequest = $type === 'request';
+        $rules = (array) config('fsb.sla', [])[$isRequest ? 'requests' : 'orders'];
+        $model = $isRequest ? SourcingRequest::find($id) : SourcingOrder::find($id);
+
+        if (! $model) {
+            $this->dispatch('show-error-toast', message: ucfirst($type)." #{$id} introuvable.");
+
+            return;
+        }
+
+        $hours = (int) ($rules[$model->status] ?? 0);
+        if ($hours <= 0) {
+            $this->dispatch('show-error-toast', message: "Aucune règle SLA pour le statut « {$model->status} ».");
+
+            return;
+        }
+
+        // Move the deadline counter beyond the SLA window so the real command detects it.
+        $model->status_changed_at = now()->subHours($hours + 12);
+        $model->is_restricted_due_to_delay = false;
+        $model->save();
+
+        Artisan::call('workflow:check-deadlines');
+        $this->lastSlaOutput = trim((string) Artisan::output());
+        $this->loadSlaData();
+
+        $this->dispatch('show-success-toast', message: ucfirst($type)." #{$id} vieilli au-delà de {$hours}h.");
+    }
+
+    /**
+     * Clear the SLA restriction on a request/order (undo the simulation).
+     */
+    public function slaReset(string $type, int $id): void
+    {
+        $model = $type === 'request' ? SourcingRequest::find($id) : SourcingOrder::find($id);
+
+        if (! $model) {
+            $this->dispatch('show-error-toast', message: ucfirst($type)." #{$id} introuvable.");
+
+            return;
+        }
+
+        $model->is_restricted_due_to_delay = false;
+        $model->save();
+        $this->loadSlaData();
+
+        $this->dispatch('show-success-toast', message: ucfirst($type)." #{$id} : restriction SLA levée.");
     }
 
     public function updatedLaravelLogEmailAlertsEnabled($value): void

@@ -167,6 +167,7 @@
                     'paid'                                 => ['active' => 'bg-blue-500 text-white border-blue-500', 'inactive' => 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50'],
                     'shipment_preparing'                   => ['active' => 'bg-cyan-500 text-white border-cyan-500', 'inactive' => 'bg-white text-cyan-700 border-cyan-200 hover:bg-cyan-50'],
                     'in_transit_china'                     => ['active' => 'bg-teal-500 text-white border-teal-500', 'inactive' => 'bg-white text-teal-700 border-teal-200 hover:bg-teal-50'],
+                    'in_air_cargo'                        => ['active' => 'bg-blue-600 text-white border-blue-600', 'inactive' => 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50'],
                     'arrival_uae'                          => ['active' => 'bg-sky-500 text-white border-sky-500', 'inactive' => 'bg-white text-sky-700 border-sky-200 hover:bg-sky-50'],
                     'customs_clearance_uae'                => ['active' => 'bg-indigo-500 text-white border-indigo-500', 'inactive' => 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'],
                     'in_transit_uae'                       => ['active' => 'bg-violet-500 text-white border-violet-500', 'inactive' => 'bg-white text-violet-700 border-violet-200 hover:bg-violet-50'],
@@ -189,6 +190,7 @@
                     'paid'                                 => 'Paid',
                     'shipment_preparing'                   => 'Shipment Preparing',
                     'in_transit_china'                     => 'In Transit (CN)',
+                    'in_air_cargo'                        => 'Air Cargo',
                     'arrival_uae'                          => 'Arrival UAE',
                     'customs_clearance_uae'                => 'Customs UAE',
                     'in_transit_uae'                       => 'In Transit (UAE)',
@@ -328,7 +330,7 @@
                                                         {{ __('Request') }} #{{ $order->sourcing_request_id ?? $order->quotation->sourcing_request_id }}
                                                     </div>
                                                     <div class="text-[10px] text-slate-400">
-                                                        {{ $order->created_at->format('d/m/Y') }}
+                                                        {{ $order->status_since->format('d/m/Y') }}
                                                     </div>
                                                 </div>
                                             </div>
@@ -395,11 +397,14 @@
                                                     @foreach (App\Models\SourcingOrder::STATUSES as $status)
                                                         <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }} class="bg-white text-slate-700">
                                                             {{ ucfirst(str_replace('_', ' ', $status)) }} 
-                                                            @if(in_array($status, ['in_transit_china', 'arrival_uae'])) ({{ __('Masked') }}) @endif
+                                                        @if(in_array($status, ['in_transit_china', 'in_air_cargo', 'arrival_uae'])) ({{ __('Masked') }}) @endif
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             </form>
+                                            <div class="mt-1.5 flex justify-center">
+                                                @include('admin.sourcing-orders.sla-badge', ['order' => $order])
+                                            </div>
                                         </td>
 
                                         <!-- Payment Proof -->
@@ -433,7 +438,7 @@
                                                 </button>
 
                                                 <!-- Shipping Label -->
-                                                @if($order->proof_of_payment_path || in_array($order->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+                                                @if($order->proof_of_payment_path || in_array($order->status, ['paid', 'shipment_preparing', 'in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
                                                     <a href="{{ route('admin.sourcing-orders.shipping-label', $order) }}" target="_blank"
                                                        class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors" 
                                                        title="{{ __('Shipping Label') }}">
@@ -499,8 +504,11 @@
                                                     @php
                                                         $hasPhoto = $order->package_label_photo_path || $order->parcel_photo_path;
                                                         $hasTracking = $order->tracking_number;
+                                                        $evidenceIncomplete = $order->hasMultipleDestinations()
+                                                            ? ! $order->hasInTransitEvidence()
+                                                            : (! $hasPhoto || ! $hasTracking);
                                                     @endphp
-                                                    @if($order->status === 'in_transit_china' && (!$hasPhoto || !$hasTracking))
+                                                    @if(in_array($order->status, ['in_transit_china', 'in_air_cargo']) && $evidenceIncomplete)
                                                         <p class="mt-2 text-[10px] font-bold text-orange-600 flex items-center gap-1">
                                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                             {{ __('In-transit evidence incomplete') }}
@@ -515,6 +523,43 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            @if($order->hasMultipleDestinations())
+                                                <div class="lg:col-span-3 bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                                                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">{{ __('Per-destination evidence') }}</p>
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                        @foreach($order->quotation->sourcingRequest->destinations as $dest)
+                                                            @php
+                                                                $ds = $order->destinationShipments->firstWhere('sourcing_request_destination_id', $dest->id);
+                                                                $dsHasTracking = ! empty(trim((string) ($ds?->tracking_number ?? '')));
+                                                                $dsHasPhoto = ! empty($ds?->parcel_photo_path);
+                                                            @endphp
+                                                            <div class="border border-slate-100 rounded-lg p-3 bg-slate-50/50 space-y-2">
+                                                                <div class="flex items-center justify-between gap-2">
+                                                                    <span class="text-xs font-bold text-slate-800">{{ $dest->country?->name ?? __('Destination #:n', ['n' => $dest->id]) }}</span>
+                                                                    @if($dsHasTracking && $dsHasPhoto)
+                                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">{{ __('Complete') }}</span>
+                                                                    @elseif($dsHasTracking || $dsHasPhoto)
+                                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">{{ __('Partial') }}</span>
+                                                                    @else
+                                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">{{ __('Missing') }}</span>
+                                                                    @endif
+                                                                </div>
+                                                                <p class="text-slate-900 font-mono font-semibold text-xs truncate">{{ $ds?->tracking_number ?: __('—') }}</p>
+                                                                @if($ds?->parcel_photo_path)
+                                                                    <a href="{{ media_url($ds->parcel_photo_path) }}" target="_blank" class="group inline-block">
+                                                                        <img src="{{ media_url($ds->parcel_photo_path) }}" alt="{{ __('Parcel photo') }}" class="w-16 h-16 object-cover rounded-md border border-slate-200 group-hover:ring-2 group-hover:ring-orange-400 transition-all">
+                                                                    </a>
+                                                                @else
+                                                                    <div class="w-16 h-16 flex items-center justify-center bg-white border border-dashed border-slate-200 rounded-md">
+                                                                        <span class="text-[9px] text-slate-400 italic">{{ __('No photo') }}</span>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
@@ -618,7 +663,7 @@
                                                 @foreach (App\Models\SourcingOrder::STATUSES as $status)
                                                     <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }} class="bg-white text-slate-700">
                                                         {{ ucfirst(str_replace('_', ' ', $status)) }}
-                                                        @if(in_array($status, ['in_transit_china', 'arrival_uae'])) ({{ __('Masked') }}) @endif
+                                                        @if(in_array($status, ['in_transit_china', 'in_air_cargo', 'arrival_uae'])) ({{ __('Masked') }}) @endif
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -627,7 +672,10 @@
                                     <div class="flex items-center justify-between gap-2 text-xs">
                                         <div>
                                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{{ __('Date') }}</span>
-                                            <div class="text-sm text-slate-600">{{ $order->created_at->format('d/m/Y') }}</div>
+                                            <div class="text-sm text-slate-600">{{ $order->status_since->format('d/m/Y') }}</div>
+                                            <div class="mt-1">
+                                                @include('admin.sourcing-orders.sla-badge', ['order' => $order])
+                                            </div>
                                         </div>
                                         <div class="text-right">
                                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{{ __('Payment Proof') }}</span>
@@ -655,7 +703,7 @@
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                         {{ __('Sync') }}
                                     </button>
-                                    @if($order->proof_of_payment_path || in_array($order->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+                                    @if($order->proof_of_payment_path || in_array($order->status, ['paid', 'shipment_preparing', 'in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
                                         <a href="{{ route('admin.sourcing-orders.shipping-label', $order) }}" target="_blank"
                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-indigo-700 bg-white border border-indigo-200 hover:bg-indigo-50 transition-colors"
                                            title="{{ __('Shipping Label') }}">

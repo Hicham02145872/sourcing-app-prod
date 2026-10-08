@@ -91,6 +91,7 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'role:admin', 'verified', 'sla.lockout'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/sla-guide', [App\Http\Controllers\Admin\SlaGuideController::class, 'index'])->name('sla-guide');
 
     Route::resource('categories', CategoryController::class);
     Route::resource('services', ServiceController::class);
@@ -158,9 +159,13 @@ Route::middleware(['auth', 'role:admin', 'verified', 'sla.lockout'])->prefix('ad
     });
 
     // Sales Margin Report
-    Route::get('/reports/sales-margin', [ReportController::class, 'salesMarginReport'])->name('reports.sales-margin');
-    Route::get('/reports/sales-margin/export', [ReportController::class, 'export'])->name('reports.sales-margin.export');
+    Route::get('/reports/sales-margin', [ReportController::class, 'salesMarginReport'])->name('reports.sales-margin');    Route::get('/reports/sales-margin/export', [ReportController::class, 'export'])->name('reports.sales-margin.export');
     Route::get('/reports/sales-margin/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.sales-margin.export-pdf');
+
+    // My Performance Analytics (admin: ses propres commandes)
+    Route::get('/analytics/my-performance', \App\Livewire\Admin\AdminPerformanceAnalytics::class)
+        ->middleware('feature:admin_performance_analytics')
+        ->name('analytics.my-performance');
 
     // Financial Reports
     Route::get('/reports/financial', [App\Http\Controllers\Admin\FinancialReportController::class, 'index'])->name('reports.financial.index');
@@ -180,8 +185,8 @@ Route::middleware(['auth', 'role:admin', 'verified', 'sla.lockout'])->prefix('ad
         Route::delete('/super-admin/admins/{admin}', [App\Http\Controllers\Admin\SuperAdminController::class, 'destroyAdmin'])->name('super-admin.destroy-admin');
 
         // Shipment Timeline Calendar (Super Admin Only)
-        Route::get('/shipment-calendar', [App\Http\Controllers\Admin\ShipmentCalendarController::class, 'index'])->name('shipment-calendar.index');
-        Route::get('/shipment-calendar/events', [App\Http\Controllers\Admin\ShipmentCalendarController::class, 'getEvents'])->name('shipment-calendar.events');
+Route::get('/shipment-calendar', [App\Http\Controllers\Admin\ShipmentCalendarController::class, 'index'])->name('shipment-calendar.index');
+    Route::get('/shipment-calendar/events', [App\Http\Controllers\Admin\ShipmentCalendarController::class, 'getEvents'])->name('shipment-calendar.events');
 
         // Shipping Fees (Super Admin Only)
         Route::resource('shipping-fees', App\Http\Controllers\Admin\ShippingFeeController::class)
@@ -198,6 +203,13 @@ Route::middleware(['auth', 'role:admin', 'verified', 'sla.lockout'])->prefix('ad
 
         // Delivery Content Management (Super Admin Only)
         Route::get('/delivery-content', \App\Livewire\Admin\DeliveryContentManager::class)->name('delivery-content.index');
+
+        // Client Banner Announcements (Super Admin Only)
+        Route::get('/announcements', [\App\Http\Controllers\Admin\AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::post('/announcements', [\App\Http\Controllers\Admin\AnnouncementController::class, 'store'])->name('announcements.store');
+        Route::get('/announcements/{announcement}/edit', [\App\Http\Controllers\Admin\AnnouncementController::class, 'edit'])->name('announcements.edit');
+        Route::put('/announcements/{announcement}', [\App\Http\Controllers\Admin\AnnouncementController::class, 'update'])->name('announcements.update');
+        Route::delete('/announcements/{announcement}', [\App\Http\Controllers\Admin\AnnouncementController::class, 'destroy'])->name('announcements.destroy');
 
         // Tracking Logs (toujours visible)
         Route::get('/tracking-logs', [App\Http\Controllers\Admin\TrackingLogController::class, 'index'])->name('tracking-logs.index');

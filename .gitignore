@@ -65,3 +65,11 @@ storage/debug_image_result.php
 *.backup
 scraper/__pycache__/
 storage/app/uiux/
+
+# Local debug/test scripts - never track
+_dbg.mjs
+_shot.mjs
+tmp-parcel-test.mjs
+/database/schema/
+/storage/exports/
+backups/

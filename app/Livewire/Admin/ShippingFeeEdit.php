@@ -47,6 +47,12 @@ class ShippingFeeEdit extends Component
     public $is_air_indirect_visible = true;
     public $is_sea_visible = true;
 
+    // Direct-route guarantee badge shown in the routing popup (50 or 100).
+    public $direct_guarantee = 100;
+
+    // Indirect-route guarantee badge shown in the routing popup (50 or 100).
+    public $indirect_guarantee = 100;
+
     public array $transportTypes = ['air_direct', 'sea', 'air_indirect'];
 
     public function getCurrenciesProperty(): array
@@ -87,6 +93,8 @@ class ShippingFeeEdit extends Component
             $this->is_air_direct_visible = $fee->is_air_direct_visible ?? true;
             $this->is_air_indirect_visible = $fee->is_air_indirect_visible ?? true;
             $this->is_sea_visible = $fee->is_sea_visible ?? true;
+            $this->direct_guarantee = (int) ($fee->direct_guarantee ?? 100);
+            $this->indirect_guarantee = (int) ($fee->indirect_guarantee ?? 100);
 
             foreach ($fee->items as $item) {
                 $transportType = match ($item->transport_type) {
@@ -261,6 +269,8 @@ class ShippingFeeEdit extends Component
 
         $this->validate([
             'currency' => ['required', 'string', 'size:3', Rule::in(array_keys($this->currencies))],
+            'direct_guarantee' => ['required', Rule::in([50, 100])],
+            'indirect_guarantee' => ['required', Rule::in([50, 100])],
         ]);
 
         if ($this->hasDuplicateCategories()) {
@@ -288,6 +298,8 @@ class ShippingFeeEdit extends Component
             'is_air_direct_visible' => $this->is_air_direct_visible,
             'is_air_indirect_visible' => $this->is_air_indirect_visible,
             'is_sea_visible' => $this->is_sea_visible,
+            'direct_guarantee' => (int) $this->direct_guarantee,
+            'indirect_guarantee' => (int) $this->indirect_guarantee,
         ];
 
         $fee = \App\Models\ShippingFee::updateOrCreate(

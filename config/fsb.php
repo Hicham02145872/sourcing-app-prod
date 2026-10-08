@@ -49,5 +49,7 @@ return [
         'font_path' => base_path('vendor/dompdf/dompdf/lib/fonts/DejaVuSans.ttf'),
         'font_bold_path' => base_path('vendor/dompdf/dompdf/lib/fonts/DejaVuSans-Bold.ttf'),
         'logo_path' => public_path('images/logo.png'),
+        // Unsharp amount applied to the upscaled logo (0 = disabled).
+        'logo_sharpen' => env('FSB_LABEL_LOGO_SHARPEN', 0.3),
     ],
 ];

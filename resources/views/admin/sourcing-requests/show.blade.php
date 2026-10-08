@@ -140,12 +140,23 @@
 
                             <!-- Sourcing Location -->
                             <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Sourcing Location') }}</label>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">{{ __('Sourcing Route') }}</label>
                                 <div class="text-sm text-slate-900 flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                    <span class="capitalize @if($sourcingRequest->quotation && $sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location) line-through opacity-50 @endif">
-                                        {{ $sourcingRequest->sourcing_location ?? __('Not specified') }}
-                                    </span>
+                                    @if(count($sourcingRequest->effective_sourcing_locations) > 1)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-violet-100 text-violet-800 border border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800">
+                                            {{ __('Mixed (China + Dubai)') }}
+                                        </span>
+                                    @elseif($sourcingRequest->sourcing_location === 'china')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 @if($sourcingRequest->quotation && $sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location) line-through opacity-50 @endif">
+                                            {{ __('Direct (from China)') }}
+                                        </span>
+                                    @elseif($sourcingRequest->sourcing_location === 'dubai')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800 @if($sourcingRequest->quotation && $sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location) line-through opacity-50 @endif">
+                                            {{ __('Indirect (via Dubai)') }}
+                                        </span>
+                                    @else
+                                        <span class="capitalize">{{ $sourcingRequest->sourcing_location_label }}</span>
+                                    @endif
                                     @if($sourcingRequest->quotation && $sourcingRequest->quotation->actual_sourcing_location !== $sourcingRequest->sourcing_location)
                                         <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-200 capitalize">
                                             {{ __('Actual Sourcing: ') }} {{ $sourcingRequest->quotation->actual_sourcing_location }}
@@ -264,6 +275,7 @@
                                         <th scope="col" class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Country') }}</th>
                                         <th scope="col" class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Service') }}</th>
                                         <th scope="col" class="px-6 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Quantity') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ __('Route') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50 bg-white">
@@ -280,6 +292,17 @@
                                             </td>
                                             <td class="px-6 py-3 whitespace-nowrap text-right text-sm font-mono text-slate-900">
                                                 {{ number_format($destination->quantity, 0, ',', ' ') }}
+                                            </td>
+                                            <td class="px-6 py-3 whitespace-nowrap">
+                                                @if($destination->effective_sourcing_location === 'dubai')
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800">
+                                                        {{ __('Indirect') }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
+                                                        {{ __('Direct') }}
+                                                    </span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

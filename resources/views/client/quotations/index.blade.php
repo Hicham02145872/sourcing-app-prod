@@ -143,6 +143,11 @@
                                         }
                                     }
                                 }
+                                $qualityLabels = ['low' => __('Low'), 'medium' => __('Medium'), 'good' => __('Good')];
+                                $firstQualityLabel = $firstQuality !== null ? ($qualityLabels[$firstQuality] ?? '') : '';
+                                $hasQualityOptions = $request->quotation
+                                    && $request->quotation->quality_options
+                                    && count(array_filter($request->quotation->quality_options, fn ($opt) => !empty($opt['price']))) > 0;
                             @endphp
                                     <div class="group p-6 hover:bg-[#EF7722]/5 dark:hover:bg-[#EF7722]/10 transition-colors duration-150 {{ $request->quotation ? 'bg-red-50/30 dark:bg-red-900/10 border-l-4 border-red-500 shadow-inner' : '' }}">
                                         <div class="flex flex-col lg:flex-row lg:items-center gap-6">
@@ -286,7 +291,13 @@
                                             {{-- Product Quality Options Selector --}}
                                             @if($request->quotation && $request->quotation->quality_options && count(array_filter($request->quotation->quality_options, fn($opt) => !empty($opt['price']))) > 0)
                                                 <div class="mt-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-[#EBEBEB] dark:border-slate-700">
-                                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">{{ __('Select Quality') }}</span>
+                                                    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-2">
+                                                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ __('Select Quality') }}</span>
+                                                        <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#EF7722] me-1 align-middle" aria-hidden="true"></span>{{ __('Selected quality') }}:
+                                                            <strong id="quality-summary-{{ $request->quotation->id }}" class="text-slate-900 dark:text-white font-bold">{{ $firstQualityLabel }}</strong>
+                                                        </span>
+                                                    </div>
                                                     <div class="flex flex-wrap gap-2" x-data="{ selectedVal: '{{ $firstQuality }}' }">
                                                         @foreach(['low' => __('Low'), 'medium' => __('Medium'), 'good' => __('Good')] as $key => $label)
                                                             @if(!empty($request->quotation->quality_options[$key]['price']))
@@ -306,15 +317,25 @@
                                                                                document.getElementById('display-amount-{{ $request->quotation->id }}').textContent = '{{ number_format($optAmount, 2) }}';
                                                                                if (typeof window.updateStickyBar === 'function') { window.updateStickyBar(); }
                                                                                document.getElementById('quality-input-{{ $request->quotation->id }}').value = '{{ $key }}';
+                                                                               document.getElementById('quality-summary-{{ $request->quotation->id }}').textContent = '{{ $label }}';
+                                                                               document.getElementById('quality-accept-{{ $request->quotation->id }}').textContent = '{{ $label }}';
                                                                                "
-                                                                        class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all"
-                                                                        :class="selectedVal === '{{ $key }}' ? 'bg-[#EF7722] text-white border-[#EF7722]' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-[#EBEBEB] dark:border-slate-700 hover:border-[#EF7722]/50'">
-{{ $label }} ({{ number_format($opt['price'], 2) }} {{ $request->quotation->currency }})@if(!empty($opt['weight'])) · {{ number_format((float)$opt['weight'], 2) }} {{ $opt['weight_unit'] ?? 'g' }}@endif
+                                                                        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-lg border transition-all"
+                                                                        :class="selectedVal === '{{ $key }}' ? 'bg-[#EF7722]/10 text-slate-900 dark:text-white border-[#EF7722] ring-1 ring-[#EF7722]/40' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-[#EBEBEB] dark:border-slate-700 hover:border-[#EF7722]/50'">
+                                                                    <svg x-show="selectedVal === '{{ $key }}'" class="w-3.5 h-3.5 text-[#EF7722] flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                                    <span>{{ $label }} ({{ number_format($opt['price'], 2) }} {{ $request->quotation->currency }})@if(!empty($opt['weight'])) · {{ number_format((float)$opt['weight'], 2) }} {{ $opt['weight_unit'] ?? 'g' }}@endif</span>
                                                                  </button>
                                                             @endif
                                                         @endforeach
                                                     </div>
                                                     <input type="hidden" id="quality-input-{{ $request->quotation->id }}" class="selected-quality-input-field" data-quotation-id="{{ $request->quotation->id }}" value="{{ $firstQuality }}">
+                                                </div>
+                                            @elseif($request->quotation)
+                                                <div class="mt-4 flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-dashed border-[#EBEBEB] dark:border-slate-700">
+                                                    <svg class="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ __('This quotation includes a single standard quality.') }}</span>
                                                 </div>
                                             @endif
                                         </div>
@@ -339,6 +360,12 @@
                                                 </svg>
                                                 <span>{{ __('Accept Quotation') }}</span>
                                             </a>
+                                            @if($hasQualityOptions)
+                                                <span class="flex items-center justify-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400 text-center">
+                                                    {{ __('Selected quality') }}:
+                                                    <strong id="quality-accept-{{ $request->quotation->id }}" class="text-slate-900 dark:text-white font-bold">{{ $firstQualityLabel }}</strong>
+                                                </span>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>

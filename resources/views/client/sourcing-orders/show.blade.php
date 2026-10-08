@@ -43,6 +43,7 @@
                     'paid' => __('Paid'),
                     'shipment_preparing' => __('Shipment Preparing'),
                     'in_transit_china' => __('In Transit China'),
+                    'in_air_cargo' => __('In Air Cargo'),
                     'arrival_uae' => __('Arrival UAE'),
                     'customs_clearance_uae' => __('Customs Clearance UAE'),
                     'in_transit_uae' => __('In Transit UAE'),
@@ -525,14 +526,14 @@
                                             </span>
                                         </button>
                                     </form>
-                            @elseif($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+                            @elseif($sourcingOrder->proof_of_payment_path || in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
                                 <div class="text-center p-6 bg-[#0BA6DF]/10 dark:bg-[#0BA6DF]/20 rounded-lg border-2 border-[#0BA6DF]">
                                     <div class="w-14 h-14 bg-[#0BA6DF]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <svg class="w-7 h-7 text-[#0BA6DF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
                                     </div>
-                                    @if(in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
+                                    @if(in_array($sourcingOrder->status, ['paid', 'shipment_preparing', 'in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae', 'in_transit_uae', 'arrival_destination_country', 'customs_clearance_destination_country', 'out_for_delivery', 'delivered', 'order_completed']))
                                         <p class="text-base font-bold text-slate-900 dark:text-white mb-2">{{ __('Payment Verified') }}</p>
                                         <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ __('Your order is being processed.') }}</p>
                                     @else

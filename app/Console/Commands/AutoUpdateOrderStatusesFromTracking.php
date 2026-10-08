@@ -129,6 +129,7 @@ class AutoUpdateOrderStatusesFromTracking extends Command
             ->whereIn('status', [
                 'shipment_preparing',
                 'in_transit_china',
+                'in_air_cargo',
                 'arrival_uae',
                 'customs_clearance_uae',
                 'in_transit_uae',

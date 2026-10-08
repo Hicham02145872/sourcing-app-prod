@@ -64,6 +64,17 @@ class CheckWorkflowDeadlines extends Command
                 ->whereNotNull('status_changed_at')
                 ->whereNotNull('assigned_to_admin_id')
                 ->where('status_changed_at', '<', $deadline)
+                // In-transit SLA: an order that already has its China tracking
+                // number and a parcel photo (evidence zone or parcel section)
+                // satisfies the deadline.
+                ->when($status === 'in_transit_china', fn ($query) => $query->where(function ($query) {
+                    $query->whereNull('tracking_number')
+                        ->orWhere('tracking_number', '')
+                        ->orWhere(function ($query) {
+                            $query->whereNull('parcel_photo_path')
+                                ->whereNull('package_label_photo_path');
+                        });
+                }))
                 ->get();
 
             foreach ($overdue as $order) {

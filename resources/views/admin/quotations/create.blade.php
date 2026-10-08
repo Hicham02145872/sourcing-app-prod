@@ -39,6 +39,8 @@
             </div>
         </div>
 
+        @include('admin.partials.workflow-alert-banner')
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <form id="quotation-create-form" method="POST" action="{{ route('admin.quotations.store') }}" enctype="multipart/form-data">
                 @csrf
@@ -475,11 +477,11 @@
                 });
             }
 
-            // Prevent submit if any file exceeds 10MB (avoids 413 Entity Too Large)
+            // Prevent submit if any file exceeds 20MB (matches server-side max:20480 validation)
             const quotationForm = document.getElementById('quotation-create-form');
             if (quotationForm) {
                 quotationForm.addEventListener('submit', function(e) {
-                    const maxFileSize = 10485760; // 10MB
+                    const maxFileSize = 20971520; // 20MB
                     const fileInputs = [
                         { selector: 'input[name="real_product_image"]', label: '{{ __('Featured Photo') }}' },
                         ...['low', 'medium', 'good'].map(k => ({ selector: `input[name="quality_options_images[${k}][]"]`, label: `{{ __('Qualité') }} ${k}` })),
@@ -494,7 +496,7 @@
                                     e.preventDefault();
                                     const fileSizeMB = (file.size / 1048576).toFixed(2);
                                     window.dispatchEvent(new CustomEvent('show-error-toast', { 
-                                        detail: `"${file.name}" (${label}) {{ __('dépasse 10 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir des fichiers plus petits.') }}`
+                                        detail: `"${file.name}" (${label}) {{ __('dépasse 20 MB') }} (${fileSizeMB} MB). {{ __('Veuillez choisir des fichiers plus petits.') }}`
                                     }));
                                     return false;
                                 }

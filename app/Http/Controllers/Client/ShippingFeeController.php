@@ -55,7 +55,9 @@ class ShippingFeeController extends Controller
             ->map(fn($item) => [
                 'id' => $item->id,
                 'item_style' => $item->item_style,
-                'price_per_kg' => $item->price_per_kg,
+                'price_per_kg' => $dbTransportType === 'air_indirect'
+                    ? $this->calculateIndirectPrice($item)
+                    : $item->price_per_kg,
                 'price_per_kg_dubai' => $item->price_per_kg_dubai,
                 'price_per_kg_china_to_dubai' => $item->price_per_kg_china_to_dubai,
                 'price_per_kg_dubai_to_africa' => $item->price_per_kg_dubai_to_africa,
@@ -191,12 +193,14 @@ class ShippingFeeController extends Controller
                 'transport' => $transportType,
                 'unit' => $fee->getUnitForTransport($directTransportType),
                 'arrival_time' => $directTransportType === 'air_direct' ? ($fee->air_direct_arrival_time ?? $fee->air_arrival_time) : $fee->sea_arrival_time,
+                'guarantee' => (int) ($fee->direct_guarantee ?? 100),
                 'items' => $directFormatted,
             ],
             'indirect' => [
                 'transport' => $transportType,
                 'unit' => $indirectUnit,
                 'arrival_time' => $isDirect ? null : $indirectArrivalTime,
+                'guarantee' => (int) ($fee->indirect_guarantee ?? 100),
                 'china_to_dubai_duration' => $isDirect ? null : $chinaToDubaiDuration,
                 'dubai_to_destination_duration' => $isDirect ? null : $dubaiToDestinationDuration,
                 'china_to_dubai_currency' => $isDirect ? null : $chinaToDubaiCurrency,

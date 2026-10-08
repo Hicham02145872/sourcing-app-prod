@@ -22,6 +22,8 @@ class ShippingFee extends Model
         'is_air_direct_visible',
         'is_air_indirect_visible',
         'is_sea_visible',
+        'direct_guarantee',
+        'indirect_guarantee',
         'china_to_dubai_duration',
         'dubai_to_destination_duration',
         'china_to_dubai_currency',
@@ -32,6 +34,8 @@ class ShippingFee extends Model
         'is_air_direct_visible' => 'boolean',
         'is_air_indirect_visible' => 'boolean',
         'is_sea_visible' => 'boolean',
+        'direct_guarantee' => 'integer',
+        'indirect_guarantee' => 'integer',
     ];
 
     public function getUnitForTransport(string $transportType): string

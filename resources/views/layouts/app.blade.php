@@ -491,6 +491,9 @@
     <x-layout.header />
 
     <div class="lg:ms-64 pt-24 flex flex-col flex-1 min-h-screen">
+        {{-- Bandeau annonce (clients uniquement, période active) --}}
+        @include('partials.client-announcement')
+
         <!-- Page Header -->
         @if (isset($header))
             <header class="bg-white dark:bg-gray-800 shadow">
@@ -521,6 +524,7 @@
         </footer>
     </div>
     <x-loading-spinner />
+    @include('admin.partials.sla-login-modal')
     @stack('scripts')
     @if(auth()->user() && auth()->user()->role === 'client')
         <script src="//code.tidio.co/fcoeyvf3lyzubcu375ojfn87yy6zf6l1.js" async></script>

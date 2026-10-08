@@ -62,6 +62,94 @@ class SourcingOrder extends Model
                 $sourcingOrder->is_restricted_due_to_delay = false;
             }
         });
+
+        static::saved(function (SourcingOrder $sourcingOrder) {
+            // In-transit SLA rule: the action deadline is satisfied as soon as
+            // the China tracking number AND a parcel photo are uploaded
+            // (evidence-zone "Colis photo" or the parcel photo section).
+            if (
+                $sourcingOrder->is_restricted_due_to_delay
+                && $sourcingOrder->status === 'in_transit_china'
+                && $sourcingOrder->tracking_number
+                && ($sourcingOrder->parcel_photo_path || $sourcingOrder->package_label_photo_path)
+            ) {
+                $sourcingOrder->is_restricted_due_to_delay = false;
+                $sourcingOrder->saveQuietly();
+            }
+        });
+    }
+
+    /**
+     * In-transit SLA: while the order is restricted (overdue, no evidence),
+     * every status change is refused except delayed/cancel — the order can
+     * only move forward once the China tracking number and a parcel photo
+     * have been uploaded (rule satisfied server-side by the saved hook).
+     */
+    public function isChinaAdvanceBlocked(string $targetStatus): bool
+    {
+        if ($this->status !== 'in_transit_china' || ! $this->is_restricted_due_to_delay) {
+            return false;
+        }
+
+        if (in_array($targetStatus, ['shipment_delayed', 'shipment_canceled'])) {
+            return false;
+        }
+
+        if ($this->tracking_number && ($this->parcel_photo_path || $this->package_label_photo_path)) {
+            return false;
+        }
+
+        return $targetStatus !== $this->status;
+    }
+
+    /**
+     * Whether the in-transit evidence (China tracking + colis photo) is complete.
+     * Single destination: order-level photo + tracking.
+     * Multi destination: every destination must have its own photo + tracking.
+     */
+    public function hasInTransitEvidence(): bool
+    {
+        if ($this->hasMultipleDestinations()) {
+            $shipments = $this->relationLoaded('destinationShipments')
+                ? $this->destinationShipments
+                : $this->destinationShipments()->get();
+
+            if ($shipments->isEmpty()) {
+                return false;
+            }
+
+            foreach ($this->quotation?->sourcingRequest?->destinations ?? [] as $dest) {
+                $shipment = $shipments->firstWhere('sourcing_request_destination_id', $dest->id);
+                if (! $shipment) {
+                    return false;
+                }
+                if (! filled(trim((string) $shipment->tracking_number))) {
+                    return false;
+                }
+                if (! filled($shipment->parcel_photo_path)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return filled($this->tracking_number)
+            && (filled($this->parcel_photo_path) || filled($this->package_label_photo_path));
+    }
+
+    /**
+     * On-cargo gate: transitioning from In Transit (China) to In Air Cargo is
+     * only allowed once the admin has entered the parcel photo(s) and China
+     * tracking (request point 1). Applies for every destination.
+     */
+    public function isOnCargoAdvanceBlocked(string $targetStatus): bool
+    {
+        if ($this->status !== 'in_transit_china' || $targetStatus !== 'in_air_cargo') {
+            return false;
+        }
+
+        return ! $this->hasInTransitEvidence();
     }
 
     public const STATUSES = [
@@ -69,6 +157,7 @@ class SourcingOrder extends Model
         'paid',
         'shipment_preparing',
         'in_transit_china',
+        'in_air_cargo',
         'arrival_uae',
         'customs_clearance_uae',
         'in_transit_uae',
@@ -79,7 +168,6 @@ class SourcingOrder extends Model
         'delivery_failed',
         'shipment_delayed',
         'shipment_returned',
-        'shipment_canceled',
         'shipment_canceled',
         'order_completed',
         'refunded',
@@ -252,7 +340,8 @@ class SourcingOrder extends Model
             'pending_payment' => ['paid', 'shipment_canceled'],
             'paid' => ['shipment_preparing', 'on_hold', 'shipment_canceled'],
             'shipment_preparing' => ['in_transit_china', 'shipment_delayed', 'shipment_canceled'],
-            'in_transit_china' => ['arrival_uae', 'shipment_delayed', 'shipment_canceled'],
+            'in_transit_china' => ['in_air_cargo', 'arrival_uae', 'shipment_delayed', 'shipment_canceled'],
+            'in_air_cargo' => ['arrival_uae', 'shipment_delayed', 'shipment_canceled'],
             'arrival_uae' => ['customs_clearance_uae', 'shipment_delayed', 'shipment_canceled'],
             'customs_clearance_uae' => ['in_transit_uae', 'shipment_delayed', 'shipment_canceled'],
             'in_transit_uae' => ['arrival_destination_country', 'shipment_delayed', 'shipment_canceled'],
@@ -261,7 +350,7 @@ class SourcingOrder extends Model
             'out_for_delivery' => ['delivered', 'delivery_failed', 'shipment_delayed', 'shipment_returned', 'shipment_canceled'],
             'delivered' => ['order_completed'],
             'delivery_failed' => ['shipment_returned', 'shipment_canceled'],
-            'shipment_delayed' => ['shipment_preparing', 'in_transit_china', 'arrival_uae', 'in_transit_uae', 'arrival_destination_country', 'out_for_delivery', 'shipment_canceled'],
+            'shipment_delayed' => ['shipment_preparing', 'in_transit_china', 'in_air_cargo', 'arrival_uae', 'in_transit_uae', 'arrival_destination_country', 'out_for_delivery', 'shipment_canceled'],
             'shipment_returned' => ['shipment_canceled'],
             'shipment_canceled' => [],
             'order_completed' => ['refunded'],
@@ -286,14 +375,15 @@ class SourcingOrder extends Model
         $shippingChainOrder = [
             'shipment_preparing' => 1,
             'in_transit_china' => 2,
-            'arrival_uae' => 3,
-            'customs_clearance_uae' => 4,
-            'in_transit_uae' => 5,
-            'arrival_destination_country' => 6,
-            'customs_clearance_destination_country' => 7,
-            'out_for_delivery' => 8,
-            'delivered' => 9,
-            'order_completed' => 10,
+            'in_air_cargo' => 3,
+            'arrival_uae' => 4,
+            'customs_clearance_uae' => 5,
+            'in_transit_uae' => 6,
+            'arrival_destination_country' => 7,
+            'customs_clearance_destination_country' => 8,
+            'out_for_delivery' => 9,
+            'delivered' => 10,
+            'order_completed' => 11,
         ];
 
         $currentOrder = $shippingChainOrder[$this->status] ?? 0;
@@ -413,7 +503,7 @@ class SourcingOrder extends Model
     public function getClientStatusAttribute(): string
     {
         // Mask China to UAE leg statuses (external tracking leg)
-        if (in_array($this->status, ['in_transit_china', 'arrival_uae', 'customs_clearance_uae'])) {
+        if (in_array($this->status, ['in_transit_china', 'in_air_cargo', 'arrival_uae', 'customs_clearance_uae'])) {
             return 'shipment_preparing';
         }
 
@@ -426,6 +516,60 @@ class SourcingOrder extends Model
     public function getStatusLabelAttribute(): string
     {
         return __($this->client_status);
+    }
+
+    /**
+     * When the current status began: the status-change date when known,
+     * otherwise the matching entry of the status timestamp map, otherwise
+     * the creation date (orders are often created directly in their current
+     * status — e.g. paid — so the creating hook never runs).
+     */
+    public function getStatusSinceAttribute(): \Illuminate\Support\Carbon
+    {
+        if ($this->status_changed_at) {
+            return $this->status_changed_at;
+        }
+
+        $timestamp = $this->status_timestamps[$this->status] ?? null;
+
+        return $timestamp
+            ? \Illuminate\Support\Carbon::parse($timestamp)
+            : $this->created_at;
+    }
+
+    /**
+     * SLA state of the current status (null when the status has no rule).
+     *
+     * The clock is `status_since` — the same value the admin lists display —
+     * and the deadline is clock + configured hours, mirroring the
+     * workflow:check-deadlines command. `minutes` is signed: positive while
+     * the deadline is ahead, negative once it passed. `satisfied` mirrors the
+     * in-transit evidence exemption (China tracking + parcel/label photo),
+     * `restricted` is the flag the deadline command writes.
+     */
+    public function getSlaStateAttribute(): ?array
+    {
+        $hours = (int) (config("fsb.sla.orders.{$this->status}") ?? 0);
+        if ($hours <= 0) {
+            return null;
+        }
+
+        $clock = $this->status_since;
+        $deadline = $clock->copy()->addHours($hours);
+        $minutes = (int) round(($deadline->getTimestamp() - now()->getTimestamp()) / 60);
+
+        $satisfied = $this->status === 'in_transit_china'
+            && filled($this->tracking_number)
+            && (filled($this->parcel_photo_path) || filled($this->package_label_photo_path));
+
+        return [
+            'hours' => $hours,
+            'clock' => $clock,
+            'deadline' => $deadline,
+            'minutes' => $minutes,
+            'restricted' => (bool) $this->is_restricted_due_to_delay,
+            'satisfied' => (bool) $satisfied,
+        ];
     }
 
     /**

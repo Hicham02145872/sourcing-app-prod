@@ -125,7 +125,10 @@ class AdminSourcingRequestController extends Controller
         // Filter by search term
         if ($request->has('search')) {
             $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
+            $fsbResolvedOrder = preg_match('/^(?:FSB|SB)\d{4,6}$/i', trim($searchTerm))
+                ? \App\Models\SourcingOrder::resolveFsbNumberToOrder(trim($searchTerm))
+                : null;
+            $query->where(function ($q) use ($searchTerm, $fsbResolvedOrder) {
                 $q->where('product_name', 'like', '%'.$searchTerm.'%')
                     ->orWhere('shared_id', 'like', '%'.$searchTerm.'%')
                     ->orWhere('id', 'like', '%'.$searchTerm.'%')
@@ -146,6 +149,9 @@ class AdminSourcingRequestController extends Controller
                     ->orWhereHas('assignedAdmin', function ($adminQuery) use ($searchTerm) {
                         $adminQuery->where('name', 'like', '%'.$searchTerm.'%');
                     });
+                if ($fsbResolvedOrder && $fsbResolvedOrder->sourcing_request_id) {
+                    $q->orWhere('id', $fsbResolvedOrder->sourcing_request_id);
+                }
             });
         }
 
@@ -172,7 +178,10 @@ class AdminSourcingRequestController extends Controller
         $statusCountsQuery = SourcingRequest::query();
         if ($request->has('search')) {
             $searchTerm = $request->search;
-            $statusCountsQuery->where(function ($q) use ($searchTerm) {
+            $fsbResolvedOrder = preg_match('/^(?:FSB|SB)\d{4,6}$/i', trim($searchTerm))
+                ? \App\Models\SourcingOrder::resolveFsbNumberToOrder(trim($searchTerm))
+                : null;
+            $statusCountsQuery->where(function ($q) use ($searchTerm, $fsbResolvedOrder) {
                 $q->where('product_name', 'like', '%'.$searchTerm.'%')
                     ->orWhere('shared_id', 'like', '%'.$searchTerm.'%')
                     ->orWhere('id', 'like', '%'.$searchTerm.'%')
@@ -193,6 +202,9 @@ class AdminSourcingRequestController extends Controller
                     ->orWhereHas('assignedAdmin', function ($adminQuery) use ($searchTerm) {
                         $adminQuery->where('name', 'like', '%'.$searchTerm.'%');
                     });
+                if ($fsbResolvedOrder && $fsbResolvedOrder->sourcing_request_id) {
+                    $q->orWhere('id', $fsbResolvedOrder->sourcing_request_id);
+                }
             });
         }
         if ($request->admin_id === 'me') {

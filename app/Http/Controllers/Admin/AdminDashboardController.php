@@ -57,64 +57,16 @@ class AdminDashboardController extends Controller
         $pendingPaymentSourcingOrders = (clone $orderQuery)->where('status', SourcingOrder::STATUSES[0])->count();
         $pendingQuotations = (clone $quotationQuery)->where('status', Quotation::STATUSES[0])->count();
 
-        // Persistent workflow alert (per-admin in-review limit)
-        $inReviewLimit = (int) config('fsb.workflow.in_review_limit', 5);
-        $showInReviewLimitBanner = ! $isSuperAdmin
-            && app(\App\Services\FeatureFlagService::class)->isEnabled('workflow_in_review_limit', $user)
-            && ($sourcingRequestsByStatus['in_review'] ?? 0) >= $inReviewLimit;
-
-        // Persistent workflow alert (per-admin action deadline enforcement)
-        $slaOverdueCount = 0;
-        $slaOverdueByStatus = [];
-        $slaOverdueRequestTargets = [];
-        $slaOverdueOrderCount = 0;
-        $slaOverdueOrderByStatus = [];
-        if (! $isSuperAdmin) {
-            $slaRules = (array) config('fsb.sla', []);
-
-            $slaOverdueQuery = SourcingRequest::query()
-                ->where('assigned_to_admin_id', $user->id)
-                ->where('is_restricted_due_to_delay', true)
-                ->whereIn('status', array_keys((array) ($slaRules['requests'] ?? [])));
-            $slaOverdueByStatus = (clone $slaOverdueQuery)
-                ->select('status', \DB::raw('count(*) as total'))
-                ->groupBy('status')
-                ->pluck('total', 'status')
-                ->toArray();
-            $slaOverdueCount = array_sum($slaOverdueByStatus);
-
-            // Most urgent (oldest) restricted request per status, used by the
-            // banner CTAs to land on the actionable page: quotation creation
-            // for in_review, the quotation edit (update quotation) page for
-            // negotiating, the request page otherwise.
-            $slaOverdueRequestTargets = (clone $slaOverdueQuery)
-                ->select('id', 'status')
-                ->with('quotation:id')
-                ->orderBy('status_changed_at')
-                ->get()
-                ->unique('status')
-                ->mapWithKeys(fn (SourcingRequest $request) => [
-                    $request->status => [
-                        'request_id' => $request->id,
-                        'quotation_id' => $request->quotation?->id,
-                    ],
-                ])
-                ->toArray();
-
-            $slaOverdueOrderQuery = SourcingOrder::query()
-                ->where('assigned_to_admin_id', $user->id)
-                ->where('is_restricted_due_to_delay', true)
-                ->whereIn('status', array_keys((array) ($slaRules['orders'] ?? [])));
-            $slaOverdueOrderByStatus = (clone $slaOverdueOrderQuery)
-                ->select('status', \DB::raw('count(*) as total'))
-                ->groupBy('status')
-                ->pluck('total', 'status')
-                ->toArray();
-            $slaOverdueOrderCount = array_sum($slaOverdueOrderByStatus);
-        }
-        $showSlaOverdueBanner = ! $isSuperAdmin
-            && app(\App\Services\FeatureFlagService::class)->isEnabled('sla_deadlines_autolock', $user)
-            && ($slaOverdueCount + $slaOverdueOrderCount) > 0;
+        // Persistent workflow alert (per-admin in-review limit + SLA overdue)
+        $workflowBanner = app(\App\Services\WorkflowAlertService::class)->bannerData($user);
+        $showInReviewLimitBanner = $workflowBanner['showInReviewLimitBanner'];
+        $inReviewLimit = $workflowBanner['inReviewLimit'];
+        $showSlaOverdueBanner = $workflowBanner['showSlaOverdueBanner'];
+        $slaOverdueCount = $workflowBanner['slaOverdueCount'];
+        $slaOverdueByStatus = $workflowBanner['slaOverdueByStatus'];
+        $slaOverdueRequestTargets = $workflowBanner['slaOverdueRequestTargets'];
+        $slaOverdueOrderCount = $workflowBanner['slaOverdueOrderCount'];
+        $slaOverdueOrderByStatus = $workflowBanner['slaOverdueOrderByStatus'];
 
         $allActivities = $user->notifications()->latest()->get();
         $filteredActivities = $this->filterNotificationsByAssignment($allActivities, $user);

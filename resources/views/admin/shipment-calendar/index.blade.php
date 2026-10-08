@@ -70,6 +70,22 @@
                     </div>
                 </div>
 
+                <!-- In Air Cargo -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-blue-300 transition-all duration-200 group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ __('In Air Cargo') }}</p>
+                            <h3 class="mt-1 text-2xl font-bold text-slate-900">{{ number_format($orders->where('status', 'in_air_cargo')->count()) }}</h3>
+                        </div>
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center text-xs text-blue-600 font-medium">
+                        <span class="animate-pulse w-1.5 h-1.5 rounded-full bg-blue-500 mr-2"></span> {{ __('En route') }}
+                    </div>
+                </div>
+
                 <!-- At Customs -->
                 <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between hover:border-purple-300 transition-all duration-200 group">
                     <div class="flex justify-between items-start">
